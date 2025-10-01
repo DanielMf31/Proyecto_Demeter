@@ -1,5 +1,9 @@
+#ifndef PROCESAMIENTODATOS_H
+#define PROCESAMIENTODATOS_H
 
-class ProcesamientoDatos {
+#include <Arduino.h>
+
+class ProcesamientoDatos{
   private:
     // Variables internas que solo esta clase necesita
     int valores[4];  // Buffer temporal para procesar
@@ -61,3 +65,5 @@ class ProcesamientoDatos {
       }
     }
 };
+
+#endif

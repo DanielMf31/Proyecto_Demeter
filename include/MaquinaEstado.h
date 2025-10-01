@@ -1,6 +1,7 @@
 #ifndef MAQUINA_ESTADO_H
 #define MAQUINA_ESTADO_H
-#include "ProcesamientoDatos.h"
+#include "Configuracion.h"
+#include "EjecucionComandos.h"
 
 class MaquinaEstado {
   private:
@@ -17,7 +18,7 @@ class MaquinaEstado {
     bool hayComandosPendientes(bool comandosActivos) {
         return comandosActivos;
     }
-    
+
     void cambiarEstado(int nuevoEstado) {
         if (nuevoEstado != estadoActual) {
             Serial.print("Cambiando estado: ");
@@ -34,7 +35,6 @@ class MaquinaEstado {
     static const int ESTADO_EJECUCION = 1;
     static const int ESTADO_RECIBIENDO = 2;
     static const int ESTADO_ERROR = 3;
-    
     // CONSTRUCTOR - se ejecuta al crear el objeto
     MaquinaEstado() {
         estadoActual = ESTADO_ESPERA;

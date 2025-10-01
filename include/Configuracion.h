@@ -1,4 +1,5 @@
 #ifndef CONFIGURACION_H
+#define CONFIGURACION_H
 
 // Definir la estructura Comando
 struct Comando {
