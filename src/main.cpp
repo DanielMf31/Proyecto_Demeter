@@ -17,8 +17,6 @@ void setup(){
     
     Serial.begin(115200);
     Serial2.begin(115200);
-
-    comando_actual = 0;
   
   // Mensaje de confirmación
   Serial.println("ESP32 Lista - Esperando datos...");  

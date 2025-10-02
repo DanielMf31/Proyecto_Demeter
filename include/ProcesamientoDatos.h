@@ -25,7 +25,12 @@ class ProcesamientoDatos{
     // Constructor
     ProcesamientoDatos();
     
-    // Métodos públicos
+    
+    /**
+     * @brief 
+     * 
+     * @param destino 
+     */
     void LeerMensajesUART(int destino[100][4]);
 
     // Getters

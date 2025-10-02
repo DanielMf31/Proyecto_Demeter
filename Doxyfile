@@ -1,0 +1,23 @@
+# 📍 ABRE Doxyfile Y CAMBIA ESTAS LÍNEAS:
+
+PROJECT_NAME           = "Demeter - Sistema de Riego"
+PROJECT_NUMBER         = 1.0
+
+# 🎯 INPUT - dónde está tu código
+INPUT                  = include src
+RECURSIVE              = YES
+
+# 📁 OUTPUT - dónde generar documentación
+OUTPUT_DIRECTORY       = docs/doxygen
+
+# 🎨 CONFIGURACIÓN HTML
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+
+# 🔍 EXTRACCIÓN
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+
+# 📝 SOPORTE MARKDOWN
+MARKDOWN_SUPPORT       = YES

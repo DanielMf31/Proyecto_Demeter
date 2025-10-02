@@ -1,6 +1,8 @@
 #ifndef EJECUCIONCOMANDOS_H
 #define EJECUCIONCOMANDOS_H
+
 #include <Arduino.h>
+#include "Configuracion.h"
 
 class EjecucionComandos {
   private:
@@ -10,44 +12,19 @@ class EjecucionComandos {
     int columnas_bombas;
 
     // Métodos internos que no se usan desde fuera
-    void configurarPin(int actuador, int numero, int estado) {
-        if (actuador >= 0 && actuador < filas_bombas && 
-            numero >= 0 && numero < columnas_bombas) {
-            digitalWrite(pines_bombas[actuador][numero], estado);
-        }
-    }
+    void configurarPin(int actuador, int numero, int estado);
 
   public:
     // Constructor - inicializa variables
-    EjecucionComandos(int** pines, int filas, int columnas) {
-        pines_bombas = pines;
-        filas_bombas = filas;
-        columnas_bombas = columnas;
-    }
+    EjecucionComandos(int** pines, int filas, int columnas);
 
     // Métodos principales que otros pueden usar
-    void iniciarComando(int idx, Comando comandos[]) {
-        if (idx >= 0 && idx < 10) {
-            comandos[idx].activo = true;
-            comandos[idx].inicio = millis();
-            configurarPin(comandos[idx].actuador, comandos[idx].numero, comandos[idx].estado);
-        }
-    }
+    void iniciarComando(int idx, Comando comandos[]);
+    void terminarComando(int idx, Comando comandos[]);
+    void cargarComandos(int origen[10][4], Comando destino[], int num_comandos);
 
-    void terminarComando(int idx, Comando comandos[]) {
-        if (idx >= 0 && idx < 10) {
-            comandos[idx].activo = false;
-            configurarPin(comandos[idx].actuador, comandos[idx].numero, LOW);
-        }
-    }
-    
     // Getter para información (opcional)
-    bool estaActivo(int idx, Comando comandos[]) {
-        if (idx >= 0 && idx < 10) {
-            return comandos[idx].activo;
-        }
-        return false;
-    }
+    bool estaActivo(int idx, Comando comandos[]);
 };
 
 #endif

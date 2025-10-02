@@ -2,6 +2,7 @@
 #define CONFIGURACION_H
 
 // Definir la estructura Comando
+
 struct Comando {
     int actuador;
     int numero;
