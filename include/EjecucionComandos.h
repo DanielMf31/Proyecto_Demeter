@@ -40,17 +40,6 @@ class EjecucionComandos {
             configurarPin(comandos[idx].actuador, comandos[idx].numero, LOW);
         }
     }
-
-    void cargarComandos(int origen[10][4], Comando destino[]) {
-        for(int i = 0; i < 10; i++) {
-            destino[i].actuador = origen[i][0];
-            destino[i].numero = origen[i][1];
-            destino[i].estado = origen[i][2];
-            destino[i].duracion = origen[i][3];
-            destino[i].activo = false;  // Importante inicializar
-            destino[i].inicio = 0;
-        }
-    }
     
     // Getter para información (opcional)
     bool estaActivo(int idx, Comando comandos[]) {

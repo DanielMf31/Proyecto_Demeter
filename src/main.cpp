@@ -4,14 +4,11 @@
 #include "ProcesamientoDatos.h"
 #include "Configuracion.h"
 
-// Estructuras de datos
+ProcesamientoDatos procesador;
+EjecucionComandos ejecutor;
+MaquinaEstado maquina(procesador, ejecutor);
 
-Comando comandos_parsed[10]; // Array de formato estructuras de Comandos
-int comandos_unparsed[2][4] = {{0,1,1,72},{0,2,0,10}}; // Array de prueba de comandos recibidos por la Raspberry.
-int numero_comandos = sizeof(comandos_unparsed)/sizeof(comandos_unparsed[0];)
-
-
-// Variables de control
+int pines_bombas;
 
 void setup(){
     for(int i=0;i<4;i++){

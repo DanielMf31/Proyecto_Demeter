@@ -12,4 +12,14 @@
 * -- Solucionar problema de referencias en Maquina de Estado respecto a EjecucionComandos
 * -- Solución planteada. Variables de arrays de comandos deben pertenecer a EjecucionComandos.
 *
+* DECISIONES ARQUITECTURA:
+* - Variables de datos sólo en class ProcesamientoDatos
+* - EjecucionComandos sólo cambia estado de pines
+* - MaquinaEstados controla la lógica de negocios únicamente
+* - Configuracion declara los tipos de variables de datos, pero no los implementa
+*
+*
+*
+*
+*
 */
