@@ -27,28 +27,6 @@ ACTORES:
 4. ESP32 ejecuta secuencia automáticamente
 5. Sistema reporta estado y errores
 
-
-## DIAGRAMA DE ARQUITECTURA
-
-┌─────────────────┐    UART     ┌──────────────────┐    GPIO     ┌─────────────┐
-│   Raspberry Pi  │─────────────│      ESP32       │─────────────│  Actuadores │
-│                 │             │                  │             │             │
-│  - Planificación│             │  ┌─────────────┐ │             │  - Bombas   │
-│  - Monitoreo    │             │  │Procesamiento│ │             │  - Válvulas │
-│  - Interfaz     │             │  │   Datos     │ │             │             │
-└─────────────────┘             │  └─────────────┘ │             └─────────────┘
-                                │        ↓         │
-                                │  ┌─────────────┐ │
-                                │  │ Máquina de  │ │
-                                │  │  Estados    │ │
-                                │  └─────────────┘ │
-                                │        ↓         │
-                                │  ┌─────────────┐ │
-                                │  │ Ejecución   │ │
-                                │  │ Comandos    │ │
-                                │  └─────────────┘ │
-                                └──────────────────┘
-
 ## CAPAS DEL SISTEMA
 
 ### CAPA 1: COMUNICACION (PROCESAMIENTODATOS)
