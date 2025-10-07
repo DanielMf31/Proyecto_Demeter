@@ -9,7 +9,6 @@
  * y configuración de hardware para el sistema de riego automatizado.
  */
 
-// Definir la estructura Comando
 /**
  * @struct Comando
  * @brief Representa una acción ejecutable en el sistema
@@ -31,11 +30,12 @@ const int FILAS_BOMBAS = 3;     ///< Número de filas en el array de bombas
 const int COLUMNAS_BOMBAS = 4;  ///< Número de columnas en el array de bombas
 
 // Actuadores
-    static const int BOMBA_1 = 2;  ///< GPIO2 - Bomba sector 1
-    static const int BOMBA_2 = 3;  ///< GPIO3 - Bomba sector 2  
-    static const int BOMBA_3 = 4;  ///< GPIO4 - Bomba sector 3
-    static const int BOMBA_4 = 5;  ///< GPIO5 - Bomba sector 4
+static const int BOMBA_1 = 2;  ///< GPIO2 - Bomba sector 1
+static const int BOMBA_2 = 3;  ///< GPIO3 - Bomba sector 2  
+static const int BOMBA_3 = 4;  ///< GPIO4 - Bomba sector 3
+static const int BOMBA_4 = 5;  ///< GPIO5 - Bomba sector 4
 
-int pines_bombas[10][4] = {{BOMBA_1, BOMBA_2, BOMBA_3, BOMBA_4}};
+// Array de pines (EXTERNO - se define en main.cpp)
+extern int pines_actuadores[10][4];
 
 #endif
