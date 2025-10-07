@@ -1,4 +1,5 @@
 #include "MaquinaEstado.h"
+#include "ProcesamientoDatos.h"
 
 // CONSTRUCTOR
 MaquinaEstado::MaquinaEstado(ProcesamientoDatos& proc, EjecucionComandos& ej) 
@@ -9,13 +10,15 @@ MaquinaEstado::MaquinaEstado(ProcesamientoDatos& proc, EjecucionComandos& ej)
 }
 
 // MÉTODOS PRIVADOS
+
+// Getters 
 bool MaquinaEstado::hayComandosUART() {
     return (Serial2.available() > 0);
 }
 
 bool MaquinaEstado::hayComandosPendientes() {
-    return procesador.hayComandosActivos();
 }
+
 
 void MaquinaEstado::cambiarEstado(int nuevoEstado) {
     if (nuevoEstado != estadoActual) {
@@ -28,6 +31,34 @@ void MaquinaEstado::cambiarEstado(int nuevoEstado) {
 }
 
 // MÉTODOS PÚBLICOS
+
+void MaquinaEstado::EstadoEspera(){}
+void MaquinaEstado::EstadoEjecucion(int comandoActual, int numero_comandos, Comando* comandos_parsed){
+    if(comandoActual < numero_comandos && comandos_parsed[comandoActual].activo) {
+                unsigned long ahora = millis();
+
+                if(ahora - comandos_parsed[comandoActual].inicio >= comandos_parsed[comandoActual].duracion) {
+                    ejecutor.terminarComando(comandoActual, comandos_parsed);
+                    procesador.incrementarComandoActual();
+                    comandoActual = procesador.getComandoActual();
+                }
+
+                if(comandoActual < numero_comandos) {
+                    ejecutor.iniciarComando(comandoActual, comandos_parsed);
+                } else {
+                    cambiarEstado(ESTADO_ESPERA);
+                    procesador.resetArrayComandos();
+                    // procesador.cargarComandos(comandos_unparsed, comandos_parsed);
+                }
+            }
+}
+void MaquinaEstado::EstadoError(){}
+void MaquinaEstado::EstadoRecibiendo(int destino[100][4], Comando struct_comandos_local_parsed[100]){
+    procesador.LeerMensajesUART(destino);
+    procesador.cargarComandos(destino, struct_comandos_local_parsed);
+            
+}
+
 void MaquinaEstado::actualizar() {
     unsigned long ahora = millis();
     if (ahora - ultimaVerificacion < intervaloVerificacion) {
@@ -60,6 +91,8 @@ String MaquinaEstado::getNombreEstado() {
     }
 }
 
+//Setters
+
 void MaquinaEstado::setIntervaloVerificacion(unsigned long intervalo) {
     intervaloVerificacion = intervalo;
 }
@@ -67,38 +100,24 @@ void MaquinaEstado::setIntervaloVerificacion(unsigned long intervalo) {
 void MaquinaEstado::ActuacionMaquinaEstados(int estadoActual) {
     int comandoActual = procesador.getComandoActual();
     int numero_comandos = procesador.getNumeroComandos();
-    Comando* comandos_parsed = procesador.getComandosParsed();
+    int array_comandos_local_unparsed[100][4];
+    Comando struct_comandos_local_parsed[100];
 
+    procesador.getComandosUnparsed(array_comandos_local_unparsed);
+    
+    
     switch(estadoActual) {
         case ESTADO_ESPERA:
-            // Código para estado espera
             break;
 
         case ESTADO_EJECUCION:
-            if(comandoActual < numero_comandos && comandos_parsed[comandoActual].activo) {
-                unsigned long ahora = millis();
-
-                if(ahora - comandos_parsed[comandoActual].inicio >= comandos_parsed[comandoActual].duracion) {
-                    ejecutor.terminarComando(comandoActual, comandos_parsed);
-                    procesador.incrementarComandoActual();
-                    comandoActual = procesador.getComandoActual();
-                }
-
-                if(comandoActual < numero_comandos) {
-                    ejecutor.iniciarComando(comandoActual, comandos_parsed);
-                } else {
-                    cambiarEstado(ESTADO_ESPERA);
-                    procesador.resetArrayComandos();
-                    // procesador.cargarComandos(comandos_unparsed, comandos_parsed);
-                }
-            }
+            EstadoEjecucion(comandoActual, numero_comandos, struct_comandos_local_parsed);
             break;
 
         case ESTADO_RECIBIENDO:
-            // procesador.LeerMensajesUART();
-            break;
+           EstadoRecibiendo(array_comandos_local_unparsed, struct_comandos_local_parsed);
 
-        default:
+        default:                                
             break;
     }
 }

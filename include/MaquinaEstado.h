@@ -19,6 +19,10 @@ class MaquinaEstado {
     bool hayComandosUART();
     bool hayComandosPendientes();
     void cambiarEstado(int nuevoEstado);
+    void EstadoEspera();
+    void EstadoEjecucion(int comandoActual, int numero_comandos, Comando* comandos_parsed);
+    void EstadoRecibiendo(int destino[100][4], Comando struct_comandos_local_parsed[100]);
+    void EstadoError();
 
   public:
     // CONSTANTES PÚBLICAS

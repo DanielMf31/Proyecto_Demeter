@@ -7,19 +7,27 @@ ProcesamientoDatos::ProcesamientoDatos() {
         valores[i] = 0;
     }
     
-    // Inicializar arrays
-    for(int i = 0; i < 2; i++) {
+    for(int i = 0; i < 100; i++) {  // Corregido: 100 filas
         for(int j = 0; j < 4; j++) {
             comandos_unparsed[i][j] = 0;
         }
     }
     
-    for(int i = 0; i < 10; i++) {
-        comandos_parsed[i] = {0, 0, 0, 0, false, 0};
-    }
-    
-    numero_comandos = 2;  // Por los comandos de prueba
+    numero_comandos = 2;
     ComandoActual = 0;
+}
+
+void ProcesamientoDatos::LeerMensajesUART(int destino[100][4]) {
+    while (Serial2.available() > 0) {
+        String mensaje = Serial2.readStringUntil('\n');
+        mensaje.trim();
+        
+        Serial.print("Recibido: ");
+        Serial.println(mensaje);
+        
+        // Llamar a procesarMensaje con el array destino
+        procesarMensaje(mensaje, destino);
+    }
 }
 
 // Implementación de procesarMensaje
@@ -60,8 +68,8 @@ void ProcesamientoDatos::procesarMensaje(String mensajeRecibido, int destino[100
 }
 
 // Implementación de cargarComandos
-void ProcesamientoDatos::cargarComandos(int origen[10][4], Comando destino[]) {
-    for(int i = 0; i < 10; i++) {
+void ProcesamientoDatos::cargarComandos(int origen[100][4], Comando destino[100]) {
+    for(int i = 0; i < 100; i++) {
         destino[i].actuador = origen[i][0];
         destino[i].numero = origen[i][1];
         destino[i].estado = origen[i][2];
@@ -72,26 +80,13 @@ void ProcesamientoDatos::cargarComandos(int origen[10][4], Comando destino[]) {
 }
 
 // Implementación de LeerMensajesUART
-void ProcesamientoDatos::LeerMensajesUART(int destino[100][4]) {
-    while (Serial2.available() > 0) {
-        String mensaje = Serial2.readStringUntil('\n');
-        mensaje.trim();
-        
-        Serial.print("Recibido: ");
-        Serial.println(mensaje);
-        
-        // Llamar a procesarMensaje con el array destino
-        procesarMensaje(mensaje, destino);
+
+void ProcesamientoDatos::getComandosUnparsed(int destino[100][4]) { 
+    for(int i = 0; i < 100; i++) {
+        for(int j = 0; j < 4; j++) {
+            destino[i][j] = comandos_unparsed[i][j];
+        }
     }
-}
-
-// Implementación de getters
-Comando* ProcesamientoDatos::getComandosParsed() { 
-    return comandos_parsed; 
-}
-
-int (*ProcesamientoDatos::getComandosUnparsed())[4] { 
-    return comandos_unparsed; 
 }
 
 int ProcesamientoDatos::getComandoCount() { 
