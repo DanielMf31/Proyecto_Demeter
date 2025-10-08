@@ -1,3 +1,11 @@
+/**
+ * @file ProcesamientoDatos.cpp
+ * @brief Implementación del procesador de datos UART y comandos
+ * 
+ * Contiene la implementación de los métodos para recibir, procesar
+ * y gestionar los comandos del sistema de riego automatizado.
+ */
+
 #include "ProcesamientoDatos.h"
 
 /**
@@ -21,9 +29,14 @@ ProcesamientoDatos::ProcesamientoDatos() {
         }
     }
     
-    // ✅ INICIALIZAR array comandos_parsed (que faltaba)
-    for(int i = 0; i < 100; i++) {
-        comandos_parsed[i] = {0, 0, 0, 0, false, 0};
+    // ✅ CORREGIDO: Inicializar array comandos_parsed correctamente
+    for(int i = 0; i < 10; i++) {  // Nota: el array es de tamaño 10, no 100
+        comandos_parsed[i].actuador = 0;
+        comandos_parsed[i].numero = 0;
+        comandos_parsed[i].estado = 0;
+        comandos_parsed[i].duracion = 0;
+        comandos_parsed[i].activo = false;
+        comandos_parsed[i].inicio = 0;
     }
     
     numero_comandos = 0;
@@ -85,6 +98,7 @@ void ProcesamientoDatos::procesarMensaje(String mensajeRecibido, int destino[100
     
     comandoCount++;
     
+    // Protección para no exceder el tamaño del array
     if (comandoCount >= 100) {
         comandoCount = 0;
     }
@@ -114,6 +128,9 @@ void ProcesamientoDatos::cargarComandos(int origen[100][4], Comando destino[100]
 /**
  * @brief Obtiene una copia de los comandos sin procesar
  * @param destino Array donde se copiarán los comandos unparsed
+ * 
+ * Realiza una copia completa del array interno comandos_unparsed
+ * al array destino proporcionado, manteniendo el encapsulamiento.
  */
 void ProcesamientoDatos::getComandosUnparsed(int destino[100][4]) { 
     for(int i = 0; i < 100; i++) {
@@ -149,6 +166,9 @@ int ProcesamientoDatos::getNumeroComandos() {
 
 /**
  * @brief Incrementa el índice del comando actual
+ * 
+ * Avanza al siguiente comando en la secuencia de ejecución.
+ * Se utiliza para progresar a través de la lista de comandos.
  */
 void ProcesamientoDatos::incrementarComandoActual() { 
     ComandoActual++; 
@@ -161,7 +181,23 @@ void ProcesamientoDatos::incrementarComandoActual() {
  * y prepara el sistema para una nueva secuencia.
  */
 void ProcesamientoDatos::resetArrayComandos() {
-    // Implementación pendiente
     comandoCount = 0;
     ComandoActual = 0;
+    
+    // Reiniciar array comandos_unparsed
+    for(int i = 0; i < 100; i++) {
+        for(int j = 0; j < 4; j++) {
+            comandos_unparsed[i][j] = 0;
+        }
+    }
+    
+    // Reiniciar array comandos_parsed
+    for(int i = 0; i < 10; i++) {
+        comandos_parsed[i].actuador = 0;
+        comandos_parsed[i].numero = 0;
+        comandos_parsed[i].estado = 0;
+        comandos_parsed[i].duracion = 0;
+        comandos_parsed[i].activo = false;
+        comandos_parsed[i].inicio = 0;
+    }
 }
