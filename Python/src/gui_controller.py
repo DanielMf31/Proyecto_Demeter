@@ -2,8 +2,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import logging
-from uart_service import UARTService
-from protocol_engine import ProtocolEngine
+from src.uart_service import UARTService
+from src.protocol_engine import ProtocolEngine
 from config.config import config
 
 # Logger específico para la GUI
@@ -160,14 +160,14 @@ class DemeterGUI:
             
             # Chequear finalización
             if state == 5: # COMUNICACION_COMPLETADA
-                self.log_visual("✅ SECUENCIA COMPLETADA")
+                self.log_visual("SECUENCIA COMPLETADA")
                 self.log_action("SEQUENCE_COMPLETE")
                 messagebox.showinfo("Éxito", "Comandos enviados y verificados.")
                 self.reset_ui()
                 return
             
             if state in [6, 7]: # ERROR
-                self.log_visual("❌ ERROR EN TRANSMISIÓN")
+                self.log_visual(" ERROR EN TRANSMISIÓN")
                 logger.error(f"Fallo de protocolo. Estado: {state}")
                 messagebox.showerror("Fallo", "No se completó la transmisión.")
                 self.reset_ui()
