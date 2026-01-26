@@ -1,13 +1,9 @@
 
 import pytest
 from unittest.mock import MagicMock, patch
-import sys
-import os
 
-# Add src to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+from src.uart_service import UARTService
 
-from uart_service import UARTService
 
 class TestUARTService:
     @patch('serial.Serial')

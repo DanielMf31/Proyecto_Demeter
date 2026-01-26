@@ -73,7 +73,16 @@ sequenceDiagram
 ```
 
 
+
+## Subsistemas Detallados
+
+Para profundizar en los componentes clave, consulta la documentación específica:
+
+*   **[Sistema de Logging](Python_Logging_System.md):** Detalles sobre la arquitectura de sesiones, handlers y niveles.
+*   **[Estrategia de Testing](Python_Testing_Strategy.md):** Guía sobre `pytest`, mocks y cobertura de código.
+
 ## Configuración y Despliegue
 *   **Entorno:** Python 3 + `venv`.
+
 *   **Dependencias:** `pyserial`, `tkinter` (usualmente preinstalado).
 *   **Configuración:** `config/settings.json` (creado por `detect_and_save_port.py`).

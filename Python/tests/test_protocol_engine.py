@@ -1,14 +1,9 @@
 
 import pytest
 from unittest.mock import MagicMock
-import sys
-import os
-import time
 
-# Add src to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+from src.protocol_engine import ProtocolEngine, CODIGO_SOLICITUD_CONEXION, CODIGO_CONFIRMACION_CONEXION
 
-from protocol_engine import ProtocolEngine, CODIGO_SOLICITUD_CONEXION, CODIGO_CONFIRMACION_CONEXION
 
 class TestProtocolEngine:
     @pytest.fixture

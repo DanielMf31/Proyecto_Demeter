@@ -9,7 +9,8 @@ class UARTService:
         self.baudrate = baudrate
         self.timeout = timeout
         self.serial_connection = None
-        self.logger = logging.getLogger('UARTService')
+        # Usamos un logger hijo del sistema principal
+        self.logger = logging.getLogger('Demeter.UART')
         
     def connect(self):
         try:
@@ -33,15 +34,18 @@ class UARTService:
             self.logger.info("Conexión serial cerrada.")
 
     def send(self, message):
-        """Envía un mensaje string terminándolo con salto de línea (compatible con println)"""
+        """Envía un mensaje string terminándolo con salto de línea"""
         if self.serial_connection and self.serial_connection.is_open:
             try:
                 # Asegurar que termina en newline
                 if not message.endswith('\n'):
                     message += '\n'
                 
-                self.serial_connection.write(message.encode('utf-8'))
-                # Pequeña pausa para estabilidad, similar al delay(2) de C++
+                # Log de traza (DEBUG)
+                raw_bytes = message.encode('utf-8')
+                self.logger.debug(f"TX >> {raw_bytes.hex().upper()} | '{message.strip()}'")
+                
+                self.serial_connection.write(raw_bytes)
                 time.sleep(0.002) 
                 return True
             except Exception as e:
@@ -57,16 +61,15 @@ class UARTService:
                     raw_data = self.serial_connection.readline()
                     
                     if raw_data:
-                        # Log raw bytes for debugging
-                        hex_data = " ".join([f"{b:02x}" for b in raw_data])
-                        # self.logger.debug(f"RAW RX: {hex_data}") 
+                        # Log de traza (DEBUG)
+                        self.logger.debug(f"RX << {raw_data.hex().upper()}")
                         
                         try:
                            decoded_line = raw_data.decode('utf-8').strip()
                            if decoded_line:
                                return decoded_line
                         except UnicodeDecodeError:
-                            self.logger.warning(f"Error decodificando bytes: {hex_data}")
+                            self.logger.warning(f"Bytes no decodificables recibidos: {raw_data.hex()}")
                             return None
             except Exception as e:
                 self.logger.error(f"Error al recibir datos: {e}")
