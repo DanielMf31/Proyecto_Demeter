@@ -42,8 +42,9 @@ public:
     static const int ESTADO_ESPERA = 1;
     static const int ESTADO_RECIBIENDO = 2;
     static const int ESTADO_EJECUTANDO = 3;
-    static const int ESTADO_COMPLETADO = 4;
-    static const int ESTADO_ERROR = 5;
+    static const        ESTADO_COMPLETADO = 4,
+        ESTADO_ERROR = 5,
+        ESTADO_EJECUCION_DIRECTA = 6;
     
     // Métodos principales
     void inicializar();
