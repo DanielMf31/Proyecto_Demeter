@@ -3,41 +3,75 @@
 ## Visión General
 El software de la Raspberry Pi actúa como el "Maestro" del sistema, proporcionando una interfaz de usuario (GUI) y gestionando la comunicación robusta con el ESP32.
 
-## Estructura de Módulos
 
-### 1. Interfaz de Usuario (`gui_controller.py`)
-*   **Tecnología:** Tkinter (Biblioteca estándar de Python).
-*   **Función:** Provee botones para activar actuadores manualmente.
-*   **Interacción:** Instancia `UARTService` para enviar comandos directos cuando el usuario interactúa.
-*   **Formato de Comando:** Envía strings formateados como `200 1 {id} 0 {duracion} 0` para ejecución directa (Nota: El soporte de código 200 fue revertido en firmware v1.1, volviendo al protocolo estándar o comandos manuales simples si se desea).
+## Estructura de Módulos (v2.0)
 
-### 2. Motor de Protocolo (`protocol_engine.py`)
-*   **Función:** Implementa la lógica espejo del `ProtocoloComunicacion` de C++.
-*   **Uso:** Se utiliza principalmente en los scripts de prueba (`main_poc.py`) para validar secuencias completas de 5 comandos con verificación.
-*   **Estados:** Maneja el Handshake (101->102) y la verificación de Eco (103->104).
+### 1. Punto de Entrada (`main.py`)
+*   **Función:** Orquestador principal.
+*   **Responsabilidades:**
+    *   Inicializar el sistema de logs (`utils.logger`).
+    *   Cargar la configuración (`config.config`).
+    *   Lanzar la interfaz gráfica (`gui_controller`).
+    *   Manejar excepciones globales.
 
-### 3. Servicio UART (`uart_service.py`)
-*   **Función:** Abstracción de bajo nivel sobre `pyserial`.
-*   **Características Clave:**
-    *   Logging de bytes crudos (Hexadecimal) para depuración de ruido eléctrico.
-    *   Manejo de reconexiones y errores de puerto.
-    *   Configuración centralizada de puerto (`/dev/ttyS0` por defecto).
+### 2. Configuración (`config/config.py`)
+*   **Función:** Singleton de configuración.
+*   **Responsabilidades:**
+    *   Cargar `settings.json`.
+    *   Proveer rutas absolutas (`LOG_DIR`, `SESSION_LOG_DIR`).
+    *   Definir puerto por defecto (`/dev/serial0`).
 
-## Flujo de Trabajo Típico (GUI)
+### 3. Sistema de Logging (`utils/logger.py`)
+*   **Filosofía:** Logs basados en Sesión.
+*   **Funcionamiento:**
+    *   Al arrancar, crea un archivo único: `logs/sessions/session_YYYYMMDD_HHMMSS.log`.
+    *   Captura `stdout` y lo envía a consola (INFO) y archivo (DEBUG).
+
+### 4. Interfaz de Usuario (`src/gui_controller.py`)
+*   **Tecnología:** Tkinter.
+*   **Workflow "Cola de Comandos":**
+    1.  **Añadir:** Usuario pulsa botones -> Se añaden a `self.command_queue` (Lista visual).
+    2.  **Iniciar:** Usuario pulsa "INICIAR SECUENCIA".
+    3.  **Procesar:** La GUI bloquea botones y delega el envío masivo a `ProtocolEngine`.
+*   **Instrumentación:** Usa `log_action()` para registrar cada click de forma estandarizada.
+
+### 5. Motor de Protocolo (`src/protocol_engine.py`)
+*   **Función:** Lógica pura del protocolo (Handshake -> 5 Comandos -> Verificación).
+*   **Uso:** Invocado por la GUI cuando se pulsa "INICIAR".
+
+## Flujo de Trabajo Típico
 
 ```mermaid
 sequenceDiagram
     participant User
+    participant Main
+    participant Logger
     participant GUI
-    participant UARTService
+    participant Protocol
     participant ESP32
 
-    User->>GUI: Click "Activar 1"
-    GUI->>UARTService: send("1 1 0 1000 0")
-    UARTService->>ESP32: TX: "1 1 0 1000 0\n"
-    ESP32-->>UARTService: RX: "..." (Si hay respuesta)
-    UARTService-->>GUI: Update Log
+    User->>Main: python3 main.py
+    Main->>Logger: setup() -> Crea session_X.log
+    Main->>GUI: Init()
+
+    User->>GUI: Click "Añadir Actuador 1"
+    GUI->>GUI: Add to Queue
+    GUI->>Logger: [INFO] ACTION: ADD_COMMAND
+
+    User->>GUI: Click "INICIAR SECUENCIA"
+    GUI->>Protocol: start_protocol(queue)
+    
+    Protocol->>ESP32: Handshake (101)
+    ESP32-->>Protocol: ACK (102)
+    Protocol->>ESP32: Send Data (5 packets)
+    ESP32-->>Protocol: Echo Verification (103 + Data)
+    Protocol->>ESP32: Success (104)
+    
+    Protocol-->>GUI: Done
+    GUI->>Logger: [INFO] ACTION: SEQUENCE_COMPLETE
+    GUI->>User: Show Success Msg
 ```
+
 
 ## Configuración y Despliegue
 *   **Entorno:** Python 3 + `venv`.
