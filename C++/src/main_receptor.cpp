@@ -117,7 +117,12 @@ void loop() {
     
     protocolo.procesarComunicacionReceptor();
     maquina.actualizar();
-    ejecutor.verificarCompletados();
+    
+    // Solo verificar completados externos si la máquina NO está controlando la ejecución
+    // Esto evita condiciones de carrera donde el ejecutor detiene el comando antes que la máquina se entere
+    if (maquina.getEstadoCompleto().estadoMaquina != 3) { // 3 = ESTADO_EJECUTANDO
+        ejecutor.verificarCompletados();
+    }
     
     delay(10);
 }

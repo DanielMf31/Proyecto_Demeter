@@ -4,7 +4,7 @@ import time
 import logging
 
 class UARTService:
-    def __init__(self, port='/dev/ttyUSB0', baudrate=115200, timeout=1):
+    def __init__(self, port='/dev/serial0', baudrate=115200, timeout=1):
         self.port = port
         self.baudrate = baudrate
         self.timeout = timeout
@@ -54,10 +54,20 @@ class UARTService:
         if self.serial_connection and self.serial_connection.is_open:
             try:
                 if self.serial_connection.in_waiting > 0:
-                    line = self.serial_connection.readline()
-                    decoded_line = line.decode('utf-8').strip()
-                    if decoded_line:
-                        return decoded_line
+                    raw_data = self.serial_connection.readline()
+                    
+                    if raw_data:
+                        # Log raw bytes for debugging
+                        hex_data = " ".join([f"{b:02x}" for b in raw_data])
+                        # self.logger.debug(f"RAW RX: {hex_data}") 
+                        
+                        try:
+                           decoded_line = raw_data.decode('utf-8').strip()
+                           if decoded_line:
+                               return decoded_line
+                        except UnicodeDecodeError:
+                            self.logger.warning(f"Error decodificando bytes: {hex_data}")
+                            return None
             except Exception as e:
                 self.logger.error(f"Error al recibir datos: {e}")
         return None
