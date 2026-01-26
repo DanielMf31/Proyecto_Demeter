@@ -16,7 +16,8 @@ void ComunicacionUART::inicializar() {
     }
     
     serialPort->begin(baudRate, SERIAL_8N1, rxPin, txPin);
-    serialPort->setTimeout(10); // Timeout corto para no bloquear el loop principal
+    serialPort->setTimeout(10);
+    delay(100);rialPort->setTimeout(10); // Timeout corto para no bloquear el loop principal
     delay(100);
     
     Serial.printf("[UART] Inicializado en pines RX:%d, TX:%d, Baud:%ld\n", 
