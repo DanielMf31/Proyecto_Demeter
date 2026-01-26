@@ -82,15 +82,6 @@ void MaquinaEstado::procesarComandosRecibidos() {
             cambiarEstado(ESTADO_ERROR);
         }
     }
-    else if (estadoProtocolo == ProtocoloComunicacion::EJECUCION_DIRECTA) {
-        Serial.println("[MAQUINA] Ejecucion Directa solicitada");
-        
-        protocolo.getComandos(comandosLocales);
-        comandoCountLocal = 1;
-
-        // Ejecutar inmediatamente
-        cambiarEstado(ESTADO_EJECUCION_DIRECTA);
-    }
     else if (estadoProtocolo == ProtocoloComunicacion::ERROR_COMUNICACION || 
              estadoProtocolo == ProtocoloComunicacion::ERROR_TIMEOUT) {
         Serial.println("[MAQUINA] Error en protocolo de comunicación");
@@ -217,40 +208,6 @@ void MaquinaEstado::actualizar() {
             
         case ESTADO_COMPLETADO:
             // Nada que hacer aquí
-            break;
-
-        case ESTADO_EJECUCION_DIRECTA:
-            // Verificar si el comando actual terminó
-            if (comandoEnEjecucion) {
-                if (ejecutor.haCompletadoDuracion(indiceComandoActual)) {
-                    Serial.println("[MAQUINA] ✓ Comando directo completado");
-                    ejecutor.detenerComando(indiceComandoActual);
-                    comandoEnEjecucion = false;
-                    
-                    // Volver a espera y confirmar al protocolo (opcional, ya enviamos 200?? No, el protocolo espera 104? No, en directo es fire and forget o respuesta simple)
-                    // Respondemos OK para que la GUI lo sepa
-                    if (!protocolo.esTransmisorMode()) {
-                        // Hack: Usamos enviarCodigo para mandar 104 (OK)
-                         // Necesitamos acceso a enviarCodigo (es privado? No, enviarCodigo no es publico en Protocolo, pero podemos usar uart directo o exponerlo)
-                         // Protocolo.enviarCodigo...
-                         // Vamos a asumir que Protocolo se resetea solo.
-                         // Mejor: Resetear protocolo
-                         protocolo.reset();
-                    }
-                    cambiarEstado(ESTADO_ESPERA);
-                }
-            } else {
-                // Iniciar la ejecución del comando 0
-                indiceComandoActual = 0;
-                ejecutor.ejecutarComando(0);
-                comandoEnEjecucion = true;
-                Serial.println("[MAQUINA] Iniciando comando directo...");
-                
-                // Responder OK a la GUI inmediatamente al empezar
-                 // (O al terminar? La GUI hace polling. Si enviamos 104 ahora, genial)
-                // Usaremos un método sucio: enviar raw bytes por uart, o agregar metodo publico enviarCodigo
-                // Por ahora, solo ejecutar.
-            }
             break;
             
         case ESTADO_ERROR:

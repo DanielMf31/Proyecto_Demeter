@@ -20,7 +20,6 @@ public:
     static const int COMUNICACION_COMPLETADA = 5;
     static const int ERROR_COMUNICACION = 6;
     static const int ERROR_TIMEOUT = 7;
-    static const int EJECUCION_DIRECTA = 8; // Added EJECUCION_DIRECTA with a new value
     
     // Códigos del protocolo
     static const int CODIGO_SOLICITUD_CONEXION = 101;
@@ -28,7 +27,6 @@ public:
     static const int CODIGO_DATOS_RECIBIDOS = 103;
     static const int CODIGO_VERIFICACION_CORRECTA = 104;
     static const int CODIGO_ERROR_VERIFICACION = 105;
-    static const int CODIGO_EJECUCION_DIRECTA = 200;
     
 private:
     ComunicacionUART& uart;
