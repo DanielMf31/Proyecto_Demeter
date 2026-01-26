@@ -14,7 +14,8 @@ Automatiza la instalación y configuración de todo lo necesario para empezar a 
 4.  **Hardware (UART/I2C)**:
     *   Habilita el puerto Serial (/dev/serial0) y deshabilita la consola serial (crucial para conectar con ESP32).
     *   Añade tu usuario a los grupos `dialout`, `gpio` e `i2c`.
-5.  **Docker (Opcional)**: Te pregunta si quieres instalar Docker para desplegar contenedores.
+5.  **GitHub CLI**: Instala `gh` para iniciar sesión y clonar repos sin contraseñas.
+6.  **Docker (Opcional)**: Te pregunta si quieres instalar Docker para desplegar contenedores.
 
 ## ¿Cómo usarlo?
 
@@ -48,8 +49,14 @@ El script es mayormente automático, pero requerirá tu atención en dos puntos:
     ```
     Debes copiar ese enlace y abrirlo en tu navegador (PC/Móvil) para autorizar a la Raspberry Pi en tu red Tailscale. **El script esperará a que hagas esto.**
 
-2.  **Instalación de Docker**:
     Al final, te preguntará `¿Desea instalar Docker y Docker Compose? (s/N)`. Responde `s` si planeas usar contenedores (recomendado).
+
+3.  **Autenticación GitHub (Nuevo)**:
+    Te preguntará si quieres iniciar sesión. Si dices que sí (`s`), iniciará `gh auth login`.
+    *   Elige **GitHub.com** -> **HTTPS** -> **Login with a web browser**.
+    *   Te dará un **Device Code** (ej. `ABCD-1234`).
+    *   Ve a https://github.com/login/device en tu móvil/PC e introduce ese código.
+    *   ¡Listo! Ya tienes acceso total a tus repositorios privados en la Pi.
 
 ### Paso 4: Reinicio
 Al finalizar, el script te pedirá reiniciar. **Es obligatorio reiniciar** para que los permisos de usuario y la configuración de UART surtan efecto.

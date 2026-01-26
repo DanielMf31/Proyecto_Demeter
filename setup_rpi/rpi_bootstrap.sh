@@ -119,6 +119,38 @@ else
 fi
 
 # ------------------------------------------------------------------------------
+# 7. GITHUB CLI (gh)
+# ------------------------------------------------------------------------------
+log_info "7. Instalando GitHub CLI (gh)..."
+if ! command -v gh &> /dev/null; then
+    (type -p wget >/dev/null || (apt update && apt-get install wget -y)) \
+    && mkdir -p -m 755 /etc/apt/keyrings \
+    && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null \
+    && chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+    && apt update \
+    && apt install gh -y
+    log_success "GitHub CLI instalado."
+else
+    log_info "GitHub CLI ya está instalado."
+fi
+
+read -p "¿Desea iniciar sesión en GitHub ahora? (s/N) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Ss]$ ]]; then
+    # Ejecutar login como usuario normal si es posible, sino root
+    if [ -n "$ACTUAL_USER" ]; then
+        log_info "Iniciando 'gh auth login' como usuario $ACTUAL_USER..."
+        log_info "Sigue las instrucciones en pantalla (selecciona 'GitHub.com', 'HTTPS', 'Login with web browser')."
+        su - "$ACTUAL_USER" -c "gh auth login"
+    else
+        gh auth login
+    fi
+else
+    log_info "Puedes iniciar sesión luego con 'gh auth login'."
+fi
+
+# ------------------------------------------------------------------------------
 # RESUMEN FINAL
 # ------------------------------------------------------------------------------
 echo ""

@@ -95,14 +95,22 @@ void setup() {
     Serial.println("RECEPTOR ESP32-S3 - COM10");
     uart.inicializar();
     maquina.inicializar();
+    // Serial.println(">> Maquina/Protocolo DESACTIVADOS para prueba");
     
     mostrarMenu();
 }
 
 void loop() {
     if (Serial.available()) {
-        char cmd = Serial.read();
-        if (cmd != '\n' && cmd != '\r') {
+        String input = Serial.readStringUntil('\n');
+        input.trim();
+        
+        Serial.print("DEBUG INPUT: [");
+        Serial.print(input);
+        Serial.println("]");
+        
+        if (input.length() > 0) {
+            char cmd = input.charAt(0);
             procesarComando(cmd);
         }
     }
