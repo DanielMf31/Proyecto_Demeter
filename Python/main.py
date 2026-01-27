@@ -14,10 +14,8 @@ logging.basicConfig(
 # Añadir root al path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from src.core.device_manager import DeviceManager
-from src.core.protocol_v2 import DemeterProtocolV2
-from src.transport.uart_gateway import UartGateway
-from src.ui.main_window import MainWindow
+from src import DeviceManager, DemeterProtocolV2, UartGateway
+from src.ui import MainWindow
 
 def main():
     logger = logging.getLogger("Main")
