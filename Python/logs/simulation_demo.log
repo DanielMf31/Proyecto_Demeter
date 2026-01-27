@@ -1,0 +1,17 @@
+2026-01-27 02:03:48,025 [SIMULATION] [INFO] > === INICIANDO SIMULACIÓN DE FLUJO REAL (DEMETER V2) ===
+2026-01-27 02:03:48,025 [SIMULATION] [INFO] > [STEP 1] Inicializando Kernels...
+2026-01-27 02:03:48,025 [DeviceManager] [INFO] > Loaded 4 devices. Config loaded.
+2026-01-27 02:03:48,025 [SIMULATION] [INFO] > [STEP 2] Levantando Gateway Transport (Mock Serial)...
+2026-01-27 02:03:48,025 [UartGateway] [INFO] > Gateway Thread Started
+2026-01-27 02:03:49,025 [SIMULATION] [INFO] > === [INTERACCIÓN DE USUARIO] ===
+2026-01-27 02:03:49,026 [SIMULATION] [INFO] > Usuario pulsa botón: 'Ejecutar Riego Secuencial'
+2026-01-27 02:03:49,026 [SIMULATION] [INFO] > [LOGIC] Mapeando Dispositivos -> Bomba ID:10, Fan ID:11
+2026-01-27 02:03:49,026 [SIMULATION] [INFO] > [LOGIC] Generando Secuencia de 4 pasos...
+2026-01-27 02:03:49,026 [SIMULATION] [INFO] > [PROTOCOL] Trama Binaria Generada (40 bytes): FE 21 01 00 01 30 04 0A 10 04 01 D0 07 00 00 0A 10 04 00 F4 01 00 00 0B 10 0C 01 D0 07 00 00 0B 10 0C 00 00 00 00 00 86
+2026-01-27 02:03:49,026 [SIMULATION] [INFO] > [UI -> TRANSPORT] Enviando trama a la cola de salida...
+2026-01-27 02:03:49,036 [SIMULATION] [INFO] > [PHY TX] Transmitting Bytes to Cable: FE 21 01 00 01 30 04 0A 10 04 01 D0 07 00 00 0A 10 04 00 F4 01 00 00 0B 10 0C 01 D0 07 00 00 0B 10 0C 00 00 00 00 00 86
+2026-01-27 02:03:49,036 [UartGateway] [DEBUG] > TX (40B): fe 21 01 00 01 30 04 0a 10 04 01 d0 07 00 00 0a 10 04 00 f4 01 00 00 0b 10 0c 01 d0 07 00 00 0b 10 0c 00 00 00 00 00 86
+2026-01-27 02:03:49,136 [SIMULATION] [INFO] > [PHY RX] Hardware Sent ACK: FE 00 00 01 00 02 03
+2026-01-27 02:03:49,137 [SIMULATION] [INFO] > [GUI EVENT] Gateway notificó: {'src': 1, 'dst': 0, 'cmd': 2, 'payload': b'', 'flags': 0}
+2026-01-27 02:03:51,026 [SIMULATION] [INFO] > === SIMULACIÓN COMPLETADA ===
+2026-01-27 02:03:51,027 [SIMULATION] [INFO] > Log guardado en: /home/danielmf31/Documentos/PlatformIO/Projects/Proyecto_Demeter/Python/scripts/../logs/simulation_demo.log

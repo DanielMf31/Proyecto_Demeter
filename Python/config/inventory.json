@@ -1,4 +1,11 @@
 {
+    "config": {
+        "serial_port": "/dev/ttyACM0",
+        "baud_rate": 115200,
+        "log_level": "INFO",
+        "ui_title": "Demeter Control System V2",
+        "ui_geometry": "700x500"
+    },
     "system": {
         "gateway_id": 1,
         "master_id": 0
