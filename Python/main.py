@@ -1,28 +1,49 @@
-
-import tkinter as tk
-from utils.logger import sys_logger
-from src.gui_controller import DemeterGUI
 import logging
+import sys
+import os
+
+# Configurar Logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
+# Añadir root al path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from src.core.device_manager import DeviceManager
+from src.core.protocol_v2 import DemeterProtocolV2
+from src.transport.uart_gateway import UartGateway
+from src.ui.main_window import MainWindow
 
 def main():
-    # 1. Inicializar Sistema de Logs
-    sys_logger.setup()
     logger = logging.getLogger("Main")
-    
-    logger.info("Iniciando Aplicación Demeter...")
+    logger.info("Starting Demeter System V2 Migration...")
 
-    # 2. Iniciar GUI
+    # 1. Initialize Core Services
     try:
-        root = tk.Tk()
-        app = DemeterGUI(root)
+        config_path = os.path.join(os.path.dirname(__file__), "config", "inventory.json")
+        dev_mgr = DeviceManager(config_path)
+        protocol = DemeterProtocolV2()
         
-        logger.info("GUI iniciada. Entrando en mainloop.")
-        root.mainloop()
+        # 2. Initialize Transport (No connect yet)
+        # Assuming Gateway is on /dev/ttyACM0 (Standard for ESP32)
+        gateway = UartGateway(port='/dev/ttyACM0', protocol_engine=protocol)
+        
+        # 3. Initialize UI
+        app = MainWindow(dev_mgr, gateway, protocol)
+        
+        # 4. Run Loop
+        app.mainloop()
         
     except Exception as e:
-        logger.critical(f"Error fatal en la aplicación: {e}", exc_info=True)
+        logger.critical(f"Fatal Error: {e}", exc_info=True)
     finally:
-        logger.info("Aplicación cerrada.")
+        if 'gateway' in locals() and gateway:
+            gateway.stop()
 
 if __name__ == "__main__":
     main()
