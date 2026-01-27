@@ -43,7 +43,7 @@ class TestDeviceManager(unittest.TestCase):
             mgr = DeviceManager("non_existent.json")
             
             # Should load defaults
-            self.assertEqual(mgr.get_config("serial_port"), "/dev/ttyACM0")
+            self.assertEqual(mgr.get_config("serial_port"), "/dev/serial0")
             self.assertEqual(mgr.get_config("baud_rate"), 115200)
 
     def test_route_extraction(self):

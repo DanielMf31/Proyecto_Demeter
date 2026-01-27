@@ -1,6 +1,6 @@
 {
     "config": {
-        "serial_port": "/dev/ttyACM0",
+        "serial_port": "/dev/serial0",
         "baud_rate": 115200,
         "log_level": "INFO",
         "ui_title": "Demeter Control System V2",

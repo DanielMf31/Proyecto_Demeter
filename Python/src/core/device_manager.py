@@ -44,7 +44,7 @@ class DeviceManager:
     def _apply_defaults(self):
         """Ensures critical config keys exist."""
         defaults = {
-            "serial_port": "/dev/ttyACM0",
+            "serial_port": "/dev/serial0",
             "baud_rate": 115200,
             "log_level": "INFO",
             "ui_title": "Demeter System (Default)",
