@@ -1,0 +1,29 @@
+{
+  "template": "https://github.com/DanielMf31/plantilla-python-core/",
+  "commit": "4a4d29ed69f7b16e5dd07d5dacc31ad13a21f86b",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "project_name": "Proyecto_Demeter",
+      "project_slug": "proyecto_demeter",
+      "package_name": "proyecto_demeter",
+      "description": "Plantilla estandarizada para proyectos de cualquier tipo, soporte para Python y Cpp",
+      "author_name": "Daniel",
+      "__comment_langs": "=== Selección de Lenguajes ===",
+      "include_cpp": "yes",
+      "include_python": "yes",
+      "__comment_py": "=== Configuración Python ===",
+      "python_version": "3.11",
+      "use_raspberry_pi": "yes",
+      "default_serial_port": "/dev/serial0",
+      "default_baud_rate": "115200",
+      "ai_model_temperature": "0.7",
+      "api_token_placeholder": "sk-...",
+      "include_agents": "no",
+      "include_protocols": "yes",
+      "_template": "https://github.com/DanielMf31/plantilla-python-core/",
+      "_commit": "4a4d29ed69f7b16e5dd07d5dacc31ad13a21f86b"
+    }
+  },
+  "directory": null
+}

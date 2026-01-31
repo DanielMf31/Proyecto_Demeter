@@ -1,0 +1,39 @@
+
+name: Quality Check (CI)
+
+on:
+  push:
+    branches: [ "develop" ] # Ejecutar tests al subir cambios a desarrollo
+  pull_request:
+    branches: [ "main", "develop" ] # Y al pedir merge
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install ruff pytest pytest-cov
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Lint with Ruff
+      run: |
+        # Revisa calidad (variables no usadas, etc.)
+        ruff check .
+        # Revisa formato (si no es estándar, falla)
+        ruff format --check .
+
+    - name: Test with pytest
+      run: |
+        pytest -v --cov=src --cov-report=term-missing
+
