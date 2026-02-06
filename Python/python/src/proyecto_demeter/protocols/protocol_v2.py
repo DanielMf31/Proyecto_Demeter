@@ -1,9 +1,11 @@
 import struct
 import logging
-from typing import Union
+from typing import Optional, Union, Any
+
 from .schemas_protocol import (
     DemeterCommand, 
     SetGpio, 
+    SetPwm,
     ExecSequence, 
     RouteAdd, 
     Ping, 
@@ -11,28 +13,17 @@ from .schemas_protocol import (
     CmdId
 )
 
-# ==========================================
-# 1. CONSTANTS definitions handled in Enums/Schemas now
-#    But we keep HEADER_FMT for internal packing
-# ==========================================
-
+# Constants
 SYNC_BYTE = 0xFE
 HEADER_FMT = '<BBBBBB' 
 HEADER_SIZE = struct.calcsize(HEADER_FMT)
 SEQUENCE_STEP_FMT = '<BBBBI'
-
-# Re-export constants for compatibility
-CMD_PING = CmdId.PING.value
-CMD_ACK = CmdId.ACK.value
-CMD_NACK = CmdId.NACK.value
-CMD_SET_GPIO = CmdId.SET_GPIO.value
-CMD_EXEC_SEQUENCE = CmdId.EXEC_SEQUENCE.value
-CMD_REPORT_BATCH = CmdId.REPORT_BATCH.value
+SEQUENCE_STEP_SIZE = struct.calcsize(SEQUENCE_STEP_FMT)
 
 class DemeterProtocolV2:
     """
     Implements the Demeter V2 Binary Protocol.
-    Now powered by Pydantic Schemas for validation.
+    Fully integrated with Pydantic for Validation and Serialization.
     """
     def __init__(self):
         self.logger = logging.getLogger("ProtocolV2")
@@ -41,7 +32,6 @@ class DemeterProtocolV2:
         return sum(data) % 256
 
     def _pack_frame_raw(self, dst_id: int, cmd_id: int, payload: bytes = b'', flags: int = 0x01) -> bytes:
-        """Internal worker: Just bytes in, bytes out."""
         src_id = 0x00 # Master ID
         length = len(payload)
         
@@ -52,17 +42,18 @@ class DemeterProtocolV2:
         return header + payload + struct.pack('<B', crc_val)
 
     # ==========================================
-    # NEW API: SERIALIZE
+    # SERIALIZATION (Model -> Bytes)
     # ==========================================
     def serialize(self, cmd: DemeterCommand) -> bytes:
-        """
-        Universal serializer for any DemeterCommand model.
-        """
         payload = b''
         
         if isinstance(cmd, SetGpio):
             # [PIN] [VAL] [FLAGS]
             payload = struct.pack('<BBB', cmd.pin, cmd.value, cmd.flags)
+
+        elif isinstance(cmd, SetPwm):
+            # [PIN] [VAL(16)]
+            payload = struct.pack('<BH', cmd.pin, cmd.value)
         
         elif isinstance(cmd, ExecSequence):
             # [COUNT] + [Steps...]
@@ -87,47 +78,18 @@ class DemeterProtocolV2:
         return self._pack_frame_raw(cmd.target_id, cmd.get_cmd_id(), payload)
 
     # ==========================================
-    # LEGACY / CONVENIENCE HELPERS (Wrappers)
+    # DESERIALIZATION (Bytes -> Model)
     # ==========================================
-
-    def create_ping(self, target_id: int) -> bytes:
-        return self.serialize(Ping(target_id=target_id))
-
-    def create_set_gpio(self, target_id: int, pin: int, value: int) -> bytes:
-        return self.serialize(SetGpio(target_id=target_id, pin=pin, value=value))
-
-    def create_route_add(self, target_node_id: int, mac_bytes: bytes) -> bytes:
-        # RouteAdd is usually sent to Gateway (ID 1)
-        # But payload contains the node ID being registered
-        return self.serialize(RouteAdd(target_id=1, node_id_to_register=target_node_id, mac_address_bytes=mac_bytes))
-
-    def create_sequence(self, steps: list) -> bytes:
-        # Convert legacy dict list to Pydantic models
-        pydantic_steps = []
-        # Target usually ID 1 (Gateway) for orchestration, or specific node
-        # We assume Gateway ID 1 for the main frame
-        
-        for s in steps:
-            pydantic_steps.append(SequenceStep(
-                target_id=s['target'],
-                cmd_id=s.get('cmd', CmdId.SET_GPIO.value),
-                pin=s['pin'],
-                value=s['val'],
-                delay_ms=s['delay']
-            ))
-            
-        seq = ExecSequence(target_id=1, steps=pydantic_steps)
-        return self.serialize(seq)
-
-    # ==========================================
-    # PARSING
-    # ==========================================
-    def parse_frame(self, frame_bytes: bytes):
-        """Standard parser (unchanged logic, just moved helpers)."""
+    def parse_frame(self, frame_bytes: bytes) -> Optional[DemeterCommand]:
+        """
+        Parses binary frame into a Pydantic Model.
+        Returns None if invalid.
+        """
         if len(frame_bytes) < HEADER_SIZE + 1:
             return None
+        
         try:
-            sync, length, flags, src, dst, cmd = struct.unpack(HEADER_FMT, frame_bytes[:HEADER_SIZE])
+            sync, length, flags, src, dst, cmd_id = struct.unpack(HEADER_FMT, frame_bytes[:HEADER_SIZE])
         except struct.error:
             return None
             
@@ -136,22 +98,61 @@ class DemeterProtocolV2:
             
         expected_total_len = HEADER_SIZE + length + 1
         if len(frame_bytes) < expected_total_len:
+            # Incomplete frame
             return None
             
         payload = frame_bytes[HEADER_SIZE : HEADER_SIZE+length]
         received_crc = frame_bytes[HEADER_SIZE+length]
         
+        # Verify CRC
         data_to_hash = frame_bytes[1 : HEADER_SIZE+length]
         calc_crc = self._calculate_crc(data_to_hash)
-        
         if calc_crc != received_crc:
-            self.logger.warning(f"CRC Mismatch! Recv: {received_crc}, Calc: {calc_crc}")
+            self.logger.warning(f"CRC Error. Recv:{received_crc}, Calc:{calc_crc}")
             return None
-            
-        return {
-            "src": src,
-            "dst": dst,
-            "cmd": cmd,
-            "payload": payload,
-            "flags": flags
-        }
+
+        # Factory Logic
+        try:
+            if cmd_id == CmdId.SET_GPIO:
+                if len(payload) < 3: return None
+                pin, val, flg = struct.unpack('<BBB', payload)
+                return SetGpio(target_id=dst, pin=pin, value=val, flags=flg)
+                
+            elif cmd_id == CmdId.SET_PWM:
+                if len(payload) < 3: return None
+                pin, val = struct.unpack('<BH', payload)
+                return SetPwm(target_id=dst, pin=pin, value=val)
+
+            elif cmd_id == CmdId.PING:
+                return Ping(target_id=dst)
+                
+            elif cmd_id == CmdId.EXEC_SEQUENCE:
+                if len(payload) < 1: return None
+                count = payload[0]
+                steps = []
+                offset = 1
+                for _ in range(count):
+                    if offset + SEQUENCE_STEP_SIZE > len(payload): break
+                    tgt, c_id, p, v, d = struct.unpack(SEQUENCE_STEP_FMT, payload[offset:offset+SEQUENCE_STEP_SIZE])
+                    steps.append(SequenceStep(target_id=tgt, cmd_id=c_id, pin=p, value=v, delay_ms=d))
+                    offset += SEQUENCE_STEP_SIZE
+                
+                return ExecSequence(target_id=dst, steps=steps)
+
+            # Default/Unknown: Handle generic? 
+            # For now return None or implement GenericCommand
+            self.logger.info(f"Unknown Command ID: {cmd_id}")
+            return None
+
+        except Exception as e:
+            self.logger.error(f"Parsing error for cmd {cmd_id}: {e}")
+            return None
+
+    # ==========================================
+    # HELPERS (Factories)
+    # ==========================================
+    def create_ping(self, target_id: int) -> bytes:
+        return self.serialize(Ping(target_id=target_id))
+
+    def create_set_gpio(self, target_id: int, pin: int, value: int) -> bytes:
+        return self.serialize(SetGpio(target_id=target_id, pin=pin, value=value))

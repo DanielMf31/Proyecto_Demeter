@@ -1,6 +1,6 @@
 # RFC 01: Migración del Protocolo a Pydantic
 
-**Estado:** Propuesta Extendida
+**Estado:** Implementado
 **Fecha:** 31 Enero 2026
 
 ## 1. El Problema Actual (Argumentos Crudos)

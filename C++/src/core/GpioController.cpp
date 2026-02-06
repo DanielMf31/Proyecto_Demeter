@@ -8,7 +8,7 @@
     }
     void digitalWrite(uint8_t pin, uint8_t val) {
         // Mock: Logic verified in tests via spies if needed
-        // std::cout << "Native GPIO " << (int)pin << " set to " << (int)val << std::endl;
+        std::cout << "[GPIO] PIN " << (int)pin << " -> " << (int)val << std::endl;
     }
 #endif
 

@@ -1,56 +1,70 @@
-# Guía de Ejecución de Tests (QA)
+# Guía de Ejecución de Tests y QA
 
-Este documento explica cómo ejecutar las baterías de pruebas para garantizar que el sistema funciona antes de desplegar.
+Este documento explica cómo verificar la integridad del sistema Demeter V2.
 
-## 1. Tests de Firmware C++ (PlatformIO)
+## 1. Niveles de Testing
 
-El Firmware tiene dos tipos de tests:
-1.  **Nativos (En tu PC):** Prueban la lógica (Protocolo, Clases) sin necesitar el hardware. Son rápidos.
-2.  **Embebidos (En ESP32):** Prueban que el código funciona en el chip real. (Aún no implementados).
-
-### Cómo ejecutar Tests Nativos
-Requisito: Tener `pio` instalado (o usar el virtualenv de PlatformIO).
-
-```bash
-# Desde la carpeta raíz del proyecto C++
-cd C++
-
-# Ejecutar TODOS los tests nativos
-/home/danielmf31/.platformio/penv/bin/pio test -e native
-
-# Ejecutar con salida detallada (Verbose)
-/home/danielmf31/.platformio/penv/bin/pio test -e native -v
-```
-
-Si ves `[PASSED]`, la lógica de tu código es correcta.
+| Nivel | Herramienta | Objetivo | Comando Rápido |
+| :--- | :--- | :--- | :--- |
+| **Unitario (Python)** | `pytest` | Verificar lógica de negocio y Modelos Pydantic. | `pytest Python/python/tests` |
+| **Unitario (C++)** | `pio test` | Verificar clases aisladas (`UartStrategy`). | `pio test -e native` |
+| **Integración (C++)** | `pio test` | Verificar flujo `Bytes -> Motor -> GPIO`. | `pio test -e native` |
+| **E2E (Simulado)** | `Python Script` | Verificar Backend -> Firmware Comunicacion. | `python Python/scripts/e2e_simulation.py` |
 
 ---
 
-## 2. Tests de Backend Python
+## 2. Prerrequisitos
 
-Python usa `unittest` y una estructura de paquete estándar.
+ Asegúrate de estar en la raíz del proyecto.
 
-### Preparación
-Asegúrate de que estás en el entorno virtual o con las dependencias instaladas.
+### Python Environment
 ```bash
-# Desde la raíz del proyecto (Proyecto_Demeter)
-source python/venv/bin/activate  # Si usas venv
-pip install -r proyecto_demeter/python/requirements.txt
+# Activar entorno virtual
+source Python/python/venv/bin/activate
+# Instalar dependencias
+pip install -r Python/python/requirements.txt
 ```
 
-### Ejecución
+### C++ Environment
+Tener PlatformIO instalado (`pip install platformio` o extensión VSCode).
+
+---
+
+## 3. Ejecución Detallada
+
+### A. Tests de Python (Backend)
+Verifican que los modelos Pydantic serialicen/deserialicen correctamente.
+
 ```bash
-# Navegar a la carpeta del paquete
-cd proyecto_demeter
-
-# Ejecutar TODOS los tests (descubrimiento automático)
-python3 -m unittest discover python/tests
-
-# Ejecutar un test específico (ej. Protocolo V2)
-python3 -m unittest python/tests/test_protocol_v2.py
+# Ejecutar todos los tests
+PYTHONPATH=Python/python/src pytest Python/python/tests -v
 ```
 
-### Tests Importantes
-*   `test_protocol_v2.py`: Verifica que los bytes se generan igual que en el estándar.
-*   `test_device_manager.py`: Verifica que `inventory.json` carga bien.
-*   `test_integration_mock.py`: Simula una comunicación completa sin hardware real.
+### B. Tests de C++ (Firmware)
+Se ejecutan en tu PC (Nativo) usando Mocks.
+
+```bash
+# Ejecutar Suite Completa
+pio test -e native
+```
+
+### C. Simulación End-to-End (La Joya de la Corona 👑)
+Esta prueba compila el firmware C++ en un ejecutable especial que lee de `STDIN` y escribe a `STDOUT`. El script de Python lanza este ejecutable y le "habla" como si fuera el chip ESP32 real.
+
+**Flujo:**
+1.  Python crea comando `SetGpio(pin=4, val=1)`.
+2.  Python envía bytes `FE 03...` al proceso C++.
+3.  C++ procesa y hace `cout << "[GPIO] PIN 4 -> 1"`.
+4.  Python lee la respuesta y valida.
+
+**Comando:**
+```bash
+PYTHONPATH=Python/python/src python Python/scripts/e2e_simulation.py
+```
+
+## 4. Solución de Problemas Comunes
+
+*   **Error: `ModuleNotFoundError: No module named 'proyecto_demeter'`**
+    *   Falta configurar el PYTHONPATH. Usa: `export PYTHONPATH=$PYTHONPATH:$(pwd)/Python/python/src`
+*   **Error: `pio command not found`**
+    *   No tienes PlatformIO en el PATH. Intenta `/home/tu_usuario/.platformio/penv/bin/pio`.
