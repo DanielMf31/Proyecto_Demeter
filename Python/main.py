@@ -1,60 +1,55 @@
-import logging
 import sys
 import os
+import logging
 
-# Configurar logs iniciales (fijos hasta cargar config)
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
-)
+# Add python/src to path so we can import proyecto_demeter package
+# Assuming we run from the project root (where this main.py is)
+sys.path.append(os.path.join(os.path.dirname(__file__), 'python', 'src'))
 
-# Añadir root al path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-from src import DeviceManager, DemeterProtocolV2, UartGateway
-from src.ui import MainWindow
+from proyecto_demeter.config.settings import Settings
+from proyecto_demeter.protocols.device_manager import DeviceManager
+from proyecto_demeter.protocols.uart_gateway import UartGateway
+from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
 
 def main():
-    logger = logging.getLogger("Main")
-    logger.info("Starting Demeter System V2 Migration...")
-
-    gateway = None
-
+    print("--> Iniciando Proyecto_Demeter V2 (Protocol Engine)...")
+    
     try:
-        # 1. Load Configuration
-        config_path = os.path.join(os.path.dirname(__file__), "config", "inventory.json")
-        dev_mgr = DeviceManager(config_path)
+        # 1. Load Settings (Env/Defaults)
+        settings = Settings()
         
-        # Update Log Level from Config
-        log_level_str = dev_mgr.get_config("log_level").upper()
-        logging.getLogger().setLevel(log_level_str)
-        logger.info(f"Log Level set to {log_level_str}")
-
-        # 2. Initialize Core Services
-        protocol = DemeterProtocolV2()
+        # Configure logging based on settings
+        logging.basicConfig(level=settings.log_level)
+        logger = logging.getLogger("Main")
+        
+        logger.info(f"Config loaded. App: {settings.app_name}")
+        
+        # 2. Initialize Device Manager (Loads inventory.json)
+        # We assume inventory.json is in python/config/inventory.json
+        # DeviceManager logic (updated) handles the resolution relative to itself.
+        dev_mgr = DeviceManager()
+        
+        logger.info(f"Device Manager initialized. Routes available: {len(dev_mgr.get_all_routes())}")
         
         # 3. Initialize Transport
-        # Get Port and Baud from Config
-        serial_port = dev_mgr.get_config("serial_port")
-        baud_rate = dev_mgr.get_config("baud_rate")
+        protocol = DemeterProtocolV2()
+        gateway = UartGateway(
+            port=dev_mgr.get_config("serial_port"),
+            baud_rate=dev_mgr.get_config("baud_rate"),
+            protocol_engine=protocol
+        )
         
-        logger.info(f"Initializing Gateway on {serial_port} @ {baud_rate}")
-        gateway = UartGateway(port=serial_port, baud=baud_rate, protocol_engine=protocol)
+        logger.info(f"Gateway initialized on port {gateway.port}")
         
-        # 4. Initialize UI
-        app = MainWindow(dev_mgr, gateway, protocol)
-        
-        # 5. Run Loop
-        app.mainloop()
+        # 4. (Optional) Loop or UI
+        # For now, just exit cleanly or keep running if we had a loop
+        # input("Press Enter to Exit...") 
         
     except Exception as e:
-        logger.critical(f"Fatal Error: {e}", exc_info=True)
-    finally:
-        if gateway:
-            gateway.stop()
+        print(f"!!! Error crítico al iniciar: {e}")
+        # import traceback
+        # traceback.print_exc()
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
