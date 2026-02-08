@@ -33,12 +33,13 @@ void setup() {
     delay(1000);
     while(!Serial) delay(10);
 
-    Serial.println("=== DEMETER RECEPTOR V2 ===");
+    Serial.println("=== DEMETER RECEPTOR V2 (MVP GPIO) ===");
+    Serial.println(" [1-4] Toggle PIN 4-7");
     Serial.println(" [I] Modo Inmediato (Default)");
     Serial.println(" [R] Modo Recepción (Cola)");
     Serial.println(" [E] Ejecutar Cola");
     Serial.println(" [C] Limpiar Cola");
-    Serial.println("===========================");
+    Serial.println("======================================");
 
     // Initialize System
     systemCtx.setup();
@@ -53,6 +54,9 @@ void loop() {
     // 2. User Interactive Menu (Serial USB)
     if (Serial.available()) {
         char c = toupper(Serial.read());
+        // Simple state tracking for toggling
+        static bool pinStates[8] = {false}; 
+
         switch (c) {
             case 'I':
                 systemCtx.setExecutionMode(ExecutionMode::IMMEDIATE);
@@ -70,6 +74,25 @@ void loop() {
                 systemCtx.clearQueue();
                 Serial.println(">> COLA LIMPIA");
                 break;
+            
+            // Manual GPIO Control
+            case '1':
+            case '2':
+            case '3':
+            case '4': {
+                uint8_t pin = (c - '0') + 3; // '1'->4, '2'->5, '3'->6, '4'->7
+                pinStates[pin] = !pinStates[pin]; // Toggle
+                
+                Demeter::SetGpioCmd cmd;
+                cmd.pin = pin;
+                cmd.value = pinStates[pin];
+                cmd.flags = 0;
+
+                Serial.printf(">> MANUAL: PIN %d -> %s\n", pin, cmd.value ? "ON" : "OFF");
+                systemCtx.injectCommand(cmd);
+                break;
+            }
+
             case '\n':
             case '\r':
                 break;

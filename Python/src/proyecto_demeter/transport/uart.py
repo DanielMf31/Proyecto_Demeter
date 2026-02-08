@@ -13,10 +13,21 @@ class UartTransport(TransportStrategy, threading.Thread):
         super().__init__()
         self.logger = logging.getLogger("UartTransport")
         
-        # Load from Config if not provided
-        self.dev_mgr = DeviceManager()
-        self.port = port or self.dev_mgr.get_config("serial_port") or '/dev/serial0'
-        self.baud = baud_rate or self.dev_mgr.get_config("baud_rate") or 115200
+        self.port = port
+        self.baud = baud_rate
+
+        # Only load DeviceManager if config is missing and we don't have explicit args
+        if not self.port or not self.baud:
+            try:
+                self.dev_mgr = DeviceManager()
+                if not self.port: self.port = self.dev_mgr.get_config("serial_port")
+                if not self.baud: self.baud = self.dev_mgr.get_config("baud_rate")
+            except Exception:
+                pass # Fallback to defaults
+        
+        # Defaults
+        if not self.port: self.port = '/dev/serial0'
+        if not self.baud: self.baud = 115200
 
         self.serial_conn = None
         self.running = False

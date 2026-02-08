@@ -41,6 +41,9 @@ public:
     void setExecutionMode(ExecutionMode mode);
     void executeQueue(); // Trigger execution of queued commands
     void clearQueue();
+    
+    // Manual Command Injection
+    void injectCommand(const Demeter::SetGpioCmd& cmd);
 
     SystemState getState() const { return _state; }
     size_t getQueueSize() const { return _commandQueue.size(); }

@@ -64,3 +64,7 @@ void SystemContext::executeQueue() {
 void SystemContext::clearQueue() {
     _commandQueue.clear();
 }
+
+void SystemContext::injectCommand(const Demeter::SetGpioCmd& cmd) {
+    handleGpioCommand(cmd);
+}
