@@ -4,7 +4,7 @@ import subprocess
 import time
 
 # Add python source to path
-sys.path.append(os.path.join(os.getcwd(), 'Python', 'python', 'src'))
+sys.path.append(os.path.join(os.getcwd(), 'Python', 'src'))
 
 from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
 from proyecto_demeter.protocols.schemas_protocol import SetGpio

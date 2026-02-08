@@ -33,10 +33,14 @@ public:
      * @param serial Pointer to HardwareSerial (e.g. &Serial)
      * @param baudRate Baud rate (e.g. 115200)
      */
-    UartStrategy(HardwareSerial* serial, uint32_t baudRate);
+    UartStrategy(HardwareSerial* serial, uint32_t baudRate, int8_t rxPin = -1, int8_t txPin = -1);
 
     void begin() override;
     void send(const uint8_t* data, size_t length) override;
     bool available() override;
     std::vector<uint8_t> read() override;
+
+private:
+    int8_t _rxPin;
+    int8_t _txPin;
 };

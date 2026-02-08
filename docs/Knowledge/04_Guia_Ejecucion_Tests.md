@@ -59,12 +59,23 @@ Esta prueba compila el firmware C++ en un ejecutable especial que lee de `STDIN`
 
 **Comando:**
 ```bash
-PYTHONPATH=Python/python/src python Python/scripts/e2e_simulation.py
+PYTHONPATH=Python/src Python/venv/bin/python Python/scripts/e2e_simulation.py
 ```
 
-## 4. Solución de Problemas Comunes
+## 4. Modos Interactivos del Firmware
 
-*   **Error: `ModuleNotFoundError: No module named 'proyecto_demeter'`**
-    *   Falta configurar el PYTHONPATH. Usa: `export PYTHONPATH=$PYTHONPATH:$(pwd)/Python/python/src`
-*   **Error: `pio command not found`**
-    *   No tienes PlatformIO en el PATH. Intenta `/home/tu_usuario/.platformio/penv/bin/pio`.
+El firmware ahora soporta **Modos de Ejecución** controlables vía Monitor Serial (USB):
+
+*   **[I] Modo Inmediato (Default):** Ejecuta comandos en cuanto llegan. Ideal para automatización.
+*   **[R] Modo Recepción (Cola):** Guarda los comandos recibidos en una cola. No los ejecuta.
+*   **[E] Ejecutar Cola:** Procesa todos los comandos almacenados en ráfaga.
+*   **[C] Limpiar Cola:** Descarta comandos pendientes.
+
+**Uso:** Abre el Monitor Serial (115200) y envía la letra correspondiente.
+
+## 5. Solución de Problemas Comunes
+
+*   **Error: `ModuleNotFoundError`**
+    *   Asegúrate de usar `PYTHONPATH=Python/src`.
+*   **Error: `pytest not found`**
+    *   Usa `Python/venv/bin/python -m pytest`.

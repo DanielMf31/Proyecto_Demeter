@@ -19,7 +19,9 @@
 // En ESP32 Serial2 se inicializa dentro de UartStrategy si así está diseñado, 
 // o pasamos el objeto global Serial2.
 // Revisando UartStrategy.h, el constructor es: UartStrategy(HardwareSerial* serial, unsigned long baud)
-UartStrategy uartStrategy(&Serial2, 115200);
+// Instancias Globales
+// UartStrategy recibe: Puntero a Serial, BaudRate, RX Pin, TX Pin
+UartStrategy uartStrategy(&Serial2, 115200, RXD2, TXD2);
 
 ProtocolEngine engine(&uartStrategy);
 GpioController gpioController;
@@ -29,32 +31,52 @@ void setup() {
     // Debug Serial
     Serial.begin(115200);
     delay(1000);
-    Serial.println("=== RECEPTOR DEMETER V2 (SYSTEM CONTEXT) ===");
-    
-    // Iniciar Serial2 manual para asegurar pines (UartStrategy usa el objeto pero a veces requiere begin explicito)
-    // Asumimos que UartStrategy.begin() llama a _serial->begin().
-    // Pero HardwareSerial::begin tiene argumentos variables en ESP32 (baud, config, rx, tx).
-    // UartStrategy standard solo llama begin(baud).
-    // Por seguridad en ESP32, configuramos Serial2 antes.
-    Serial2.begin(115200, SERIAL_8N1, RXD2, TXD2);
+    while(!Serial) delay(10);
 
-    // Inicializar Componentes a través del Contexto
-    // systemCtx.setup() inicializará el Controller y bindeará los callbacks
+    Serial.println("=== DEMETER RECEPTOR V2 ===");
+    Serial.println(" [I] Modo Inmediato (Default)");
+    Serial.println(" [R] Modo Recepción (Cola)");
+    Serial.println(" [E] Ejecutar Cola");
+    Serial.println(" [C] Limpiar Cola");
+    Serial.println("===========================");
+
+    // Initialize System
     systemCtx.setup();
-    
-    // UartStrategy begin
+    // UartStrategy.begin() now handles Serial2.begin(baud, config, rx, tx) internally
     uartStrategy.begin();
-
-    Serial.println("[INFO] Sistema Iniciado. Esperando Comandos...");
 }
 
 void loop() {
-    // Toda la lógica ocurre aquí dentro
+    // 1. System Loop (Protocol Engine)
     systemCtx.loop();
 
-    // Pequeño delay para estabilidad RTOS
-    delay(1);
-    
-    // (Opcional) Debug input para pruebas manuales si fuera necesario,
-    // pero idealmente el SystemContext maneja todo.
+    // 2. User Interactive Menu (Serial USB)
+    if (Serial.available()) {
+        char c = toupper(Serial.read());
+        switch (c) {
+            case 'I':
+                systemCtx.setExecutionMode(ExecutionMode::IMMEDIATE);
+                Serial.println(">> MODO: INMEDIATO");
+                break;
+            case 'R':
+                systemCtx.setExecutionMode(ExecutionMode::INTERACTIVE_QUEUE);
+                Serial.println(">> MODO: RECEPCION (Encolando...)");
+                break;
+            case 'E':
+                Serial.println(">> EJECUTANDO COLA...");
+                systemCtx.executeQueue();
+                break;
+            case 'C':
+                systemCtx.clearQueue();
+                Serial.println(">> COLA LIMPIA");
+                break;
+            case '\n':
+            case '\r':
+                break;
+            default:
+                Serial.print("Comando desconocido: ");
+                Serial.println(c);
+                break;
+        }
+    }
 }

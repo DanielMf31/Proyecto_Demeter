@@ -8,14 +8,29 @@
  * @brief Binary Protocol Parser (V2).
  * Handles Serialization/Deserialization and CRC Validation.
  */
+/**
+ * @class ProtocolEngine
+ * @brief Handles the Demoeter Binary Protocol (V2).
+ * 
+ * Responsible for:
+ * 1. Deserializing incoming byte streams into frames.
+ * 2. Validating frames (Sync Byte, Length, CRC).
+ * 3. Dispatching valid commands to registered callbacks.
+ * 4. Generating and serializing response frames (ACK/NACK).
+ */
 class ProtocolEngine {
 public:
     // Callback types for event handling
     using GpioCallback = std::function<void(const Demeter::SetGpioCmd&)>;
+    using PwmCallback = std::function<void(const Demeter::SetPwmCmd&)>;
+    using SequenceCallback = std::function<void(const std::vector<uint8_t>&)>; // Raw payload for now
 
 private:
     IComms* _strategy;
     GpioCallback _onGpioCommand;
+    PwmCallback _onPwmCommand;
+    SequenceCallback _onSequenceCommand;
+
 
     // Frame Constants
     static const uint8_t SYNC_BYTE = 0xFE;
@@ -43,15 +58,57 @@ public:
 
     /**
      * @brief Process incoming data from the strategy.
-     * Should be called in the main loop.
+     * 
+     * Reads available bytes from the transport layer, parses potential frames,
+     * and triggers callbacks if a valid frame is found.
+     * Should be called frequently in the main loop.
      */
     void update();
 
     /**
      * @brief Register callback for SET_GPIO commands.
+     * @param cb Function to call when a valid GPIO command is received.
      */
     void onSetGpio(GpioCallback cb);
+
+    /**
+     * @brief Register callback for SET_PWM commands.
+     * @param cb Function to call when a valid PWM command is received.
+     */
+    void onSetPwm(PwmCallback cb);
+
+    /**
+     * @brief Register callback for EXEC_SEQUENCE commands.
+     * @param cb Function to call when a valid Sequence command is received.
+     */
+    void onExecSequence(SequenceCallback cb);
     
+    // Output Methods
+
+    /**
+     * @brief Send an ACK (Acknowledge) frame.
+     * @param targetId The device ID to send the ACK to.
+     */
+    void sendAck(uint8_t targetId);
+
+    /**
+     * @brief Send a NACK (Negative Acknowledge) frame.
+     * @param targetId The device ID to send the NACK to.
+     */
+    void sendNack(uint8_t targetId);
+
+    /**
+     * @brief Construct and send a generic frame.
+     * 
+     * Handles the creation of the header, calculation of CRC, and transmission
+     * via the strategy.
+     * 
+     * @param cmdId Command ID (e.g., PING, ACK).
+     * @param targetId Destination Device ID.
+     * @param payload Vector containing the command payload.
+     */
+    void sendFrame(uint8_t cmdId, uint8_t targetId, const std::vector<uint8_t>& payload);
+
     // Helpers for testing
     void parseFrame(const std::vector<uint8_t>& frame);
 };

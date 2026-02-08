@@ -18,7 +18,8 @@ void tearDown(void) {
 
 void test_uart_begin(void) {
     HardwareSerial mockSerial;
-    UartStrategy uart(&mockSerial, 115200);
+    // Pass dummy pins 16, 17
+    UartStrategy uart(&mockSerial, 115200, 16, 17);
     
     // begin() should not crash
     uart.begin();
@@ -27,7 +28,7 @@ void test_uart_begin(void) {
 
 void test_uart_send(void) {
     HardwareSerial mockSerial;
-    UartStrategy uart(&mockSerial, 115200);
+    UartStrategy uart(&mockSerial, 115200, 16, 17);
     
     uint8_t payload[] = {0xAA, 0xBB};
     
@@ -41,7 +42,7 @@ void test_uart_send(void) {
 
 void test_uart_read_empty(void) {
     HardwareSerial mockSerial; // Default mock available() = 0
-    UartStrategy uart(&mockSerial, 115200);
+    UartStrategy uart(&mockSerial, 115200, 16, 17);
     
     TEST_ASSERT_FALSE(uart.available());
     std::vector<uint8_t> data = uart.read();

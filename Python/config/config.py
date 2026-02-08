@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, ConfigDict
 
 class DeviceConfig(BaseModel):
     """Schema base para configuración de hardware."""
-    port: str
+    port: str = "/dev/serial0"
     baudrate: int = 115200
     timeout: float = 1.0
 
