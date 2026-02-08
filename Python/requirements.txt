@@ -1,21 +1,26 @@
-# Dependencias Core
+# --- Core Dependencies ---
 pydantic>=2.0
 pydantic-settings
 python-dotenv
-pandas>=2.0
+pyserial>=3.5
+
+# --- GUI & Data ---
+# Note: Tkinter must be installed via apt (python3-tk) on Linux/RPi
 pillow>=10.0
+pandas>=2.0
 
-# LLM Providers (Opcionales, comentar si no se usan)
-langgraph
-langchain
+# --- Testing ---
+pytest>=7.4.3
+pytest-mock
+coverage
 
-# Documentation
+# --- Documentation ---
 mkdocs-material
 
-# Hardware (Solo si estás en RPi)
-pyserial
-RPi.GPIO
+# --- Hardware (Raspberry Pi Only) ---
+# Uncomment if running on RPi hardware
+# RPi.GPIO
 
-pyserial==3.5
-pytest==7.4.3
-
+# --- Optional / AI Agents ---
+langchain
+langgraph
