@@ -11,16 +11,13 @@ pandas>=2.0
 
 # --- Testing ---
 pytest>=7.4.3
-pytest-mock
-coverage
+ pytest-mock
+# coverage
 
 # --- Documentation ---
-mkdocs-material
+# mkdocs-material
 
 # --- Hardware (Raspberry Pi Only) ---
 # Uncomment if running on RPi hardware
-# RPi.GPIO
+RPi.GPIO
 
-# --- Optional / AI Agents ---
-langchain
-langgraph
