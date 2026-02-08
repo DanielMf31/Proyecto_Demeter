@@ -1,17 +1,19 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from typing import Callable, List
-from ..protocols.schemas_sequencer import SequenceStep
+from typing import Callable, List, Optional
+from tkinter import ttk, messagebox, simpledialog, filedialog
+from ..protocols.schemas_sequencer import SequenceStep, SequenceFile, SequenceManager
 from ..protocols.protocol_v2 import DemeterProtocolV2, ExecSequence, SequenceStep as ProtoStep
 
 class SequencerWindow(tk.Toplevel):
     def __init__(self, parent, protocol: DemeterProtocolV2, send_callback: Callable[[bytes], None]):
         super().__init__(parent)
         self.title("Planificador de Secuencias")
-        self.geometry("500x400")
+        self.geometry("600x500")
         
         self.protocol = protocol
         self.send_callback = send_callback
+        self.manager = SequenceManager()
         self.steps: List[SequenceStep] = []
         
         self.setup_ui()
@@ -42,22 +44,36 @@ class SequencerWindow(tk.Toplevel):
         # Add Button
         ttk.Button(input_frame, text="➕ Añadir Paso", command=self.add_step).grid(row=0, column=6, padx=15)
         
-        # --- LIST FRAME ---
+        # --- LIST FRAME (DataGrid Style) ---
         list_frame = ttk.Frame(self, padding=10)
         list_frame.pack(fill="both", expand=True)
         
+        # Configure Treeview Style
+        style = ttk.Style()
+        style.configure("Treeview", 
+                        background="#ffffff",
+                        foreground="black",
+                        rowheight=25,
+                        fieldbackground="#ffffff",
+                        font=("Arial", 10))
+        style.map('Treeview', background=[('selected', '#347083')])
+        
         cols = ("#", "Pin", "Estado", "Demora (ms)")
-        self.tree = ttk.Treeview(list_frame, columns=cols, show="headings", height=8)
+        self.tree = ttk.Treeview(list_frame, columns=cols, show="headings", height=10)
         
         self.tree.heading("#", text="#")
-        self.tree.heading("Pin", text="Pin")
-        self.tree.heading("Estado", text="Estado")
-        self.tree.heading("Demora (ms)", text="Demora")
+        self.tree.heading("Pin", text="Pin GPIO")
+        self.tree.heading("Estado", text="Acción")
+        self.tree.heading("Demora (ms)", text="Espera (ms)")
         
-        self.tree.column("#", width=30, anchor="center")
-        self.tree.column("Pin", width=50, anchor="center")
-        self.tree.column("Estado", width=80, anchor="center")
-        self.tree.column("Demora (ms)", width=100, anchor="center")
+        self.tree.column("#", width=40, anchor="center")
+        self.tree.column("Pin", width=80, anchor="center")
+        self.tree.column("Estado", width=100, anchor="center")
+        self.tree.column("Demora (ms)", width=120, anchor="center")
+        
+        # Tags for striped rows
+        self.tree.tag_configure('odd', background='#E8E8E8')
+        self.tree.tag_configure('even', background='#FFFFFF')
         
         self.tree.pack(side="left", fill="both", expand=True)
         
@@ -70,9 +86,58 @@ class SequencerWindow(tk.Toplevel):
         btn_frame = ttk.Frame(self, padding=10)
         btn_frame.pack(fill="x")
         
-        ttk.Button(btn_frame, text="🗑️ Limpiar", command=self.clear_steps).pack(side="left")
+        left_frame = ttk.Frame(btn_frame)
+        left_frame.pack(side="left")
+        
+        ttk.Button(left_frame, text="💾 Guardar", command=self.save_sequence).pack(side="left", padx=5)
+        ttk.Button(left_frame, text="📂 Cargar", command=self.load_sequence).pack(side="left", padx=5)
+        ttk.Button(left_frame, text="🗑️ Limpiar", command=self.clear_steps).pack(side="left", padx=5)
+        
         ttk.Button(btn_frame, text="🚀 ENVIAR SECUENCIA", command=self.send_sequence).pack(side="right")
         
+    def refresh_list(self):
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+            
+        for i, step in enumerate(self.steps):
+            action = "ON" if step.value else "OFF"
+            tag = 'even' if i % 2 == 0 else 'odd'
+            self.tree.insert("", "end", values=(i+1, step.pin, action, step.delay_ms), tags=(tag,))
+
+    def save_sequence(self):
+        if not self.steps:
+            messagebox.showwarning("Aviso", "No hay pasos para guardar")
+            return
+            
+        name = simpledialog.askstring("Guardar Secuencia", "Nombre de la secuencia:")
+        if name:
+            try:
+                seq = SequenceFile(name=name, steps=self.steps)
+                path = self.manager.save_sequence(name, seq)
+                messagebox.showinfo("Guardado", f"Secuencia guardada en:\n{path}")
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
+
+    def load_sequence(self):
+        files = self.manager.list_sequences()
+        if not files:
+            messagebox.showinfo("Cargar", "No hay secuencias guardadas.")
+            return
+
+        # Simple Checkbox or Listbox Implementation could be complex here for Toplevel
+        # For MVP, let's use FileDialog pointing to the dir
+        filename = filedialog.askopenfilename(initialdir=self.manager.directory, filetypes=[("JSON Files", "*.json")])
+        if filename:
+            try:
+                import os
+                basename = os.path.basename(filename)
+                seq = self.manager.load_sequence(basename)
+                self.steps = seq.steps
+                self.refresh_list()
+                messagebox.showinfo("Cargado", f"Se cargó '{seq.name}' con {len(seq.steps)} pasos.")
+            except Exception as e:
+                messagebox.showerror("Error", f"Fallo al cargar: {e}")
+
     def add_step(self):
         try:
             pin = int(self.combo_pin.get())
@@ -85,10 +150,7 @@ class SequencerWindow(tk.Toplevel):
             
             step = SequenceStep(pin=pin, value=value, delay_ms=duration)
             self.steps.append(step)
-            
-            # Update UI
-            idx = len(self.steps)
-            self.tree.insert("", "end", values=(idx, pin, action_str, duration))
+            self.refresh_list()
             
         except ValueError as e:
             messagebox.showerror("Error", f"Entrada inválida: {e}")

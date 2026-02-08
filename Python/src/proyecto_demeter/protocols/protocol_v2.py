@@ -10,6 +10,8 @@ from .schemas_protocol import (
     RouteAdd, 
     Ping, 
     SequenceStep,
+    Ack,
+    Nack,
     CmdId
 )
 
@@ -85,6 +87,14 @@ class DemeterProtocolV2:
         elif isinstance(cmd, Ping):
             payload = b''
             
+        elif isinstance(cmd, Ack):
+            # [ORIGINAL_CMD_ID]
+            payload = struct.pack('<B', cmd.original_cmd_id)
+            
+        elif isinstance(cmd, Nack):
+            # [ORIGINAL_CMD_ID] [ERROR_CODE]
+            payload = struct.pack('<BB', cmd.original_cmd_id, cmd.error_code)
+            
         return self._pack_frame_raw(cmd.target_id, cmd.get_cmd_id(), payload)
 
     # ==========================================
@@ -135,6 +145,16 @@ class DemeterProtocolV2:
 
             elif cmd_id == CmdId.PING:
                 return Ping(target_id=dst)
+                
+            elif cmd_id == CmdId.ACK:
+                if len(payload) < 1: return None
+                orig = payload[0]
+                return Ack(target_id=dst, original_cmd_id=orig)
+                
+            elif cmd_id == CmdId.NACK:
+                if len(payload) < 2: return None
+                orig, err = struct.unpack('<BB', payload)
+                return Nack(target_id=dst, original_cmd_id=orig, error_code=err)
                 
             elif cmd_id == CmdId.EXEC_SEQUENCE:
                 if len(payload) < 1: return None

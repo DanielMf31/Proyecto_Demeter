@@ -29,6 +29,27 @@ class DemeterCommand(BaseModel):
 # Specific Commands
 # ==========================================
 
+class Ack(DemeterCommand):
+    """
+    Positive Acknowledgment of a command.
+    Payload: [ORIGINAL_CMD_ID]
+    """
+    original_cmd_id: int = Field(ge=0, le=255)
+
+    def get_cmd_id(self) -> int:
+        return CmdId.ACK
+
+class Nack(DemeterCommand):
+    """
+    Negative Acknowledgment (Error).
+    Payload: [ORIGINAL_CMD_ID] [ERROR_CODE]
+    """
+    original_cmd_id: int = Field(ge=0, le=255)
+    error_code: int = Field(ge=0, le=255)
+
+    def get_cmd_id(self) -> int:
+        return CmdId.NACK
+
 class Ping(DemeterCommand):
     def get_cmd_id(self) -> int:
         return CmdId.PING
