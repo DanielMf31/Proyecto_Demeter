@@ -1,0 +1,6 @@
+pyserial>=3.5
+pydantic>=2.0
+pydantic-settings
+python-dotenv
+# RPi.GPIO is usually pre-installed on Raspbian, but good to have if needed for other tests
+# RPi.GPIO

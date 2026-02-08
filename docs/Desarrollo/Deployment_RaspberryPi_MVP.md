@@ -32,8 +32,11 @@ Es crucial que la Raspberry Pi tenga el puerto serial habilitado y **no lo esté
     cd Python
     python3 -m venv venv
     source venv/bin/activate
-    pip install pyserial
-    # No hace falta instalar tkinter con pip, usa el del sistema (paso 1A)
+    
+    # Instalar requerimientos mínimos para el MVP
+    pip install -r requirements_mvp.txt
+    
+    # Nota: Tkinter se instala con apt (paso 1A), no con pip.
     ```
 
 ## 3. Ejecución
