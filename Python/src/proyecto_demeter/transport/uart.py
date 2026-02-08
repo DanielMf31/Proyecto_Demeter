@@ -8,6 +8,14 @@ from proyecto_demeter.protocols.device_manager import DeviceManager
 class UartTransport(TransportStrategy, threading.Thread):
     """
     Concrete implementation of TransportStrategy using Serial (UART).
+    
+    Runs a background thread to continuously listen for incoming data (`RX`)
+    while allowing thread-safe transmission (`TX`) from the main thread.
+    
+    Attributes:
+        port (str): Serial port path (e.g., '/dev/ttyUSB0').
+        baud (int): Baud rate (default: 115200).
+        callback (callable): Function to invoke when data is received.
     """
     def __init__(self, port: str = None, baud_rate: int = None):
         super().__init__()

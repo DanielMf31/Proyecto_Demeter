@@ -4,7 +4,15 @@ from typing import Optional, Callable
 class TransportStrategy(ABC):
     """
     Abstract Base Class for Communication Strategies.
-    Allows decoupling Logic from Hardware (UART, WiFi, Mock).
+    
+    Defines the contract for any transport layer (UART, TCP/IP, LoRa, Mock),
+    ensuring the upper logic layers remain agnostic to the physical medium.
+    
+    Methods:
+        connect(): Establish connection.
+        send(data): Transmit raw bytes.
+        set_callback(cb): Register data reception handler.
+        start()/stop(): Manage background listening tasks.
     """
 
     @abstractmethod

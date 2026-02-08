@@ -1,7 +1,11 @@
-/*
-* RECEPTOR ESP32-S3 - Nueva Arquitectura V2
-* Implementa Strategy Pattern + System Context
-*/
+/**
+ * @file main_receptor.cpp
+ * @brief Firmware Entry Point for "Receptor" (ESP32).
+ * 
+ * Implements the Demeter Protocol V2 Receptor logic.
+ * Initializes the Dependency Injection container (SystemContext)
+ * and managing the main Arduino Loop.
+ */
 
 #include <Arduino.h>
 #include "communications/UartStrategy.h"
@@ -10,78 +14,95 @@
 #include "core/SystemContext.h"
 
 // Define Hardware Serial for ESP32
-// RX=16, TX=17 (Ajustar según hardware)
+// RX=16, TX=17 (Adjust per hardware revision)
 #define RXD2 16
 #define TXD2 17
 
-// Instancias Globales
-// UartStrategy recibe: Puntero a Serial, BaudRate
-// En ESP32 Serial2 se inicializa dentro de UartStrategy si así está diseñado, 
-// o pasamos el objeto global Serial2.
-// Revisando UartStrategy.h, el constructor es: UartStrategy(HardwareSerial* serial, unsigned long baud)
-// Instancias Globales
-// UartStrategy recibe: Puntero a Serial, BaudRate, RX Pin, TX Pin
+// ==========================================
+// Global Instances (Dependency Injection)
+// ==========================================
+
+// 1. Communication Layer: UART (Serial2)
+// Uses pins 16 (RX) and 17 (TX) at 115200 baud.
 UartStrategy uartStrategy(&Serial2, 115200, RXD2, TXD2);
 
+// 2. Protocol Layer: Protocol V2 Engine
+// Decoupled from transport via IComms interface.
 ProtocolEngine engine(&uartStrategy);
+
+// 3. Hardware Layer: GPIO Controller
+// Manages physical pin states.
 GpioController gpioController;
+
+// 4. System Layer: Context Orchestrator
+// Binds Engine and Controller, manages State & Queue.
 SystemContext systemCtx(engine, gpioController);
 
+/**
+ * @brief Standard Arduino Setup.
+ * Initializes Debug Serial, System Context, and Communication.
+ */
 void setup() {
-    // Debug Serial
+    // Debug Serial (USB)
     Serial.begin(115200);
     delay(1000);
     while(!Serial) delay(10);
 
     Serial.println("=== DEMETER RECEPTOR V2 (MVP GPIO) ===");
     Serial.println(" [1-4] Toggle PIN 4-7");
-    Serial.println(" [I] Modo Inmediato (Default)");
-    Serial.println(" [R] Modo Recepción (Cola)");
-    Serial.println(" [E] Ejecutar Cola");
-    Serial.println(" [C] Limpiar Cola");
+    Serial.println(" [I] Mode: IMMEDIATE (Default)");
+    Serial.println(" [R] Mode: QUEUED (Interactive)");
+    Serial.println(" [E] Execute Queue");
+    Serial.println(" [C] Clear Queue");
     Serial.println("======================================");
 
-    // Initialize System
+    // Initialize System Logic
     systemCtx.setup();
-    // UartStrategy.begin() now handles Serial2.begin(baud, config, rx, tx) internally
+    
+    // Initialize Communication (Starts Serial2)
     uartStrategy.begin();
 }
 
+/**
+ * @brief Standard Arduino Loop.
+ * 1. Updates System Context (Polls UART).
+ * 2. Checks Debug Serial for Manual Commands.
+ */
 void loop() {
-    // 1. System Loop (Protocol Engine)
+    // 1. System Loop (Protocol Engine Update)
     systemCtx.loop();
 
-    // 2. User Interactive Menu (Serial USB)
+    // 2. User Interactive Menu (Serial USB / Debug)
     if (Serial.available()) {
         char c = toupper(Serial.read());
-        // Simple state tracking for toggling
+        // Simple state tracking for toggling in manual mode
         static bool pinStates[8] = {false}; 
 
         switch (c) {
             case 'I':
                 systemCtx.setExecutionMode(ExecutionMode::IMMEDIATE);
-                Serial.println(">> MODO: INMEDIATO");
+                Serial.println(">> MODE: IMMEDIATE");
                 break;
             case 'R':
                 systemCtx.setExecutionMode(ExecutionMode::INTERACTIVE_QUEUE);
-                Serial.println(">> MODO: RECEPCION (Encolando...)");
+                Serial.println(">> MODE: QUEUE (Buffering...)");
                 break;
             case 'E':
-                Serial.println(">> EJECUTANDO COLA...");
+                Serial.println(">> EXECUTING QUEUE...");
                 systemCtx.executeQueue();
                 break;
             case 'C':
                 systemCtx.clearQueue();
-                Serial.println(">> COLA LIMPIA");
+                Serial.println(">> QUEUE CLEARED");
                 break;
             
-            // Manual GPIO Control
+            // Manual GPIO Control Shortcuts
             case '1':
             case '2':
             case '3':
             case '4': {
                 uint8_t pin = (c - '0') + 3; // '1'->4, '2'->5, '3'->6, '4'->7
-                pinStates[pin] = !pinStates[pin]; // Toggle
+                pinStates[pin] = !pinStates[pin]; // Toggle Local State
                 
                 Demeter::SetGpioCmd cmd;
                 cmd.pin = pin;
@@ -89,7 +110,7 @@ void loop() {
                 cmd.flags = 0;
 
                 Serial.printf(">> MANUAL: PIN %d -> %s\n", pin, cmd.value ? "ON" : "OFF");
-                systemCtx.injectCommand(cmd);
+                systemCtx.injectCommand(cmd); // Inject into Protocol Logic
                 break;
             }
 
@@ -97,7 +118,7 @@ void loop() {
             case '\r':
                 break;
             default:
-                Serial.print("Comando desconocido: ");
+                Serial.print("Unknown Command: ");
                 Serial.println(c);
                 break;
         }

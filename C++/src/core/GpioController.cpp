@@ -1,5 +1,10 @@
 #include "core/GpioController.h"
 
+/**
+ * @file GpioController.cpp
+ * @brief GPIO Hardware Abstraction Implementation.
+ */
+
 #ifndef ARDUINO
     // Mock Implementation for Native Environment
     #include <iostream>
@@ -13,7 +18,6 @@
     
     void digitalWrite(uint8_t pin, uint8_t val) {
         _mockPinStates[pin] = val;
-        // std::cout << "[GPIO] PIN " << (int)pin << " -> " << (int)val << std::endl;
     }
 
     uint8_t getMockPinState(uint8_t pin) {

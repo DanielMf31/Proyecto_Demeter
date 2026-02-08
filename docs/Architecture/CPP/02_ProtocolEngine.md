@@ -30,6 +30,15 @@ Es agnóstico del medio de transporte: funciona igual sobre UART, LoRa o WiFi, s
 *   **SET_GPIO (`0x10`):** Control Digital (ON/OFF) de pines.
 *   **SET_PWM (`0x11`):** Control Anológico (PWM) de pines.
 *   **EXEC_SEQUENCE (`0x30`):** Ejecución de secuencias preprogramadas.
+    *   **Payload Estructura:**
+        *   `[COUNT]` (1 Byte): Número de pasos.
+        *   `[STEP_1]` ... `[STEP_N]` (8 Bytes cada uno).
+        *   **Estructura del Paso (8 Bytes):**
+            *   `[TGT_ID]` (1): Reservado (Target).
+            *   `[CMD_ID]` (1): Reservado (Tipo de Acción).
+            *   `[PIN]` (1): GPIO Pin.
+            *   `[VAL]` (1): Valor (0/1).
+            *   `[DELAY]` (4): Tiempo en ms (Little Endian).
 
 ## 4. Referencia de API
 

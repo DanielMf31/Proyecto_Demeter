@@ -1,5 +1,12 @@
 #pragma once
 
+/**
+ * @file IComms.h
+ * @brief Abstract Interface for Communication Strategies.
+ * @author Proyecto Demeter Team
+ * @date 2026-02-08
+ */
+
 #include <stdint.h>
 #include <stddef.h>
 #include <vector>

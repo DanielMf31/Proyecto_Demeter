@@ -42,7 +42,14 @@ Demeter::SetGpioCmd cmd = {4, true, 0};
 controller.execute(cmd); // Enciende GPIO 4
 ```
 
-### 2.3 Tipos Internos (`InternalTypes.h`)
+### 2.3 System: `SystemContext`
+El orquestador del flujo de trabajo y la máquina de estados.
+*   **Responsabilidad:** Unificar Protocolo y Hardware. Gestionar modos (Inmediato/Cola) y **Secuencias**.
+*   **Ubicación:** `src/core/SystemContext.cpp`
+*   **Features:**
+    *   **Ejecución de Secuencias:** Implementa un motor no bloqueante basado en `millis()` para ejecutar `ExecSequenceCmd`.
+
+### 2.4 Tipos Internos (`InternalTypes.h`)
 El "Lenguaje Común" del sistema.
 ```cpp
 struct SetGpioCmd {

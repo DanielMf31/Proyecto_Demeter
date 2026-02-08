@@ -23,7 +23,17 @@ SEQUENCE_STEP_SIZE = struct.calcsize(SEQUENCE_STEP_FMT)
 class DemeterProtocolV2:
     """
     Implements the Demeter V2 Binary Protocol.
-    Fully integrated with Pydantic for Validation and Serialization.
+    
+    This class handles the core logic for:
+    1.  **Serialization**: Converting High-Level Pydantic Models (`DemeterCommand`) into binary frames.
+    2.  **Deserialization**: Parsing incoming binary byte streams into Pydantic Models.
+    3.  **Validation**: CRC integrity checks and Frame structure verification.
+    
+    Frame Structure:
+    `[SYNC(1)] [LEN(1)] [FLAGS(1)] [SRC(1)] [DST(1)] [CMD(1)] ... [PAYLOAD(N)] ... [CRC(1)]`
+    
+    Attributes:
+        logger (logging.Logger): Logger instance for protocol events.
     """
     def __init__(self):
         self.logger = logging.getLogger("ProtocolV2")

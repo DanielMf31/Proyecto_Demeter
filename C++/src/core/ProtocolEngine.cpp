@@ -2,6 +2,11 @@
 #include <cstring>
 #include <vector>
 
+/**
+ * @file ProtocolEngine.cpp
+ * @brief Logic for Frame Parsing and Validation.
+ */
+
 ProtocolEngine::ProtocolEngine(IComms* strategy) : _strategy(strategy) {}
 
 void ProtocolEngine::onSetGpio(GpioCallback cb) {
@@ -16,6 +21,12 @@ void ProtocolEngine::onExecSequence(SequenceCallback cb) {
     _onSequenceCommand = cb;
 }
 
+/**
+ * @brief Calculates a simple Modular Sum CRC (Mod 256).
+ * @param data Pointer to data buffer.
+ * @param len Length of data in bytes.
+ * @return uint8_t Calculated CRC.
+ */
 uint8_t ProtocolEngine::calculateCRC(const uint8_t* data, size_t len) {
     uint32_t sum = 0;
     for (size_t i = 0; i < len; i++) {
@@ -33,6 +44,10 @@ void ProtocolEngine::update() {
     }
 }
 
+/**
+ * @brief Core parsing logic for a received frame.
+ * Validates Header, Sync, Length and CRC before dispatching.
+ */
 void ProtocolEngine::parseFrame(const std::vector<uint8_t>& frame) {
     if (frame.size() < HEADER_SIZE + 1) return; // Min: Header + CRC
 
@@ -48,9 +63,6 @@ void ProtocolEngine::parseFrame(const std::vector<uint8_t>& frame) {
 
     // 4. CRC Validation
     // CRC is over Header[1:] + Payload
-    // Frame: [SYNC][LEN][FLAGS][SRC][DST][CMD] ... [PAYLOAD] ... [CRC]
-    // Index:   0     1     2      3    4    5        6...          END
-    
     const uint8_t* dataStart = frame.data() + 1; // Skip Sync
     size_t dataLen = (HEADER_SIZE - 1) + hdr->length;
     
@@ -88,13 +100,37 @@ void ProtocolEngine::parseFrame(const std::vector<uint8_t>& frame) {
         }
     }
     else if (hdr->cmd_id == (uint8_t)Demeter::CommandType::EXEC_SEQUENCE) {
-        if (_onSequenceCommand) {
-            // Pass raw payload for now (Sequence Parsing is complex logic)
-            std::vector<uint8_t> payload;
+        if (hdr->length >= 1 && _onSequenceCommand) {
+            Demeter::ExecSequenceCmd cmd;
             const uint8_t* payloadPtr = frame.data() + HEADER_SIZE;
-            payload.assign(payloadPtr, payloadPtr + hdr->length);
             
-            _onSequenceCommand(payload);
+            uint8_t count = payloadPtr[0];
+            size_t offset = 1;
+            
+            for (uint8_t i = 0; i < count; i++) {
+                // Ensure we don't read past the frame
+                if (offset + 8 > hdr->length) break;
+                
+                Demeter::SequenceStep step;
+                // Format: [TGT] [CMD] [PIN] [VAL] [DELAY(4)]
+                
+                // step.target = payloadPtr[offset + 0]; // Ignored for now
+                // step.cmd    = payloadPtr[offset + 1]; // Ignored for now
+                step.pin = payloadPtr[offset + 2];
+                step.value = (payloadPtr[offset + 3] > 0);
+                
+                // Extract 32-bit Delay (Little Endian)
+                uint32_t delay = payloadPtr[offset + 4] | 
+                                 (payloadPtr[offset + 5] << 8) |
+                                 (payloadPtr[offset + 6] << 16) |
+                                 (payloadPtr[offset + 7] << 24);
+                step.delayMs = delay;
+                
+                cmd.steps.push_back(step);
+                offset += 8;
+            }
+            
+            _onSequenceCommand(cmd);
         }
     }
     else if (hdr->cmd_id == (uint8_t)Demeter::CommandType::PING) {
@@ -120,9 +156,7 @@ void ProtocolEngine::sendFrame(uint8_t cmdId, uint8_t targetId, const std::vecto
     frame.reserve(HEADER_SIZE + payload.size() + 1);
 
     // Header
-    // [SYNC][LEN][FLAGS][SRC][DST][CMD]
-    // SRC is fixed to 0x01 (Assuming we are Device ID 1) - TODO: Configurable ID
-    uint8_t myId = 0x01; 
+    uint8_t myId = 0x01; // TODO: Configurable ID
 
     Header hdr;
     hdr.sync = SYNC_BYTE;
@@ -140,7 +174,6 @@ void ProtocolEngine::sendFrame(uint8_t cmdId, uint8_t targetId, const std::vecto
     frame.insert(frame.end(), payload.begin(), payload.end());
 
     // CRC
-    // Calculate CRC over Header[1:] + Payload
     const uint8_t* dataStart = frame.data() + 1; // Skip Sync
     size_t dataLen = (HEADER_SIZE - 1) + payload.size();
     uint8_t crc = calculateCRC(dataStart, dataLen);

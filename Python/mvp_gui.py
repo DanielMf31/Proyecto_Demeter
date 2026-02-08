@@ -1,5 +1,6 @@
 import sys
 import os
+import argparse
 import logging
 import tkinter as tk
 from tkinter import ttk, scrolledtext
@@ -10,6 +11,7 @@ import time
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 from proyecto_demeter.transport.uart import UartTransport
+from proyecto_demeter.transport.mock import MockTransport
 from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
 from proyecto_demeter.protocols.schemas_protocol import CmdId
 
@@ -17,7 +19,31 @@ from proyecto_demeter.protocols.schemas_protocol import CmdId
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("MVP_GUI")
 
+"""
+Demeter MVP GUI Application.
+
+This module provides a standalone Tkinter-based Graphical User Interface (GUI)
+for controlling the ESP32 GPIO pins via UART (Serial) using the Demeter Protocol V2.
+
+Features:
+- Auto-detection of Serial Ports (or manual override via CLI args).
+- Optimistic UI updates for instant feedback.
+- Real-time HEX logging of transmitted and received frames.
+- Direct integration with `UartTransport` and `DemeterProtocolV2`.
+
+Usage:
+    python mvp_gui.py [serial_port]
+    
+    Example:
+        python mvp_gui.py /dev/ttyUSB0
+"""
+
 class DemeterMVPApp:
+    """
+    Main Application Controller for the MVP GUI.
+    
+    Manages the Tkinter Root Window, Transport Layer, and Protocol Logic.
+    """
     def __init__(self, root):
         self.root = root
         self.root.title("Demeter Control MVP (Direct UART)")
@@ -27,11 +53,19 @@ class DemeterMVPApp:
         # Initialize Protocol & Transport
         self.protocol = DemeterProtocolV2()
         
-        # Try finding port: First arg, then env, then default
-        port = sys.argv[1] if len(sys.argv) > 1 else '/dev/ttyUSB0' # Default for PC testing usually
-        # On Raspberry Pi it might be /dev/serial0
-        
-        self.transport = UartTransport(port=port, baud_rate=115200)
+        # Parse Arguments
+        parser = argparse.ArgumentParser(description="Demeter MVP GUI")
+        parser.add_argument("port", nargs="?", default=None, help="Serial Port (e.g. /dev/ttyUSB0)")
+        parser.add_argument("--mock", action="store_true", help="Run in Simulation Mode (No Hardware)")
+        args = parser.parse_args()
+
+        if args.mock:
+            self.transport = MockTransport()
+            self.root.title("Demeter Control MVP (SIMULATION MODE)")
+        else:
+            # Try finding port: Arg -> Env -> Default
+            port = args.port if args.port else os.environ.get("DEMETER_PORT", "/dev/ttyUSB0")
+            self.transport = UartTransport(port=port, baud_rate=115200)
         self.transport.set_callback(self.on_rx_data)
         
         # --- GUI COMPONENTS ---

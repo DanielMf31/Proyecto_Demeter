@@ -1,4 +1,4 @@
-# Protocolo de Comunicación Demeter V2
+# Especificación de Diseño: Protocolo Demeter V2
 **Versión del Estándar:** 2.1
 **Fecha de Revisión:** 31 Enero 2026
 **Implementación de Referencia:** `proyecto_demeter.protocols.protocol_v2.DemeterProtocolV2`

@@ -10,20 +10,22 @@
  */
 /**
  * @class ProtocolEngine
- * @brief Handles the Demoeter Binary Protocol (V2).
+ * @brief Handles the Demeter Binary Protocol (V2).
  * 
  * Responsible for:
  * 1. Deserializing incoming byte streams into frames.
  * 2. Validating frames (Sync Byte, Length, CRC).
  * 3. Dispatching valid commands to registered callbacks.
  * 4. Generating and serializing response frames (ACK/NACK).
+ * 
+ * @note This class is platform-agnostic. It relies on IComms interface.
  */
 class ProtocolEngine {
 public:
     // Callback types for event handling
     using GpioCallback = std::function<void(const Demeter::SetGpioCmd&)>;
     using PwmCallback = std::function<void(const Demeter::SetPwmCmd&)>;
-    using SequenceCallback = std::function<void(const std::vector<uint8_t>&)>; // Raw payload for now
+    using SequenceCallback = std::function<void(const Demeter::ExecSequenceCmd&)>;
 
 private:
     IComms* _strategy;
@@ -51,8 +53,8 @@ private:
 
 public:
     /**
-     * @brief Construct a new Protocol Engine
-     * @param strategy Pointer to the Communication Strategy (UART, LoRa...)
+     * @brief Construct a new Protocol Engine.
+     * @param strategy Pointer to the Communication Strategy (UART, LoRa...).
      */
     ProtocolEngine(IComms* strategy);
 
@@ -110,5 +112,10 @@ public:
     void sendFrame(uint8_t cmdId, uint8_t targetId, const std::vector<uint8_t>& payload);
 
     // Helpers for testing
+    /**
+     * @brief Parses a single frame buffer.
+     * Exposed for Unit Testing purposes.
+     * @param frame byte vector containing the full frame (header + payload + crc).
+     */
     void parseFrame(const std::vector<uint8_t>& frame);
 };

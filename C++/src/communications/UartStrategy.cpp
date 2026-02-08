@@ -1,5 +1,10 @@
 #include "communications/UartStrategy.h"
 
+/**
+ * @file UartStrategy.cpp
+ * @brief Implementation of UART Communication Strategy.
+ */
+
 #ifndef ARDUINO
     // Mock Instance for Native Linker
     HardwareSerial Serial;
