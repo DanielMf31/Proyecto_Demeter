@@ -79,6 +79,46 @@ def main():
     # App placeholder
     app = None
 
+    # 6. Setup Thread-Safe Queue
+    import queue
+    rx_queue = queue.Queue()
+
+    # 7. Setup RX Callback (Puts data into Queue)
+    def on_rx_data(data):
+        rx_queue.put(data)
+    
+    transport.set_callback(on_rx_data)
+
+    # 8. Define Queue Processor (Runs in Main Thread)
+    def process_queue():
+        try:
+            while not rx_queue.empty():
+                data = rx_queue.get_nowait()
+                try:
+                    # Parse Frame
+                    cmd = protocol.parse_frame(data)
+                    
+                    if cmd and app: # Ensure App is initialized
+                        from proyecto_demeter.config.schemas import DataReport
+                        if isinstance(cmd, DataReport):
+                            app.handle_data_report(cmd)
+                        else:
+                            app.log(f"RX <- {cmd}")
+                    elif app:
+                        # Log raw hex if parsing failed (or incomplete frame)
+                        # app.log(f"RX (Raw) <- {data.hex(' ').upper()}")
+                        pass
+                except Exception as e:
+                     if app: app.log_error(f"RX Parse Error: {e}")
+        except queue.Empty:
+            pass
+        finally:
+            # Schedule next check (50ms)
+            root.after(50, process_queue)
+
+    # Start Queue Loop
+    root.after(100, process_queue)
+
     def on_login_success():
         nonlocal app
         logger.info("Login Successful. Showing Main Window.")
@@ -87,59 +127,24 @@ def main():
         # Initialize Main App
         app = MainWindow(root, transport, protocol)
         
-        # Wire up RX Callback
-        def on_rx_data(data):
-            try:
-                # 1. Parse Frame
-                cmd = protocol.parse_frame(data)
-                
-                if cmd:
-                    from proyecto_demeter.config.schemas import DataReport
-                    if isinstance(cmd, DataReport):
-                        # Dispatch to App
-                        root.after(0, lambda: app.handle_data_report(cmd))
-                    else:
-                        # Log generic commands
-                        root.after(0, lambda: app.log(f"RX <- {cmd}"))
-                else:
-                    # Log raw hex if parsing failed (or incomplete frame)
-                    root.after(0, lambda: app.log(f"RX (Raw) <- {data.hex(' ').upper()}"))
-            except Exception as e:
-                 root.after(0, lambda: app.log_error(f"RX Parse Error: {e}"))
-        
-        transport.set_callback(on_rx_data)
-
         # --- Device Manager & Route Sync ---
         try:
             from proyecto_demeter.core.device_manager import DeviceManager
             from proyecto_demeter.config.schemas import RouteAdd
             
             logger.info("Loading Device Manager...")
-            dm = DeviceManager() # Loads config/devices.json by default
+            dm = DeviceManager()
             routes = dm.get_all_routes()
             
             if routes:
                 logger.info(f"Syncing {len(routes)} routes to Gateway...")
                 # user requested to comment out sync_routes for now
-                # root.after(2000, lambda: sync_routes(routes, transport, protocol, app)) 
                 pass 
             else:
                 logger.info("No routes to sync.")
                 
         except Exception as e:
             logger.error(f"Failed to sync routes: {e}")
-
-    def sync_routes(routes, transport, protocol, app):
-        from proyecto_demeter.config.schemas import RouteAdd
-        for node_id, mac_bytes in routes:
-             # RouteAdd requires: target_id, node_id_to_register, mac_address_bytes
-             # mac_bytes is already bytes (from DeviceManager)
-             cmd = RouteAdd(target_id=1, node_id_to_register=node_id, mac_address_bytes=mac_bytes)
-             frame = protocol.serialize(cmd)
-             if transport:
-                 transport.send(frame)
-                 app.log(f"Synced Route Node {node_id}")
-                 time.sleep(0.1)
 
     from proyecto_demeter.ui.login_window import LoginWindow
     login = LoginWindow(root, on_login_success)
