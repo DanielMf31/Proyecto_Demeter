@@ -7,6 +7,7 @@
  */
 
 #include <Arduino.h>
+#include <WiFi.h>  // Required for macAddress()
 #include "communications/EspNowStrategy.h"
 #include "core/ProtocolEngine.h"
 #include "core/GpioController.h"
@@ -52,6 +53,11 @@ void setup() {
     
     // Initialize Communication
     espNowStrategy.begin();
+    
+    // TURN OFF RGB LED (ESP32-S3 DevKitC-1)
+    #ifdef RGB_BUILTIN
+    neopixelWrite(RGB_BUILTIN, 0, 0, 0);
+    #endif
 }
 
 /**
@@ -61,5 +67,12 @@ void loop() {
     // 1. System Loop (Protocol Engine Update)
     systemCtx.loop();
     
-    // Optional: Sleep or low power mode could go here
+    // 2. Serial Command Check (For MAC)
+    if (Serial.available()) {
+        char c = Serial.read();
+        if (c == 'm' || c == 'M') {
+            Serial.print("MAC Address: ");
+            Serial.println(WiFi.macAddress());
+        }
+    }
 }
