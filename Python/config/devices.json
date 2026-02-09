@@ -16,7 +16,7 @@
         },
         {
             "id": 2,
-            "mac": "AA:BB:CC:DD:EE:02",
+            "mac": "9C:13:9E:AC:50:C4",
             "type": "sensor_node",
             "description": "ESP32 Node 2",
             "pins": {
