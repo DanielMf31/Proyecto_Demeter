@@ -9,7 +9,7 @@
         },
         {
             "id": 1,
-            "mac": "AA:BB:CC:DD:EE:01",
+            "mac": "9C:13:9E:A8:6F:CC",
             "type": "gateway",
             "description": "ESP32 Gateway",
             "pins": {}

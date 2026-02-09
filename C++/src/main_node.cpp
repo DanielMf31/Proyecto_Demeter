@@ -65,9 +65,9 @@ void setup() {
     // Initialize Communication
     espNowStrategy.begin();
     
-    // HARDCODED GATEWAY MAC (TODO: Update after getting Gateway MAC)
-    // std::array<uint8_t, 6> gatewayMac = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    // espNowStrategy.registerRoute(1, gatewayMac); // ID 1 = Gateway
+    // HARDCODED GATEWAY MAC (From devices.json: 9C:13:9E:A8:6F:CC)
+    std::array<uint8_t, 6> gatewayMac = {0x9C, 0x13, 0x9E, 0xA8, 0x6F, 0xCC};
+    espNowStrategy.registerRoute(1, gatewayMac); // ID 1 = Gateway
     
     // TURN OFF RGB LED (ESP32-S3 DevKitC-1)
     #ifdef RGB_BUILTIN
