@@ -151,7 +151,7 @@ class DemeterService:
         # self.logger.info(f"RX Parsed: {cmd}")
         
         # Broadcast DataReports to all connected GUI clients
-        if cmd.get_cmd_id() == 0x10: # DataReport
+        if cmd.get_cmd_id() == 0x0B: # DataReport
             self.logger.info(f"[RX] DataReport Node={cmd.node_id} Temp={cmd.temperature:.1f} Hum={cmd.humidity:.1f}")
             self.broadcast_event(cmd)
             
