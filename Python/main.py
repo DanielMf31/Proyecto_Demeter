@@ -73,29 +73,27 @@ def main():
 
     # 5. Launch GUI
     root = tk.Tk()
-    
-    # Callback for RX
-    # We need a way to pass data to UI. 
-    # MainWindow doesn't seem to have a public 'on_data' method in the snippet I saw?
-    # I need to check MainWindow again or add a method to it.
-    # The snippet showed 'self.log' but not an external data handler hook clearly exposed 
-    # other than passing it to transport?
-    # Wait, 'mvp_gui.py' had 'on_rx_data'.
-    # MainWindow logic:
-    # It initializes, but who handles RX?
-    
-    app = MainWindow(root, transport, protocol)
-    
-    # Wire up RX Callback
-    # MainWindow needs a method to receive data.
-    # Let's assume we can add 'handle_rx' to MainWindow or use a lambda.
-    # For now, I'll define a closure here using app.
-    
-    def on_rx_data(data):
-        # Schedule GUI update on main thread
-        root.after(0, lambda: app.log(f"RX <- {data.hex(' ').upper()}"))
+    root.withdraw() # Hide main window initially
 
-    transport.set_callback(on_rx_data)
+    # App placeholder
+    app = None
+
+    def on_login_success():
+        nonlocal app
+        logger.info("Login Successful. Showing Main Window.")
+        root.deiconify() # Show main window
+        
+        # Initialize Main App
+        app = MainWindow(root, transport, protocol)
+        
+        # Wire up RX Callback
+        def on_rx_data(data):
+            root.after(0, lambda: app.log(f"RX <- {data.hex(' ').upper()}"))
+        
+        transport.set_callback(on_rx_data)
+
+    from proyecto_demeter.ui.login_window import LoginWindow
+    login = LoginWindow(root, on_login_success)
 
     # Handle Close
     def on_close():
