@@ -1,6 +1,7 @@
 #include "communications/EspNowStrategy.h"
 #include <Arduino.h>
 #include <esp_now.h>
+#include <esp_wifi.h>
 #include <WiFi.h>
 #include <cstring>
 
@@ -23,6 +24,16 @@ void EspNowStrategy::begin() {
         Serial.println("Error initializing ESP-NOW");
         return;
     }
+    
+    // START FIX: ESP32-S3 Channel Mismatch Fix
+    // ESP-Now requires sender and receiver on the same channel.
+    // In STA mode, it might scan or default.
+    // Force Channel 1.
+    esp_wifi_set_promiscuous(true);
+    esp_wifi_set_channel(1, WIFI_SECOND_CHAN_NONE);
+    esp_wifi_set_promiscuous(false);
+    Serial.println("ESP-Now Channel set to 1");
+    // END FIX
 
     // Register Callbacks
     esp_now_register_send_cb(EspNowStrategy::onDataSent);

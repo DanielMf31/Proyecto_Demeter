@@ -89,5 +89,9 @@ void loop() {
             Serial.print("MAC Address: ");
             Serial.println(WiFi.macAddress());
         }
+        else if (c == 'p' || c == 'P') {
+            Serial.println(">> TX -> PING Gateway (Manual)");
+            engine.sendPing(1); // Gateway ID = 1
+        }
     }
 }

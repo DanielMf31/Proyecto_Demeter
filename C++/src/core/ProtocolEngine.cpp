@@ -1,4 +1,5 @@
 #include "core/ProtocolEngine.h"
+#include <Arduino.h>
 #include <cstring>
 #include <vector>
 
@@ -95,6 +96,7 @@ void ProtocolEngine::parseFrame(const std::vector<uint8_t>& frame) {
 
     // 6. Dispatch based on CMD
     if (hdr->cmd_id == 0x0A) { // ROUTE_ADD
+        Serial.println(">> RX: ROUTE_ADD Command");
         if (hdr->length >= 7) { // 1 byte ID + 6 bytes MAC
             const uint8_t* payloadPtr = frame.data() + HEADER_SIZE;
             uint8_t nodeId = payloadPtr[0];
@@ -185,6 +187,11 @@ void ProtocolEngine::parseFrame(const std::vector<uint8_t>& frame) {
 void ProtocolEngine::sendAck(uint8_t targetId) {
     std::vector<uint8_t> empty;
     sendFrame((uint8_t)Demeter::CommandType::ACK, targetId, empty);
+}
+
+void ProtocolEngine::sendPing(uint8_t targetId) {
+    std::vector<uint8_t> empty;
+    sendFrame((uint8_t)Demeter::CommandType::PING, targetId, empty);
 }
 
 void ProtocolEngine::sendNack(uint8_t targetId) {

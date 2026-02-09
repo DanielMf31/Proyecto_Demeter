@@ -97,6 +97,12 @@ public:
     void onExecSequence(SequenceCallback cb);
 
     /**
+     * @brief Send a PING command to a target.
+     * @param targetId Destination Device ID.
+     */
+    void sendPing(uint8_t targetId);
+
+    /**
      * @brief Register callback for ACK reception.
      * @param cb Function to call when an ACK is received.
      */

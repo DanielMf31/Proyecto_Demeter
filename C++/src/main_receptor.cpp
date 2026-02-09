@@ -86,6 +86,11 @@ void setup() {
     
     // Initialize Composite Communication (Starts UART + ESP-Now)
     gatewayStrategy.begin();
+    
+    // DEBUG: HARDCODE NODE 2 MAC (From devices.json: 9C:13:9E:AC:50:C4)
+    std::array<uint8_t, 6> node2Mac = {0x9C, 0x13, 0x9E, 0xAC, 0x50, 0xC4};
+    espNowStrategy.registerRoute(2, node2Mac);
+    Serial.println("DEBUG: Hardcoded Route for Node 2 added.");
 }
 
 /**
@@ -104,6 +109,24 @@ void loop() {
         static bool pinStates[8] = {false}; 
 
         switch (c) {
+            case 'P': {
+                // Manual PING to Node 2
+                Serial.println(">> TX -> PING Node 2 (Manual)");
+                std::vector<uint8_t> empty;
+                // We use engine's internal sendFrame via headers if possible, 
+                // but sendFrame is private. 
+                // We can't call sendFrame directly. 
+                // Alternative: Inject a "Ping" command? No, ProtocolEngine handles sending.
+                // We need a public method in ProtocolEngine to send Ping.
+                // OR we just use the Strategy directly to send a raw frame?
+                // Let's expose sendPing in ProtocolEngine or make sendFrame protected/public.
+                // For now, I'll modify ProtocolEngine.h to make sendFrame public OR add sendPing.
+                // Using a lambda or creating a temporary command?
+                // Actually, ProtocolEngine should have a sendPing method.
+                // I will add `sendPing(uint8_t target)` to ProtocolEngine.
+                engine.sendPing(2);
+                break;
+            }
             case 'I':
                 systemCtx.setExecutionMode(ExecutionMode::IMMEDIATE);
                 Serial.println(">> MODE: IMMEDIATE");
