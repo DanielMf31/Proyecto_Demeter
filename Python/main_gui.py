@@ -30,6 +30,19 @@ def main():
     
     # Import here to ensure sys.path is set
     try:
+        # 1. Show Login Window
+        from proyecto_demeter.ui.login_view import LoginWindow
+        print("🔐 Launching Login Window...")
+        login_app = LoginWindow()
+        login_app.mainloop()
+        
+        if not login_app.authenticated:
+            print("⛔ Authentication required. Exiting.")
+            sys.exit(0)
+            
+        print("✅ Authentication Successful. Loading Main App...")
+
+        # 2. Show Main App
         from proyecto_demeter.ui.gui_main_ctk import DemeterApp
         app = DemeterApp()
         
