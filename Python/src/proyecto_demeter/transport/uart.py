@@ -82,16 +82,72 @@ class UartTransport(TransportStrategy, threading.Thread):
             self.join(timeout=1.0)
 
     def run(self):
-        """Thread loop for receiving data."""
+        """
+        Thread loop for receiving data.
+        Implements a buffering mechanism to handle stream fragmentation.
+        """
         self.logger.info("Listening Thread Started")
+        
+        rx_buffer = b''
+        SYNC_BYTE = b'\xfe' # Must match ProtocolV2
+        HEADER_SIZE = 6     # Must match ProtocolV2
+        
         while self.running:
-            if self.serial_conn and self.serial_conn.is_open and self.serial_conn.in_waiting > 0:
-                try:
-                    # Read all available
-                    data = self.serial_conn.read(self.serial_conn.in_waiting)
-                    if data and self.callback:
-                        self.callback(data)
-                except Exception as e:
-                    self.logger.error(f"RX Error: {e}")
-            
-            time.sleep(0.01)
+            try:
+                if self.serial_conn and self.serial_conn.is_open:
+                    # Read available bytes
+                    if self.serial_conn.in_waiting > 0:
+                        chunk = self.serial_conn.read(self.serial_conn.in_waiting)
+                        rx_buffer += chunk
+                        
+                        # Process Buffer
+                        while True:
+                            # 1. Search for Sync Byte
+                            try:
+                                sync_idx = rx_buffer.index(SYNC_BYTE)
+                            except ValueError:
+                                # No sync byte found, discard garbage (keep last few bytes?)
+                                # For simplicity, if buffer is huge > 1024, clear it to prevent leak
+                                if len(rx_buffer) > 1024:
+                                    rx_buffer = b''
+                                break # Wait for more data
+                            
+                            # Align buffer to Sync
+                            if sync_idx > 0:
+                                self.logger.debug(f"Discarding {sync_idx} garbage bytes: {rx_buffer[:sync_idx].hex()}")
+                                rx_buffer = rx_buffer[sync_idx:]
+                                
+                            # 2. Check for Header
+                            if len(rx_buffer) < HEADER_SIZE:
+                                break # Wait for more data
+                                
+                            # 3. Extract Length (Byte 1 is Length)
+                            # Header: [SYNC] [LEN] [FLAGS] [SRC] [DST] [CMD]
+                            payload_len = rx_buffer[1]
+                            total_frame_len = HEADER_SIZE + payload_len + 1 # +1 for CRC
+                            
+                            # 4. Check for Full Frame
+                            if len(rx_buffer) < total_frame_len:
+                                break # Wait for more data
+                                
+                            # 5. Extract Frame
+                            frame = rx_buffer[:total_frame_len]
+                            rx_buffer = rx_buffer[total_frame_len:] # Remove from buffer
+                            
+                            # 6. Dispatch
+                            if self.callback:
+                                # We pass the raw frame bytes to the callback
+                                # The callback (Main Window) will call Protocol.parse_frame
+                                try:
+                                    self.callback(frame)
+                                except Exception as cb_err:
+                                     self.logger.error(f"Callback Error: {cb_err}")
+
+                    else:
+                        time.sleep(0.01) # Yield if no data
+                else:
+                    time.sleep(0.1) # Wait for connection
+                    
+            except Exception as e:
+                self.logger.error(f"RX Loop Error: {e}")
+                time.sleep(1) # Prevent tight loop on error
