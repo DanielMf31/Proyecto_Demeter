@@ -28,6 +28,7 @@ public:
     using SequenceCallback = std::function<void(const Demeter::ExecSequenceCmd&)>;
     using AckCallback = std::function<void(uint8_t srcId)>;
     using PingCallback = std::function<void(uint8_t srcId)>;
+    using DataReportCallback = std::function<void(uint8_t srcId, float temp, float hum)>;
 
 private:
     IComms* _strategy;
@@ -36,6 +37,7 @@ private:
     SequenceCallback _onSequenceCommand;
     AckCallback _onAckRecv;
     PingCallback _onPingRecv;
+    DataReportCallback _onDataReportRecv;
     
     uint8_t _myId = 1; // Default to Gateway ID
 
@@ -125,6 +127,12 @@ public:
      * @param cb Function to call when a PING is received.
      */
     void onPingRecv(PingCallback cb);
+
+    /**
+     * @brief Register callback for DataReport reception.
+     * @param cb Function to call when a DataReport is received.
+     */
+    void onDataReportRecv(DataReportCallback cb);
 
 private:
     /**

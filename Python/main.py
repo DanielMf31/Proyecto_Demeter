@@ -131,7 +131,9 @@ def main():
     def sync_routes(routes, transport, protocol, app):
         from proyecto_demeter.config.schemas import RouteAdd
         for node_id, mac_bytes in routes:
-             cmd = RouteAdd(target_id=1, node_id_to_register=node_id, mac_address=mac_bytes.hex(':'))
+             # RouteAdd requires: target_id, node_id_to_register, mac_address_bytes
+             # mac_bytes is already bytes (from DeviceManager)
+             cmd = RouteAdd(target_id=1, node_id_to_register=node_id, mac_address_bytes=mac_bytes)
              frame = protocol.serialize(cmd)
              if transport:
                  transport.send(frame)

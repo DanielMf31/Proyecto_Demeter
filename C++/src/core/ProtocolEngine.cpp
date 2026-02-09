@@ -30,6 +30,10 @@ void ProtocolEngine::onPingRecv(PingCallback cb) {
     _onPingRecv = cb;
 }
 
+void ProtocolEngine::onDataReportRecv(DataReportCallback cb) {
+    _onDataReportRecv = cb;
+}
+
 /**
  * @brief Calculates a simple Modular Sum CRC (Mod 256).
  * @param data Pointer to data buffer.
@@ -181,6 +185,22 @@ void ProtocolEngine::parseFrame(const std::vector<uint8_t>& frame) {
         if (_onAckRecv) {
             _onAckRecv(hdr->src_id);
         }
+    }
+    else if (hdr->cmd_id == (uint8_t)Demeter::CommandType::DATA_REPORT) {
+        if (hdr->length >= 4 && _onDataReportRecv) {
+            // Payload: [TempLSB] [TempMSB] [HumLSB] [HumMSB]
+            const uint8_t* p = frame.data() + HEADER_SIZE;
+            int16_t t_int = p[0] | (p[1] << 8);
+            int16_t h_int = p[2] | (p[3] << 8);
+            
+            float temp = t_int / 100.0f;
+            float hum = h_int / 100.0f;
+            
+            _onDataReportRecv(hdr->src_id, temp, hum);
+        }
+        // Also send ACK? Usually telemetry is fire-and-forget or ACKed.
+        // Let's ACK for reliability if needed, but might congest.
+        // User didn't specify. Let's NOT Ack for now to save bandwidth.
     }
 }
 

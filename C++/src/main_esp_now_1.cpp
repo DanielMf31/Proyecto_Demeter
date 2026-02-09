@@ -18,7 +18,11 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
 
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   Serial.printf("Bytes received: %d\n", len);
-  Serial.print("Data: ");
+  Serial.printf("Bytes received: %d\n", len);
+  Serial.print("Data (Hex): ");
+  for(int i=0; i<len; i++) Serial.printf("%02X ", incomingData[i]);
+  Serial.println();
+  Serial.print("Data (Str): ");
   for(int i=0; i<len; i++) Serial.print((char)incomingData[i]);
   Serial.println();
 

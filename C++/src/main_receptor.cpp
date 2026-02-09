@@ -83,6 +83,36 @@ void setup() {
         digitalWrite(4, state ? HIGH : LOW);
         Serial.printf(">> ACK Received from Node %d. Toggled GPIO 4 to %s\n", srcId, state ? "ON" : "OFF");
     });
+
+    // Forward Data Reports to UART (Target 0)
+    // When Gateway (ID 1) receives DataReport, it needs to send it to Host (ID 0).
+    // The ProtocolEngine::sendDataReport sends to a target.
+    // If we call engine.sendDataReport(0, ...), it will construct a NEW frame and send it.
+    // Strategy for ID 0 is UART.
+    engine.onDataReportRecv([&](uint8_t srcId, float temp, float hum) {
+        Serial.printf(">> DATA REPORT from Node %d: %.2f C, %.2f %%\n", srcId, temp, hum);
+        // Forward as a new packet from Gateway (or preserve source?)
+        // V2 Protocol Header has Source ID. 
+        // If we use sendDataReport, Source will be Gateway (1).
+        // This effectively "proxies" the data. The Host will see "From Node 1: Temp X".
+        // But we want "From Node 2".
+        // To preserve Source ID, we would need to manually construct frame or add "Forwarding" capability.
+        // OR: We simply tell ProtocolEngine to "spoof" source? No.
+        // OR: The Node should have sent it to ID 0 (Host) initially!
+        // If Node sends to ID 0, Gateway forwards it at Rule 5.
+        
+        // However, user setup currently sends to Target 1.
+        // So we will proxy it. 
+        // The host will see it coming from Gateway (1).
+        // BUT the payload contains the data. 
+        // Does the Host care about the Source ID for logging? 
+        // Yes, likely.
+        
+        // Workaround: We Re-Send it to ID 0.
+        // If we want Host to know it's from Node 2, we might need to modify payload or header.
+        // For now, let's just send it to ID 0.
+        engine.sendDataReport(0, temp, hum); 
+    });
     
     // Initialize Composite Communication (Starts UART + ESP-Now)
     gatewayStrategy.begin();

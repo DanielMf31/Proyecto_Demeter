@@ -92,8 +92,10 @@ class MainWindow:
             for node_id, mac in routes:
                 f = ttk.Frame(net_frame)
                 f.pack(fill="x", pady=2)
-                mac_hex = mac.hex(':').upper()
-                ttk.Label(f, text=f"Node {node_id} [{mac_hex}]", width=30).pack(side=tk.LEFT)
+                f = ttk.Frame(net_frame)
+                f.pack(fill="x", pady=2)
+                # mac_hex = mac.hex(':').upper() # Removed to avoid potential issues
+                ttk.Label(f, text=f"Node {node_id}", width=15).pack(side=tk.LEFT)
                 ttk.Button(f, text="⚡ PING", command=lambda n=node_id: self.send_ping(n)).pack(side=tk.LEFT)
 
         # --- Log Area ---
@@ -143,7 +145,8 @@ class MainWindow:
 
         success_count = 0
         for node_id, mac_bytes in routes:
-            cmd = RouteAdd(node_id=node_id, mac_address=mac_bytes.hex(':'))
+            # Fix: Use correct field names and types for RouteAdd
+            cmd = RouteAdd(target_id=1, node_id_to_register=node_id, mac_address_bytes=mac_bytes)
             frame = self.protocol.serialize(cmd)
             if self.transport.send(frame):
                 success_count += 1
