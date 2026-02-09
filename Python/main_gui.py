@@ -1,6 +1,7 @@
 import sys
 import os
 import subprocess
+import argparse
 
 # Add src to path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -11,7 +12,18 @@ def main():
     """
     Launcher for the Demeter Professional GUI.
     """
+    parser = argparse.ArgumentParser(description="Demeter V2 Professional GUI")
+    parser.add_argument("--host", default="127.0.0.1", help="Backend Host IP (default: 127.0.0.1)")
+    parser.add_argument("--port", default=8888, type=int, help="Backend Socket Port (default: 8888)")
+    
+    args = parser.parse_args()
+    
+    # Configure Environment for ViewModel
+    os.environ["DEMETER_HOST"] = args.host
+    os.environ["DEMETER_SOCKET_PORT"] = str(args.port)
+
     print("🚀 Starting Demeter V2 Professional GUI...")
+    print(f"📡 Connecting to Backend at: {args.host}:{args.port}")
     
     # Check if backend is likely running (optional)
     # Could check port 8888, but let's just launch
