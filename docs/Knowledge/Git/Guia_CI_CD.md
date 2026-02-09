@@ -20,6 +20,11 @@ Hemos definido dos flujos de trabajo principales basados en las ramas del reposi
 
 > ⛔ **Bloqueo**: Si alguno de estos tests falla, el workflow se marca como fallido y se notifica al desarrollador. No se debe mergear a `main` si esto falla.
 
+### 🔍 ¿Dónde veo esto?
+1. Ve a la pestaña **Actions** en tu repositorio de GitHub.
+2. Verás un workflow llamado "CI (Develop)" en ejecución (amarillo) o finalizado (verde ✅ / rojo ❌).
+3. Si entras, verás el detalle paso a paso (Instalar, Test C++, Test Python).
+
 ### B. Rama `main` (Despliegue Continuo / Entrega)
 **Objetivo**: Generar una versión ejecutable y lista para usar del software.
 **Disparador**: Cada vez que se hace `push` a la rama `main` (generalmente tras un Merge desde `develop`).
@@ -74,7 +79,12 @@ xhost +local:docker
 ```
 
 ### Ejecución (Comando Rápido)
-Puedes usar este comando (o el script `run_docker.sh` incluido) para descargar y ejecutar la última versión estable:
+Puedes usar este comando (o el script `run_docker.sh` incluido).
+
+> **¿Cómo veo la GUI si está en Docker?**
+> El script usa "X11 Forwarding" (`--env="DISPLAY"` y volumen `.Xauthority`). Esto le dice al contenedor: "No tienes pantalla propia, usa la pantalla de mi ordenador Linux principal para dibujar las ventanas".
+> 
+> **Resultado**: Verás la ventana de Demeter aparecer en tu escritorio como si fuera una aplicación nativa, pero todo su entorno (Python, librerías) está aislado dentro del contenedor.
 
 ```bash
 docker run -it --rm \
