@@ -4,6 +4,7 @@ import argparse
 import logging
 import tkinter as tk
 from tkinter import messagebox
+import time
 
 # Ensure src is in path
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
@@ -119,9 +120,9 @@ def main():
             
             if routes:
                 logger.info(f"Syncing {len(routes)} routes to Gateway...")
-                # Note: We need a delay or wait for transport to be ready
-                # Small delay to ensure boot
-                root.after(2000, lambda: sync_routes(routes, transport, protocol, app)) 
+                # user requested to comment out sync_routes for now
+                # root.after(2000, lambda: sync_routes(routes, transport, protocol, app)) 
+                pass 
             else:
                 logger.info("No routes to sync.")
                 

@@ -178,7 +178,14 @@ void loop() {
                 Serial.println(">> QUEUE CLEARED");
                 break;
             
-            // Manual GPIO Control Shortcuts
+            case 'D': {
+                // Manual Data Report to Host (ID 0)
+                Serial.println(">> TX -> DATA REPORT (Manual Mock)");
+                // Send Mock Temp: 24.5C, Hum: 55.0%
+                engine.sendDataReport(0, 24.5f, 55.0f);
+                break;
+            }
+
             case '1':
             case '2':
             case '3':
