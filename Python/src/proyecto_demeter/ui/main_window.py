@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import logging
+import time
 from ..protocols.protocol_v2 import DemeterProtocolV2
 from ..config.schemas import CmdId, SetGpio, Ping
 from ..transport.interface import TransportStrategy
@@ -58,8 +59,14 @@ class MainWindow:
         main_frame = ttk.Frame(self.tab_control, padding="20")
         main_frame.pack(fill=tk.BOTH, expand=True)
         
+        
         ttk.Label(main_frame, text="Gateway & Node Control", font=("Helvetica", 14, "bold")).pack(pady=(0, 20))
         
+        # --- Toolbar ---
+        toolbar = ttk.Frame(main_frame)
+        toolbar.pack(fill="x", pady=5)
+        ttk.Button(toolbar, text="🔄 Sincronizar Rutas (UART)", command=self.send_sync_routes).pack(side=tk.RIGHT)
+
         # --- GPIO Control (Gateway) ---
         gpio_frame = ttk.Labelframe(main_frame, text=" Gateway GPIOs (Local) ", padding=10)
         gpio_frame.pack(pady=5, fill="x")
@@ -114,15 +121,41 @@ class MainWindow:
             self.log_error(f"TX Failed: GPIO {pin}")
 
     def send_ping(self, target_id):
-        # Create PING command
-        # Note: Protocol V2 Schema for Ping might need arguments?
-        # Checking schema: Ping(target_id=...)
+        # ... existing ping logic ...
         cmd = Ping(target_id=target_id)
         frame = self.protocol.serialize(cmd)
         if self.transport.send(frame):
             self.log(f"TX -> PING Node {target_id}")
         else:
             self.log_error(f"TX Failed: PING {target_id}")
+
+    def send_sync_routes(self):
+        """Manually User-Triggered Route Sync"""
+        from ..config.schemas import RouteAdd, CmdId
+        routes = self.device_manager.get_all_routes()
+        if not routes:
+            self.log("No routes to sync.")
+            return
+
+        success_count = 0
+        for node_id, mac_bytes in routes:
+            # Create RouteAdd command
+            # Protocol V2: CMD_ID=0x0A, Payload=[ID, MAC...]
+            # We construct frame manually using ProtocolEngine helper if exposed, 
+            # Or assume we have a RouteAdd schema class (we do: RouteAdd)
+            
+            # Using RouteAdd schema
+            cmd = RouteAdd(node_id=node_id, mac_address=mac_bytes.hex(':'))
+            
+            # Serialize
+            frame = self.protocol.serialize(cmd) # This uses generic serialize
+            
+            # Send
+            if self.transport.send(frame):
+                success_count += 1
+                time.sleep(0.1) # Small delay
+        
+        self.log(f"Synced {success_count}/{len(routes)} routes to Gateway.")
 
     def log(self, msg):
         self.log_text.config(state='normal')

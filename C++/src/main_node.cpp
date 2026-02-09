@@ -47,12 +47,27 @@ void setup() {
 
     // Configure Protocol Engine
     engine.setNodeId(NODE_ID);
+    
+    // Feedback: Blink RGB Green on PING
+    engine.onPingRecv([](uint8_t srcId) {
+        #ifdef RGB_BUILTIN
+        // Green Blink
+        neopixelWrite(RGB_BUILTIN, 0, 50, 0); 
+        delay(100);
+        neopixelWrite(RGB_BUILTIN, 0, 0, 0);
+        #endif
+        Serial.printf(">> PING from %d\n", srcId);
+    });
 
     // Initialize System Logic
     systemCtx.setup();
     
     // Initialize Communication
     espNowStrategy.begin();
+    
+    // HARDCODED GATEWAY MAC (TODO: Update after getting Gateway MAC)
+    // std::array<uint8_t, 6> gatewayMac = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    // espNowStrategy.registerRoute(1, gatewayMac); // ID 1 = Gateway
     
     // TURN OFF RGB LED (ESP32-S3 DevKitC-1)
     #ifdef RGB_BUILTIN

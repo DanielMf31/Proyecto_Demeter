@@ -27,6 +27,7 @@ public:
     using PwmCallback = std::function<void(const Demeter::SetPwmCmd&)>;
     using SequenceCallback = std::function<void(const Demeter::ExecSequenceCmd&)>;
     using AckCallback = std::function<void(uint8_t srcId)>;
+    using PingCallback = std::function<void(uint8_t srcId)>;
 
 private:
     IComms* _strategy;
@@ -34,6 +35,7 @@ private:
     PwmCallback _onPwmCommand;
     SequenceCallback _onSequenceCommand;
     AckCallback _onAckRecv;
+    PingCallback _onPingRecv;
     
     uint8_t _myId = 1; // Default to Gateway ID
 
@@ -99,6 +101,12 @@ public:
      * @param cb Function to call when an ACK is received.
      */
     void onAckRecv(AckCallback cb);
+
+    /**
+     * @brief Register callback for PING reception.
+     * @param cb Function to call when a PING is received.
+     */
+    void onPingRecv(PingCallback cb);
 
 private:
     /**

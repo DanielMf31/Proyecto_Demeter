@@ -25,6 +25,10 @@ void ProtocolEngine::onAckRecv(AckCallback cb) {
     _onAckRecv = cb;
 }
 
+void ProtocolEngine::onPingRecv(PingCallback cb) {
+    _onPingRecv = cb;
+}
+
 /**
  * @brief Calculates a simple Modular Sum CRC (Mod 256).
  * @param data Pointer to data buffer.
@@ -165,6 +169,9 @@ void ProtocolEngine::parseFrame(const std::vector<uint8_t>& frame) {
         }
     }
     else if (hdr->cmd_id == (uint8_t)Demeter::CommandType::PING) {
+        if (_onPingRecv) {
+            _onPingRecv(hdr->src_id);
+        }
         // Respond with ACK
         sendAck(hdr->src_id);
     }

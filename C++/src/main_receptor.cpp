@@ -8,6 +8,7 @@
  */
 
 #include <Arduino.h>
+#include <WiFi.h>
 #include "communications/UartStrategy.h"
 #include "communications/EspNowStrategy.h"
 #include "communications/GatewayStrategy.h"
@@ -110,6 +111,10 @@ void loop() {
             case 'R':
                 systemCtx.setExecutionMode(ExecutionMode::INTERACTIVE_QUEUE);
                 Serial.println(">> MODE: QUEUE (Buffering...)");
+                break;
+            case 'M':
+                Serial.print(">> Gateway MAC: ");
+                Serial.println(WiFi.macAddress());
                 break;
             case 'E':
                 Serial.println(">> EXECUTING QUEUE...");
