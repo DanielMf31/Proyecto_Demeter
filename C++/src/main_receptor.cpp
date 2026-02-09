@@ -139,6 +139,12 @@ void loop() {
         static bool pinStates[8] = {false}; 
 
         switch (c) {
+            case 'H': {
+                // Manual PING to Host (ID 0)
+                Serial.println(">> TX -> PING Host (ID 0)");
+                engine.sendPing(0);
+                break;
+            }
             case 'P': {
                 // Manual PING to Node 2
                 Serial.println(">> TX -> PING Node 2 (Manual)");
