@@ -180,7 +180,7 @@ class DemeterProtocolV2:
                 t_int, h_int = struct.unpack('<hh', payload)
                 temp = t_int / 100.0
                 hum = h_int / 100.0
-                return DataReport(node_id=src, temperature=temp, humidity=hum)
+                return DataReport(target_id=dst, node_id=src, temperature=temp, humidity=hum)
 
             # Default/Unknown: Handle generic? 
             # For now return None or implement GenericCommand

@@ -24,4 +24,5 @@ RPi.GPIO
 # --- Async Core (Demeter V2) ---
 textual
 pyserial-asyncio
-
+pydantic
+customtkinter
