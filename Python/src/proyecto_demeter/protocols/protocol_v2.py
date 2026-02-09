@@ -2,7 +2,7 @@ import struct
 import logging
 from typing import Optional, Union, Any
 
-from ..config.schemas import (
+from ..shared.schemas import (
     DemeterCommand, 
     SetGpio, 
     SetPwm,
@@ -80,6 +80,7 @@ class DemeterProtocolV2:
                                          step.value, 
                                          step.delay_ms)
                 payload += step_bytes
+
                 
         elif isinstance(cmd, RouteAdd):
             # [TARGET_ID] [MAC(6)]
@@ -112,14 +113,17 @@ class DemeterProtocolV2:
         try:
             sync, length, flags, src, dst, cmd_id = struct.unpack(HEADER_FMT, frame_bytes[:HEADER_SIZE])
         except struct.error:
+            self.logger.warning("Header unpack failed")
             return None
             
         if sync != SYNC_BYTE:
+            self.logger.warning(f"Invalid Sync Byte: {sync}")
             return None
             
         expected_total_len = HEADER_SIZE + length + 1
         if len(frame_bytes) < expected_total_len:
             # Incomplete frame
+            self.logger.warning(f"Incomplete Frame: {len(frame_bytes)} < {expected_total_len}")
             return None
             
         payload = frame_bytes[HEADER_SIZE : HEADER_SIZE+length]

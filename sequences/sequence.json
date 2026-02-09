@@ -1,0 +1,26 @@
+[
+    {
+        "pin": 4,
+        "value": 1,
+        "delay_ms": 1000,
+        "target_id": 1
+    },
+    {
+        "pin": 5,
+        "value": 1,
+        "delay_ms": 1000,
+        "target_id": 1
+    },
+    {
+        "pin": 6,
+        "value": 1,
+        "delay_ms": 1000,
+        "target_id": 1
+    },
+    {
+        "pin": 7,
+        "value": 1,
+        "delay_ms": 1000,
+        "target_id": 1
+    }
+]

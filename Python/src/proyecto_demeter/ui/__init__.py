@@ -1,1 +1,1 @@
-from .main_window import MainWindow
+from .gui_main_ctk import DemeterApp
