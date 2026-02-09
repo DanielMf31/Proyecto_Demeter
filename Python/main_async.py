@@ -4,11 +4,21 @@ import os
 import signal
 import logging
 import time
+import argparse
 
 # Deferred logging setup until main to establish log file
 logger = logging.getLogger("DemeterLauncher")
 
 def main():
+    # Parse CLI Arguments
+    parser = argparse.ArgumentParser(description="Demeter V2 Backend Launcher")
+    parser.add_argument("--port", default="/dev/serial0", help="UART Port (default: /dev/serial0)")
+    parser.add_argument("--host", default="0.0.0.0", help="Socket Host (default: 0.0.0.0)")
+    parser.add_argument("--socket-port", default=8888, type=int, help="Socket Port (default: 8888)")
+    parser.add_argument("--mock", action="store_true", help="Run in Mock Mode (no hardware)")
+    
+    args = parser.parse_args()
+
     # Determine paths
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     SERVICE_SCRIPT = os.path.join(BASE_DIR, "src", "proyecto_demeter", "core", "async_service.py")
@@ -30,6 +40,7 @@ def main():
 
     logger.info("--- [START] Demeter V2 Backend Launcher ---")
     logger.info(f"Logging to: {log_file}")
+    logger.info(f"Configuration: PORT={args.port}, HOST={args.host}:{args.socket_port}, MOCK={args.mock}")
 
     # Verify Environment
     # Try to find venv python or use system one if suitable
@@ -87,15 +98,19 @@ def main():
 
     try:
         # Pre-flight check: Ensure port 8888 is free
-        check_and_kill_port(8888)
+        check_and_kill_port(args.socket_port)
 
         # Start Backend Service
         logger.info(f"[EXEC] Executing: {VENV_PYTHON} {SERVICE_SCRIPT}")
         
-        # Pass environment variables if needed
+        # Pass environment variables including CLI overrides
         env = os.environ.copy()
         env["PYTHONUNBUFFERED"] = "1" # Ensure logs flow immediately
         env["DEMETER_LOG_FILE"] = log_file # Pass log file path to service
+        env["DEMETER_PORT"] = args.port
+        env["DEMETER_HOST"] = args.host
+        env["DEMETER_SOCKET_PORT"] = str(args.socket_port)
+        env["DEMETER_MOCK"] = str(args.mock)
 
         service_process = subprocess.Popen(
             [VENV_PYTHON, SERVICE_SCRIPT],

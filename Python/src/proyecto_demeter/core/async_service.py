@@ -22,10 +22,10 @@ except ImportError:
 from pydantic import ValidationError
 
 # Configuration
-UART_PORT = os.getenv('DEMETER_PORT', '/dev/ttyUSB0')
+UART_PORT = os.getenv('DEMETER_PORT', '/dev/serial0')
 UART_BAUD = 115200
-SOCKET_HOST = '127.0.0.1'
-SOCKET_PORT = 8888
+SOCKET_HOST = os.getenv('DEMETER_HOST', '0.0.0.0') # Listen on all interfaces by default
+SOCKET_PORT = int(os.getenv('DEMETER_SOCKET_PORT', 8888))
 MOCK_MODE = os.getenv('DEMETER_MOCK', 'False').lower() == 'true'
 
 class DemeterService:
