@@ -52,16 +52,21 @@ void EspNowStrategy::registerRoute(uint8_t id, const std::array<uint8_t, 6>& mac
 }
 
 bool EspNowStrategy::addPeer(const uint8_t* mac) {
-    esp_now_peer_info_t peerInfo;
+    esp_now_peer_info_t peerInfo = {}; // Zero-initialize
     memcpy(peerInfo.peer_addr, mac, 6);
     peerInfo.channel = 0;  
     peerInfo.encrypt = false;
     
     if (esp_now_add_peer(&peerInfo) != ESP_OK){
-        // Only print if not already exists (ESP_ERR_ESPNOW_EXIST)
-        // ensure we check return code or just ignore if exists
+        if (esp_now_is_peer_exist(mac)) {
+            Serial.println("DEBUG: Peer already exists.");
+            return true;
+        }
+        Serial.println("ERROR: Failed to add peer!");
         return false;
     }
+    Serial.printf("DEBUG: Peer added: %02X:%02X:%02X:%02X:%02X:%02X\n", 
+                  mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     return true;
 }
 
@@ -82,7 +87,9 @@ void EspNowStrategy::send(const uint8_t* data, size_t length) {
         esp_err_t result = esp_now_send(targetMac, data, length);
         
         if (result != ESP_OK) {
-            // Serial.println("Error sending data");
+            Serial.printf("ERROR: ESP-Now Send Failed: %s\n", esp_err_to_name(result));
+        } else {
+            Serial.printf("DEBUG: ESP-Now Send OK to ID %d\n", dstId);
         }
     } else {
         // Unknown Route
