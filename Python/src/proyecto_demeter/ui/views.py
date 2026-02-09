@@ -51,9 +51,16 @@ class ControlPanelFrame(ctk.CTkScrollableFrame):
         self.btn_ping = ctk.CTkButton(self, text="PING Gateway", command=self.on_ping)
         self.btn_ping.grid(row=6, column=0, padx=5, pady=5)
 
+        self.btn_get_data = ctk.CTkButton(self, text="GET REPORT (Node 2)", fg_color="purple", command=self.on_get_data)
+        self.btn_get_data.grid(row=6, column=1, padx=5, pady=5)
+
     def on_ping(self):
         if hasattr(self.master.master.master, 'trigger_ping'):
              self.master.master.master.trigger_ping(1)
+
+    def on_get_data(self):
+        if hasattr(self.master.master.master, 'trigger_get_sensors'):
+             self.master.master.master.trigger_get_sensors(2) # Target Node 2
 
     def create_pump_card(self, index: int, pin: int, row: int):
         frame = ctk.CTkFrame(self)

@@ -34,6 +34,16 @@ void ProtocolEngine::onDataReportRecv(DataReportCallback cb) {
     _onDataReportRecv = cb;
 }
 
+void ProtocolEngine::onGetSensorsRecv(GetSensorsCallback cb) {
+    _onGetSensorsRecv = cb;
+}
+
+// ... (calculateCRC placeholder, careful with replace_file_content matching) ...
+// Actually, I can't match across `calculateCRC`. I'll do two replaces. 
+// Wait, I can match `void ProtocolEngine::onDataReportRecv(DataReportCallback cb) {\n    _onDataReportRecv = cb;\n}` exactly.
+// Then I'll check parsing.
+
+
 /**
  * @brief Calculates a simple Modular Sum CRC (Mod 256).
  * @param data Pointer to data buffer.
@@ -201,6 +211,11 @@ void ProtocolEngine::parseFrame(const std::vector<uint8_t>& frame) {
         // Also send ACK? Usually telemetry is fire-and-forget or ACKed.
         // Let's ACK for reliability if needed, but might congest.
         // User didn't specify. Let's NOT Ack for now to save bandwidth.
+    }
+    else if (hdr->cmd_id == 0x20) { // GET_SENSORS
+        if (_onGetSensorsRecv) {
+            _onGetSensorsRecv(hdr->src_id);
+        }
     }
 }
 

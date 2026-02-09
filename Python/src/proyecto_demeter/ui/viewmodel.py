@@ -3,7 +3,7 @@ import json
 import logging
 import os
 from typing import Callable, Optional, List, Dict
-from ..shared.schemas import GpioCommand, ActionResponse, PingCommand, SequenceCommand, SequenceStep
+from ..shared.schemas import GpioCommand, ActionResponse, PingCommand, SequenceCommand, SequenceStep, GetSensorsCommand
 
 class DemeterViewModel:
     """
@@ -20,8 +20,8 @@ class DemeterViewModel:
         self._log_cb = log_callback
         self._status_cb = status_callback
         
-        self.host = '127.0.0.1'
-        self.port = 8888
+        self.host = os.getenv('DEMETER_HOST', '127.0.0.1')
+        self.port = int(os.getenv('DEMETER_SOCKET_PORT', 8888))
         
         self._seq_dir = os.path.join(os.getcwd(), "sequences")
         os.makedirs(self._seq_dir, exist_ok=True)
@@ -78,6 +78,16 @@ class DemeterViewModel:
             cmd = PingCommand(target_id=target_id)
             await self._send_json(cmd)
             self.log(f"TX: PING Node {target_id}")
+        except Exception as e:
+            self.log(f"TX Error: {e}")
+
+    async def send_get_sensors(self, target_id: int):
+        """Requests sensor data from a node."""
+        if not self.connected: return
+        try:
+            cmd = GetSensorsCommand(target_id=target_id)
+            await self._send_json(cmd)
+            self.log(f"TX: GET_SENSORS Node {target_id}")
         except Exception as e:
             self.log(f"TX Error: {e}")
 

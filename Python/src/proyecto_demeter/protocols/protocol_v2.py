@@ -13,7 +13,8 @@ from ..shared.schemas import (
     Ack,
     Nack,
     CmdId,
-    DataReport
+    DataReport,
+    GetSensors
 )
 
 # Constants
@@ -89,6 +90,9 @@ class DemeterProtocolV2:
         elif isinstance(cmd, Ping):
             payload = b''
             
+        elif isinstance(cmd, GetSensors):
+            payload = b''
+
         elif isinstance(cmd, Ack):
             # [ORIGINAL_CMD_ID]
             payload = struct.pack('<B', cmd.original_cmd_id)
@@ -196,6 +200,9 @@ class DemeterProtocolV2:
     # ==========================================
     def create_ping(self, target_id: int) -> bytes:
         return self.serialize(Ping(target_id=target_id))
+
+    def create_get_sensors(self, target_id: int) -> bytes:
+        return self.serialize(GetSensors(target_id=target_id))
 
     def create_set_gpio(self, target_id: int, pin: int, value: int) -> bytes:
         return self.serialize(SetGpio(target_id=target_id, pin=pin, value=value))

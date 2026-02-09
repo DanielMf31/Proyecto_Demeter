@@ -36,6 +36,13 @@ class PingCommand(BaseModel):
     type: Literal["PING_CMD"] = "PING_CMD"
     target_id: int = Field(..., ge=0, le=254)
 
+class GetSensorsCommand(BaseModel):
+    """
+    Command sent by GUI to request sensor data from a node.
+    """
+    type: Literal["GET_SENSORS_CMD"] = "GET_SENSORS_CMD"
+    target_id: int = Field(..., ge=0, le=254)
+
 class SequenceCommand(BaseModel):
     """
     Command sent by GUI to execute a sequence.
@@ -97,6 +104,10 @@ class SetPwm(DemeterCommand):
     pin: int = Field(ge=0, le=40)
     value: int = Field(ge=0, le=65535, description="PWM Duty Cycle 16-bit")
     def get_cmd_id(self) -> int: return CmdId.SET_PWM
+
+class GetSensors(DemeterCommand):
+    """Request data from sensors."""
+    def get_cmd_id(self) -> int: return CmdId.GET_SENSORS
 
 class RouteAdd(DemeterCommand):
     """Register a route (Mac Address) in the Gateway."""

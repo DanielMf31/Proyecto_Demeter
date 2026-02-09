@@ -59,6 +59,25 @@ void setup() {
         Serial.printf(">> PING from %d\n", srcId);
     });
 
+    // Handle GET_SENSORS Request (On Demand)
+    engine.onGetSensorsRecv([](uint8_t srcId) {
+        Serial.printf(">> GET_SENSORS from %d. Sending Data Report...\n", srcId);
+        
+        // Mock Data Generation
+        float mockTemp = 20.0f + (rand() % 100) / 10.0f;
+        float mockHum = 40.0f + (rand() % 200) / 10.0f;
+
+        // Send Response to Requestor
+        engine.sendDataReport(srcId, mockTemp, mockHum);
+        
+        #ifdef RGB_BUILTIN
+        // Blue Blink for Data
+        neopixelWrite(RGB_BUILTIN, 0, 0, 50); 
+        delay(100);
+        neopixelWrite(RGB_BUILTIN, 0, 0, 0);
+        #endif
+    });
+
     // Initialize System Logic
     systemCtx.setup();
     
@@ -95,18 +114,5 @@ void loop() {
         }
     }
 
-    // Periodic Data Report (Every 5 seconds)
-    static unsigned long lastReport = 0;
-    if (millis() - lastReport > 5000) {
-        lastReport = millis();
-        
-        // Dummy Data Simulation
-        // Temp varies between 20.0 and 30.0
-        // Hum varies between 40.0 and 60.0
-        float mockTemp = 20.0f + (rand() % 100) / 10.0f;
-        float mockHum = 40.0f + (rand() % 200) / 10.0f;
-
-        Serial.printf(">> TX -> DATA REPORT: Temp=%.2f, Hum=%.2f\n", mockTemp, mockHum);
-        engine.sendDataReport(1, mockTemp, mockHum); // Send to Gateway (ID 1)
-    }
+    // Periodic Data Sending Disabled (On-Demand Mode)
 }

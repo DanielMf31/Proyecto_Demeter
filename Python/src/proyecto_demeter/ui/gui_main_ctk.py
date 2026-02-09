@@ -92,6 +92,10 @@ class DemeterApp(ctk.CTk):
         if self.loop.is_running():
             asyncio.run_coroutine_threadsafe(self.vm.send_ping(target_id), self.loop)
 
+    def trigger_get_sensors(self, target_id):
+        if self.loop.is_running():
+            asyncio.run_coroutine_threadsafe(self.vm.send_get_sensors(target_id), self.loop)
+
     def trigger_sequence_payload(self, steps_data: list):
         """
         Takes list of dicts from Planner UI, converts to Schema, and sends.

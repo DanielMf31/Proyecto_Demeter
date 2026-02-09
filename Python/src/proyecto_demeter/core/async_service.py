@@ -9,7 +9,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 
 try:
     from proyecto_demeter.transport.async_uart import AsyncUartTransport
-    from proyecto_demeter.shared.schemas import GpioCommand, ActionResponse, PingCommand, SequenceCommand, ExecSequence
+    from proyecto_demeter.shared.schemas import GpioCommand, ActionResponse, PingCommand, SequenceCommand, ExecSequence, GetSensorsCommand
     from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
 except ImportError:
     # Fallback for direct execution
@@ -226,6 +226,15 @@ class DemeterService:
                         else:
                             await self._send_protocol_cmd(self.protocol.create_ping(cmd.target_id))
                             response_obj = ActionResponse(status="OK", message="Ping Sent")
+
+                    elif cmd_type == "GET_SENSORS_CMD":
+                        cmd = GetSensorsCommand.model_validate(msg_json)
+                        self.logger.info(f"[CMD] GET_SENSORS: Target={cmd.target_id}")
+                        if MOCK_MODE or not self.transport:
+                             response_obj = ActionResponse(status="OK", message="MOCK: Data Requested")
+                        else:
+                             await self._send_protocol_cmd(self.protocol.create_get_sensors(cmd.target_id))
+                             response_obj = ActionResponse(status="OK", message="Data Request Sent")
 
                     elif cmd_type == "SEQ_CMD":
                         cmd = SequenceCommand.model_validate(msg_json)

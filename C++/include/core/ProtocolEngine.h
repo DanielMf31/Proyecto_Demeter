@@ -29,6 +29,7 @@ public:
     using AckCallback = std::function<void(uint8_t srcId)>;
     using PingCallback = std::function<void(uint8_t srcId)>;
     using DataReportCallback = std::function<void(uint8_t srcId, float temp, float hum)>;
+    using GetSensorsCallback = std::function<void(uint8_t srcId)>;
 
 private:
     IComms* _strategy;
@@ -38,6 +39,7 @@ private:
     AckCallback _onAckRecv;
     PingCallback _onPingRecv;
     DataReportCallback _onDataReportRecv;
+    GetSensorsCallback _onGetSensorsRecv;
     
     uint8_t _myId = 1; // Default to Gateway ID
 
@@ -133,6 +135,12 @@ public:
      * @param cb Function to call when a DataReport is received.
      */
     void onDataReportRecv(DataReportCallback cb);
+
+    /**
+     * @brief Register callback for GET_SENSORS reception.
+     * @param cb Function to call when a GET_SENSORS command is received.
+     */
+    void onGetSensorsRecv(GetSensorsCallback cb);
 
 private:
     /**
