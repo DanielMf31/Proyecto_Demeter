@@ -88,7 +88,23 @@ def main():
         
         # Wire up RX Callback
         def on_rx_data(data):
-            root.after(0, lambda: app.log(f"RX <- {data.hex(' ').upper()}"))
+            try:
+                # 1. Parse Frame
+                cmd = protocol.parse_frame(data)
+                
+                if cmd:
+                    from proyecto_demeter.config.schemas import DataReport
+                    if isinstance(cmd, DataReport):
+                        # Dispatch to App
+                        root.after(0, lambda: app.handle_data_report(cmd))
+                    else:
+                        # Log generic commands
+                        root.after(0, lambda: app.log(f"RX <- {cmd}"))
+                else:
+                    # Log raw hex if parsing failed (or incomplete frame)
+                    root.after(0, lambda: app.log(f"RX (Raw) <- {data.hex(' ').upper()}"))
+            except Exception as e:
+                 root.after(0, lambda: app.log_error(f"RX Parse Error: {e}"))
         
         transport.set_callback(on_rx_data)
 
@@ -103,19 +119,24 @@ def main():
             
             if routes:
                 logger.info(f"Syncing {len(routes)} routes to Gateway...")
-                for node_id, mac_bytes in routes:
-                    # Target ID 1 (Gateway)
-                    cmd = RouteAdd(target_id=1, node_id_to_register=node_id, mac_address_bytes=mac_bytes)
-                    frame = protocol.serialize(cmd)
-                    if transport:
-                        transport.send(frame)
-                        logger.info(f" -> Sent RouteAdd for Node {node_id}")
+                # Note: We need a delay or wait for transport to be ready
+                # Small delay to ensure boot
+                root.after(2000, lambda: sync_routes(routes, transport, protocol, app)) 
             else:
                 logger.info("No routes to sync.")
                 
         except Exception as e:
             logger.error(f"Failed to sync routes: {e}")
-            messagebox.showwarning("Config Error", f"Error syncing routes:\n{e}")
+
+    def sync_routes(routes, transport, protocol, app):
+        from proyecto_demeter.config.schemas import RouteAdd
+        for node_id, mac_bytes in routes:
+             cmd = RouteAdd(target_id=1, node_id_to_register=node_id, mac_address=mac_bytes.hex(':'))
+             frame = protocol.serialize(cmd)
+             if transport:
+                 transport.send(frame)
+                 app.log(f"Synced Route Node {node_id}")
+                 time.sleep(0.1)
 
     from proyecto_demeter.ui.login_window import LoginWindow
     login = LoginWindow(root, on_login_success)

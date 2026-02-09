@@ -194,6 +194,24 @@ void ProtocolEngine::sendPing(uint8_t targetId) {
     sendFrame((uint8_t)Demeter::CommandType::PING, targetId, empty);
 }
 
+void ProtocolEngine::sendDataReport(uint8_t targetId, float temp, float hum) {
+    std::vector<uint8_t> payload;
+    payload.reserve(4);
+
+    // Convert float to Int16 scaled x100
+    // Example: 25.43 -> 2543
+    int16_t t_int = (int16_t)(temp * 100.0f);
+    int16_t h_int = (int16_t)(hum * 100.0f);
+
+    // Serialize Little Endian
+    payload.push_back((uint8_t)(t_int & 0xFF));
+    payload.push_back((uint8_t)((t_int >> 8) & 0xFF));
+    payload.push_back((uint8_t)(h_int & 0xFF));
+    payload.push_back((uint8_t)((h_int >> 8) & 0xFF));
+
+    sendFrame((uint8_t)Demeter::CommandType::DATA_REPORT, targetId, payload);
+}
+
 void ProtocolEngine::sendNack(uint8_t targetId) {
     std::vector<uint8_t> empty;
     sendFrame((uint8_t)Demeter::CommandType::NACK, targetId, empty);

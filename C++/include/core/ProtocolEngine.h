@@ -100,7 +100,19 @@ public:
      * @brief Send a PING command to a target.
      * @param targetId Destination Device ID.
      */
+    /**
+     * @brief Send a PING command to a target.
+     * @param targetId Destination Device ID.
+     */
     void sendPing(uint8_t targetId);
+
+    /**
+     * @brief Send Sensor Data Report (Temp/Hum)
+     * @param targetId Destination Device ID.
+     * @param temp Temperature in Celsius.
+     * @param hum Humidity in %.
+     */
+    void sendDataReport(uint8_t targetId, float temp, float hum);
 
     /**
      * @brief Register callback for ACK reception.

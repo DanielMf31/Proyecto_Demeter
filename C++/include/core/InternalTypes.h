@@ -19,6 +19,7 @@ namespace Demeter {
         ACK             = 0x02, ///< Acknowledge successful command receipt.
         NACK            = 0x03, ///< Negative Acknowledge (Error).
         ROUTE_ADD       = 0x0A, ///< Register a new route in the routing table.
+        DATA_REPORT     = 0x0B, ///< Report Sensor Data (Temp/Hum).
         SET_GPIO        = 0x10, ///< Set Digital Output state.
         SET_PWM         = 0x11, ///< Set PWM Duty Cycle.
         EXEC_SEQUENCE   = 0x30, ///< Execute a complex sequence of actions.

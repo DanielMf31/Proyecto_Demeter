@@ -12,7 +12,8 @@ from ..config.schemas import (
     SequenceStep,
     Ack,
     Nack,
-    CmdId
+    CmdId,
+    DataReport
 )
 
 # Constants
@@ -168,6 +169,14 @@ class DemeterProtocolV2:
                     offset += SEQUENCE_STEP_SIZE
                 
                 return ExecSequence(target_id=dst, steps=steps)
+
+            elif cmd_id == CmdId.DATA_REPORT:
+                if len(payload) < 4: return None
+                # Payload: [T_LSB] [T_MSB] [H_LSB] [H_MSB] (Int16 x100)
+                t_int, h_int = struct.unpack('<hh', payload)
+                temp = t_int / 100.0
+                hum = h_int / 100.0
+                return DataReport(node_id=src, temperature=temp, humidity=hum)
 
             # Default/Unknown: Handle generic? 
             # For now return None or implement GenericCommand

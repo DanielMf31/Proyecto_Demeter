@@ -1,5 +1,6 @@
 from enum import IntEnum
-from typing import List, Optional
+from typing import List, Optional, Literal
+from dataclasses import dataclass
 from pydantic import BaseModel, Field
 
 # ==========================================
@@ -10,6 +11,7 @@ class CmdId(IntEnum):
     ACK             = 0x02
     NACK            = 0x03
     ROUTE_ADD       = 0x0A
+    DATA_REPORT     = 0x0B
     SET_GPIO        = 0x10
     SET_PWM         = 0x11
     GET_SENSORS     = 0x20
@@ -74,6 +76,20 @@ class SequenceStep(BaseModel):
     pin: int = Field(ge=0, le=40)
     value: int = Field(ge=0, le=1)
     delay_ms: int = Field(ge=0, le=4294967295, description="Delay after execution (ms)")
+
+@dataclass
+class SequenceConfig:
+    """Configuration for a sequence of steps"""
+    steps: List[SequenceStep]
+    name: str = "default_sequence"
+
+@dataclass
+class DataReport:
+    """Sensor Data Report from Node"""
+    node_id: int
+    temperature: float
+    humidity: float
+    timestamp: float = 0.0 # Epoch time
 
 class ExecSequence(DemeterCommand):
     steps: List[SequenceStep] = Field(min_length=1, max_length=30)

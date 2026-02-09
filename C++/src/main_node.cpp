@@ -94,4 +94,19 @@ void loop() {
             engine.sendPing(1); // Gateway ID = 1
         }
     }
+
+    // Periodic Data Report (Every 5 seconds)
+    static unsigned long lastReport = 0;
+    if (millis() - lastReport > 5000) {
+        lastReport = millis();
+        
+        // Dummy Data Simulation
+        // Temp varies between 20.0 and 30.0
+        // Hum varies between 40.0 and 60.0
+        float mockTemp = 20.0f + (rand() % 100) / 10.0f;
+        float mockHum = 40.0f + (rand() % 200) / 10.0f;
+
+        Serial.printf(">> TX -> DATA REPORT: Temp=%.2f, Hum=%.2f\n", mockTemp, mockHum);
+        engine.sendDataReport(1, mockTemp, mockHum); // Send to Gateway (ID 1)
+    }
 }

@@ -2,7 +2,8 @@ import sys
 import os
 import pytest
 from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
-from proyecto_demeter.config.schemas import CmdId, SetGpio, Ping
+from proyecto_demeter.config.schemas import CmdId, SetGpio, Ping, DataReport
+import struct
 
 class TestProtocolV2:
     def setup_method(self):
@@ -32,3 +33,22 @@ class TestProtocolV2:
         frame = self.protocol.serialize(cmd)
         parsed = self.protocol.parse_frame(frame)
         assert isinstance(parsed, Ping)
+
+    def test_data_report(self):
+        # Create DataReport (Note: Serialization for DataReport is not explicitly implemented in protocol_v2.serialize 
+        # because it comes FROM the device, but we can test parsing manually constructed frame)
+        
+        # Manually construct a valid DataReport frame
+        # Payload: Temp=25.43 (2543), Hum=60.12 (6012)
+        # [239, 9] [12, 23] (Little Endian)
+        t_int = int(25.43 * 100)
+        h_int = int(60.12 * 100)
+        payload = struct.pack('<hh', t_int, h_int)
+        
+        # Dst=0 (Host), Cmd=0x0B (DATA_REPORT)
+        frame = self.protocol._pack_frame_raw(dst_id=0, cmd_id=CmdId.DATA_REPORT, payload=payload)
+        
+        parsed = self.protocol.parse_frame(frame)
+        assert isinstance(parsed, DataReport)
+        assert abs(parsed.temperature - 25.43) < 0.01
+        assert abs(parsed.humidity - 60.12) < 0.01
