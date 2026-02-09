@@ -2,7 +2,7 @@ import struct
 import logging
 from typing import Optional, Union, Any
 
-from .schemas_protocol import (
+from ..config.schemas import (
     DemeterCommand, 
     SetGpio, 
     SetPwm,

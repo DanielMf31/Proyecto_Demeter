@@ -1,8 +1,9 @@
 import pytest
 import os
 import json
-from proyecto_demeter.protocols.schemas_sequencer import SequenceStep, SequenceFile, SequenceManager
-from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2, ExecSequence, SetGpio, Ping, Ack, Nack, SequenceStep as ProtoStep
+from proyecto_demeter.config.schemas import SequenceStep, SequenceFile, ExecSequence, SetGpio, Ping, Ack, Nack
+from proyecto_demeter.core.sequence_manager import SequenceManager
+from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
 
 # --- Test Persistence (JSON) ---
 
@@ -76,8 +77,8 @@ def test_nack_serialization(protocol):
 
 def test_exec_sequence_full_serialization(protocol):
     steps = [
-        ProtoStep(target_id=1, cmd_id=0x10, pin=4, value=1, delay_ms=1000),
-        ProtoStep(target_id=1, cmd_id=0x10, pin=5, value=0, delay_ms=500)
+        SequenceStep(target_id=1, cmd_id=0x10, pin=4, value=1, delay_ms=1000),
+        SequenceStep(target_id=1, cmd_id=0x10, pin=5, value=0, delay_ms=500)
     ]
     cmd = ExecSequence(target_id=1, steps=steps)
     frame = protocol.serialize(cmd)

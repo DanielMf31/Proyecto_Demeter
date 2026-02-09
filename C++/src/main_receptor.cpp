@@ -9,6 +9,8 @@
 
 #include <Arduino.h>
 #include "communications/UartStrategy.h"
+#include "communications/EspNowStrategy.h"
+#include "communications/GatewayStrategy.h"
 #include "core/ProtocolEngine.h"
 #include "core/GpioController.h"
 #include "core/SystemContext.h"
@@ -22,13 +24,19 @@
 // Global Instances (Dependency Injection)
 // ==========================================
 
-// 1. Communication Layer: UART (Serial2)
-// Uses pins 16 (RX) and 17 (TX) at 115200 baud.
+// 1. Communication Layers
+// 1.1 UART (Host Connection)
 UartStrategy uartStrategy(&Serial2, 115200, RXD2, TXD2);
 
+// 1.2 ESP-Now (Node Network)
+EspNowStrategy espNowStrategy;
+
+// 1.3 Composite Gateway Strategy
+GatewayStrategy gatewayStrategy(&uartStrategy, &espNowStrategy);
+
 // 2. Protocol Layer: Protocol V2 Engine
-// Decoupled from transport via IComms interface.
-ProtocolEngine engine(&uartStrategy);
+// Uses the Composite Strategy
+ProtocolEngine engine(&gatewayStrategy);
 
 // 3. Hardware Layer: GPIO Controller
 // Manages physical pin states.
@@ -45,22 +53,38 @@ SystemContext systemCtx(engine, gpioController);
 void setup() {
     // Debug Serial (USB)
     Serial.begin(115200);
+    
+    // Feedback LED (GPIO 4)
+    pinMode(4, OUTPUT);
+    digitalWrite(4, LOW);
+
     delay(1000);
     while(!Serial) delay(10);
 
-    Serial.println("=== DEMETER RECEPTOR V2 (MVP GPIO) ===");
-    Serial.println(" [1-4] Toggle PIN 4-7");
-    Serial.println(" [I] Mode: IMMEDIATE (Default)");
-    Serial.println(" [R] Mode: QUEUED (Interactive)");
-    Serial.println(" [E] Execute Queue");
-    Serial.println(" [C] Clear Queue");
-    Serial.println("======================================");
+    Serial.println("=== DEMETER GATEWAY V2 (ESP-Now + UART) ===");
+    Serial.println(" [I] Mode: IMMEDIATE");
+    Serial.println(" [R] Mode: QUEUED");
+    Serial.println("==========================================");
 
     // Initialize System Logic
     systemCtx.setup();
     
-    // Initialize Communication (Starts Serial2)
-    uartStrategy.begin();
+    // Feedback Logic: Toggle GPIO 4 (Index 0 for user "1") on ACK
+    // Note: User said "encience gpio 4" when receiving ACK from Ping.
+    // If it's already on, turn off.
+    engine.onAckRecv([](uint8_t srcId) {
+        // Toggle GPIO 4 (Mapped to ID 4 in GpioController, or Index 0?)
+        // GpioController uses 0-3 for pins 4-7.
+        static bool state = false;
+        state = !state;
+        // On ESP32-S3 DevKit, Pin 4 might be used for something else or correct.
+        // Assuming Pin 4 is valid.
+        digitalWrite(4, state ? HIGH : LOW);
+        Serial.printf(">> ACK Received from Node %d. Toggled GPIO 4 to %s\n", srcId, state ? "ON" : "OFF");
+    });
+    
+    // Initialize Composite Communication (Starts UART + ESP-Now)
+    gatewayStrategy.begin();
 }
 
 /**

@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <vector>
+#include <array>
 
 /**
  * @brief Abstract Interface for Communication Layer.
@@ -49,4 +50,14 @@ public:
      * For now, following the design document's std::vector approach.
      */
     virtual std::vector<uint8_t> read() = 0;
+
+    /**
+     * @brief Register a route for a remote node (ESP-Now).
+     * @param id Node ID (Protocol Level).
+     * @param mac MAC Address (6 bytes).
+     * Default implementation does nothing (for UART/LoRa).
+     */
+    virtual void registerRoute(uint8_t id, const std::array<uint8_t, 6>& mac) {
+        (void)id; (void)mac;
+    }
 };

@@ -2,7 +2,7 @@ import sys
 import os
 import pytest
 from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
-from proyecto_demeter.protocols import CmdId, SetGpio, Ping
+from proyecto_demeter.config.schemas import CmdId, SetGpio, Ping
 
 class TestProtocolV2:
     def setup_method(self):

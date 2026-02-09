@@ -11,18 +11,21 @@ def test_users_json_valid_structure():
     with open(CONFIG_PATH, "r") as f:
         data = json.load(f)
     
-    assert isinstance(data, dict), "Root must be a dictionary"
-    assert len(data) > 0, "Must have at least one user"
+    assert "users" in data, "Root must contain 'users' key"
+    assert isinstance(data["users"], list), "'users' must be a list"
+    assert len(data["users"]) > 0, "Must have at least one user"
     
-    for user, pwd in data.items():
-        assert isinstance(user, str)
-        assert isinstance(pwd, str)
-        assert len(user) > 0
-        assert len(pwd) > 0
+    for u in data["users"]:
+        assert "username" in u
+        assert "password" in u
+        assert isinstance(u["username"], str)
+        assert isinstance(u["password"], str)
 
 def test_default_credentials():
     with open(CONFIG_PATH, "r") as f:
         data = json.load(f)
     
-    assert "admin" in data
-    assert data["admin"] == "admin123"
+    # Check for admin user
+    admin_user = next((u for u in data["users"] if u["username"] == "admin"), None)
+    assert admin_user is not None
+    assert admin_user["password"] == "123"

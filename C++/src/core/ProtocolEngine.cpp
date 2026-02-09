@@ -21,6 +21,10 @@ void ProtocolEngine::onExecSequence(SequenceCallback cb) {
     _onSequenceCommand = cb;
 }
 
+void ProtocolEngine::onAckRecv(AckCallback cb) {
+    _onAckRecv = cb;
+}
+
 /**
  * @brief Calculates a simple Modular Sum CRC (Mod 256).
  * @param data Pointer to data buffer.
@@ -74,8 +78,35 @@ void ProtocolEngine::parseFrame(const std::vector<uint8_t>& frame) {
         return;
     }
 
-    // 5. Dispatch based on CMD
-    if (hdr->cmd_id == (uint8_t)Demeter::CommandType::SET_GPIO) {
+    // 5. Forwarding Logic
+    // If destination is not ME, try to forward via Strategy.
+    if (hdr->dst_id != _myId && hdr->dst_id != 0xFF) { // Assuming 0xFF is Broadcast? Or check if not Broadcast.
+        // Note: We might want to execute Broadcasts AND forward them? 
+        // For now, simple unicast forwarding.
+        if (_strategy) {
+            _strategy->send(frame.data(), frame.size());
+        }
+        return; // Don't execute locally
+    }
+
+    // 6. Dispatch based on CMD
+    if (hdr->cmd_id == 0x0A) { // ROUTE_ADD
+        if (hdr->length >= 7) { // 1 byte ID + 6 bytes MAC
+            const uint8_t* payloadPtr = frame.data() + HEADER_SIZE;
+            uint8_t nodeId = payloadPtr[0];
+            std::array<uint8_t, 6> mac;
+            std::copy(payloadPtr + 1, payloadPtr + 7, mac.begin());
+            
+            if (_strategy) {
+                _strategy->registerRoute(nodeId, mac);
+            }
+            sendAck(hdr->src_id);
+        } else {
+            sendNack(hdr->src_id);
+        }
+        return;
+    }
+    else if (hdr->cmd_id == (uint8_t)Demeter::CommandType::SET_GPIO) {
         if (hdr->length >= 3 && _onGpioCommand) {
             Demeter::SetGpioCmd cmd;
             const uint8_t* payloadPtr = frame.data() + HEADER_SIZE;
@@ -137,6 +168,11 @@ void ProtocolEngine::parseFrame(const std::vector<uint8_t>& frame) {
         // Respond with ACK
         sendAck(hdr->src_id);
     }
+    else if (hdr->cmd_id == (uint8_t)Demeter::CommandType::ACK) {
+        if (_onAckRecv) {
+            _onAckRecv(hdr->src_id);
+        }
+    }
 }
 
 void ProtocolEngine::sendAck(uint8_t targetId) {
@@ -149,6 +185,10 @@ void ProtocolEngine::sendNack(uint8_t targetId) {
     sendFrame((uint8_t)Demeter::CommandType::NACK, targetId, empty);
 }
 
+void ProtocolEngine::setNodeId(uint8_t id) {
+    _myId = id;
+}
+
 void ProtocolEngine::sendFrame(uint8_t cmdId, uint8_t targetId, const std::vector<uint8_t>& payload) {
     if (!_strategy) return;
 
@@ -156,13 +196,11 @@ void ProtocolEngine::sendFrame(uint8_t cmdId, uint8_t targetId, const std::vecto
     frame.reserve(HEADER_SIZE + payload.size() + 1);
 
     // Header
-    uint8_t myId = 0x01; // TODO: Configurable ID
-
     Header hdr;
     hdr.sync = SYNC_BYTE;
     hdr.length = (uint8_t)payload.size();
     hdr.flags = 0x00;
-    hdr.src_id = myId;
+    hdr.src_id = _myId;
     hdr.dst_id = targetId;
     hdr.cmd_id = cmdId;
     

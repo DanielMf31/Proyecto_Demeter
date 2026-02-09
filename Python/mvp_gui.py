@@ -13,7 +13,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 from proyecto_demeter.transport.uart import UartTransport
 from proyecto_demeter.transport.mock import MockTransport
 from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
-from proyecto_demeter.protocols.schemas_protocol import CmdId
+from proyecto_demeter.config.schemas import CmdId
 
 # Configure Logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

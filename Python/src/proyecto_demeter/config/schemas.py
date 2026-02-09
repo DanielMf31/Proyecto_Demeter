@@ -1,6 +1,6 @@
 from enum import IntEnum
-from typing import List, Optional, Union
-from pydantic import BaseModel, Field, field_validator
+from typing import List, Optional
+from pydantic import BaseModel, Field
 
 # ==========================================
 # Enums
@@ -28,84 +28,61 @@ class DemeterCommand(BaseModel):
 # ==========================================
 # Specific Commands
 # ==========================================
-
 class Ack(DemeterCommand):
-    """
-    Positive Acknowledgment of a command.
-    Payload: [ORIGINAL_CMD_ID]
-    """
+    """Positive Acknowledgment."""
     original_cmd_id: int = Field(ge=0, le=255)
-
-    def get_cmd_id(self) -> int:
-        return CmdId.ACK
+    def get_cmd_id(self) -> int: return CmdId.ACK
 
 class Nack(DemeterCommand):
-    """
-    Negative Acknowledgment (Error).
-    Payload: [ORIGINAL_CMD_ID] [ERROR_CODE]
-    """
+    """Negative Acknowledgment."""
     original_cmd_id: int = Field(ge=0, le=255)
     error_code: int = Field(ge=0, le=255)
-
-    def get_cmd_id(self) -> int:
-        return CmdId.NACK
+    def get_cmd_id(self) -> int: return CmdId.NACK
 
 class Ping(DemeterCommand):
-    def get_cmd_id(self) -> int:
-        return CmdId.PING
+    def get_cmd_id(self) -> int: return CmdId.PING
 
 class SetGpio(DemeterCommand):
-    """
-    Directly control a digital pin.
-    """
+    """Directly control a digital pin."""
     pin: int = Field(ge=0, le=40, description="Physical GPIO Pin Number")
     value: int = Field(ge=0, le=1, description="1=High, 0=Low")
     flags: int = Field(default=0, ge=0, le=255)
-
-    def get_cmd_id(self) -> int:
-        return CmdId.SET_GPIO
+    def get_cmd_id(self) -> int: return CmdId.SET_GPIO
 
 class SetPwm(DemeterCommand):
     pin: int = Field(ge=0, le=40)
     value: int = Field(ge=0, le=65535, description="PWM Duty Cycle 16-bit")
-
-    def get_cmd_id(self) -> int:
-        return CmdId.SET_PWM
+    def get_cmd_id(self) -> int: return CmdId.SET_PWM
 
 class RouteAdd(DemeterCommand):
-    """
-    Register a route (Mac Address) in the Gateway.
-    Note: target_id in the *Command* is the node being registered.
-    But the *Frame* usually targets the Gateway (ID 1).
-    This ambiguity is handled by business logic, but structurally this payload 
-    carries the ID and MAC.
-    """
+    """Register a route (Mac Address) in the Gateway."""
     node_id_to_register: int = Field(ge=0, le=254)
+    # 6 bytes for MAC
     mac_address_bytes: bytes = Field(min_length=6, max_length=6)
-
-    def get_cmd_id(self) -> int:
-        return CmdId.ROUTE_ADD
+    def get_cmd_id(self) -> int: return CmdId.ROUTE_ADD
 
 # ==========================================
 # Sequence Structures
 # ==========================================
-
 class SequenceStep(BaseModel):
     """
     A single step in a batch execution.
-    Composition over Inheritance: Contains a specific action.
+    Unified model: Contains Protocol fields (target, cmd) and UI fields (pin, val, delay).
     """
-    target_id: int = Field(ge=0, le=254)
-    # For now, we only allow GPIO actions in sequences in MVP
-    # In full version this could be Union[SetGpio, SetPwm]
-    # But to match binary struct: Cmd(1), Pin(1), Val(1)
-    cmd_id: int = Field(default=CmdId.SET_GPIO.value) 
+    target_id: int = Field(default=1, ge=0, le=254, description="Target Node ID (1=Gateway)")
+    cmd_id: int = Field(default=CmdId.SET_GPIO.value, description="Command ID (Default: SetGpio)")
     pin: int = Field(ge=0, le=40)
     value: int = Field(ge=0, le=1)
     delay_ms: int = Field(ge=0, le=4294967295, description="Delay after execution (ms)")
 
 class ExecSequence(DemeterCommand):
     steps: List[SequenceStep] = Field(min_length=1, max_length=30)
-    
-    def get_cmd_id(self) -> int:
-        return CmdId.EXEC_SEQUENCE
+    def get_cmd_id(self) -> int: return CmdId.EXEC_SEQUENCE
+
+class SequenceFile(BaseModel):
+    """
+    Metadata and content for a saved sequence file.
+    """
+    name: str = Field(..., min_length=1, description="Display Name")
+    description: str = Field("", description="Optional Description")
+    steps: List[SequenceStep]

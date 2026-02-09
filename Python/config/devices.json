@@ -1,0 +1,37 @@
+{
+    "devices": [
+        {
+            "id": 0,
+            "mac": "AA:BB:CC:DD:EE:00",
+            "type": "host",
+            "description": "Raspberry Pi Host",
+            "pins": {}
+        },
+        {
+            "id": 1,
+            "mac": "AA:BB:CC:DD:EE:01",
+            "type": "gateway",
+            "description": "ESP32 Gateway",
+            "pins": {}
+        },
+        {
+            "id": 2,
+            "mac": "AA:BB:CC:DD:EE:02",
+            "type": "sensor_node",
+            "description": "ESP32 Node 2",
+            "pins": {
+                "led": 2,
+                "relay": 4
+            }
+        },
+        {
+            "id": 3,
+            "mac": "AA:BB:CC:DD:EE:03",
+            "type": "actuator",
+            "description": "ESP32 Node 3",
+            "pins": {
+                "pump": 5
+            }
+        }
+    ]
+}

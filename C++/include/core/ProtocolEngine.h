@@ -26,13 +26,16 @@ public:
     using GpioCallback = std::function<void(const Demeter::SetGpioCmd&)>;
     using PwmCallback = std::function<void(const Demeter::SetPwmCmd&)>;
     using SequenceCallback = std::function<void(const Demeter::ExecSequenceCmd&)>;
+    using AckCallback = std::function<void(uint8_t srcId)>;
 
 private:
     IComms* _strategy;
     GpioCallback _onGpioCommand;
     PwmCallback _onPwmCommand;
     SequenceCallback _onSequenceCommand;
-
+    AckCallback _onAckRecv;
+    
+    uint8_t _myId = 1; // Default to Gateway ID
 
     // Frame Constants
     static const uint8_t SYNC_BYTE = 0xFE;
@@ -57,6 +60,12 @@ public:
      * @param strategy Pointer to the Communication Strategy (UART, LoRa...).
      */
     ProtocolEngine(IComms* strategy);
+
+    /**
+     * @brief Configure the local Node ID.
+     * @param id The ID of this device (Default: 1).
+     */
+    void setNodeId(uint8_t id);
 
     /**
      * @brief Process incoming data from the strategy.
@@ -84,9 +93,14 @@ public:
      * @param cb Function to call when a valid Sequence command is received.
      */
     void onExecSequence(SequenceCallback cb);
-    
-    // Output Methods
 
+    /**
+     * @brief Register callback for ACK reception.
+     * @param cb Function to call when an ACK is received.
+     */
+    void onAckRecv(AckCallback cb);
+
+private:
     /**
      * @brief Send an ACK (Acknowledge) frame.
      * @param targetId The device ID to send the ACK to.

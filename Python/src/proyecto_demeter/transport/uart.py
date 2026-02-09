@@ -3,7 +3,7 @@ import threading
 import time
 import logging
 from .interface import TransportStrategy
-from proyecto_demeter.protocols.device_manager import DeviceManager
+from ..core.device_manager import DeviceManager
 
 class UartTransport(TransportStrategy, threading.Thread):
     """

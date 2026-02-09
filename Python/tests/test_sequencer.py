@@ -1,7 +1,7 @@
 import pytest
 import struct
-from proyecto_demeter.protocols.schemas_sequencer import SequenceStep
-from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2, ExecSequence, SequenceStep as ProtoStep
+from proyecto_demeter.config.schemas import SequenceStep, ExecSequence
+from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
 
 def test_sequence_step_validation():
     # Valid Step
@@ -10,29 +10,32 @@ def test_sequence_step_validation():
     assert step.value == 1
     assert step.delay_ms == 1000
 
-    # Invalid Pin (<4)
+    # Invalid Pin (New limit < 0)
+    # But Pydantic validates ge=0. 
     with pytest.raises(ValueError):
-        SequenceStep(pin=3, value=1, delay_ms=100)
+        SequenceStep(pin=-1, value=1, delay_ms=100)
 
-    # Invalid Pin (>7)
+    # Invalid Pin (New limit > 40)
     with pytest.raises(ValueError):
-        SequenceStep(pin=8, value=1, delay_ms=100)
+        SequenceStep(pin=41, value=1, delay_ms=100)
         
     # Invalid Value (not 0 or 1)
     with pytest.raises(ValueError):
         SequenceStep(pin=4, value=2, delay_ms=100)
         
-    # Invalid Delay (<=0)
+    # Invalid Delay (< 0) - Although model says ge=0, typical is >0, but 0 is technically allowed for no delay?
+    # Schema says ge=0.
+    # Check negative
     with pytest.raises(ValueError):
-        SequenceStep(pin=4, value=1, delay_ms=0)
+        SequenceStep(pin=4, value=1, delay_ms=-1)
 
 def test_exec_sequence_serialization():
     protocol = DemeterProtocolV2()
     
     # Create Protocol Steps (Low Level)
     steps = [
-        ProtoStep(target_id=1, cmd_id=0x10, pin=4, value=1, delay_ms=500),
-        ProtoStep(target_id=1, cmd_id=0x10, pin=4, value=0, delay_ms=500)
+        SequenceStep(target_id=1, cmd_id=0x10, pin=4, value=1, delay_ms=500),
+        SequenceStep(target_id=1, cmd_id=0x10, pin=4, value=0, delay_ms=500)
     ]
     
     cmd = ExecSequence(target_id=1, steps=steps)

@@ -2,20 +2,25 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from typing import Callable, List, Optional
 from tkinter import ttk, messagebox, simpledialog, filedialog
-from ..protocols.schemas_sequencer import SequenceStep, SequenceFile, SequenceManager
-from ..protocols.protocol_v2 import DemeterProtocolV2, ExecSequence, SequenceStep as ProtoStep
+from ..config.schemas import SequenceStep, SequenceFile, ExecSequence
+from ..core.sequence_manager import SequenceManager
+from ..protocols.protocol_v2 import DemeterProtocolV2
 
-class SequencerWindow(tk.Toplevel):
-    def __init__(self, parent, protocol: DemeterProtocolV2, send_callback: Callable[[bytes], None]):
+class SequencerWindow(ttk.Frame):
+    def __init__(self, parent, protocol: DemeterProtocolV2, send_callback: Callable[[bytes], None], is_tab=False):
         super().__init__(parent)
-        self.title("Planificador de Secuencias")
-        self.geometry("600x500")
-        
         self.protocol = protocol
         self.send_callback = send_callback
         self.manager = SequenceManager()
         self.steps: List[SequenceStep] = []
         
+        if not is_tab and isinstance(parent, tk.Tk):
+            # If not a tab, we might want a Toplevel wrapper, but since we inherit Frame,
+            # we rely on the parent being a container. 
+            # This refactor assumes it's always used as a Frame or inside a Toplevel.
+            pass
+
+        self.pack(fill="both", expand=True) # Self-pack
         self.setup_ui()
         
     def setup_ui(self):
@@ -166,19 +171,10 @@ class SequencerWindow(tk.Toplevel):
             return
             
         try:
-            # Convert Pydantic High Level Steps to Protocol Low Level Steps
-            proto_steps = []
-            for s in self.steps:
-                # Target ID 1 (ESP32), Cmd ID 0x10 (GPIO)
-                proto_steps.append(ProtoStep(
-                    target_id=1,
-                    cmd_id=0x10, # CMD_SET_GPIO
-                    pin=s.pin,
-                    value=s.value,
-                    delay_ms=s.delay_ms
-                ))
-            
-            cmd = ExecSequence(target_id=1, steps=proto_steps)
+            # Unified SequenceStep matches Protocol Step structure
+            # steps are already SequenceStep objects suitable for ExecSequence
+            # (they have default target_id and cmd_id)
+            cmd = ExecSequence(target_id=1, steps=self.steps)
             frame = self.protocol.serialize(cmd)
             
             self.send_callback(frame)

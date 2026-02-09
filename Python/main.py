@@ -92,6 +92,31 @@ def main():
         
         transport.set_callback(on_rx_data)
 
+        # --- Device Manager & Route Sync ---
+        try:
+            from proyecto_demeter.core.device_manager import DeviceManager
+            from proyecto_demeter.config.schemas import RouteAdd
+            
+            logger.info("Loading Device Manager...")
+            dm = DeviceManager() # Loads config/devices.json by default
+            routes = dm.get_all_routes()
+            
+            if routes:
+                logger.info(f"Syncing {len(routes)} routes to Gateway...")
+                for node_id, mac_bytes in routes:
+                    # Target ID 1 (Gateway)
+                    cmd = RouteAdd(target_id=1, node_id_to_register=node_id, mac_address_bytes=mac_bytes)
+                    frame = protocol.serialize(cmd)
+                    if transport:
+                        transport.send(frame)
+                        logger.info(f" -> Sent RouteAdd for Node {node_id}")
+            else:
+                logger.info("No routes to sync.")
+                
+        except Exception as e:
+            logger.error(f"Failed to sync routes: {e}")
+            messagebox.showwarning("Config Error", f"Error syncing routes:\n{e}")
+
     from proyecto_demeter.ui.login_window import LoginWindow
     login = LoginWindow(root, on_login_success)
 

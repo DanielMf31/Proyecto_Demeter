@@ -67,7 +67,9 @@ public:
      * @return std::vector<uint8_t> containing received data.
      */
     std::vector<uint8_t> read() override;
-
+    
+    // UartStrategy ignores RouteAdd
+    void registerRoute(uint8_t id, const std::array<uint8_t, 6>& mac) override {}
 private:
     int8_t _rxPin; ///< Configured RX Pin.
     int8_t _txPin; ///< Configured TX Pin.

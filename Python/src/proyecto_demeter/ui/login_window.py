@@ -32,7 +32,11 @@ class LoginWindow(tk.Toplevel):
             config_path = os.path.join(base_dir, "config", "users.json")
             
             with open(config_path, "r") as f:
-                return json.load(f)
+                data = json.load(f)
+                # Convert list format to dict for easy lookup: {user: pass}
+                if "users" in data and isinstance(data["users"], list):
+                    return {u["username"]: u["password"] for u in data["users"]}
+                return data # Fallback if old format (though we just changed it)
         except Exception as e:
             messagebox.showerror("Config Error", f"Could not load users.json:\n{e}")
             return {}
@@ -42,7 +46,7 @@ class LoginWindow(tk.Toplevel):
         frame.pack(fill="both", expand=True)
 
         # Title
-        ttk.Label(frame, text="🔐 Acceso Seguro", font=("Arial", 14, "bold")).pack(pady=10)
+        ttk.Label(frame, text=" Acceso Seguro", font=("Arial", 14, "bold")).pack(pady=10)
 
         # User
         ttk.Label(frame, text="Usuario:").pack(anchor="w")
@@ -65,6 +69,7 @@ class LoginWindow(tk.Toplevel):
         username = self.entry_user.get()
         password = self.entry_pass.get()
 
+        # Check against dict {user: pass}
         if username in self.users_db and self.users_db[username] == password:
             self.destroy()
             self.on_success()

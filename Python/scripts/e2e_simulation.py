@@ -7,7 +7,7 @@ import time
 sys.path.append(os.path.join(os.getcwd(), 'Python', 'src'))
 
 from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
-from proyecto_demeter.protocols.schemas_protocol import SetGpio
+from proyecto_demeter.config.schemas import SetGpio
 
 def main():
     print("=== DEMETER E2E SIMULATION RUNNER ===")
