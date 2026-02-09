@@ -129,10 +129,11 @@ class SequenceFile(BaseModel):
     description: str = Field("", description="Optional Description")
     steps: List[SequenceStep]
 
-@dataclass
-class DataReport:
+class DataReport(DemeterCommand):
     """Sensor Data Report from Node"""
-    node_id: int
+    node_id: int = Field(..., ge=0, le=254)
     temperature: float
     humidity: float
     timestamp: float = 0.0 # Epoch time
+
+    def get_cmd_id(self) -> int: return CmdId.DATA_REPORT
