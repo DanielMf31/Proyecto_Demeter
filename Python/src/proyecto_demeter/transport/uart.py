@@ -44,6 +44,7 @@ class UartTransport(TransportStrategy, threading.Thread):
     def connect(self) -> bool:
         try:
             self.serial_conn = serial.Serial(self.port, self.baud, timeout=0.1)
+            self.serial_conn.flushInput() # Clear startup garbage
             self.logger.info(f"Connected to UART at {self.port} ({self.baud})")
             return True
         except serial.SerialException as e:
@@ -101,23 +102,26 @@ class UartTransport(TransportStrategy, threading.Thread):
                         rx_buffer += chunk
                         
                         # Process Buffer
-                        while True:
+                        while len(rx_buffer) >= HEADER_SIZE:
                             # 1. Search for Sync Byte
                             try:
                                 sync_idx = rx_buffer.index(SYNC_BYTE)
                             except ValueError:
-                                # No sync byte found, discard garbage (keep last few bytes?)
-                                # For simplicity, if buffer is huge > 1024, clear it to prevent leak
-                                if len(rx_buffer) > 1024:
-                                    rx_buffer = b''
-                                break # Wait for more data
+                                # No sync byte found in the entire buffer
+                                # Keep the last few bytes just in case split sync?
+                                # No, sync is 1 byte.
+                                # Discard all but last byte? 
+                                # Safer: Discard all.
+                                self.logger.debug(f"Discarding garbage: {rx_buffer.hex()}")
+                                rx_buffer = b''
+                                break
                             
                             # Align buffer to Sync
                             if sync_idx > 0:
                                 self.logger.debug(f"Discarding {sync_idx} garbage bytes: {rx_buffer[:sync_idx].hex()}")
                                 rx_buffer = rx_buffer[sync_idx:]
                                 
-                            # 2. Check for Header
+                            # 2. Check for Header (again, after alignment)
                             if len(rx_buffer) < HEADER_SIZE:
                                 break # Wait for more data
                                 
@@ -136,8 +140,6 @@ class UartTransport(TransportStrategy, threading.Thread):
                             
                             # 6. Dispatch
                             if self.callback:
-                                # We pass the raw frame bytes to the callback
-                                # The callback (Main Window) will call Protocol.parse_frame
                                 try:
                                     self.callback(frame)
                                 except Exception as cb_err:
