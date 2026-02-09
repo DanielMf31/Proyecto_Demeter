@@ -152,9 +152,7 @@ class DemeterService:
         
         # Broadcast DataReports to all connected GUI clients
         if cmd.get_cmd_id() == 0x10: # DataReport
-            # Convert to Pydantic and broadcast
-            # We need a unified schema for broadcasting. 
-            # For now, let's just send the Pydantic model as JSON.
+            self.logger.info(f"[RX] DataReport Node={cmd.node_id} Temp={cmd.temperature:.1f} Hum={cmd.humidity:.1f}")
             self.broadcast_event(cmd)
             
         elif cmd.get_cmd_id() == 0xF0: # ACK
