@@ -1,7 +1,9 @@
 import customtkinter as ctk
 import json
+import webbrowser
 import os
 from tkinter import messagebox
+from ..config import settings
 
 class LoginWindow(ctk.CTk):
     """
@@ -10,13 +12,12 @@ class LoginWindow(ctk.CTk):
     def __init__(self):
         super().__init__()
         
-        self.title("Demeter Login")
-        self.geometry("400x300")
+        self.title("Demeter - Login")
+        self.geometry("400x500")
         self.resizable(False, False)
         
-        # Determine config path
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-        self.config_path = os.path.join(base_dir, "config", "users.json")
+        # Use centralized config path
+        self.config_path = settings.CONFIG_DIR / "users.json"
         
         self.authenticated = False
 

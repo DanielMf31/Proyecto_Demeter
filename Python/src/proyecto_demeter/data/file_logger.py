@@ -1,18 +1,20 @@
 import logging
 import logging.handlers
 import os
+from ..config import settings
 
 class SensorLogger:
     """
     Handles logging of sensor data to a separate file.
     Format: CSV
     """
-    def __init__(self, log_dir: str = "logs", filename: str = "sensors.log"):
-        self.log_dir = log_dir
-        self.filepath = os.path.join(log_dir, filename)
+    def __init__(self, log_dir: str = None, filename: str = None):
+        self.log_dir = log_dir if log_dir else str(settings.LOG_DIR)
+        self.filename = filename if filename else "sensors.log" # Assuming filename default is not from settings based on snippet
+        self.filepath = os.path.join(self.log_dir, self.filename)
         
         # Ensure directory exists
-        os.makedirs(log_dir, exist_ok=True)
+        os.makedirs(self.log_dir, exist_ok=True)
         
         # Configure specific logger
         self.logger = logging.getLogger("demeter_sensors")

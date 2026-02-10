@@ -2,11 +2,16 @@ import sys
 import os
 import subprocess
 import argparse
+import signal
+import logging
 
 # Add src to path
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SRC_DIR = os.path.join(BASE_DIR, "src")
-sys.path.append(SRC_DIR)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
+from proyecto_demeter.config import settings
+
+# Setup Logging
+logging.basicConfig(level=getattr(logging, settings.LOG_LEVEL), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger("DemeterGUI")
 
 def main():
     """

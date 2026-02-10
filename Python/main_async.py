@@ -9,12 +9,16 @@ import argparse
 # Deferred logging setup until main to establish log file
 logger = logging.getLogger("DemeterLauncher")
 
+# Add src to path if needed (though running as module is better, we keep script compat)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
+from proyecto_demeter.config import settings
+
 def main():
-    # Parse CLI Arguments
+    # Parse CLI Arguments (Overrides Settings)
     parser = argparse.ArgumentParser(description="Demeter V2 Backend Launcher")
-    parser.add_argument("--port", default=os.environ.get("DEMETER_PORT", "/dev/serial0"), help="UART Port")
-    parser.add_argument("--host", default=os.environ.get("DEMETER_HOST", "0.0.0.0"), help="Socket Host")
-    parser.add_argument("--socket-port", default=int(os.environ.get("DEMETER_SOCKET_PORT", 8888)), type=int, help="Socket Port")
+    parser.add_argument("--port", default=settings.PORT, help="UART Port")
+    parser.add_argument("--host", default=settings.HOST, help="Socket Host")
+    parser.add_argument("--socket-port", default=settings.SOCKET_PORT, type=int, help="Socket Port")
     
     # Mock default from Environment
     mock_default = os.environ.get("DEMETER_MOCK", "False").lower() in ("true", "1", "yes")
@@ -26,11 +30,11 @@ def main():
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     SERVICE_SCRIPT = os.path.join(BASE_DIR, "src", "proyecto_demeter", "core", "async_service.py")
     
-    # 1. Setup Logging
-    LOG_DIR = os.path.join(BASE_DIR, "logs")
-    os.makedirs(LOG_DIR, exist_ok=True)
-    timestamp = time.strftime("%Y-%m-%d_%H-%M-%S")
-    log_file = os.path.join(LOG_DIR, f"session_{timestamp}.log")
+    
+    # 1. Setup Logging using Settings
+    log_file = settings.LOG_FILE_PATH
+    log_dir = os.path.dirname(log_file)
+    os.makedirs(log_dir, exist_ok=True) # Ensure dir exists
     
     logging.basicConfig(
         level=logging.INFO,

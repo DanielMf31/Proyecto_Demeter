@@ -1,14 +1,15 @@
 import aiosqlite
 import logging
 from datetime import datetime, timedelta
+from ..config import settings
 
 class DatabaseManager:
     """
     Manages SQLite database storage for sensor data.
     Uses async IO to interact with the DB.
     """
-    def __init__(self, db_path: str = "data/demeter_data.db"):
-        self.db_path = db_path
+    def __init__(self, db_path: str = None):
+        self.db_path = db_path if db_path else settings.DB_PATH
         self.logger = logging.getLogger("DatabaseManager")
 
     async def init_db(self):
