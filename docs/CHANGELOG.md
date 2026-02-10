@@ -14,6 +14,12 @@ All notable changes to the "Proyecto Demeter" will be documented in this file.
 - **Data Transfer**: Implemented `CMD_DATA_REPORT` (0x0B) for telemetry (Temp/Hum) from Node to Gateway to Python.
 - **RPi UART Tools**: Added `scripts/setup_rpi_uart.sh` and `scripts/test_uart_loopback.py` for Raspberry Pi configuration.
 
+### Documentation
+- **Restructuring**: Merged `docs/Design` into `docs/Architecture` for a unified structure.
+- **Hardware Docs**: Split `System_Inventory` into specific files for Raspberry Pi, Gateway, and Node.
+- **SCRUM**: Added `Product_Backlog.md` and `Sprint_Backlog.md` in `docs/Desarrollo`.
+- **Logs**: Consolidated development logs into `Desarrollo_General.md` and archived legacy logs.
+
 ### Fixed
 - **UART Communication**: Implemented Ring Buffer in `UartTransport.py` to handle stream fragmentation and ensure reliable frame reception.
 - **ProtocolEngine**: Fixed linker error due to duplicate callback declaration.
