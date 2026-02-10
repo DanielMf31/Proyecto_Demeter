@@ -57,9 +57,18 @@ class LoginWindow(ctk.CTk):
 
         try:
             with open(self.config_path, "r") as f:
-                users = json.load(f)
+                data = json.load(f)
             
-            if user in users and users[user] == pwd:
+            # Data structure is {"users": [{"username": "...", "password": "..."}]}
+            users_list = data.get("users", [])
+            valid_user = False
+            
+            for u in users_list:
+                if u.get("username") == user and u.get("password") == pwd:
+                    valid_user = True
+                    break
+            
+            if valid_user:
                 self.authenticated = True
                 self.destroy() # Close login window to proceed
             else:

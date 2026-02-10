@@ -1,30 +1,19 @@
 import json
 import os
 from typing import List
-from ..config.schemas import SequenceFile
+from ..shared.schemas import SequenceFile
+from ..config import settings
 
 class SequenceManager:
     """
     Handles loading and saving sequences to JSON files.
     """
-    def __init__(self, directory: str = "sequences"):
-        # Directory logic: If relative, relative to project root (assumed 2 levels up from src/package/core)
-        # Main is in Python/
-        # src is in Python/src
-        # this file is Python/src/proyecto_demeter/core/sequence_manager.py
-        # Project root relative to this file: ../../../../
-        
-        # Better: use the directory passed or default relative to CWD if running from Python/
-        self.directory = directory
-        if not os.path.isabs(directory):
-             # Just use local sequences folder for now, or adhere to previous logic
-             # Previous logic: os.path.dirname(os.path.dirname(os.path.dirname(__file__))) + directory
-             # That was from schemas_sequencer.py in protocols/
-             # Let's keep it simple: relative to execution CWD usually works best for scripts, 
-             # but to match previous behavior:
-             base = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../.."))
-             self.directory = os.path.join(base, directory)
-
+    def __init__(self, directory: str = None):
+        if directory:
+            self.directory = directory
+        else:
+            self.directory = str(settings.SEQUENCES_DIR)
+            
         os.makedirs(self.directory, exist_ok=True)
 
     def save_sequence(self, filename: str, sequence: SequenceFile) -> str:

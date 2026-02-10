@@ -50,6 +50,13 @@ class Settings(BaseSettings):
         p = self.BASE_DIR / "config"
         return p
 
+    @property
+    def SEQUENCES_DIR(self) -> Path:
+        """Sequence Files Directory (Python/config/sequences)"""
+        p = self.CONFIG_DIR / "sequences"
+        p.mkdir(parents=True, exist_ok=True)
+        return p
+
     # ==========================================
     # 3. Component Configs
     # ==========================================
