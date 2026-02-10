@@ -10,7 +10,7 @@ import sys
 # Add src to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '../src'))
 
-from proyecto_demeter.shared.schemas import GpioCommand, ActionResponse
+from proyecto_demeter.transport.protocol_schemas import GpioCommand, ActionResponse
 
 SERVICE_SCRIPT = os.path.join(os.path.dirname(__file__), '../src/proyecto_demeter/core/async_service.py')
 PYTHON_EXE = sys.executable

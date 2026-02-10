@@ -1,7 +1,7 @@
 import pytest
 import os
 import json
-from proyecto_demeter.shared.schemas import SequenceStep, SequenceFile, ExecSequence, SetGpio, Ping, Ack, Nack
+from proyecto_demeter.transport.protocol_schemas import SequenceStep, SequenceFile, ExecSequence, SetGpio, Ping, Ack, Nack
 from proyecto_demeter.core.sequence_manager import SequenceManager
 from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
 

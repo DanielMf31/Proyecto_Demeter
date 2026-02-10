@@ -111,7 +111,7 @@ void setup() {
         // Workaround: We Re-Send it to ID 0.
         // If we want Host to know it's from Node 2, we might need to modify payload or header.
         // For now, let's just send it to ID 0.
-        engine.sendDataReport(0, temp, hum); 
+        engine.sendTempHumReport(0, temp, hum); 
     });
     
     // Initialize Composite Communication (Starts UART + ESP-Now)
@@ -186,9 +186,9 @@ void loop() {
             
             case 'D': {
                 // Manual Data Report to Host (ID 0)
-                Serial.println(">> TX -> DATA REPORT (Manual Mock)");
+                Serial.println(">> TX -> TEMP HUM REPORT (Manual Mock)");
                 // Send Mock Temp: 24.5C, Hum: 55.0%
-                engine.sendDataReport(0, 24.5f, 55.0f);
+                engine.sendTempHumReport(0, 24.5f, 55.0f);
                 break;
             }
 

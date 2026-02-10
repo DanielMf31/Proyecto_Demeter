@@ -48,14 +48,17 @@ float readBatteryVoltage() {
 
 void reportStatus() {
     float voltage = readBatteryVoltage();
-    float stateVal = motorState ? 1.0f : 0.0f;
+    bool stateVal = motorState;
     
-    Serial.printf("[Actuator] Reporting: Motor=%.0f, Bat=%.2fV\n", stateVal, voltage);
+    Serial.printf("[Actuator] Reporting: Motor=%s, Bat=%.2fV\n", stateVal ? "ON" : "OFF", voltage);
     
-    // Send DATA_REPORT (Cmd 0x0B)
-    // Value1: Motor State
-    // Value2: Battery Voltage
-    engine.sendDataReport(GATEWAY_ID, stateVal, voltage);
+    // Send PIN_REPORT (Cmd 0x0C) for Motor State
+    engine.sendPinReport(GATEWAY_ID, PIN_MOTOR_RELAY, stateVal);
+
+    // Send SYSTEM_REPORT (Cmd 0x0D) for Battery/Mode
+    // Mode 0 = Active
+    uint16_t battMv = (uint16_t)(voltage * 1000); 
+    engine.sendSystemReport(GATEWAY_ID, 0, battMv);
 }
 
 // ==========================================

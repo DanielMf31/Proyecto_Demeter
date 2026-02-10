@@ -1,5 +1,5 @@
 from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
-from proyecto_demeter.shared.schemas import GetSensors, CmdId
+from proyecto_demeter.transport.protocol_schemas import GetSensors, CmdId
 import struct
 
 def test_create_get_sensors():
@@ -7,7 +7,8 @@ def test_create_get_sensors():
     target_id = 2
     
     # 1. Test Factory
-    frame = protocol.create_get_sensors(target_id)
+    # Replaced create_get_sensors with serialize(GetSensors)
+    frame = protocol.serialize(GetSensors(target_id=target_id))
     
     assert len(frame) == 7 # Header(6) + Payload(0) + CRC(1) = 7 bytes.
     # Check constants in protocol_v2.py

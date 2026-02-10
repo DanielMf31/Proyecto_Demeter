@@ -70,7 +70,7 @@ void Node::collectAndSend() {
             // Determine Target (Gateway = 1 or Host = 0?)
             // Usually valid to send to Gateway (1).
             if (_engine) {
-                _engine->sendDataReport(1, data.value1, data.value2);
+                _engine->sendTempHumReport(1, data.value1, data.value2);
             }
         }
     }
