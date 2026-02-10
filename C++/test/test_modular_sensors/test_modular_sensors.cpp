@@ -9,29 +9,12 @@
 #include "hardware/sensors/DS18B20Sensor.h"
 #include "hardware/sensors/SoilMoistureSensor.h"
 #include "communications/IComms.h"
+#include "../mocks/MockComms.h"
 
 // ==========================================
 // MOCK COMMS STRATEGY
 // ==========================================
-class MockComms : public IComms {
-public:
-    std::vector<uint8_t> lastSentData;
-    bool sendCalled = false;
-
-    void begin() override {}
-    
-    void send(const uint8_t* data, size_t length) override {
-        sendCalled = true;
-        lastSentData.clear();
-        lastSentData.insert(lastSentData.end(), data, data + length);
-    }
-
-    void registerRoute(uint8_t id, const std::array<uint8_t, 6>& mac) override {}
-    
-    // Simulate receiving data (not used for this test)
-    bool available() override { return false; }
-    std::vector<uint8_t> read() override { return {}; }
-};
+// Moved to ../mocks/MockComms.h
 
 // ==========================================
 // UNIT TESTS: SENSORS
