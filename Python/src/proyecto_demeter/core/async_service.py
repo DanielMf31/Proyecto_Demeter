@@ -20,7 +20,13 @@ except ImportError:
     from src.proyecto_demeter.shared.schemas import GpioCommand, ActionResponse,  PingCommand, SequenceCommand, ExecSequence
     from src.proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
     from src.proyecto_demeter.data.database import DatabaseManager
+    from src.proyecto_demeter.data.database import DatabaseManager
     from src.proyecto_demeter.data.file_logger import SensorLogger
+    
+try:
+    from proyecto_demeter.transport.mock_transport import MockTransport
+except ImportError:
+    from src.proyecto_demeter.transport.mock_transport import MockTransport
     
 from pydantic import ValidationError
 
@@ -78,9 +84,12 @@ class DemeterService:
         addr = self.server.sockets[0].getsockname()
         self.logger.info(f"[NET] TCP Server listening on {addr}")
 
-        # 2. Start UART Transport (Hardware)
+        # 2. Start Transport (Hardware or Mock)
         if MOCK_MODE:
-            self.logger.warning("[WARN] RUNNING IN MOCK MODE (No Hardware connection)")
+            self.logger.warning("[WARN] RUNNING IN MOCK MODE (Virtual Hardware)")
+            self.transport = MockTransport()
+            self.transport.set_callback(self.on_uart_data)
+            await self.transport.connect()
         else:
             # Init transport with callback
             self.transport = AsyncUartTransport(UART_PORT, UART_BAUD)
@@ -92,9 +101,15 @@ class DemeterService:
                 else:
                     self.logger.error("[ERR] UART Connect Failed")
                     self.logger.warning("   -> Switching to MOCK behavior for stability.")
+                    self.transport = MockTransport()
+                    self.transport.set_callback(self.on_uart_data)
+                    await self.transport.connect()
             except Exception as e:
                 self.logger.error(f"[ERR] UART Connection Exception: {e}")
                 self.logger.warning("   -> Switching to MOCK behavior for stability.")
+                self.transport = MockTransport()
+                self.transport.set_callback(self.on_uart_data)
+                await self.transport.connect()
 
         # 3. Keep alive
         async with self.server:

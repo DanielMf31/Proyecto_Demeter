@@ -45,8 +45,7 @@ class DemeterProtocolV2:
     def _calculate_crc(self, data: bytes) -> int:
         return sum(data) % 256
 
-    def _pack_frame_raw(self, dst_id: int, cmd_id: int, payload: bytes = b'', flags: int = 0x01) -> bytes:
-        src_id = 0x00 # Master ID
+    def _pack_frame_raw(self, dst_id: int, cmd_id: int, payload: bytes = b'', flags: int = 0x01, src_id: int = 0x00) -> bytes:
         length = len(payload)
         
         header = struct.pack(HEADER_FMT, SYNC_BYTE, length, flags, src_id, dst_id, cmd_id)
@@ -100,6 +99,13 @@ class DemeterProtocolV2:
         elif isinstance(cmd, Nack):
             # [ORIGINAL_CMD_ID] [ERROR_CODE]
             payload = struct.pack('<BB', cmd.original_cmd_id, cmd.error_code)
+
+        elif isinstance(cmd, DataReport):
+            # [T_INT] [H_INT]
+            t_int = int(cmd.temperature * 100)
+            h_int = int(cmd.humidity * 100)
+            payload = struct.pack('<hh', t_int, h_int)
+            return self._pack_frame_raw(cmd.target_id, cmd.get_cmd_id(), payload, src_id=cmd.node_id)
             
         return self._pack_frame_raw(cmd.target_id, cmd.get_cmd_id(), payload)
 
