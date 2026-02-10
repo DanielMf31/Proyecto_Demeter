@@ -6,19 +6,27 @@ import subprocess
 import glob
 
 # Ensure src is in path for imports if needed, but we are testing via subprocess mainly
+# Ensure src is in path for imports
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(BASE_DIR)
+sys.path.append(os.path.join(BASE_DIR, 'src'))
+from proyecto_demeter.config import settings
 
 def test_logging_rotation_and_sanity():
     print("--- [TEST] Starting Logging Test ---")
     
     # 1. Clear existing logs to be sure? No, we check new file.
-    log_dir = os.path.join(BASE_DIR, "logs")
+    # 1. Use Settings for Log Dir
+    log_dir = str(settings.LOG_DIR)
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
+    
+    # Check for specific log file
+    log_file = os.path.join(log_dir, settings.LOG_FILE)
+    initial_size = 0
+    if os.path.exists(log_file):
+        initial_size = os.path.getsize(log_file)
         
-    initial_log_count = len(glob.glob(os.path.join(log_dir, "session_*.log")))
-    print(f"Initial log files: {initial_log_count}")
+    print(f"Initial log size: {initial_size} bytes for {log_file}")
     
     # 2. Run Main Async in MOCK mode
     env = os.environ.copy()
@@ -45,16 +53,23 @@ def test_logging_rotation_and_sanity():
     except subprocess.TimeoutExpired:
         proc.kill()
         
-    # 3. Verify Log File Created
-    final_logs = glob.glob(os.path.join(log_dir, "session_*.log"))
-    final_log_count = len(final_logs)
+    # 3. Verify Log File Created/Grown
+    if not os.path.exists(log_file):
+         print(f"[FAIL] Log file {log_file} does not exist.")
+         sys.exit(1)
+         
+    final_size = os.path.getsize(log_file)
+    print(f"Final log size: {final_size} bytes")
     
-    if final_log_count <= initial_log_count:
-        print("[FAIL] No new log file created.")
+    if final_size <= initial_size:
+        print("[FAIL] Log file did not grow.")
+        out, err = proc.communicate()
+        print("STDOUT:", out)
+        print("STDERR:", err)
         sys.exit(1)
         
     # Get latest log file
-    latest_log = max(final_logs, key=os.path.getctime)
+    latest_log = log_file
     print(f"Latest Log File: {latest_log}")
     
     with open(latest_log, "r") as f:
