@@ -9,19 +9,28 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 
 try:
     from proyecto_demeter.transport.async_uart import AsyncUartTransport
-    from proyecto_demeter.shared.schemas import GpioCommand, ActionResponse, PingCommand, SequenceCommand, ExecSequence, GetSensorsCommand
+    from proyecto_demeter.transport.protocol_schemas import (
+        GpioCommand, ActionResponse, PingCommand, SequenceCommand, ExecSequence, 
+        GetSensorsCommand, TempHumReport, PinReport, SystemReport, Ack, Nack, CmdId,
+        SetGpio, Ping, GetSensors
+    )
     from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
     from proyecto_demeter.data.database import DatabaseManager
     from proyecto_demeter.data.file_logger import SensorLogger
+    from proyecto_demeter.config.provider import settings
 except ImportError:
     # Fallback for direct execution
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
     from src.proyecto_demeter.transport.async_uart import AsyncUartTransport
-    from src.proyecto_demeter.shared.schemas import GpioCommand, ActionResponse,  PingCommand, SequenceCommand, ExecSequence
+    from src.proyecto_demeter.transport.protocol_schemas import (
+        GpioCommand, ActionResponse, PingCommand, SequenceCommand, ExecSequence, 
+        GetSensorsCommand, TempHumReport, PinReport, SystemReport, Ack, Nack, CmdId,
+        SetGpio, Ping, GetSensors
+    )
     from src.proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
     from src.proyecto_demeter.data.database import DatabaseManager
-    from src.proyecto_demeter.data.database import DatabaseManager
     from src.proyecto_demeter.data.file_logger import SensorLogger
+    from src.proyecto_demeter.config.provider import settings
     
 try:
     from proyecto_demeter.transport.mock_transport import MockTransport
@@ -31,21 +40,24 @@ except ImportError:
 from pydantic import ValidationError
 
 # Configuration
-UART_PORT = os.getenv('DEMETER_PORT', '/dev/serial0')
+# Use settings from provider.py for consistency
+UART_PORT = settings.PORT
 UART_BAUD = 115200
-SOCKET_HOST = os.getenv('DEMETER_HOST', '0.0.0.0') # Listen on all interfaces by default
-SOCKET_PORT = int(os.getenv('DEMETER_SOCKET_PORT', 8888))
-MOCK_MODE = os.getenv('DEMETER_MOCK', 'False').lower() == 'true'
+SOCKET_HOST = settings.HOST
+SOCKET_PORT = settings.SOCKET_PORT
+MOCK_MODE = settings.MOCK
+MOCK_TYPE = settings.MOCK_MODE
 
 class DemeterService:
     def __init__(self):
         handlers = [logging.StreamHandler(sys.stdout)]
-        log_file = os.environ.get("DEMETER_LOG_FILE")
-        if log_file:
-            handlers.append(logging.FileHandler(log_file))
+        if settings.LOG_FILE_PATH:
+             # Ensure dir exists
+             os.makedirs(os.path.dirname(settings.LOG_FILE_PATH), exist_ok=True)
+             handlers.append(logging.FileHandler(settings.LOG_FILE_PATH))
 
         logging.basicConfig(
-            level=logging.INFO,
+            level=getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO),
             format='%(asctime)s - [%(levelname)s] - %(name)s - %(message)s',
             handlers=handlers
         )
@@ -86,8 +98,8 @@ class DemeterService:
 
         # 2. Start Transport (Hardware or Mock)
         if MOCK_MODE:
-            self.logger.warning("[WARN] RUNNING IN MOCK MODE (Virtual Hardware)")
-            self.transport = MockTransport()
+            self.logger.warning(f"[WARN] RUNNING IN MOCK MODE ({MOCK_TYPE})")
+            self.transport = MockTransport(mode=MOCK_TYPE)
             self.transport.set_callback(self.on_uart_data)
             await self.transport.connect()
         else:
@@ -101,13 +113,13 @@ class DemeterService:
                 else:
                     self.logger.error("[ERR] UART Connect Failed")
                     self.logger.warning("   -> Switching to MOCK behavior for stability.")
-                    self.transport = MockTransport()
+                    self.transport = MockTransport(mode=MOCK_TYPE) # Use configured type even in fallback
                     self.transport.set_callback(self.on_uart_data)
                     await self.transport.connect()
             except Exception as e:
                 self.logger.error(f"[ERR] UART Connection Exception: {e}")
                 self.logger.warning("   -> Switching to MOCK behavior for stability.")
-                self.transport = MockTransport()
+                self.transport = MockTransport(mode=MOCK_TYPE)
                 self.transport.set_callback(self.on_uart_data)
                 await self.transport.connect()
 
@@ -177,8 +189,8 @@ class DemeterService:
         # self.logger.info(f"RX Parsed: {cmd}")
         
         # Broadcast DataReports to all connected GUI clients
-        if cmd.get_cmd_id() == 0x0B: # DataReport
-            self.logger.info(f"[RX] DataReport Node={cmd.node_id} Temp={cmd.temperature:.1f} Hum={cmd.humidity:.1f}")
+        if isinstance(cmd, TempHumReport): # DataReport replacement
+            self.logger.info(f"[RX] TempHum Node={cmd.node_id} Temp={cmd.temperature:.1f} Hum={cmd.humidity:.1f}")
             
             # Log & Save
             self.sensor_logger.log_reading(cmd.node_id, cmd.temperature, cmd.humidity)
@@ -186,11 +198,19 @@ class DemeterService:
 
             self.broadcast_event(cmd)
             
-        elif cmd.get_cmd_id() == 0xF0: # ACK
+        elif isinstance(cmd, PinReport):
+            self.logger.info(f"[RX] PinReport Node={cmd.node_id} Pin={cmd.pin} State={cmd.state}")
+            self.broadcast_event(cmd)
+
+        elif isinstance(cmd, SystemReport):
+            self.logger.info(f"[RX] SystemReport Node={cmd.node_id} Mode={cmd.mode} Batt={cmd.battery_mv}mV")
+            self.broadcast_event(cmd)
+            
+        elif isinstance(cmd, Ack):
             self.logger.info(f"[ACK] Device ACK for CMD {cmd.original_cmd_id}")
             # Could forward ACK to GUI if we mapped request IDs
             
-        elif cmd.get_cmd_id() == 0xF1: # NACK
+        elif isinstance(cmd, Nack):
             self.logger.warning(f"[NACK] Device NACK for CMD {cmd.original_cmd_id} (Err: {cmd.error_code})")
 
     def broadcast_event(self, model):
@@ -202,7 +222,7 @@ class DemeterService:
             # DataReport has fields 'node_id', 'temperature', 'humidity'.
             # Let's wrap to be safe/consistent?
             # Or just send it. Let's send raw JSON of the model.
-            data = json_str.encode()
+            data = json_str.encode() + b'\n'
             
             # Iterate copy of set to handle disconnection during iteration safely
             for writer in list(self.clients):
@@ -245,7 +265,7 @@ class DemeterService:
                         self.logger.info(f"[CMD] GPIO Command: PIN={cmd.pin} ACT={cmd.action}")
                          # Execute (Mock or Real)
                         if MOCK_MODE or not self.transport:
-                            response_obj = self._execute_mock_gpio(cmd)
+                            response_obj = await self._execute_mock_gpio(cmd)
                         else:
                             response_obj = await self._execute_real_gpio(cmd)
 
@@ -255,7 +275,7 @@ class DemeterService:
                         if MOCK_MODE or not self.transport:
                              response_obj = ActionResponse(status="OK", message=f"MOCK: Pong from {cmd.target_id}")
                         else:
-                            await self._send_protocol_cmd(self.protocol.create_ping(cmd.target_id))
+                            await self._send_protocol_cmd(self.protocol.serialize(Ping(target_id=cmd.target_id)))
                             response_obj = ActionResponse(status="OK", message="Ping Sent")
 
                     elif cmd_type == "GET_SENSORS_CMD":
@@ -264,7 +284,7 @@ class DemeterService:
                         if MOCK_MODE or not self.transport:
                              response_obj = ActionResponse(status="OK", message="MOCK: Data Requested")
                         else:
-                             await self._send_protocol_cmd(self.protocol.create_get_sensors(cmd.target_id))
+                             await self._send_protocol_cmd(self.protocol.serialize(GetSensors(target_id=cmd.target_id)))
                              response_obj = ActionResponse(status="OK", message="Data Request Sent")
 
                     elif cmd_type == "SEQ_CMD":
@@ -289,17 +309,17 @@ class DemeterService:
 
                     # 3. Send Response
                     if response_obj:
-                        writer.write(response_obj.model_dump_json().encode())
+                        writer.write(response_obj.model_dump_json().encode() + b'\n')
                         await writer.drain()
                     
                 except ValidationError as e:
                     self.logger.error(f"Validation Error: {e}")
                     err = ActionResponse(status="ERROR", message=f"Schema Error: {e}")
-                    writer.write(err.model_dump_json().encode())
+                    writer.write(err.model_dump_json().encode() + b'\n')
                     await writer.drain()
                 except Exception as e:
                     self.logger.error(f"Processing Error: {e}")
-
+                
         except Exception as e:
             self.logger.error(f"Client Error: {e}")
         finally:
@@ -309,7 +329,7 @@ class DemeterService:
                 writer.close()
             except: pass
 
-    def _execute_mock_gpio(self, cmd: GpioCommand) -> ActionResponse:
+    async def _execute_mock_gpio(self, cmd: GpioCommand) -> ActionResponse:
         """Simulate hardware action."""
         current = self.mock_gpio_state.get(cmd.pin, False)
         
@@ -321,7 +341,15 @@ class DemeterService:
             new_state = not current
             
         self.mock_gpio_state[cmd.pin] = new_state
-        self.logger.info(f"💡 [MOCK] Pin {cmd.pin} -> {new_state}")
+        self.logger.info(f"[MOCK] Pin {cmd.pin} -> {new_state}")
+        
+        # Send to Transport to trigger Actuator Simulation
+        if self.transport:
+             val = 1 if new_state else 0
+             # Create payload using protocol factory
+             # Assuming target=3 for Actuator Node or 1 for Gateway (MockTransport handles both)
+             payload = self.protocol.serialize(SetGpio(target_id=3, pin=cmd.pin, value=val))
+             await self.transport.send(payload)
         
         return ActionResponse(
             status="OK",
@@ -342,7 +370,7 @@ class DemeterService:
                  val = 1
         
         # Create Payload
-        payload = self.protocol.create_set_gpio(target_id=1, pin=cmd.pin, value=val) # Target 1 (Gateway) usually
+        payload = self.protocol.serialize(SetGpio(target_id=1, pin=cmd.pin, value=val)) # Target 1 (Gateway) usually
         await self._send_protocol_cmd(payload)
         
         return ActionResponse(status="OK", message="Command Sent to UART")

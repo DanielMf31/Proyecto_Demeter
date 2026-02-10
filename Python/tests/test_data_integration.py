@@ -12,18 +12,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src'
 from proyecto_demeter.data.database import DatabaseManager
 from proyecto_demeter.data.file_logger import SensorLogger
 from proyecto_demeter.core.async_service import DemeterService
-
-# Mock for Protocol/Cmd
-from pydantic import BaseModel
-
-# Mock for Protocol/Cmd
-class MockDataReport(BaseModel):
-    node_id: int
-    temperature: float
-    humidity: float
-    
-    def get_cmd_id(self):
-        return 0x0B # DataReport
+from proyecto_demeter.transport.protocol_schemas import TempHumReport
 
 @pytest.mark.asyncio
 async def test_database_manager():
@@ -104,8 +93,8 @@ async def test_service_integration():
     # Setup Logger
     service.sensor_logger = SensorLogger("test_logs", "service_test.log")
     
-    # Mock Protocol Command
-    cmd = MockDataReport(node_id=99, temperature=12.3, humidity=88.8)
+    # Mock Protocol Command (Real Schema)
+    cmd = TempHumReport(target_id=0, node_id=99, temperature=12.3, humidity=88.8)
     
     # Execute Handler (Async)
     await service.handle_protocol_command(cmd)

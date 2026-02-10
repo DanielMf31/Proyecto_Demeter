@@ -79,7 +79,8 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: str = "/dev/serial0"
     SOCKET_PORT: int = 8888
-    MOCK_MODE: bool = False
+    MOCK_MODE: str = "MIXED"
+    MOCK: bool = False
 
     model_config = SettingsConfigDict(
         env_prefix="DEMETER_",

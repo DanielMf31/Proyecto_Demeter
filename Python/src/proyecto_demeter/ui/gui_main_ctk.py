@@ -60,7 +60,8 @@ class DemeterApp(ctk.CTk):
         self.vm = DemeterViewModel(
             self.loop,
             log_callback=lambda msg: self.after(0, self.console.append_log, msg),
-            status_callback=lambda connected: self.after(0, self.sidebar.update_status, connected)
+            status_callback=lambda connected: self.after(0, self.sidebar.update_status, connected),
+            data_callback=self.on_data_received
         )
         
         # Control Panel (Injects VM command)
@@ -115,6 +116,13 @@ class DemeterApp(ctk.CTk):
                 asyncio.run_coroutine_threadsafe(self.vm.send_sequence(steps), self.loop)
         except Exception as e:
             self.console.append_log(f"Error building sequence: {e}")
+
+    def on_data_received(self, report):
+        """Handle incoming DataReport."""
+        # Check for Actuator Node (ID 3)
+        if report.node_id == 3:
+            # We need to update UI safely
+            self.after(0, lambda: self.controls.update_actuator_state(report.temperature, report.humidity))
 
     def on_closing(self):
         self.vm.shutdown()

@@ -28,7 +28,9 @@ public:
     using SequenceCallback = std::function<void(const Demeter::ExecSequenceCmd&)>;
     using AckCallback = std::function<void(uint8_t srcId)>;
     using PingCallback = std::function<void(uint8_t srcId)>;
-    using DataReportCallback = std::function<void(uint8_t srcId, float temp, float hum)>;
+    using TempHumReportCallback = std::function<void(uint8_t srcId, float temp, float hum)>;
+    using PinReportCallback = std::function<void(uint8_t srcId, uint8_t pin, bool state)>;
+    using SystemReportCallback = std::function<void(uint8_t srcId, uint8_t mode, uint16_t batteryMv)>;
     using GetSensorsCallback = std::function<void(uint8_t srcId)>;
 
 private:
@@ -38,103 +40,60 @@ private:
     SequenceCallback _onSequenceCommand;
     AckCallback _onAckRecv;
     PingCallback _onPingRecv;
-    DataReportCallback _onDataReportRecv;
+    TempHumReportCallback _onTempHumReportRecv;
+    PinReportCallback _onPinReportRecv;
+    SystemReportCallback _onSystemReportRecv;
     GetSensorsCallback _onGetSensorsRecv;
     
-    uint8_t _myId = 1; // Default to Gateway ID
-
-    // Frame Constants
-    static const uint8_t SYNC_BYTE = 0xFE;
-    static const uint8_t HEADER_SIZE = 6; // Sync, Len, Flags, Src, Dst, Cmd
-
-    #pragma pack(push, 1)
-    struct Header {
-        uint8_t sync;
-        uint8_t length;     // Payload Length
-        uint8_t flags;
-        uint8_t src_id;
-        uint8_t dst_id;
-        uint8_t cmd_id;
-    };
-    #pragma pack(pop)
-
-    uint8_t calculateCRC(const uint8_t* data, size_t len);
+    // ...
 
 public:
-    /**
-     * @brief Construct a new Protocol Engine.
-     * @param strategy Pointer to the Communication Strategy (UART, LoRa...).
-     */
-    ProtocolEngine(IComms* strategy);
-
-    /**
-     * @brief Configure the local Node ID.
-     * @param id The ID of this device (Default: 1).
-     */
-    void setNodeId(uint8_t id);
-
-    /**
-     * @brief Process incoming data from the strategy.
-     * 
-     * Reads available bytes from the transport layer, parses potential frames,
-     * and triggers callbacks if a valid frame is found.
-     * Should be called frequently in the main loop.
-     */
-    void update();
-
-    /**
-     * @brief Register callback for SET_GPIO commands.
-     * @param cb Function to call when a valid GPIO command is received.
-     */
-    void onSetGpio(GpioCallback cb);
-
-    /**
-     * @brief Register callback for SET_PWM commands.
-     * @param cb Function to call when a valid PWM command is received.
-     */
-    void onSetPwm(PwmCallback cb);
-
-    /**
-     * @brief Register callback for EXEC_SEQUENCE commands.
-     * @param cb Function to call when a valid Sequence command is received.
-     */
-    void onExecSequence(SequenceCallback cb);
-
-    /**
-     * @brief Send a PING command to a target.
-     * @param targetId Destination Device ID.
-     */
-    /**
-     * @brief Send a PING command to a target.
-     * @param targetId Destination Device ID.
-     */
-    void sendPing(uint8_t targetId);
+    // ...
 
     /**
      * @brief Send Sensor Data Report (Temp/Hum)
+     * Replaces sendDataReport.
      * @param targetId Destination Device ID.
      * @param temp Temperature in Celsius.
      * @param hum Humidity in %.
      */
-    void sendDataReport(uint8_t targetId, float temp, float hum);
+    void sendTempHumReport(uint8_t targetId, float temp, float hum);
 
     /**
-     * @brief Register callback for ACK reception.
-     * @param cb Function to call when an ACK is received.
+     * @brief Send GPIO State Report (Feedback).
+     * @param targetId Destination Device ID.
+     * @param pin GPIO Number.
+     * @param state Current State (true=HIGH).
      */
-    void onAckRecv(AckCallback cb);
+    void sendPinReport(uint8_t targetId, uint8_t pin, bool state);
 
     /**
-     * @brief Register callback for PING reception.
-     * @param cb Function to call when a PING is received.
+     * @brief Send System Status Report.
+     * @param targetId Destination Device ID.
+     * @param mode System Mode (0=Active, 1=LightSleep, 2=DeepSleep).
+     * @param batteryMv Battery Voltage in millivolts.
      */
-    void onPingRecv(PingCallback cb);
+    void sendSystemReport(uint8_t targetId, uint8_t mode, uint16_t batteryMv);
+
+    // ...
 
     /**
-     * @brief Register callback for DataReport reception.
-     * @param cb Function to call when a DataReport is received.
+     * @brief Register callback for TempHumReport reception.
+     * @param cb Function to call when a Temp/Hum Report is received.
      */
-    void onDataReportRecv(DataReportCallback cb);
+    void onTempHumReportRecv(TempHumReportCallback cb);
+
+    /**
+     * @brief Register callback for PinReport reception.
+     * @param cb Function to call when a Pin Report is received.
+     */
+    void onPinReportRecv(PinReportCallback cb);
+
+    /**
+     * @brief Register callback for SystemReport reception.
+     * @param cb Function to call when a System Report is received.
+     */
+    void onSystemReportRecv(SystemReportCallback cb);
 
     /**
      * @brief Register callback for GET_SENSORS reception.

@@ -30,8 +30,19 @@ void ProtocolEngine::onPingRecv(PingCallback cb) {
     _onPingRecv = cb;
 }
 
-void ProtocolEngine::onDataReportRecv(DataReportCallback cb) {
-    _onDataReportRecv = cb;
+    _onPingRecv = cb;
+}
+
+void ProtocolEngine::onTempHumReportRecv(TempHumReportCallback cb) {
+    _onTempHumReportRecv = cb;
+}
+
+void ProtocolEngine::onPinReportRecv(PinReportCallback cb) {
+    _onPinReportRecv = cb;
+}
+
+void ProtocolEngine::onSystemReportRecv(SystemReportCallback cb) {
+    _onSystemReportRecv = cb;
 }
 
 void ProtocolEngine::onGetSensorsRecv(GetSensorsCallback cb) {
@@ -196,8 +207,8 @@ void ProtocolEngine::parseFrame(const std::vector<uint8_t>& frame) {
             _onAckRecv(hdr->src_id);
         }
     }
-    else if (hdr->cmd_id == (uint8_t)Demeter::CommandType::DATA_REPORT) {
-        if (hdr->length >= 4 && _onDataReportRecv) {
+    else if (hdr->cmd_id == (uint8_t)Demeter::CommandType::TEMP_HUM_REPORT) {
+        if (hdr->length >= 4 && _onTempHumReportRecv) {
             // Payload: [TempLSB] [TempMSB] [HumLSB] [HumMSB]
             const uint8_t* p = frame.data() + HEADER_SIZE;
             int16_t t_int = p[0] | (p[1] << 8);
@@ -206,11 +217,27 @@ void ProtocolEngine::parseFrame(const std::vector<uint8_t>& frame) {
             float temp = t_int / 100.0f;
             float hum = h_int / 100.0f;
             
-            _onDataReportRecv(hdr->src_id, temp, hum);
+            _onTempHumReportRecv(hdr->src_id, temp, hum);
         }
-        // Also send ACK? Usually telemetry is fire-and-forget or ACKed.
-        // Let's ACK for reliability if needed, but might congest.
-        // User didn't specify. Let's NOT Ack for now to save bandwidth.
+    }
+    else if (hdr->cmd_id == (uint8_t)Demeter::CommandType::PIN_REPORT) {
+         if (hdr->length >= 2 && _onPinReportRecv) {
+             // Payload: [PIN] [STATE]
+             const uint8_t* p = frame.data() + HEADER_SIZE;
+             uint8_t pin = p[0];
+             bool state = (p[1] > 0);
+             _onPinReportRecv(hdr->src_id, pin, state);
+         }
+    }
+    else if (hdr->cmd_id == (uint8_t)Demeter::CommandType::SYSTEM_REPORT) {
+        if (hdr->length >= 8 && _onSystemReportRecv) {
+            // Payload: [MODE] [BATT_LSB] [BATT_MSB] [RES*5]
+            const uint8_t* p = frame.data() + HEADER_SIZE;
+            uint8_t mode = p[0];
+            uint16_t battery = p[1] | (p[2] << 8);
+            
+            _onSystemReportRecv(hdr->src_id, mode, battery);
+        }
     }
     else if (hdr->cmd_id == 0x20) { // GET_SENSORS
         if (_onGetSensorsRecv) {
@@ -229,7 +256,7 @@ void ProtocolEngine::sendPing(uint8_t targetId) {
     sendFrame((uint8_t)Demeter::CommandType::PING, targetId, empty);
 }
 
-void ProtocolEngine::sendDataReport(uint8_t targetId, float temp, float hum) {
+void ProtocolEngine::sendTempHumReport(uint8_t targetId, float temp, float hum) {
     std::vector<uint8_t> payload;
     payload.reserve(4);
 
@@ -244,7 +271,28 @@ void ProtocolEngine::sendDataReport(uint8_t targetId, float temp, float hum) {
     payload.push_back((uint8_t)(h_int & 0xFF));
     payload.push_back((uint8_t)((h_int >> 8) & 0xFF));
 
-    sendFrame((uint8_t)Demeter::CommandType::DATA_REPORT, targetId, payload);
+    sendFrame((uint8_t)Demeter::CommandType::TEMP_HUM_REPORT, targetId, payload);
+}
+
+void ProtocolEngine::sendPinReport(uint8_t targetId, uint8_t pin, bool state) {
+    std::vector<uint8_t> payload;
+    payload.reserve(2);
+    payload.push_back(pin);
+    payload.push_back(state ? 1 : 0);
+    sendFrame((uint8_t)Demeter::CommandType::PIN_REPORT, targetId, payload);
+}
+
+void ProtocolEngine::sendSystemReport(uint8_t targetId, uint8_t mode, uint16_t batteryMv) {
+    std::vector<uint8_t> payload;
+    payload.reserve(8);
+    // [MODE(1)] [BATTERY(2)] [RESERVED(5)]
+    payload.push_back(mode);
+    payload.push_back((uint8_t)(batteryMv & 0xFF));
+    payload.push_back((uint8_t)((batteryMv >> 8) & 0xFF));
+    // Reserved padding
+    for(int i=0; i<5; i++) payload.push_back(0x00);
+
+    sendFrame((uint8_t)Demeter::CommandType::SYSTEM_REPORT, targetId, payload);
 }
 
 void ProtocolEngine::sendNack(uint8_t targetId) {

@@ -69,7 +69,7 @@ class DatabaseManager:
                     FROM sensor_readings 
                     WHERE node_id = ? AND timestamp >= ?
                     """,
-                    (node_id, start_time)
+                    (node_id, start_time.isoformat())
                 ) as cursor:
                     row = await cursor.fetchone()
                     if row:

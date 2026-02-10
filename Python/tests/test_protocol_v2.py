@@ -1,9 +1,15 @@
 import sys
 import os
 import pytest
-from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
-from proyecto_demeter.shared.schemas import CmdId, SetGpio, Ping, DataReport
 import struct
+
+# Add src to path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+
+from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
+from proyecto_demeter.transport.protocol_schemas import (
+    CmdId, SetGpio, Ping, TempHumReport, PinReport, SystemReport
+)
 
 class TestProtocolV2:
     def setup_method(self):
@@ -17,7 +23,7 @@ class TestProtocolV2:
         assert frame[0] == 0xFE
         # Frame structure: Sync(1) Len(1) Flags(1) Src(1) Dst(1) Cmd(1) Payload(N) CRC(1)
         # Cmd is at index 5 
-        assert frame[5] == CmdId.SET_GPIO
+        assert frame[5] == CmdId.SET_GPIO.value
 
     def test_parse_frame(self):
         cmd = SetGpio(target_id=1, pin=4, value=1)
@@ -34,21 +40,39 @@ class TestProtocolV2:
         parsed = self.protocol.parse_frame(frame)
         assert isinstance(parsed, Ping)
 
-    def test_data_report(self):
-        # Create DataReport (Note: Serialization for DataReport is not explicitly implemented in protocol_v2.serialize 
-        # because it comes FROM the device, but we can test parsing manually constructed frame)
+    def test_temphum_report(self):
+        # Model -> Bytes
+        cmd = TempHumReport(target_id=0, node_id=10, temperature=24.5, humidity=50.2)
+        serialized = self.protocol.serialize(cmd)
         
-        # Manually construct a valid DataReport frame
-        # Payload: Temp=25.43 (2543), Hum=60.12 (6012)
-        # [239, 9] [12, 23] (Little Endian)
-        t_int = int(25.43 * 100)
-        h_int = int(60.12 * 100)
-        payload = struct.pack('<hh', t_int, h_int)
+        # Bytes -> Model
+        parsed = self.protocol.parse_frame(serialized)
+        assert isinstance(parsed, TempHumReport)
+        assert parsed.node_id == 10
+        assert abs(parsed.temperature - 24.5) < 0.05 # Precision loss due to int16 packing
+        assert abs(parsed.humidity - 50.2) < 0.05
+
+    def test_pin_report(self):
+        # Model -> Bytes
+        cmd = PinReport(target_id=0, node_id=3, pin=26, state=1)
+        serialized = self.protocol.serialize(cmd)
         
-        # Dst=0 (Host), Cmd=0x0B (DATA_REPORT)
-        frame = self.protocol._pack_frame_raw(dst_id=0, cmd_id=CmdId.DATA_REPORT, payload=payload)
+        # Bytes -> Model
+        parsed = self.protocol.parse_frame(serialized)
+        assert isinstance(parsed, PinReport)
+        assert parsed.node_id == 3
+        assert parsed.pin == 26
+        assert parsed.state == 1
+
+    def test_system_report(self):
+        # Model -> Bytes
+        cmd = SystemReport(target_id=0, node_id=3, mode=1, battery_mv=12500)
+        serialized = self.protocol.serialize(cmd)
         
-        parsed = self.protocol.parse_frame(frame)
-        assert isinstance(parsed, DataReport)
-        assert abs(parsed.temperature - 25.43) < 0.01
-        assert abs(parsed.humidity - 60.12) < 0.01
+        # Bytes -> Model
+        parsed = self.protocol.parse_frame(serialized)
+        assert isinstance(parsed, SystemReport)
+        assert parsed.node_id == 3
+        assert parsed.mode == 1
+        assert parsed.battery_mv == 12500
+        assert parsed.reserved == b'\x00\x00\x00\x00\x00'

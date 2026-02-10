@@ -10,7 +10,7 @@ class DemeterViewModel:
     Manages the application state and async communication.
     Decoupled from CustomTkinter (UI agnostic).
     """
-    def __init__(self, loop: asyncio.AbstractEventLoop, log_callback: Callable[[str], None], status_callback: Callable[[bool], None]):
+    def __init__(self, loop: asyncio.AbstractEventLoop, log_callback: Callable[[str], None], status_callback: Callable[[bool], None], data_callback: Callable[[object], None] = None):
         self.loop = loop
         self.writer = None
         self.reader = None
@@ -19,6 +19,7 @@ class DemeterViewModel:
         # Callbacks to update UI
         self._log_cb = log_callback
         self._status_cb = status_callback
+        self._data_cb = data_callback
         
         self.host = os.getenv('DEMETER_HOST', '127.0.0.1')
         self.port = int(os.getenv('DEMETER_SOCKET_PORT', 8888))
@@ -129,6 +130,17 @@ class DemeterViewModel:
                         temp = data_json.get("temperature", 0.0)
                         hum = data_json.get("humidity", 0.0)
                         self.log(f"[RPT] Node {node}: {temp}C | {hum}%")
+                        
+                        if self._data_cb:
+                            # Pass the raw dict or the Pydantic model? 
+                            # Let's pass the Pydantic model for type safety if possible, but here we have dict.
+                            # Schemas are imported.
+                            try:
+                                from ..shared.schemas import DataReport
+                                report = DataReport(**data_json)
+                                self._data_cb(report)
+                            except:
+                                pass
                         
                     # 2. Check if it is ActionResponse
                     elif "status" in data_json:

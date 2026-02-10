@@ -22,7 +22,12 @@ def main():
     
     # Mock default from Environment
     mock_default = os.environ.get("DEMETER_MOCK", "False").lower() in ("true", "1", "yes")
-    parser.add_argument("--mock", action="store_true", default=mock_default, help="Run in Mock Mode")
+    
+    # Mock Modes
+    parser.add_argument("--mock-sensors", action="store_true", help="Mock Sensors Only")
+    parser.add_argument("--mock-actuator", action="store_true", help="Mock Actuator Only")
+    parser.add_argument("--mock-mixed", action="store_true", help="Mock Both (Sensors + Actuator)")
+    parser.add_argument("--mock", action="store_true", default=mock_default, help="Legacy alias for Mixed Mock")
     
     args = parser.parse_args()
 
@@ -113,7 +118,15 @@ def main():
         env["DEMETER_PORT"] = args.port
         env["DEMETER_HOST"] = args.host
         env["DEMETER_SOCKET_PORT"] = str(args.socket_port)
-        env["DEMETER_MOCK"] = str(args.mock)
+        # Determine Mode
+        mode = "NONE"
+        if args.mock_sensors: mode = "SENSORS"
+        elif args.mock_actuator: mode = "ACTUATOR"
+        elif args.mock_mixed or args.mock: mode = "MIXED"
+        
+        env["DEMETER_MOCK_MODE"] = mode
+        # Legacy compat
+        env["DEMETER_MOCK"] = "True" if mode != "NONE" else "False"
 
         service_process = subprocess.Popen(
             [VENV_PYTHON, SERVICE_SCRIPT],

@@ -44,15 +44,54 @@ class ControlPanelFrame(ctk.CTkScrollableFrame):
         for i, pin in enumerate([4, 5, 6, 7]):
             self.create_pump_card(i+1, pin, row=i+1)
 
+        # Actuator Window (Node 3)
+        self.create_actuator_card(row=5)
+
+    def create_actuator_card(self, row: int):
+        frame = ctk.CTkFrame(self)
+        frame.grid(row=row, column=0, columnspan=2, padx=10, pady=20, sticky="ew")
+        
+        lbl = ctk.CTkLabel(frame, text="Window Actuator (Node 3)", font=("Arial", 16, "bold"))
+        lbl.pack(pady=5)
+
+        # Status
+        self.lbl_window_state = ctk.CTkLabel(frame, text="State: UNKNOWN", text_color="gray")
+        self.lbl_window_state.pack(pady=2)
+        
+        self.lbl_battery = ctk.CTkLabel(frame, text="Battery: -- V", text_color="gray")
+        self.lbl_battery.pack(pady=2)
+        
+        # Buttons
+        btn_frame = ctk.CTkFrame(frame, fg_color="transparent")
+        btn_frame.pack(pady=10)
+        
+        self.btn_open = ctk.CTkButton(btn_frame, text="OPEN", fg_color="green", 
+                                      command=lambda: self.command_callback(26, "ON")) # Pin 26 is used in tests/firmware? Need to confirm. 
+                                      # In firmware: #define PIN_RELAY 2. 
+                                      # In tests: 26. 
+                                      # User verification passed with 26. 
+                                      # Let's use 26 as in verified test.
+        self.btn_open.pack(side="left", padx=10)
+        
+        self.btn_close = ctk.CTkButton(btn_frame, text="CLOSE", fg_color="red", 
+                                       command=lambda: self.command_callback(26, "OFF"))
+        self.btn_close.pack(side="left", padx=10)
+
+    def update_actuator_state(self, state_val, battery_val):
+        state_str = "OPEN" if state_val > 0.5 else "CLOSED"
+        color = "green" if state_val > 0.5 else "red"
+        self.lbl_window_state.configure(text=f"State: {state_str}", text_color=color)
+        self.lbl_battery.configure(text=f"Battery: {battery_val:.2f} V")
+
         # Advanced/Diagnostics
         self.lbl_advanced = ctk.CTkLabel(self, text="Diagnostics & Tools", font=ctk.CTkFont(size=14, weight="bold"))
-        self.lbl_advanced.grid(row=5, column=0, columnspan=2, pady=(20, 10))
+        self.lbl_advanced.grid(row=6, column=0, columnspan=2, pady=(20, 10))
 
         self.btn_ping = ctk.CTkButton(self, text="PING Gateway", command=self.on_ping)
-        self.btn_ping.grid(row=6, column=0, padx=5, pady=5)
+        self.btn_ping.grid(row=7, column=0, padx=5, pady=5)
 
         self.btn_get_data = ctk.CTkButton(self, text="GET REPORT (Node 2)", fg_color="purple", command=self.on_get_data)
-        self.btn_get_data.grid(row=6, column=1, padx=5, pady=5)
+        self.btn_get_data.grid(row=7, column=1, padx=5, pady=5)
 
     def on_ping(self):
         if hasattr(self.master.master.master, 'trigger_ping'):

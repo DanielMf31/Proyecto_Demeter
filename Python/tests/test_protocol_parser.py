@@ -7,18 +7,18 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(BASE_DIR, 'src'))
 
-from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2, DataReport, CmdId, HEADER_FMT, SYNC_BYTE
-from proyecto_demeter.shared.schemas import DemeterCommand
+from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2, HEADER_FMT, SYNC_BYTE
+from proyecto_demeter.transport.protocol_schemas import DemeterCommand, TempHumReport, CmdId
 
 class TestDemeterProtocolV2(unittest.TestCase):
     def setUp(self):
         self.protocol = DemeterProtocolV2()
 
-    def test_parse_data_report(self):
-        """Test parsing of a valid DataReport frame."""
+    def test_parse_temphum_report(self):
+        """Test parsing of a valid TempHumReport frame."""
         # Construct a raw frame
         # [SYNC] [LEN] [FLAGS] [SRC] [DST] [CMD] [PAYLOAD] [CRC]
-        # Payload for DataReport: T_LSB, T_MSB, H_LSB, H_MSB (4 bytes)
+        # Payload for TempHumReport: T_LSB, T_MSB, H_LSB, H_MSB (4 bytes)
         # Temp = 25.50 -> 2550 (0x09F6) -> F6 09
         # Hum = 60.00 -> 6000 (0x1770) -> 70 17
         
@@ -27,7 +27,7 @@ class TestDemeterProtocolV2(unittest.TestCase):
         flags = 0
         src = 10 # Node ID
         dst = 1  # Gateway ID
-        cmd_id = CmdId.DATA_REPORT
+        cmd_id = CmdId.TEMP_HUM_REPORT
         
         header = struct.pack(HEADER_FMT, sync, length, flags, src, dst, cmd_id)
         payload = struct.pack('<hh', 2550, 6000)
@@ -43,8 +43,9 @@ class TestDemeterProtocolV2(unittest.TestCase):
         
         # Assertions
         self.assertIsNotNone(cmd, "Parsed command should not be None")
-        self.assertIsInstance(cmd, DataReport)
-        self.assertEqual(cmd.target_id, 1) # This was the missing field causing error
+        self.assertIsInstance(cmd, TempHumReport)
+        # Protocol parse_frame extracts dst_id from frame and passes it to parser.
+        self.assertEqual(cmd.target_id, 1) # DST in frame was 1
         self.assertEqual(cmd.node_id, 10)
         self.assertAlmostEqual(cmd.temperature, 25.50)
         self.assertAlmostEqual(cmd.humidity, 60.00)

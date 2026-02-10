@@ -1,8 +1,8 @@
 import struct
 import logging
-from typing import Optional, Union, Any
+from typing import Optional, Union, Any, Dict, Type
 
-from ..shared.schemas import (
+from ..transport.protocol_schemas import (
     DemeterCommand, 
     SetGpio, 
     SetPwm,
@@ -13,7 +13,9 @@ from ..shared.schemas import (
     Ack,
     Nack,
     CmdId,
-    DataReport,
+    TempHumReport,
+    PinReport,
+    SystemReport,
     GetSensors
 )
 
@@ -26,32 +28,30 @@ SEQUENCE_STEP_SIZE = struct.calcsize(SEQUENCE_STEP_FMT)
 
 class DemeterProtocolV2:
     """
-    Implements the Demeter V2 Binary Protocol.
-    
-    This class handles the core logic for:
-    1.  **Serialization**: Converting High-Level Pydantic Models (`DemeterCommand`) into binary frames.
-    2.  **Deserialization**: Parsing incoming binary byte streams into Pydantic Models.
-    3.  **Validation**: CRC integrity checks and Frame structure verification.
-    
-    Frame Structure:
-    `[SYNC(1)] [LEN(1)] [FLAGS(1)] [SRC(1)] [DST(1)] [CMD(1)] ... [PAYLOAD(N)] ... [CRC(1)]`
-    
-    Attributes:
-        logger (logging.Logger): Logger instance for protocol events.
+    Implements the Demeter V2 Binary Protocol with Registry Pattern.
     """
     def __init__(self):
         self.logger = logging.getLogger("ProtocolV2")
+        self._registry: Dict[int, Any] = {
+            CmdId.PING: self._parse_ping,
+            CmdId.ACK: self._parse_ack,
+            CmdId.NACK: self._parse_nack,
+            CmdId.SET_GPIO: self._parse_set_gpio,
+            CmdId.SET_PWM: self._parse_set_pwm,
+            CmdId.EXEC_SEQUENCE: self._parse_exec_sequence,
+            CmdId.TEMP_HUM_REPORT: self._parse_temp_hum_report,
+            CmdId.PIN_REPORT: self._parse_pin_report,
+            CmdId.SYSTEM_REPORT: self._parse_system_report
+        }
 
     def _calculate_crc(self, data: bytes) -> int:
         return sum(data) % 256
 
     def _pack_frame_raw(self, dst_id: int, cmd_id: int, payload: bytes = b'', flags: int = 0x01, src_id: int = 0x00) -> bytes:
         length = len(payload)
-        
         header = struct.pack(HEADER_FMT, SYNC_BYTE, length, flags, src_id, dst_id, cmd_id)
         data_to_hash = header[1:] + payload
         crc_val = self._calculate_crc(data_to_hash)
-        
         return header + payload + struct.pack('<B', crc_val)
 
     # ==========================================
@@ -59,156 +59,132 @@ class DemeterProtocolV2:
     # ==========================================
     def serialize(self, cmd: DemeterCommand) -> bytes:
         payload = b''
-        
-        if isinstance(cmd, SetGpio):
-            # [PIN] [VAL] [FLAGS]
-            payload = struct.pack('<BBB', cmd.pin, cmd.value, cmd.flags)
+        src_id = 0x00
 
+        if isinstance(cmd, SetGpio):
+            payload = struct.pack('<BBB', cmd.pin, cmd.value, cmd.flags)
         elif isinstance(cmd, SetPwm):
-            # [PIN] [VAL(16)]
             payload = struct.pack('<BH', cmd.pin, cmd.value)
-        
         elif isinstance(cmd, ExecSequence):
-            # [COUNT] + [Steps...]
             count = len(cmd.steps)
             payload = struct.pack('<B', count)
             for step in cmd.steps:
-                step_bytes = struct.pack(SEQUENCE_STEP_FMT, 
-                                         step.target_id, 
-                                         step.cmd_id,
-                                         step.pin, 
-                                         step.value, 
-                                         step.delay_ms)
-                payload += step_bytes
-
-                
+                payload += struct.pack(SEQUENCE_STEP_FMT, step.target_id, step.cmd_id, step.pin, step.value, step.delay_ms)
         elif isinstance(cmd, RouteAdd):
-            # [TARGET_ID] [MAC(6)]
             payload = struct.pack('<B6s', cmd.node_id_to_register, cmd.mac_address_bytes)
-            
-        elif isinstance(cmd, Ping):
-            payload = b''
-            
-        elif isinstance(cmd, GetSensors):
-            payload = b''
-
         elif isinstance(cmd, Ack):
-            # [ORIGINAL_CMD_ID]
             payload = struct.pack('<B', cmd.original_cmd_id)
-            
         elif isinstance(cmd, Nack):
-            # [ORIGINAL_CMD_ID] [ERROR_CODE]
             payload = struct.pack('<BB', cmd.original_cmd_id, cmd.error_code)
-
-        elif isinstance(cmd, DataReport):
+        
+        # Reports
+        elif isinstance(cmd, TempHumReport):
             # [T_INT] [H_INT]
             t_int = int(cmd.temperature * 100)
             h_int = int(cmd.humidity * 100)
             payload = struct.pack('<hh', t_int, h_int)
-            return self._pack_frame_raw(cmd.target_id, cmd.get_cmd_id(), payload, src_id=cmd.node_id)
+            src_id = cmd.node_id
+        
+        elif isinstance(cmd, PinReport):
+            # [PIN] [STATE]
+            payload = struct.pack('<BB', cmd.pin, cmd.state)
+            src_id = cmd.node_id
+
+        elif isinstance(cmd, SystemReport):
+            # [MODE] [BATT_mV] [RESERVED(5)]
+            payload = struct.pack('<BH5s', cmd.mode, cmd.battery_mv, cmd.reserved)
+            src_id = cmd.node_id
+
+        elif isinstance(cmd, (Ping, GetSensors)):
+            payload = b''
             
-        return self._pack_frame_raw(cmd.target_id, cmd.get_cmd_id(), payload)
+        return self._pack_frame_raw(cmd.target_id, cmd.get_cmd_id(), payload, src_id=src_id)
 
     # ==========================================
     # DESERIALIZATION (Bytes -> Model)
     # ==========================================
     def parse_frame(self, frame_bytes: bytes) -> Optional[DemeterCommand]:
-        """
-        Parses binary frame into a Pydantic Model.
-        Returns None if invalid.
-        """
         if len(frame_bytes) < HEADER_SIZE + 1:
             return None
         
         try:
             sync, length, flags, src, dst, cmd_id = struct.unpack(HEADER_FMT, frame_bytes[:HEADER_SIZE])
         except struct.error:
-            self.logger.warning("Header unpack failed")
             return None
             
         if sync != SYNC_BYTE:
-            self.logger.warning(f"Invalid Sync Byte: {sync}")
             return None
             
         expected_total_len = HEADER_SIZE + length + 1
         if len(frame_bytes) < expected_total_len:
-            # Incomplete frame
-            self.logger.warning(f"Incomplete Frame: {len(frame_bytes)} < {expected_total_len}")
             return None
             
         payload = frame_bytes[HEADER_SIZE : HEADER_SIZE+length]
         received_crc = frame_bytes[HEADER_SIZE+length]
         
         # Verify CRC
-        data_to_hash = frame_bytes[1 : HEADER_SIZE+length]
-        calc_crc = self._calculate_crc(data_to_hash)
-        if calc_crc != received_crc:
-            self.logger.warning(f"CRC Error. Recv:{received_crc}, Calc:{calc_crc}")
+        if self._calculate_crc(frame_bytes[1 : HEADER_SIZE+length]) != received_crc:
+            self.logger.warning(f"CRC Error")
             return None
 
-        # Factory Logic
-        try:
-            if cmd_id == CmdId.SET_GPIO:
-                if len(payload) < 3: return None
-                pin, val, flg = struct.unpack('<BBB', payload)
-                return SetGpio(target_id=dst, pin=pin, value=val, flags=flg)
-                
-            elif cmd_id == CmdId.SET_PWM:
-                if len(payload) < 3: return None
-                pin, val = struct.unpack('<BH', payload)
-                return SetPwm(target_id=dst, pin=pin, value=val)
+        # Registry Dispatch
+        parser = self._registry.get(cmd_id)
+        if parser:
+            return parser(dst, src, payload)
+        
+        self.logger.info(f"Unknown Command ID: {cmd_id}")
+        return None
 
-            elif cmd_id == CmdId.PING:
-                return Ping(target_id=dst)
-                
-            elif cmd_id == CmdId.ACK:
-                if len(payload) < 1: return None
-                orig = payload[0]
-                return Ack(target_id=dst, original_cmd_id=orig)
-                
-            elif cmd_id == CmdId.NACK:
-                if len(payload) < 2: return None
-                orig, err = struct.unpack('<BB', payload)
-                return Nack(target_id=dst, original_cmd_id=orig, error_code=err)
-                
-            elif cmd_id == CmdId.EXEC_SEQUENCE:
-                if len(payload) < 1: return None
-                count = payload[0]
-                steps = []
-                offset = 1
-                for _ in range(count):
-                    if offset + SEQUENCE_STEP_SIZE > len(payload): break
-                    tgt, c_id, p, v, d = struct.unpack(SEQUENCE_STEP_FMT, payload[offset:offset+SEQUENCE_STEP_SIZE])
-                    steps.append(SequenceStep(target_id=tgt, cmd_id=c_id, pin=p, value=v, delay_ms=d))
-                    offset += SEQUENCE_STEP_SIZE
-                
-                return ExecSequence(target_id=dst, steps=steps)
+    # --- Parsers ---
+    def _parse_ping(self, dst, src, payload):
+        return Ping(target_id=dst)
 
-            elif cmd_id == CmdId.DATA_REPORT:
-                if len(payload) < 4: return None
-                # Payload: [T_LSB] [T_MSB] [H_LSB] [H_MSB] (Int16 x100)
-                t_int, h_int = struct.unpack('<hh', payload)
-                temp = t_int / 100.0
-                hum = h_int / 100.0
-                return DataReport(target_id=dst, node_id=src, temperature=temp, humidity=hum)
+    def _parse_ack(self, dst, src, payload):
+        if len(payload) < 1: return None
+        return Ack(target_id=dst, original_cmd_id=payload[0])
 
-            # Default/Unknown: Handle generic? 
-            # For now return None or implement GenericCommand
-            self.logger.info(f"Unknown Command ID: {cmd_id}")
-            return None
+    def _parse_nack(self, dst, src, payload):
+        if len(payload) < 2: return None
+        orig, err = struct.unpack('<BB', payload)
+        return Nack(target_id=dst, original_cmd_id=orig, error_code=err)
 
-        except Exception as e:
-            self.logger.error(f"Parsing error for cmd {cmd_id}: {e}")
-            return None
+    def _parse_set_gpio(self, dst, src, payload):
+        if len(payload) < 3: return None
+        pin, val, flg = struct.unpack('<BBB', payload)
+        return SetGpio(target_id=dst, pin=pin, value=val, flags=flg)
 
-    # ==========================================
-    # HELPERS (Factories)
-    # ==========================================
+    def _parse_set_pwm(self, dst, src, payload):
+        if len(payload) < 3: return None
+        pin, val = struct.unpack('<BH', payload)
+        return SetPwm(target_id=dst, pin=pin, value=val)
+
+    def _parse_exec_sequence(self, dst, src, payload):
+        if len(payload) < 1: return None
+        count = payload[0]
+        steps = []
+        offset = 1
+        for _ in range(count):
+            if offset + SEQUENCE_STEP_SIZE > len(payload): break
+            tgt, c_id, p, v, d = struct.unpack(SEQUENCE_STEP_FMT, payload[offset:offset+SEQUENCE_STEP_SIZE])
+            steps.append(SequenceStep(target_id=tgt, cmd_id=c_id, pin=p, value=v, delay_ms=d))
+            offset += SEQUENCE_STEP_SIZE
+        return ExecSequence(target_id=dst, steps=steps)
+
+    def _parse_temp_hum_report(self, dst, src, payload):
+        if len(payload) < 4: return None
+        t_int, h_int = struct.unpack('<hh', payload)
+        return TempHumReport(target_id=dst, node_id=src, temperature=t_int/100.0, humidity=h_int/100.0)
+
+    def _parse_pin_report(self, dst, src, payload):
+        if len(payload) < 2: return None
+        pin, state = struct.unpack('<BB', payload)
+        return PinReport(target_id=dst, node_id=src, pin=pin, state=state)
+
+    def _parse_system_report(self, dst, src, payload):
+        if len(payload) < 8: return None # 1 + 2 + 5
+        mode, batt_mv, reserved = struct.unpack('<BH5s', payload)
+        return SystemReport(target_id=dst, node_id=src, mode=mode, battery_mv=batt_mv, reserved=reserved)
+
+    # --- Helpers ---
     def create_ping(self, target_id: int) -> bytes:
         return self.serialize(Ping(target_id=target_id))
-
-    def create_get_sensors(self, target_id: int) -> bytes:
-        return self.serialize(GetSensors(target_id=target_id))
-
-    def create_set_gpio(self, target_id: int, pin: int, value: int) -> bytes:
-        return self.serialize(SetGpio(target_id=target_id, pin=pin, value=value))
