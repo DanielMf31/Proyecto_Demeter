@@ -45,6 +45,8 @@ void setUp(void) {
         cmdReceived = true;
         gpio->execute(cmd); // Actually run controller logic
     });
+    
+    engine->setNodeId(0x0A); // Match DST in test frame
 }
 
 void tearDown(void) {

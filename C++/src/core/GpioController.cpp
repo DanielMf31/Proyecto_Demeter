@@ -5,25 +5,7 @@
  * @brief GPIO Hardware Abstraction Implementation.
  */
 
-#ifndef ARDUINO
-    // Mock Implementation for Native Environment
-    #include <iostream>
-    #include <map>
-    
-    static std::map<uint8_t, uint8_t> _mockPinStates;
 
-    void pinMode(uint8_t pin, uint8_t mode) { 
-        // Mock: Do nothing or log
-    }
-    
-    void digitalWrite(uint8_t pin, uint8_t val) {
-        _mockPinStates[pin] = val;
-    }
-
-    uint8_t getMockPinState(uint8_t pin) {
-        return _mockPinStates[pin];
-    }
-#endif
 
 void GpioController::init() {
     // Initialize default pins for MVP (4, 5, 6, 7) context

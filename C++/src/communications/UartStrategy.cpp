@@ -6,8 +6,7 @@
  */
 
 #ifndef ARDUINO
-    // Mock Instance for Native Linker
-    HardwareSerial Serial;
+    #include <Arduino.h>
 #endif
 
 UartStrategy::UartStrategy(HardwareSerial* serial, uint32_t baudRate, int8_t rxPin, int8_t txPin) 

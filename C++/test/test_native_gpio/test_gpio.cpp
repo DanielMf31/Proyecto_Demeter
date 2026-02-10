@@ -17,10 +17,10 @@ void tearDown(void) {
 
 void test_init_sets_pins_low(void) {
     controller->init();
-    TEST_ASSERT_EQUAL(0, getMockPinState(4));
-    TEST_ASSERT_EQUAL(0, getMockPinState(5));
-    TEST_ASSERT_EQUAL(0, getMockPinState(6));
-    TEST_ASSERT_EQUAL(0, getMockPinState(7));
+    TEST_ASSERT_EQUAL(0, digitalRead(4));
+    TEST_ASSERT_EQUAL(0, digitalRead(5));
+    TEST_ASSERT_EQUAL(0, digitalRead(6));
+    TEST_ASSERT_EQUAL(0, digitalRead(7));
 }
 
 void test_execute_valid_pin_on(void) {
@@ -30,7 +30,7 @@ void test_execute_valid_pin_on(void) {
     cmd.flags = 0;
 
     controller->execute(cmd);
-    TEST_ASSERT_EQUAL(1, getMockPinState(4));
+    TEST_ASSERT_EQUAL(1, digitalRead(4));
 }
 
 void test_execute_valid_pin_off(void) {
@@ -39,14 +39,14 @@ void test_execute_valid_pin_off(void) {
     cmdOn.pin = 5;
     cmdOn.value = true;
     controller->execute(cmdOn);
-    TEST_ASSERT_EQUAL(1, getMockPinState(5));
+    TEST_ASSERT_EQUAL(1, digitalRead(5));
 
     // Then set OFF
     Demeter::SetGpioCmd cmdOff;
     cmdOff.pin = 5;
     cmdOff.value = false;
     controller->execute(cmdOff);
-    TEST_ASSERT_EQUAL(0, getMockPinState(5));
+    TEST_ASSERT_EQUAL(0, digitalRead(5));
 }
 
 void test_ignore_invalid_pins(void) {
@@ -61,7 +61,7 @@ void test_ignore_invalid_pins(void) {
     // Best way: Pre-set to 0, execute, check 0.
     
     controller->execute(cmd);
-    TEST_ASSERT_EQUAL(0, getMockPinState(2));
+    TEST_ASSERT_EQUAL(0, digitalRead(2));
 }
 
 int main(int argc, char **argv) {

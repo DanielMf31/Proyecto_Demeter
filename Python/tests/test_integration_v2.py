@@ -62,13 +62,13 @@ class TestDemeterIntegrationV2(unittest.TestCase):
         """Test that split frames are correctly reassembled."""
         # Create a valid DataReport frame
         protocol = DemeterProtocolV2()
-        report = DataReport(node_id=2, temperature=25.5, humidity=60.0)
+        report = DataReport(target_id=0, node_id=2, temperature=25.5, humidity=60.0)
         # Manually serialize based on protocol (DataReport ID = 0x10)
         # Payload: [T_LSB] [T_MSB] [H_LSB] [H_MSB] (x100)
         t_int = int(25.5 * 100)
         h_int = int(60.0 * 100)
         payload = int(t_int).to_bytes(2, 'little', signed=True) + int(h_int).to_bytes(2, 'little', signed=True)
-        frame = protocol._pack_frame_raw(dst_id=0, cmd_id=0x10, payload=payload)
+        frame = protocol._pack_frame_raw(dst_id=0, cmd_id=0x0B, payload=payload)
         
         # Confirm frame validity
         parsed = protocol.parse_frame(frame)

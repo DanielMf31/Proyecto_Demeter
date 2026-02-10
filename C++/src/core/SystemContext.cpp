@@ -1,7 +1,5 @@
 #include "core/SystemContext.h"
-#ifdef ARDUINO
 #include <Arduino.h>
-#endif
 
 /**
  * @file SystemContext.cpp
