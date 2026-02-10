@@ -1,5 +1,5 @@
 from .protocol_v2 import DemeterProtocolV2
-from ..config.schemas import (
+from ..shared.schemas import (
     CmdId,
     DemeterCommand,
     SetGpio,
@@ -7,5 +7,9 @@ from ..config.schemas import (
     ExecSequence,
     RouteAdd,
     Ping,
-    SequenceStep
+    SequenceStep,
+    Ack, 
+    Nack,
+    DataReport,
+    GetSensors
 )
