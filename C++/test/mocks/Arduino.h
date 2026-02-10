@@ -30,6 +30,8 @@ public:
     void begin(unsigned long baud, uint32_t config=SERIAL_8N1, int8_t rxPx=-1, int8_t txPin=-1) {}
     void print(const char* s) {}
     void println(const char* s) {}
+    void printf(const char* format, ...) {}
+    void flush() {}
     int available() { return 0; }
     int read() { return -1; }
     size_t write(uint8_t c) { return 1; }

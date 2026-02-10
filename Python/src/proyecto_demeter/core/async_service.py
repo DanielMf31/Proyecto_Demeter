@@ -11,13 +11,16 @@ try:
     from proyecto_demeter.transport.async_uart import AsyncUartTransport
     from proyecto_demeter.shared.schemas import GpioCommand, ActionResponse, PingCommand, SequenceCommand, ExecSequence, GetSensorsCommand
     from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
+    from proyecto_demeter.data.database import DatabaseManager
+    from proyecto_demeter.data.file_logger import SensorLogger
 except ImportError:
     # Fallback for direct execution
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
     from src.proyecto_demeter.transport.async_uart import AsyncUartTransport
-    from src.proyecto_demeter.transport.async_uart import AsyncUartTransport
     from src.proyecto_demeter.shared.schemas import GpioCommand, ActionResponse,  PingCommand, SequenceCommand, ExecSequence
     from src.proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
+    from src.proyecto_demeter.data.database import DatabaseManager
+    from src.proyecto_demeter.data.file_logger import SensorLogger
     
 from pydantic import ValidationError
 
@@ -51,9 +54,16 @@ class DemeterService:
         # Buffer for incoming UART bytes
         self.rx_buffer = bytearray()
 
+        # Data Layer
+        self.data_manager = DatabaseManager()
+        self.sensor_logger = SensorLogger()
+
     async def start(self):
         """Start all async tasks."""
         self.logger.info("[START] Starting Demeter Async Service...")
+        
+        # Init DB
+        await self.data_manager.init_db()
         
         # 1. Start TCP Server (IPC)
         # reuse_address=True and reuse_port=True (on supported OS) helps avoid "Address already in use"
@@ -142,17 +152,23 @@ class DemeterService:
             # 2. Parse Frame
             cmd = self.protocol.parse_frame(bytes(frame))
             if cmd:
-                self.handle_protocol_command(cmd)
+                # Schedule async handler
+                asyncio.create_task(self.handle_protocol_command(cmd))
             else:
                 self.logger.warning(f"Invalid Frame (CRC or Structure): {frame.hex()}")
 
-    def handle_protocol_command(self, cmd):
+    async def handle_protocol_command(self, cmd):
         """Dispatch received protocol commands."""
         # self.logger.info(f"RX Parsed: {cmd}")
         
         # Broadcast DataReports to all connected GUI clients
         if cmd.get_cmd_id() == 0x0B: # DataReport
             self.logger.info(f"[RX] DataReport Node={cmd.node_id} Temp={cmd.temperature:.1f} Hum={cmd.humidity:.1f}")
+            
+            # Log & Save
+            self.sensor_logger.log_reading(cmd.node_id, cmd.temperature, cmd.humidity)
+            await self.data_manager.save_reading(cmd.node_id, cmd.temperature, cmd.humidity)
+
             self.broadcast_event(cmd)
             
         elif cmd.get_cmd_id() == 0xF0: # ACK

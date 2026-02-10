@@ -37,7 +37,11 @@ class LoginWindow(ctk.CTk):
 
         # Login Button
         self.btn_login = ctk.CTkButton(self, text="Login", command=self.check_login)
-        self.btn_login.pack(pady=20)
+        self.btn_login.pack(pady=10)
+
+        # Dev Bypass
+        self.btn_bypass = ctk.CTkButton(self, text="Bypass (Dev)", command=self.bypass_login, fg_color="#555555", hover_color="#333333")
+        self.btn_bypass.pack(pady=5)
         
         # Bind Enter key
         self.bind('<Return>', lambda event: self.check_login())
@@ -61,6 +65,12 @@ class LoginWindow(ctk.CTk):
                 messagebox.showerror("Login Failed", "Invalid Username or Password")
         except Exception as e:
             messagebox.showerror("Error", f"Login Error: {e}")
+
+    def bypass_login(self):
+        """Skip authentication for development."""
+        print("⚠️  Developer Bypass Activated")
+        self.authenticated = True
+        self.destroy()
 
 if __name__ == "__main__":
     app = LoginWindow()

@@ -1,20 +1,27 @@
 /**
  * @file main_node.cpp
- * @brief Firmware Entry Point for "Node" (ESP32).
+ * @brief Firmware Entry Point for "Node" (ESP32) - Modular Sensor Prototype.
  * 
- * Implements the Demeter Protocol V2 Node logic.
+ * Implements the Demeter Protocol V2 Node logic using the new Node architecture.
  * Communicates via ESP-Now.
  */
 
 #include <Arduino.h>
-#include <WiFi.h>  // Required for macAddress()
+#include <WiFi.h>
 #include "communications/EspNowStrategy.h"
 #include "core/ProtocolEngine.h"
-#include "core/GpioController.h"
-#include "core/SystemContext.h"
+#include "core/Node.h"
 
-// ID of this Node (Ideally read from NVS or Switches)
+// Sensors
+#include "hardware/sensors/DHTSensor.h"
+#include "hardware/sensors/DS18B20Sensor.h"
+#include "hardware/sensors/SoilMoistureSensor.h"
+
+// ID of this Node
 #define NODE_ID 2
+
+// Configuration Flags
+#define USE_MOCK_SENSORS true
 
 // ==========================================
 // Global Instances
@@ -26,11 +33,18 @@ EspNowStrategy espNowStrategy;
 // 2. Protocol Layer: Protocol V2 Engine
 ProtocolEngine engine(&espNowStrategy);
 
-// 3. Hardware Layer: GPIO Controller
-GpioController gpioController;
+// 3. New Modular Node Manager
+Node demeterNode(NODE_ID, &engine);
 
-// 4. System Layer: Context Orchestrator
-SystemContext systemCtx(engine, gpioController);
+// 4. Sensors
+// DHT22 on Pin 4
+Demeter::Sensors::DHTSensor dhtSensor(4, 22, USE_MOCK_SENSORS); 
+
+// DS18B20 on Pin 5
+Demeter::Sensors::DS18B20Sensor tempSensor(5, USE_MOCK_SENSORS);
+
+// Soil Moisture on Pin 34 (Analog)
+Demeter::Sensors::SoilMoistureSensor soilSensor(34, 3000, 1000, USE_MOCK_SENSORS);
 
 /**
  * @brief Standard Arduino Setup.
@@ -41,78 +55,46 @@ void setup() {
     delay(1000);
     while(!Serial) delay(10);
 
-    Serial.println("=== DEMETER NODE V2 (ESP-Now) ===");
+    Serial.println("=== DEMETER NODE V2 (Modular Prototype Full) ===");
     Serial.printf("Node ID: %d\n", NODE_ID);
-    Serial.println("Waiting for Gateway PING/Route...");
+    Serial.printf("Mode: %s\n", USE_MOCK_SENSORS ? "MOCK" : "REAL");
 
-    // Configure Protocol Engine
-    engine.setNodeId(NODE_ID);
-    
-    // Feedback: Blink RGB Green on PING
-    engine.onPingRecv([](uint8_t srcId) {
-        #ifdef RGB_BUILTIN
-        // Green Blink
-        neopixelWrite(RGB_BUILTIN, 0, 50, 0); 
-        delay(100);
-        neopixelWrite(RGB_BUILTIN, 0, 0, 0);
-        #endif
-        Serial.printf(">> PING from %d\n", srcId);
-    });
-
-    // Handle GET_SENSORS Request (On Demand)
-    engine.onGetSensorsRecv([](uint8_t srcId) {
-        Serial.printf(">> GET_SENSORS from %d. Sending Data Report...\n", srcId);
-        
-        // Mock Data Generation
-        float mockTemp = 20.0f + (rand() % 100) / 10.0f;
-        float mockHum = 40.0f + (rand() % 200) / 10.0f;
-
-        // Send Response to Requestor
-        engine.sendDataReport(srcId, mockTemp, mockHum);
-        
-        #ifdef RGB_BUILTIN
-        // Blue Blink for Data
-        neopixelWrite(RGB_BUILTIN, 0, 0, 50); 
-        delay(100);
-        neopixelWrite(RGB_BUILTIN, 0, 0, 0);
-        #endif
-    });
-
-    // Initialize System Logic
-    systemCtx.setup();
-    
     // Initialize Communication
     espNowStrategy.begin();
     
-    // HARDCODED GATEWAY MAC (From devices.json: 9C:13:9E:A8:6F:CC)
+    // Register Gateway Route (Hardcoded for Prototype)
+    // MAC: 9C:13:9E:A8:6F:CC
     std::array<uint8_t, 6> gatewayMac = {0x9C, 0x13, 0x9E, 0xA8, 0x6F, 0xCC};
     espNowStrategy.registerRoute(1, gatewayMac); // ID 1 = Gateway
     
-    // TURN OFF RGB LED (ESP32-S3 DevKitC-1)
-    #ifdef RGB_BUILTIN
-    neopixelWrite(RGB_BUILTIN, 0, 0, 0);
-    #endif
+    // Configure Node
+    Serial.println("[Setup] Registering Sensors...");
+    demeterNode.registerSensor(&dhtSensor);
+    demeterNode.registerSensor(&tempSensor);
+    demeterNode.registerSensor(&soilSensor);
+
+    // Configure Reporting (e.g., every 5 seconds, No Deep Sleep for now)
+    demeterNode.setReportingConfig(5000, false);
+
+    // Start Node (Initializes Engine and Sensors)
+    demeterNode.begin();
+    
+    Serial.println("[Setup] Ready.");
 }
 
 /**
  * @brief Standard Arduino Loop.
  */
 void loop() {
-    // 1. System Loop (Protocol Engine Update)
-    systemCtx.loop();
+    // New Modular Loop
+    demeterNode.update();
     
-    // 2. Serial Command Check (For MAC)
+    // Legacy functionality (Serial Commands for debugging)
     if (Serial.available()) {
         char c = Serial.read();
-        if (c == 'm' || c == 'M') {
-            Serial.print("MAC Address: ");
-            Serial.println(WiFi.macAddress());
-        }
-        else if (c == 'p' || c == 'P') {
-            Serial.println(">> TX -> PING Gateway (Manual)");
-            engine.sendPing(1); // Gateway ID = 1
+        if (c == 'p') {
+            Serial.println(">> PING Gateway");
+            engine.sendPing(1);
         }
     }
-
-    // Periodic Data Sending Disabled (On-Demand Mode)
 }

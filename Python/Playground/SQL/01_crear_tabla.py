@@ -7,14 +7,14 @@ DB_FILE = "playground.db"
 # Borrar si ya existe para empezar limpio (solo para aprendizaje)
 if os.path.exists(DB_FILE):
     os.remove(DB_FILE)
-    print(f"🗑️  Archivo anterior '{DB_FILE}' borrado.")
+    print(f"  Archivo anterior '{DB_FILE}' borrado.")
 
 # 2. Conectar a la Base de Datos
 # (Si no existe el archivo, sqlite3 lo crea automáticamente)
 conn = sqlite3.connect(DB_FILE)
 cursor = conn.cursor()
 
-print(f"✅ Conectado a la base de datos: {DB_FILE}")
+print(f" Conectado a la base de datos: {DB_FILE}")
 
 # 3. Crear una Tabla (El "Excel")
 # Vamos a crear una tabla llamada 'sensores'
