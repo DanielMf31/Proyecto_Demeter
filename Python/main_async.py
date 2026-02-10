@@ -12,10 +12,13 @@ logger = logging.getLogger("DemeterLauncher")
 def main():
     # Parse CLI Arguments
     parser = argparse.ArgumentParser(description="Demeter V2 Backend Launcher")
-    parser.add_argument("--port", default="/dev/serial0", help="UART Port (default: /dev/serial0)")
-    parser.add_argument("--host", default="0.0.0.0", help="Socket Host (default: 0.0.0.0)")
-    parser.add_argument("--socket-port", default=8888, type=int, help="Socket Port (default: 8888)")
-    parser.add_argument("--mock", action="store_true", help="Run in Mock Mode (no hardware)")
+    parser.add_argument("--port", default=os.environ.get("DEMETER_PORT", "/dev/serial0"), help="UART Port")
+    parser.add_argument("--host", default=os.environ.get("DEMETER_HOST", "0.0.0.0"), help="Socket Host")
+    parser.add_argument("--socket-port", default=int(os.environ.get("DEMETER_SOCKET_PORT", 8888)), type=int, help="Socket Port")
+    
+    # Mock default from Environment
+    mock_default = os.environ.get("DEMETER_MOCK", "False").lower() in ("true", "1", "yes")
+    parser.add_argument("--mock", action="store_true", default=mock_default, help="Run in Mock Mode")
     
     args = parser.parse_args()
 
@@ -43,17 +46,13 @@ def main():
     logger.info(f"Configuration: PORT={args.port}, HOST={args.host}:{args.socket_port}, MOCK={args.mock}")
 
     # Verify Environment
-    # Try to find venv python or use system one if suitable
-    VENV_PYTHON = os.path.join(BASE_DIR, ".venv", "bin", "python")
+    # If running in Github Actions or specific venv, sys.executable is usually correct
+    VENV_PYTHON = sys.executable 
     
-    if not os.path.exists(VENV_PYTHON):
-        # Fallback for when running inside venv already or if venv structure differs
-        if sys.prefix != sys.base_prefix:
-            VENV_PYTHON = sys.executable
-        else:
-            logger.error(f"[ERR] Virtual environment not found at {VENV_PYTHON}")
-            logger.info("Please run: python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt")
-            sys.exit(1)
+    # Optional: Check explicitly for .venv only if NOT already in a venv
+    potential_venv = os.path.join(BASE_DIR, ".venv", "bin", "python")
+    if os.path.exists(potential_venv) and sys.prefix == sys.base_prefix:
+        VENV_PYTHON = potential_venv
 
     if not os.path.exists(SERVICE_SCRIPT):
         logger.error(f"[ERR] Service script not found at {SERVICE_SCRIPT}")
