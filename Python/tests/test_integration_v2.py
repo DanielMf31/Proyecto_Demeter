@@ -40,10 +40,9 @@ class MockAsyncUartTransport:
         if self.callback:
             self.callback(data)
 
-class TestDemeterIntegrationV2(unittest.TestCase):
-    def setUp(self):
-        # Setup Service in Isolation (No TCP Server for this unit test if possible, or mock it)
-        # We want to test on_uart_data -> process_buffer -> broadcast
+class TestDemeterIntegrationV2(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        # Setup Service in Isolation
         self.service = DemeterService()
         self.service.transport = MockAsyncUartTransport()
         self.service.transport.set_callback(self.service.on_uart_data)
@@ -55,10 +54,11 @@ class TestDemeterIntegrationV2(unittest.TestCase):
         # Silence logs
         logging.disable(logging.CRITICAL)
 
-    def tearDown(self):
+    async def asyncTearDown(self):
         logging.disable(logging.NOTSET)
+        # Ensure tasks are cleaned up if necessary
 
-    def test_fragmented_uart_frame(self):
+    async def test_fragmented_uart_frame(self):
         """Test that split frames are correctly reassembled."""
         # Create a valid DataReport frame
         protocol = DemeterProtocolV2()
@@ -91,6 +91,9 @@ class TestDemeterIntegrationV2(unittest.TestCase):
         print(f"Sending Chunk 3: {chunk3.hex()}")
         self.service.transport.simulate_rx(chunk3)
         
+        # Allow background task (handle_protocol_command) to run
+        await asyncio.sleep(0.2)
+        
         # Check Broadcast
         self.assertEqual(len(self.mock_client_writer.data_written), 1)
         json_msg = self.mock_client_writer.data_written[0].decode()
@@ -101,7 +104,7 @@ class TestDemeterIntegrationV2(unittest.TestCase):
         self.assertEqual(data["temperature"], 25.5)
         self.assertEqual(data["humidity"], 60.0)
 
-    def test_garbage_handling(self):
+    async def test_garbage_handling(self):
         """Test that garbage bytes before SYNC are discarded."""
         garbage = b'\x00\xFF\xAA\xBB'
         protocol = DemeterProtocolV2()

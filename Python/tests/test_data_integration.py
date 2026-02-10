@@ -1,6 +1,7 @@
 import pytest
 import asyncio
 import os
+import shutil
 import aiosqlite
 from datetime import datetime
 
@@ -13,11 +14,13 @@ from proyecto_demeter.data.file_logger import SensorLogger
 from proyecto_demeter.core.async_service import DemeterService
 
 # Mock for Protocol/Cmd
-class MockDataReport:
-    def __init__(self, node_id, temp, hum):
-        self.node_id = node_id
-        self.temperature = temp
-        self.humidity = hum
+from pydantic import BaseModel
+
+# Mock for Protocol/Cmd
+class MockDataReport(BaseModel):
+    node_id: int
+    temperature: float
+    humidity: float
     
     def get_cmd_id(self):
         return 0x0B # DataReport
@@ -57,7 +60,17 @@ def test_sensor_logger():
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     
+    # Force fresh logger by removing handlers if present (Singleton issue)
     logger = SensorLogger(log_dir, "test_sensors.log")
+    if logger.logger.handlers:
+         for h in logger.logger.handlers[:]:
+             logger.logger.removeHandler(h)
+         # Re-init manually to ensure correct file
+         import logging.handlers
+         h = logging.handlers.RotatingFileHandler(logger.filepath, maxBytes=1000, backupCount=1)
+         h.setFormatter(logging.Formatter('%(asctime)s,%(message)s'))
+         logger.logger.addHandler(h)
+    
     filepath = logger.get_log_path()
     
     logger.log_reading(2, 22.2, 44.4)
@@ -68,10 +81,17 @@ def test_sensor_logger():
         assert "2,22.20,44.40" in content
         
     # Cleanup (rmtree or file)
-    if os.path.exists(filepath):
-        os.remove(filepath)
+    # Close handlers to release file lock
+    if hasattr(logger, 'logger'):
+        for h in logger.logger.handlers:
+            h.close()
+            logger.logger.removeHandler(h)
+    
     if os.path.exists(log_dir):
-        os.rmdir(log_dir)
+        try:
+            shutil.rmtree(log_dir)
+        except Exception as e:
+            print(f"Cleanup Error: {e}")
 
 @pytest.mark.asyncio
 async def test_service_integration():
@@ -85,7 +105,7 @@ async def test_service_integration():
     service.sensor_logger = SensorLogger("test_logs", "service_test.log")
     
     # Mock Protocol Command
-    cmd = MockDataReport(99, 12.3, 88.8)
+    cmd = MockDataReport(node_id=99, temperature=12.3, humidity=88.8)
     
     # Execute Handler (Async)
     await service.handle_protocol_command(cmd)

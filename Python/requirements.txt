@@ -27,3 +27,4 @@ pyserial-asyncio
 pydantic
 customtkinter
 aiosqlite
+aiosqlite
