@@ -10,7 +10,7 @@
 #include <WiFi.h>
 #include "communications/EspNowStrategy.h"
 #include "core/ProtocolEngine.h"
-#include "core/Node.h"
+#include "core/Node_Sensor.h"
 
 // Sensors
 #include "hardware/sensors/DHTSensor.h"
@@ -34,7 +34,7 @@ EspNowStrategy espNowStrategy;
 ProtocolEngine engine(&espNowStrategy);
 
 // 3. New Modular Node Manager
-Node demeterNode(NODE_ID, &engine);
+Node_Sensor demeterNode(NODE_ID, &engine);
 
 // 4. Sensors
 // DHT22 on Pin 4
@@ -55,7 +55,7 @@ void setup() {
     delay(1000);
     while(!Serial) delay(10);
 
-    Serial.println("=== DEMETER NODE V2 (Modular Prototype Full) ===");
+    Serial.println("=== DEMETER NODE V2 (Refactored Sensor) ===");
     Serial.printf("Node ID: %d\n", NODE_ID);
     Serial.printf("Mode: %s\n", USE_MOCK_SENSORS ? "MOCK" : "REAL");
 
@@ -69,9 +69,11 @@ void setup() {
     
     // Configure Node
     Serial.println("[Setup] Registering Sensors...");
-    demeterNode.registerSensor(&dhtSensor);
-    demeterNode.registerSensor(&tempSensor);
-    demeterNode.registerSensor(&soilSensor);
+    if (demeterNode.getSensorManager()) {
+        demeterNode.getSensorManager()->addSensor(&dhtSensor);
+        demeterNode.getSensorManager()->addSensor(&tempSensor);
+        demeterNode.getSensorManager()->addSensor(&soilSensor);
+    }
 
     // Configure Reporting (e.g., every 5 seconds, No Deep Sleep for now)
     demeterNode.setReportingConfig(5000, false);

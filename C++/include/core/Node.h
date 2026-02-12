@@ -1,25 +1,18 @@
 #pragma once
 
-#include <vector>
-#include <memory>
 #include "core/ProtocolEngine.h"
-#include "hardware/ISensor.h"
+#include "core/SystemContext.h"
 
 /**
  * @file Node.h
- * @brief Logic for a Modular Node.
+ * @brief Abstract Base Node.
  */
 
 class Node {
 protected:
     uint8_t _nodeId;
     ProtocolEngine* _engine;
-    std::vector<Demeter::ISensor*> _sensors; // Pointers to sensors (managed externally or here)
-    
-    // Config
-    bool _isSensorNode; // If true, enters deep sleep after reporting
-    uint32_t _reportIntervalMs;
-    unsigned long _lastReportTime;
+    SystemContext* _systemContext;
 
 public:
     /**
@@ -28,31 +21,20 @@ public:
      * @param engine Pointer to the Protocol Engine.
      */
     Node(uint8_t id, ProtocolEngine* engine);
+    
+    virtual ~Node();
 
     /**
-     * @brief Register a sensor to the node.
-     * @param sensor Pointer to the sensor instance.
+     * @brief Initialize Node and SystemContext.
+     * Subclasses must override to configure their specific modules.
      */
-    void registerSensor(Demeter::ISensor* sensor);
-
-    /**
-     * @brief Initialize Node and all registered sensors.
-     */
-    void begin();
+    virtual void begin();
 
     /**
      * @brief Update Loop.
-     * Handles data collection and transmission.
+     * Should be called in the main loop.
      */
-    void update();
-
-    /**
-     * @brief Configure reporting behavior.
-     * @param intervalMs Time between data reports (0 = On Demand Only).
-     * @param deepSleep Enable Deep Sleep between reports?
-     */
-    void setReportingConfig(uint32_t intervalMs, bool deepSleep);
-
-private:
-    void collectAndSend();
+    virtual void update();
+    
+    SystemContext* getSystemContext() { return _systemContext; }
 };

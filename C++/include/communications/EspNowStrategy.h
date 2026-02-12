@@ -1,7 +1,11 @@
 #pragma once
 
 #include "communications/IComms.h"
+#ifndef NATIVE_ENV
 #include <esp_now.h>
+#else
+typedef int esp_now_send_status_t;
+#endif
 #include <map>
 #include <array>
 #include <vector>

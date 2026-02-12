@@ -6,24 +6,41 @@
  * @brief Workflow Orchestrator Implementation.
  */
 
-// Helper for Lambda
-SystemContext::SystemContext(ProtocolEngine& engine, GpioController& executor) 
-    : _engine(engine), _executor(executor), _state(SystemState::BOOT), _execMode(ExecutionMode::IMMEDIATE),
+SystemContext::SystemContext(ProtocolEngine* engine) 
+    : _engine(engine), _executor(nullptr), _sensorManager(nullptr), 
+      _state(SystemState::BOOT), _execMode(ExecutionMode::IMMEDIATE),
       _sequenceStepIndex(0), _lastStepTime(0), _isSequencerActive(false) {}
+
+void SystemContext::enableExecutor(GpioController* executor) {
+    _executor = executor;
+}
+
+void SystemContext::enableSensorManager(SensorManager* manager) {
+    _sensorManager = manager;
+}
 
 void SystemContext::setup() {
     _state = SystemState::IDLE;
-    _executor.init();
+    
+    if (_executor) {
+        _executor->init();
+    }
+    
+    if (_sensorManager) {
+        _sensorManager->begin();
+    }
 
-    // Register Callback
-    // Captures 'this' to allow calling member function from lambda
-    _engine.onSetGpio([this](const Demeter::SetGpioCmd& cmd) {
-        this->handleGpioCommand(cmd);
-    });
+    if (_engine) {
+        // Register Callback
+        // Captures 'this' to allow calling member function from lambda
+        _engine->onSetGpio([this](const Demeter::SetGpioCmd& cmd) {
+            this->handleGpioCommand(cmd);
+        });
 
-    _engine.onExecSequence([this](const Demeter::ExecSequenceCmd& cmd) {
-        this->handleExecSequence(cmd);
-    });
+        _engine->onExecSequence([this](const Demeter::ExecSequenceCmd& cmd) {
+            this->handleExecSequence(cmd);
+        });
+    }
 }
 
 void SystemContext::loop() {
@@ -31,10 +48,12 @@ void SystemContext::loop() {
         return;
     }
 
-    _engine.update();
+    if (_engine) {
+        _engine->update();
+    }
 
     // Sequencer Logic
-    if (_isSequencerActive && !_activeSequence.empty()) {
+    if (_isSequencerActive && !_activeSequence.empty() && _executor) {
         if (_sequenceStepIndex < _activeSequence.size()) {
             // Check if delay has passed
             unsigned long currentTime = millis();
@@ -51,7 +70,7 @@ void SystemContext::loop() {
                     gpioCmd.value = step.value;
                     gpioCmd.flags = 0; // Immediate
                     
-                    _executor.execute(gpioCmd);
+                    _executor->execute(gpioCmd);
                     _lastStepTime = currentTime;
                 } else {
                     // Sequence Finished
@@ -70,10 +89,11 @@ void SystemContext::loop() {
  */
 void SystemContext::handleGpioCommand(const Demeter::SetGpioCmd& cmd) {
     if (_state == SystemState::ERROR) return;
+    if (!_executor) return; // Ignore if no executor enabled
 
     if (_execMode == ExecutionMode::IMMEDIATE) {
         _state = SystemState::PROCESSING;
-        _executor.execute(cmd);
+        _executor->execute(cmd);
         _state = SystemState::IDLE;
     } else {
         // Queue Mode
@@ -91,10 +111,11 @@ void SystemContext::setExecutionMode(ExecutionMode mode) {
 
 void SystemContext::executeQueue() {
     if (_commandQueue.empty()) return;
+    if (!_executor) return;
 
     _state = SystemState::PROCESSING;
     for (const auto& cmd : _commandQueue) {
-        _executor.execute(cmd);
+        _executor->execute(cmd);
         // Potential delay could be added here if needed
     }
     _commandQueue.clear();
@@ -111,6 +132,7 @@ void SystemContext::injectCommand(const Demeter::SetGpioCmd& cmd) {
 
 void SystemContext::handleExecSequence(const Demeter::ExecSequenceCmd& cmd) {
     if (_state == SystemState::ERROR) return;
+    if (!_executor) return;
 
     // Load new sequence
     _activeSequence = cmd.steps;
@@ -131,6 +153,6 @@ void SystemContext::handleExecSequence(const Demeter::ExecSequenceCmd& cmd) {
     gpioCmd.value = step.value;
     gpioCmd.flags = 0;
     
-    _executor.execute(gpioCmd);
+    _executor->execute(gpioCmd);
     _lastStepTime = millis();
 }

@@ -3,22 +3,13 @@
 #include "communications/IComms.h"
 #include "core/InternalTypes.h"
 #include <functional>
+#include <vector>
+#include <cstdint>
+#include <cstddef>
 
 /**
  * @brief Binary Protocol Parser (V2).
  * Handles Serialization/Deserialization and CRC Validation.
- */
-/**
- * @class ProtocolEngine
- * @brief Handles the Demeter Binary Protocol (V2).
- * 
- * Responsible for:
- * 1. Deserializing incoming byte streams into frames.
- * 2. Validating frames (Sync Byte, Length, CRC).
- * 3. Dispatching valid commands to registered callbacks.
- * 4. Generating and serializing response frames (ACK/NACK).
- * 
- * @note This class is platform-agnostic. It relies on IComms interface.
  */
 class ProtocolEngine {
 public:
@@ -35,6 +26,9 @@ public:
 
 private:
     IComms* _strategy;
+    uint8_t _myId; // Node ID
+
+    // Callbacks
     GpioCallback _onGpioCommand;
     PwmCallback _onPwmCommand;
     SequenceCallback _onSequenceCommand;
@@ -44,93 +38,87 @@ private:
     PinReportCallback _onPinReportRecv;
     SystemReportCallback _onSystemReportRecv;
     GetSensorsCallback _onGetSensorsRecv;
-    
-    // ...
+
+    // Protocol Constants
+    static const uint8_t SYNC_BYTE = 0xFE;
+
+    // Header Structure (Packed)
+    struct Header {
+        uint8_t sync;
+        uint8_t length;     // Payload Length
+        uint8_t flags;
+        uint8_t src_id;
+        uint8_t dst_id;
+        uint8_t cmd_id;
+    } __attribute__((packed));
+
+    static const size_t HEADER_SIZE = sizeof(Header);
+
+    /**
+     * @brief Calculates a simple Modular Sum CRC (Mod 256).
+     * @param data Pointer to data buffer.
+     * @param len Length of data in bytes.
+     * @return uint8_t Calculated CRC.
+     */
+    uint8_t calculateCRC(const uint8_t* data, size_t len);
 
 public:
-    // ...
+    ProtocolEngine(IComms* strategy);
+
+    // Callback Setters
+    void onSetGpio(GpioCallback cb);
+    void onSetPwm(PwmCallback cb);
+    void onExecSequence(SequenceCallback cb);
+    void onAckRecv(AckCallback cb);
+    void onPingRecv(PingCallback cb);
+    void onTempHumReportRecv(TempHumReportCallback cb);
+    void onPinReportRecv(PinReportCallback cb);
+    void onSystemReportRecv(SystemReportCallback cb);
+    void onGetSensorsRecv(GetSensorsCallback cb);
+
+    /**
+     * @brief Update Loop.
+     * Reads from strategy, parses frames, and dispatches callbacks.
+     */
+    void update();
+
+    /**
+     * @brief Set the Node ID.
+     * @param id The ID to use as Source.
+     */
+    void setNodeId(uint8_t id);
 
     /**
      * @brief Send Sensor Data Report (Temp/Hum)
      * Replaces sendDataReport.
-     * @param targetId Destination Device ID.
-     * @param temp Temperature in Celsius.
-     * @param hum Humidity in %.
      */
     void sendTempHumReport(uint8_t targetId, float temp, float hum);
 
     /**
      * @brief Send GPIO State Report (Feedback).
-     * @param targetId Destination Device ID.
-     * @param pin GPIO Number.
-     * @param state Current State (true=HIGH).
      */
     void sendPinReport(uint8_t targetId, uint8_t pin, bool state);
 
     /**
      * @brief Send System Status Report.
-     * @param targetId Destination Device ID.
-     * @param mode System Mode (0=Active, 1=LightSleep, 2=DeepSleep).
-     * @param batteryMv Battery Voltage in millivolts.
      */
     void sendSystemReport(uint8_t targetId, uint8_t mode, uint16_t batteryMv);
-
-    // ...
-
+    
     /**
-     * @brief Register callback for TempHumReport reception.
-     * @param cb Function to call when a Temp/Hum Report is received.
+     * @brief Send PING.
      */
-    void onTempHumReportRecv(TempHumReportCallback cb);
-
-    /**
-     * @brief Register callback for PinReport reception.
-     * @param cb Function to call when a Pin Report is received.
-     */
-    void onPinReportRecv(PinReportCallback cb);
-
-    /**
-     * @brief Register callback for SystemReport reception.
-     * @param cb Function to call when a System Report is received.
-     */
-    void onSystemReportRecv(SystemReportCallback cb);
-
-    /**
-     * @brief Register callback for GET_SENSORS reception.
-     * @param cb Function to call when a GET_SENSORS command is received.
-     */
-    void onGetSensorsRecv(GetSensorsCallback cb);
+    void sendPing(uint8_t targetId);
 
 private:
     /**
-     * @brief Send an ACK (Acknowledge) frame.
-     * @param targetId The device ID to send the ACK to.
+     * @brief Send Frame Helpers.
      */
     void sendAck(uint8_t targetId);
-
-    /**
-     * @brief Send a NACK (Negative Acknowledge) frame.
-     * @param targetId The device ID to send the NACK to.
-     */
     void sendNack(uint8_t targetId);
-
-    /**
-     * @brief Construct and send a generic frame.
-     * 
-     * Handles the creation of the header, calculation of CRC, and transmission
-     * via the strategy.
-     * 
-     * @param cmdId Command ID (e.g., PING, ACK).
-     * @param targetId Destination Device ID.
-     * @param payload Vector containing the command payload.
-     */
     void sendFrame(uint8_t cmdId, uint8_t targetId, const std::vector<uint8_t>& payload);
 
-    // Helpers for testing
     /**
      * @brief Parses a single frame buffer.
-     * Exposed for Unit Testing purposes.
-     * @param frame byte vector containing the full frame (header + payload + crc).
      */
     void parseFrame(const std::vector<uint8_t>& frame);
 };

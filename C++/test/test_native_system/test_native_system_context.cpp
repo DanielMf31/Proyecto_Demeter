@@ -34,7 +34,8 @@ void setUp(void) {
     mockRadio = new MockStrategy();
     engine = new ProtocolEngine(mockRadio);
     gpio = new GpioController();
-    systemCtx = new SystemContext(*engine, *gpio);
+    systemCtx = new SystemContext(engine);
+    systemCtx->enableExecutor(gpio);
     systemCtx->setup();
 }
 

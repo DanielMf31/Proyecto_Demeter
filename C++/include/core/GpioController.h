@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/InternalTypes.h"
+#include <vector>
 
 // Hardware Abstraction for GPIO
 #include <Arduino.h>
@@ -13,17 +14,25 @@
  * Decouples logic from hardware specifics (Arduino API).
  */
 class GpioController {
+private:
+    std::vector<uint8_t> _managedPins;
+
 public:
     /**
-     * @brief Initialize GPIO pins.
-     * Sets PINS 4-7 as OUTPUT and initializes them to LOW.
+     * @brief Configure the list of managed pins.
+     * @param pins List of GPIO numbers.
+     */
+    void setPins(const std::vector<uint8_t>& pins);
+
+    /**
+     * @brief Initialize configured GPIO pins.
+     * Sets managed pins as OUTPUT and initializes them to LOW.
      */
     void init();
 
     /**
      * @brief Execute a State Change Command.
      * @param cmd Command containing target PIN and Logic Level.
-     * @note Only affects Pins 4-7 (Safe-guard for MVP).
      */
     void execute(const Demeter::SetGpioCmd& cmd);
 };

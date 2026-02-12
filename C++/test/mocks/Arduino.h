@@ -50,8 +50,8 @@ extern void digitalWrite(uint8_t pin, uint8_t val);
 extern int digitalRead(uint8_t pin);
 
 // Math/Utils
-#define min(a,b) ((a)<(b)?(a):(b))
-#define max(a,b) ((a)>(b)?(a):(b))
+// #define min(a,b) ((a)<(b)?(a):(b))
+// #define max(a,b) ((a)>(b)?(a):(b))
 #define abs(x) ((x)>0?(x):-(x))
 #define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
 #define round(x)     ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))

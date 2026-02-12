@@ -30,9 +30,6 @@ void ProtocolEngine::onPingRecv(PingCallback cb) {
     _onPingRecv = cb;
 }
 
-    _onPingRecv = cb;
-}
-
 void ProtocolEngine::onTempHumReportRecv(TempHumReportCallback cb) {
     _onTempHumReportRecv = cb;
 }

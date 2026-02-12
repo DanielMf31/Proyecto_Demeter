@@ -2,6 +2,7 @@
 
 #include "core/ProtocolEngine.h"
 #include "core/GpioController.h"
+#include "core/SensorManager.h"
 #include "core/InternalTypes.h"
 #include <vector>
 
@@ -29,8 +30,10 @@ enum class ExecutionMode {
  */
 class SystemContext {
 private:
-    ProtocolEngine& _engine;
-    GpioController& _executor;
+    ProtocolEngine* _engine;
+    GpioController* _executor; // Optional (Actuator Node only)
+    SensorManager* _sensorManager; // Optional (Sensor Node only)
+    
     SystemState _state;
     ExecutionMode _execMode;
 
@@ -49,14 +52,28 @@ private:
 public:
     /**
      * @brief Construct a new System Context.
-     * @param engine Reference to Protocol Engine.
-     * @param executor Reference to GPIO Controller.
+     * @param engine Pointer to Protocol Engine.
      */
-    SystemContext(ProtocolEngine& engine, GpioController& executor);
+    SystemContext(ProtocolEngine* engine);
+
+    /**
+     * @brief Enable the Executor Module.
+     * @param executor Pointer to GpioController.
+     */
+    void enableExecutor(GpioController* executor);
+
+    /**
+     * @brief Enable the Sensor Manager Module.
+     * @param manager Pointer to SensorManager.
+     */
+    void enableSensorManager(SensorManager* manager);
+
+    GpioController* getExecutor() const { return _executor; }
+    SensorManager* getSensorManager() const { return _sensorManager; }
 
     /**
      * @brief Initialize the system components.
-     * Sets up callbacks and initializes hardware.
+     * Sets up callbacks and initializes enabled hardware.
      */
     void setup();
 
