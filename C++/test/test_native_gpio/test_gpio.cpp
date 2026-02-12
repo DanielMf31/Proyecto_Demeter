@@ -5,10 +5,7 @@ GpioController* controller;
 
 void setUp(void) {
     controller = new GpioController();
-    // Clear mock state (optional, if we exposed a clear method, 
-    // but creating a new controller doesn't clear the static map.
-    // We should rely on setting known states or adding a clearMock helper.
-    // For MVP, just specific tests.
+    controller->setPins({4, 5, 6, 7});
 }
 
 void tearDown(void) {

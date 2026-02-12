@@ -3,7 +3,7 @@
 #include <cstring>
 #include <iostream>
 
-#include "core/Node.h"
+#include "core/Node_Sensor.h"
 #include "core/ProtocolEngine.h"
 #include "hardware/sensors/DHTSensor.h"
 #include "hardware/sensors/DS18B20Sensor.h"
@@ -80,11 +80,11 @@ void test_node_integration() {
     // 1. Setup Mock System
     MockComms mockComms;
     ProtocolEngine engine(&mockComms);
-    Node node(2, &engine); // Node ID 2
+    Node_Sensor node(2, &engine); // Node ID 2, using Node_Sensor
 
     // 2. Setup Sensor
     Demeter::Sensors::DHTSensor dht(4, 22, true);
-    node.registerSensor(&dht);
+    node.getSensorManager()->addSensor(&dht);
 
     // 3. Init
     node.begin();
@@ -92,67 +92,21 @@ void test_node_integration() {
     // 4. Trigger Update (Simulate Reporting Interval)
     node.setReportingConfig(1000, false); // 1 sec interval
     
-    // Hack: Wait or simulate time passage? 
-    // Since Node uses `millis()`, and in Native `millis()` might start at 0.
-    // We can call `collectAndSend` directly if it was public, but it's private.
-    // Instead, we rely on the loop. In Native, we can assume millis() increments or we just check logic.
-    // NOTE: `millis()` is mocked in `test/mocks/Arduino.cpp` usually.
-    
-    // For this test, we might need to expose `collectAndSend` or wait.
-    // Let's force an update by setting interval to 0 (Manual) and calling a Trigger,
-    // OR just rely on the fact that `lastReportTime` starts at 0 and `millis()` likely returns > 1000 after some sleep?
-    // Actually, let's use the public `update()` but we need to ensure the condition `millis() - last > interval` is met.
-    
-    // Let's try calling it twice with a delay simulation
-    // Assuming `millis()` mock exists and increments.
-    
-    // Alternative: Use ProtocolEngine's `sendDataReport` directly to verify PACKET structure,
-    // asserting that Node *would* call it.
-    
-    // But to test Node logic strictly:
-    // Let's modify Node to allow forcing a send (e.g. interval 0 implies manual, but here we want to test automatic).
-    
-    // FORCE TRIGGER: 
-    // We can't easily force time in a generic way without specific mock support.
-    // However, clean test would be:
-    // Verify that IF sensor reads X, Protocol sends Frame Y.
-    
-    // Let's perform a manual reading integration check via Engine directly for now to verify "Packaging"
-    // And assume Node logic is verified by review or advanced mocks.
-    
-    // Actually, Node::begin() doesn't send. 
-    // Let's verify ProtocolEngine logic with values similar to what Sensor produces.
-    
+    // Manual Engine Check
     float testTemp = 25.5;
     float testHum = 60.2;
     uint8_t target = 1; // Gateway
     
-    engine.sendDataReport(target, testTemp, testHum);
+    engine.sendTempHumReport(target, testTemp, testHum);
     
     TEST_ASSERT_TRUE(mockComms.sendCalled);
     TEST_ASSERT_NOT_EMPTY(mockComms.lastSentData);
     
     // Verify Frame Content (Protocol V2)
-    // [SYNC] [LEN] [FLAGS] [SRC] [DST] [CMD] [PAYLOAD...] [CRC]
-    // CMD_DATA_REPORT = 0x14 (Check InternalTypes.h or ProtocolEngine.cpp)
-    // Payload: [T_LSB] [T_MSB] [H_LSB] [H_MSB] (int16 * 100)
-    
-    // 25.5 * 100 = 2550 = 0x09F6 -> F6 09
-    // 60.2 * 100 = 6020 = 0x1784 -> 84 17
-    
     std::vector<uint8_t>& frame = mockComms.lastSentData;
     TEST_ASSERT_EQUAL_HEX8(0xFE, frame[0]); // SYNC
-    // ... check others ...
     
     // Check Payload (Offset 6)
-    // [0] = F6
-    // [1] = 09
-    // [2] = 84
-    // [3] = 17
-    
-    // Note: Depends on endianness, usually Little Endian in ESP32/Protocol.
-    // ProtocolEngine writes <hh (Little Endian).
-    
     int16_t t_expected = (int16_t)(testTemp * 100);
     int16_t h_expected = (int16_t)(testHum * 100);
     

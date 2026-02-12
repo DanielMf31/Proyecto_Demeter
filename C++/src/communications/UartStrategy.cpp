@@ -12,6 +12,8 @@
 UartStrategy::UartStrategy(HardwareSerial* serial, uint32_t baudRate, int8_t rxPin, int8_t txPin) 
     : _serial(serial), _baudRate(baudRate), _rxPin(rxPin), _txPin(txPin) {}
 
+UartStrategy::~UartStrategy() {}
+
 void UartStrategy::begin() {
     // If running on actual hardware (Arduino framework), initialize the Serial port
     // with the configured pins. Otherwise (Native Test), just mock the call.

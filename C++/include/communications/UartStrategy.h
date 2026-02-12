@@ -1,10 +1,15 @@
 #pragma once
 
-#include "IComms.h"
+#include "communications/IComms.h"
+#include <vector>
 
 // If running natively (Unit Tests), we Mock Arduino.h
 // If running on ESP32 (PlatformIO env:esp32), we use real Arduino.h
+#ifdef NATIVE_ENV
+#include <Arduino.h> // Mock
+#else
 #include <Arduino.h>
+#endif
 
 /**
  * @brief UART Communication Implementation.
@@ -27,6 +32,7 @@ public:
      * @param txPin TX Pin number (optional, -1 to use default).
      */
     UartStrategy(HardwareSerial* serial, uint32_t baudRate, int8_t rxPin = -1, int8_t txPin = -1);
+    virtual ~UartStrategy();
 
     /**
      * @brief Initialize the UART Interface.

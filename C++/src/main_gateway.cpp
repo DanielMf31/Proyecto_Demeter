@@ -13,8 +13,7 @@
 #include "communications/EspNowStrategy.h"
 #include "communications/GatewayStrategy.h"
 #include "core/ProtocolEngine.h"
-#include "core/GpioController.h"
-#include "core/SystemContext.h"
+#include "core/Node_Gateway.h"
 
 // Define Hardware Serial for ESP32
 // RX=16, TX=17 (Adjust per hardware revision)
@@ -39,13 +38,9 @@ GatewayStrategy gatewayStrategy(&uartStrategy, &espNowStrategy);
 // Uses the Composite Strategy
 ProtocolEngine engine(&gatewayStrategy);
 
-// 3. Hardware Layer: GPIO Controller
-// Manages physical pin states.
-GpioController gpioController;
-
-// 4. System Layer: Context Orchestrator
-// Binds Engine and Controller, manages State & Queue.
-SystemContext systemCtx(engine, gpioController);
+// 3. Application Layer: Node Gateway (Hybrid)
+// ID 1 for Gateway
+Node_Gateway gateway(1, &engine);
 
 /**
  * @brief Standard Arduino Setup.
@@ -55,67 +50,41 @@ void setup() {
     // Debug Serial (USB)
     Serial.begin(115200);
     
-    // Feedback LED (GPIO 4)
-    pinMode(4, OUTPUT);
-    digitalWrite(4, LOW);
+    // Feedback LED (GPIO 4) is now managed by GpioController in Node_Gateway,
+    // but we can still access it manually if needed, or rely on commands.
+    // Ensure Pin 4 is Output (managed by Node_Gateway::begin -> GpioController::init)
 
     delay(1000);
     while(!Serial) delay(10);
 
-    Serial.println("=== DEMETER GATEWAY V2 (ESP-Now + UART) ===");
+    Serial.println("=== DEMETER GATEWAY V2 (Hybrid Node) ===");
     Serial.println(" [I] Mode: IMMEDIATE");
     Serial.println(" [R] Mode: QUEUED");
     Serial.println("==========================================");
 
-    // Initialize System Logic
-    systemCtx.setup();
+    // Initialize Communications
+    gatewayStrategy.begin();
+
+    // Initialize Node (SystemContext, GpioController, SensorManager)
+    gateway.begin();
     
     // Feedback Logic: Toggle GPIO 4 (Index 0 for user "1") on ACK
-    // Note: User said "encience gpio 4" when receiving ACK from Ping.
-    // If it's already on, turn off.
     engine.onAckRecv([](uint8_t srcId) {
-        // Toggle GPIO 4 (Mapped to ID 4 in GpioController, or Index 0?)
-        // GpioController uses 0-3 for pins 4-7.
         static bool state = false;
         state = !state;
-        // On ESP32-S3 DevKit, Pin 4 might be used for something else or correct.
-        // Assuming Pin 4 is valid.
+        // We can use the gateway's GpioController if we want
+        // gateway.getExecutor()->execute(...)
+        // Or direct write for debug feedback
         digitalWrite(4, state ? HIGH : LOW);
         Serial.printf(">> ACK Received from Node %d. Toggled GPIO 4 to %s\n", srcId, state ? "ON" : "OFF");
     });
 
     // Forward Data Reports to UART (Target 0)
-    // When Gateway (ID 1) receives DataReport, it needs to send it to Host (ID 0).
-    // The ProtocolEngine::sendDataReport sends to a target.
-    // If we call engine.sendDataReport(0, ...), it will construct a NEW frame and send it.
-    // Strategy for ID 0 is UART.
-    engine.onDataReportRecv([&](uint8_t srcId, float temp, float hum) {
+    engine.onTempHumReportRecv([&](uint8_t srcId, float temp, float hum) {
         Serial.printf(">> DATA REPORT from Node %d: %.2f C, %.2f %%\n", srcId, temp, hum);
-        // Forward as a new packet from Gateway (or preserve source?)
-        // V2 Protocol Header has Source ID. 
-        // If we use sendDataReport, Source will be Gateway (1).
-        // This effectively "proxies" the data. The Host will see "From Node 1: Temp X".
-        // But we want "From Node 2".
-        // To preserve Source ID, we would need to manually construct frame or add "Forwarding" capability.
-        // OR: We simply tell ProtocolEngine to "spoof" source? No.
-        // OR: The Node should have sent it to ID 0 (Host) initially!
-        // If Node sends to ID 0, Gateway forwards it at Rule 5.
-        
-        // However, user setup currently sends to Target 1.
-        // So we will proxy it. 
-        // The host will see it coming from Gateway (1).
-        // BUT the payload contains the data. 
-        // Does the Host care about the Source ID for logging? 
-        // Yes, likely.
-        
-        // Workaround: We Re-Send it to ID 0.
-        // If we want Host to know it's from Node 2, we might need to modify payload or header.
-        // For now, let's just send it to ID 0.
+        // Proxy to Host (ID 0)
         engine.sendTempHumReport(0, temp, hum); 
     });
-    
-    // Initialize Composite Communication (Starts UART + ESP-Now)
-    gatewayStrategy.begin();
     
     // DEBUG: HARDCODE NODE 2 MAC (From devices.json: 9C:13:9E:AC:50:C4)
     std::array<uint8_t, 6> node2Mac = {0x9C, 0x13, 0x9E, 0xAC, 0x50, 0xC4};
@@ -129,8 +98,8 @@ void setup() {
  * 2. Checks Debug Serial for Manual Commands.
  */
 void loop() {
-    // 1. System Loop (Protocol Engine Update)
-    systemCtx.loop();
+    // 1. System Loop (Protocol Engine Update via Node)
+    gateway.update();
 
     // 2. User Interactive Menu (Serial USB / Debug)
     if (Serial.available()) {
@@ -140,35 +109,21 @@ void loop() {
 
         switch (c) {
             case 'H': {
-                // Manual PING to Host (ID 0)
                 Serial.println(">> TX -> PING Host (ID 0)");
                 engine.sendPing(0);
                 break;
             }
             case 'P': {
-                // Manual PING to Node 2
                 Serial.println(">> TX -> PING Node 2 (Manual)");
-                std::vector<uint8_t> empty;
-                // We use engine's internal sendFrame via headers if possible, 
-                // but sendFrame is private. 
-                // We can't call sendFrame directly. 
-                // Alternative: Inject a "Ping" command? No, ProtocolEngine handles sending.
-                // We need a public method in ProtocolEngine to send Ping.
-                // OR we just use the Strategy directly to send a raw frame?
-                // Let's expose sendPing in ProtocolEngine or make sendFrame protected/public.
-                // For now, I'll modify ProtocolEngine.h to make sendFrame public OR add sendPing.
-                // Using a lambda or creating a temporary command?
-                // Actually, ProtocolEngine should have a sendPing method.
-                // I will add `sendPing(uint8_t target)` to ProtocolEngine.
                 engine.sendPing(2);
                 break;
             }
             case 'I':
-                systemCtx.setExecutionMode(ExecutionMode::IMMEDIATE);
+                gateway.getSystemContext()->setExecutionMode(ExecutionMode::IMMEDIATE);
                 Serial.println(">> MODE: IMMEDIATE");
                 break;
             case 'R':
-                systemCtx.setExecutionMode(ExecutionMode::INTERACTIVE_QUEUE);
+                gateway.getSystemContext()->setExecutionMode(ExecutionMode::INTERACTIVE_QUEUE);
                 Serial.println(">> MODE: QUEUE (Buffering...)");
                 break;
             case 'M':
@@ -177,17 +132,15 @@ void loop() {
                 break;
             case 'E':
                 Serial.println(">> EXECUTING QUEUE...");
-                systemCtx.executeQueue();
+                gateway.getSystemContext()->executeQueue();
                 break;
             case 'C':
-                systemCtx.clearQueue();
+                gateway.getSystemContext()->clearQueue();
                 Serial.println(">> QUEUE CLEARED");
                 break;
             
             case 'D': {
-                // Manual Data Report to Host (ID 0)
                 Serial.println(">> TX -> TEMP HUM REPORT (Manual Mock)");
-                // Send Mock Temp: 24.5C, Hum: 55.0%
                 engine.sendTempHumReport(0, 24.5f, 55.0f);
                 break;
             }
@@ -197,7 +150,7 @@ void loop() {
             case '3':
             case '4': {
                 uint8_t pin = (c - '0') + 3; // '1'->4, '2'->5, '3'->6, '4'->7
-                pinStates[pin] = !pinStates[pin]; // Toggle Local State
+                pinStates[pin] = !pinStates[pin]; 
                 
                 Demeter::SetGpioCmd cmd;
                 cmd.pin = pin;
@@ -205,7 +158,7 @@ void loop() {
                 cmd.flags = 0;
 
                 Serial.printf(">> MANUAL: PIN %d -> %s\n", pin, cmd.value ? "ON" : "OFF");
-                systemCtx.injectCommand(cmd); // Inject into Protocol Logic
+                gateway.getSystemContext()->injectCommand(cmd); 
                 break;
             }
 

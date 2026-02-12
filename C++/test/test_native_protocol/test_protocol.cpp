@@ -35,6 +35,7 @@ ProtocolEngine* engine;
 void setUp(void) {
     mockComms = new MockComms();
     engine = new ProtocolEngine(mockComms);
+    engine->setNodeId(1);
 }
 
 void tearDown(void) {
