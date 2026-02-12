@@ -1,0 +1,47 @@
+classDiagram
+    %% --- Context ---
+    class ProtocolEngine {
+        -IComms* _strategy
+        +setStrategy(IComms*)
+        +sendPacket()
+        +receivePacket()
+    }
+
+    %% --- Strategy Interface ---
+    class IComms {
+        <<Interface>>
+        +virtual void begin()
+        +virtual void send(data, len)
+        +virtual bool available()
+        +virtual vector~uint8_t~ read()
+    }
+
+    %% --- Concrete Strategies ---
+    class UartStrategy {
+        +begin()
+        +send()
+        +read()
+    }
+
+    class EspNowStrategy {
+        +begin()
+        +send()
+        +read()
+        +onDataRecv(mac, data, len)
+        +onDataSent(mac, status)
+    }
+    
+    class GatewayStrategy {
+        +begin()
+        +send() (Routes to UART/EspNow)
+        +read() (Aggregates)
+    }
+
+    %% --- Relationships ---
+    ProtocolEngine o-- IComms : uses
+    IComms <|.. UartStrategy : implements
+    IComms <|.. EspNowStrategy : implements
+    IComms <|.. GatewayStrategy : implements
+
+    note for ProtocolEngine "Decoupled from hardware.\nOnly knows IComms interface."
+    note for GatewayStrategy "Composite Strategy.\nRoutes traffic between PC (UART) and Nodes (ESP-Now)."

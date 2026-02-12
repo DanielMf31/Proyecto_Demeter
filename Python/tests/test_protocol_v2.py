@@ -7,8 +7,9 @@ import struct
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
 from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
-from proyecto_demeter.transport.protocol_schemas import (
-    CmdId, SetGpio, Ping, TempHumReport, PinReport, SystemReport
+from proyecto_demeter.config.schemas import (
+    CmdId, SetGpio, SetPwm, ExecSequence, RouteAdd, Ping, SequenceStep,
+    TempHumReport, PinReport, SystemReport
 )
 
 class TestProtocolV2:

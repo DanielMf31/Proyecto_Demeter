@@ -1,0 +1,48 @@
+sequenceDiagram
+    participant Host as Server (Python)
+    participant GW as Gateway (ID 1)
+    participant S1 as Sensor 1 (ID 10)
+    participant S2 as Sensor 2 (ID 11)
+    participant A1 as Actuator 1 (ID 20)
+    participant A2 as Actuator 2 (ID 21)
+
+    %% --- 1. Broadcast Discovery (Optional) ---
+    Host->>GW: PING (Target=255 Broadcast)
+    GW->>S1: ESP-NOW Broadcast
+    GW->>A1: ESP-NOW Broadcast
+    
+    S1-->>GW: ACK / Pong
+    A1-->>GW: ACK / Pong
+    GW-->>Host: Serial Forwarding
+
+    %% --- 2. Sensor Reporting Cycle ---
+    par Sensor 1 Report
+        S1->>S1: Wake & Read
+        S1->>GW: TempHumReport (ID 10)
+        GW->>Host: UART Frame (0x0B, Src=10)
+    and Sensor 2 Report
+        S2->>S2: Wake & Read
+        S2->>GW: TempHumReport (ID 11)
+        GW->>Host: UART Frame (0x0B, Src=11)
+    end
+
+    %% --- 3. Actuation Command ---
+    Host->>GW: SET_GPIO (Target=20, Pin=2, ON)
+    activate GW
+    GW->>GW: Router: Map ID 20 -> MAC A1
+    GW->>A1: ESP-NOW Unicast (SET_GPIO)
+    deactivate GW
+    
+    activate A1
+    A1->>A1: Motor ON
+    A1->>GW: PinReport (Src=20, State=1)
+    deactivate A1
+    
+    GW->>Host: UART Frame (0x0C, Src=20)
+
+    %% --- 4. Complex Logic (Condition) ---
+    note over Host: If Temp > 30C, Open Windows
+    Host->>GW: SET_GPIO (Target=21, Pin=2, ON)
+    GW->>A2: ESP-NOW Unicast
+    A2->>GW: PinReport (Src=21)
+    GW->>Host: Ack

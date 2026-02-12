@@ -1,5 +1,5 @@
 from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
-from proyecto_demeter.transport.protocol_schemas import GetSensors, CmdId
+from proyecto_demeter.config.schemas import GetSensors, CmdId
 import struct
 
 def test_create_get_sensors():

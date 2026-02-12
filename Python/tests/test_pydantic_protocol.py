@@ -1,6 +1,6 @@
 import unittest
 from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
-from proyecto_demeter.transport.protocol_schemas import SetGpio, SetPwm, ExecSequence, SequenceStep, CmdId
+from proyecto_demeter.config.schemas import SetGpio, SetPwm, ExecSequence, SequenceStep, CmdId
 
 class TestPydanticProtocol(unittest.TestCase):
     def setUp(self):

@@ -9,7 +9,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 
 try:
     from proyecto_demeter.transport.async_uart import AsyncUartTransport
-    from proyecto_demeter.transport.protocol_schemas import (
+    from proyecto_demeter.config.schemas import (
         GpioCommand, ActionResponse, PingCommand, SequenceCommand, ExecSequence, 
         GetSensorsCommand, TempHumReport, PinReport, SystemReport, Ack, Nack, CmdId,
         SetGpio, Ping, GetSensors
@@ -18,24 +18,11 @@ try:
     from proyecto_demeter.data.database import DatabaseManager
     from proyecto_demeter.data.file_logger import SensorLogger
     from proyecto_demeter.config.provider import settings
-except ImportError:
-    # Fallback for direct execution
-    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
-    from src.proyecto_demeter.transport.async_uart import AsyncUartTransport
-    from src.proyecto_demeter.transport.protocol_schemas import (
-        GpioCommand, ActionResponse, PingCommand, SequenceCommand, ExecSequence, 
-        GetSensorsCommand, TempHumReport, PinReport, SystemReport, Ack, Nack, CmdId,
-        SetGpio, Ping, GetSensors
-    )
-    from src.proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
-    from src.proyecto_demeter.data.database import DatabaseManager
-    from src.proyecto_demeter.data.file_logger import SensorLogger
-    from src.proyecto_demeter.config.provider import settings
-    
-try:
     from proyecto_demeter.transport.mock_transport import MockTransport
-except ImportError:
-    from src.proyecto_demeter.transport.mock_transport import MockTransport
+except ImportError as e:
+    # re-raise to debug path issues instead of silently switching class loaders
+    logging.error(f"Import Error in async_service: {e}")
+    raise
     
 from pydantic import ValidationError
 

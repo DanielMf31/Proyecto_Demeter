@@ -13,7 +13,7 @@ if src_path not in sys.path:
 
 from proyecto_demeter.transport.mock_transport import MockTransport
 from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
-from proyecto_demeter.transport.protocol_schemas import SetGpio, PinReport, CmdId
+from proyecto_demeter.config.schemas import PinReport, CmdId, SetGpio
 
 @pytest.mark.asyncio
 async def test_mock_actuator_response():

@@ -9,7 +9,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 
 from proyecto_demeter.ui.views import SidebarFrame, ControlPanelFrame, LogConsoleFrame, SequencePlannerFrame
 from proyecto_demeter.ui.viewmodel import DemeterViewModel
-from proyecto_demeter.shared.schemas import SequenceStep
+from proyecto_demeter.config.schemas import SequenceStep
 
 ctk.set_appearance_mode("System")
 ctk.set_default_color_theme("blue")

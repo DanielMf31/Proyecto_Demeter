@@ -1,0 +1,30 @@
+sequenceDiagram
+    participant Timer
+    participant Node as NodoSensor (ID 2)
+    participant Sensor as DHT/Soil
+    participant Engine as ProtocolEngine
+    participant Gateway
+
+    %% --- Initialization ---
+    Node->>Node: Setup (ID=2)
+    Node->>Sensor: Init Sensors
+    Node->>Engine: Register Gateway (MB:ID 1)
+    
+    %% --- Main Loop (Periodic) ---
+    loop Every 5 Minutes
+        Timer->>Node: Wake Up (Deep Sleep limit)
+        activate Node
+        
+        Node->>Sensor: read()
+        Sensor-->>Node: {Temp: 24.5, Hum: 60}
+        
+        Node->>Engine: sendTempHumReport(Target=1, T=24.5, H=60)
+        Engine->>Gateway: ESP-NOW Frame (0x0B)
+        
+        note right of Gateway: Gateway forwards to Host
+        
+        Node->>Node: Check if other sensors need reading
+        
+        Node->>Node: Go to Deep Sleep
+        deactivate Node
+    end

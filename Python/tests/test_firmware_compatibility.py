@@ -1,6 +1,6 @@
 import pytest
 import struct
-from proyecto_demeter.transport.protocol_schemas import TempHumReport, PinReport, SystemReport, CmdId
+from proyecto_demeter.config.schemas import TempHumReport, PinReport, SystemReport, CmdId
 from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
 
 # Constants from C++ definetion

@@ -1,6 +1,6 @@
 import pytest
 import struct
-from proyecto_demeter.transport.protocol_schemas import SequenceStep, ExecSequence
+from proyecto_demeter.config.schemas import SequenceStep, ExecSequence
 from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
 
 def test_sequence_step_validation():

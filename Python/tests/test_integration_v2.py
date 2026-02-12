@@ -17,7 +17,7 @@ print(f"Debug: Added {src_path} to sys.path")
 
 from proyecto_demeter.core.async_service import DemeterService
 from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2
-from proyecto_demeter.transport.protocol_schemas import TempHumReport, CmdId, Ping
+from proyecto_demeter.config.schemas import TempHumReport, CmdId, Ping
 
 # Mock Transport
 class MockAsyncUartTransport:

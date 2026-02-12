@@ -1,0 +1,94 @@
+classDiagram
+    %% --- Core Node Abstraction ---
+    class Node {
+        <<Abstract>>
+        #uint8_t _nodeId
+        #SystemContext* _context
+        +virtual void setup()
+        +virtual void begin()
+        +virtual void update()
+    }
+
+    class NodoSensor {
+        +NodoSensor(id)
+        +setup()
+    }
+
+    class NodoActuador {
+        +NodoActuador(id)
+        +setup()
+    }
+
+    %% --- Orchestrator ---
+    class SystemContext {
+        +GpioController* executor
+        +ProtocolEngine* protocol
+        +SensorManager* sensors
+        +begin()
+        +loop()
+    }
+
+    %% --- Subsystems ---
+    class GpioController {
+        +setPin(pin, state)
+        +pwmWrite(pin, duty)
+    }
+
+    class SensorManager {
+        -vector~ISensor*~ _sensors
+        +addSensor(ISensor*)
+        +readAll()
+    }
+
+    class ProtocolEngine {
+        -IComms* _strategy
+        +setStrategy(IComms*)
+        +sendPacket()
+        +registerCallback()
+    }
+
+    %% --- Interfaces & Strategies ---
+    class ISensor {
+        <<Interface>>
+        +init()
+        +read()
+        +getType()
+    }
+
+    class IComms {
+        <<Interface>>
+        +begin()
+        +send()
+        +available()
+        +read()
+    }
+
+    %% --- Concrete Implementations ---
+    class DHTSensor { +read() }
+    class SoilSensor { +read() }
+    
+    class UartStrategy { +send() }
+    class EspNowStrategy { +send() }
+    class GatewayStrategy { +send() }
+
+    %% --- Relationships ---
+    %% Node Hierarchy
+    Node <|-- NodoSensor
+    Node <|-- NodoActuador
+    Node *-- SystemContext : composes
+
+    %% SystemContext Aggregation
+    SystemContext o-- GpioController
+    SystemContext o-- ProtocolEngine
+    SystemContext o-- SensorManager
+
+    %% Sensor System
+    SensorManager o-- ISensor : manages
+    ISensor <|.. DHTSensor
+    ISensor <|.. SoilSensor
+
+    %% Communication System
+    ProtocolEngine o-- IComms : uses
+    IComms <|.. UartStrategy
+    IComms <|.. EspNowStrategy
+    IComms <|.. GatewayStrategy

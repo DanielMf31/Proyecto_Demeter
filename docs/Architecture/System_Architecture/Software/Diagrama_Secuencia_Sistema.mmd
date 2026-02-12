@@ -1,0 +1,53 @@
+sequenceDiagram
+    participant GUI as GUI (CustomTkinter)
+    participant Service as AsyncService
+    participant Transport as MockTransport
+    participant Mock as MixedStrategy
+
+    %% --- 1. Connection Phase ---
+    GUI->>Service: Connect (TCP/8888)
+    activate Service
+    Service-->>GUI: Accept Connection
+    deactivate Service
+    
+    %% --- 2. User Action (Actuator Control) ---
+    note over GUI: User clicks "OPEN Window"
+    GUI->>Service: JSON {"type":"GPIO_CMD", "pin":2, "action":"ON"}
+    activate Service
+    
+    Service->>Service: Validate JSON & Create Binary Cmd
+    Service->>Transport: send(SetGpio(Pin=2, Val=1))
+    Transport->>Mock: handle_command(SetGpio)
+    
+    activate Mock
+    note over Mock: Simulated Latency (200ms)
+    Mock->>Mock: Update Internal State (GPIO=1)
+    Mock->>Transport: send_frame_to_host(PinReport)
+    deactivate Mock
+    
+    Transport->>Service: on_uart_data(PinReport Binary)
+    deactivate Service
+
+    activate Service
+    Service->>Service: parse_frame() -> PinReport
+    Service->>GUI: JSON {"node_id":3, "pin":2, "state":1} (Broadcast)
+    deactivate Service
+    
+    GUI->>GUI: Update Label "OPEN", Color Green
+
+    %% --- 3. Background Sensor Loop ---
+    loop Every 5 Seconds
+        activate Mock
+        Mock->>Mock: Generate Random Temp/Hum
+        Mock->>Transport: send_frame_to_host(TempHumReport)
+        deactivate Mock
+        
+        Transport->>Service: on_uart_data(TempHumReport Binary)
+        activate Service
+        Service->>Service: parse_frame()
+        Service->>Service: Log to DB & File
+        Service->>GUI: JSON {"node_id":10, "temperature":24.5, "humidity":50}
+        deactivate Service
+        
+        GUI->>GUI: Update Monitor Tab / Log Console
+    end

@@ -5,7 +5,7 @@ import json
 from unittest.mock import MagicMock, AsyncMock
 from proyecto_demeter.core.async_service import DemeterService
 from proyecto_demeter.transport.interface import TransportStrategy
-from proyecto_demeter.transport.protocol_schemas import GpioCommand, PingCommand, SequenceCommand, SequenceStep, ActionResponse
+from proyecto_demeter.config.schemas import GpioCommand, PingCommand, SequenceCommand, SequenceStep, ActionResponse
 
 # Mock Transport
 class MockAsyncTransport(TransportStrategy):
@@ -91,7 +91,7 @@ async def test_service_sequence_command():
     cmd = SequenceCommand(steps=steps, target_id=1)
     
     # Simulate processing
-    from proyecto_demeter.transport.protocol_schemas import ExecSequence
+    from proyecto_demeter.config.schemas import ExecSequence
     exec_seq = ExecSequence(target_id=cmd.target_id, steps=cmd.steps)
     bytes_seq = service.protocol.serialize(exec_seq)
     

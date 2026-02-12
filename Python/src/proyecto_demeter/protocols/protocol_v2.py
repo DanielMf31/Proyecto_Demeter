@@ -2,7 +2,7 @@ import struct
 import logging
 from typing import Optional, Union, Any, Dict, Type
 
-from ..transport.protocol_schemas import (
+from ..config.schemas import (
     DemeterCommand, 
     SetGpio, 
     SetPwm,

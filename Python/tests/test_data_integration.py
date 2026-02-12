@@ -12,7 +12,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src'
 from proyecto_demeter.data.database import DatabaseManager
 from proyecto_demeter.data.file_logger import SensorLogger
 from proyecto_demeter.core.async_service import DemeterService
-from proyecto_demeter.transport.protocol_schemas import TempHumReport
+from proyecto_demeter.config.schemas import TempHumReport
 
 @pytest.mark.asyncio
 async def test_database_manager():

@@ -8,7 +8,16 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(BASE_DIR, 'src'))
 
 from proyecto_demeter.protocols.protocol_v2 import DemeterProtocolV2, HEADER_FMT, SYNC_BYTE
-from proyecto_demeter.transport.protocol_schemas import DemeterCommand, TempHumReport, CmdId
+from proyecto_demeter.config.schemas import (
+    CmdId,
+    Ping,
+    Ack,
+    Nack,
+    SetGpio,
+    TempHumReport,
+    PinReport,
+    SystemReport
+)
 
 class TestDemeterProtocolV2(unittest.TestCase):
     def setUp(self):

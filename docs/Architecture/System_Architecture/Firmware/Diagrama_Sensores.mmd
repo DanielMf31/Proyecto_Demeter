@@ -1,0 +1,44 @@
+classDiagram
+    %% --- Context ---
+    class SensorManager {
+        -std::vector~ISensor*~ _sensors
+        +addSensor(ISensor*)
+        +readAll()
+        +update()
+    }
+
+    %% --- Interface ---
+    class ISensor {
+        <<Interface>>
+        +virtual bool init()
+        +virtual bool read(SensorReading&)
+        +virtual string getName()
+    }
+
+    %% --- Concrete Sensors ---
+    class DHTSensor {
+        -uint8_t _pin
+        +init()
+        +read()
+    }
+
+    class SoilSensor {
+        -uint8_t _pin
+        +init()
+        +read()
+    }
+
+    class DS18B20Sensor {
+        -uint8_t _pin
+        -OneWire* _bus
+        +init()
+        +read()
+    }
+
+    %% --- Relationships ---
+    SensorManager o-- ISensor : aggregates
+    ISensor <|.. DHTSensor : implements
+    ISensor <|.. SoilSensor : implements
+    ISensor <|.. DS18B20Sensor : implements
+
+    note for SensorManager "Iterates over agnostic ISensors.\nCollects data for ProtocolEngine."

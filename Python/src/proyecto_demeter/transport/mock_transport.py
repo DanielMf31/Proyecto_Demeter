@@ -5,7 +5,7 @@ import struct
 from typing import Callable, Optional, List, Dict
 from abc import ABC, abstractmethod
 from ..protocols.protocol_v2 import DemeterProtocolV2
-from ..transport.protocol_schemas import (
+from ..config.schemas import (
     CmdId, SetGpio, Ping, Ack, DemeterCommand, 
     TempHumReport, PinReport, SystemReport
 )

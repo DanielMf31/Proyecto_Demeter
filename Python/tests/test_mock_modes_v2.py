@@ -1,7 +1,7 @@
 import pytest
 import asyncio
 from proyecto_demeter.transport.mock_transport import MockTransport
-from proyecto_demeter.transport.protocol_schemas import (
+from proyecto_demeter.config.schemas import (
     DemeterCommand, TempHumReport, PinReport, SystemReport, Ack, CmdId, SetGpio, Ping
 )
 

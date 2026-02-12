@@ -11,7 +11,7 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 
 try:
-    from proyecto_demeter.shared.schemas import GpioCommand, ActionResponse, DataReport
+    from proyecto_demeter.config.schemas import GpioCommand, ActionResponse
 except ImportError:
      # Fallback
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
