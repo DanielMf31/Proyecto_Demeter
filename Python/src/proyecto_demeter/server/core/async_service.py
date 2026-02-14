@@ -13,7 +13,7 @@ try:
     from proyecto_demeter.shared.config.schemas import (
         GpioCommand, ActionResponse, PingCommand, SequenceCommand, ExecSequence, 
         GetSensorsCommand, TempHumReport, PinReport, SystemReport, Ack, Nack, CmdId,
-        SetGpio, Ping, GetSensors, Syn
+        SetGpio, Ping, GetSensors, Syn, SynAck
     )
     from proyecto_demeter.shared.protocols.protocol_v2 import DemeterProtocolV2
     from proyecto_demeter.server.data.database import DatabaseManager
@@ -158,16 +158,23 @@ class DemeterService:
             # Extract full frame
             frame = self.rx_buffer[:total_frame_len]
             
-            # Remove frame from buffer
-            del self.rx_buffer[:total_frame_len]
+            # 2. Parse Frame (Peek)
+            # We don't remove from buffer yet, in case it's invalid
+            frame_bytes = bytes(frame)
+            cmd = self.protocol.parse_frame(frame_bytes)
             
-            # 2. Parse Frame
-            cmd = self.protocol.parse_frame(bytes(frame))
             if cmd:
+                # Valid Frame -> Consume it
+                del self.rx_buffer[:total_frame_len]
                 # Schedule async handler
                 asyncio.create_task(self.handle_protocol_command(cmd))
             else:
-                self.logger.warning(f"Invalid Frame (CRC or Structure): {frame.hex()}")
+                # Invalid Frame (CRC or Structure)
+                # It's possible we found a '0xFE' byte inside garbage or data, not a real header.
+                # Drop only the Sync Byte (1 byte) and let the loop find the next 0xFE
+                self.logger.warning(f"Invalid Frame (CRC/Struct). Dropping SYNC to resync. Data: {frame_bytes.hex()}")
+                del self.rx_buffer[0]
+                # Loop continues to search for next SYNC
 
     async def handle_protocol_command(self, cmd):
         """Dispatch received protocol commands."""
@@ -191,6 +198,13 @@ class DemeterService:
             self.logger.info(f"[RX] SystemReport Node={cmd.node_id} Mode={cmd.mode} Batt={cmd.battery_mv}mV")
             self.broadcast_event(cmd)
             
+        elif isinstance(cmd, Syn):
+            self.logger.info(f"[SYN] Handshake Request from Node {cmd.source_id} (Ctx={cmd.context})")
+            # Reply with SYN_ACK to Source
+            if cmd.source_id is not None:
+                reply = self.protocol.serialize(SynAck(target_id=cmd.source_id, context=cmd.context))
+                await self._send_protocol_cmd(reply)
+
         elif isinstance(cmd, Ack):
             self.logger.info(f"[ACK] Device ACK for CMD {cmd.original_cmd_id}")
             # Could forward ACK to GUI if we mapped request IDs

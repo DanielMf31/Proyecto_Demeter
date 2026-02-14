@@ -31,6 +31,7 @@ class CmdId(IntEnum):
 class DemeterCommand(BaseModel):
     """Base class for all Protocol Commands."""
     target_id: int = Field(ge=0, le=254, description="Node ID of the recipient")
+    source_id: Optional[int] = Field(default=None, ge=0, le=255, description="Node ID of the sender")
     
     def get_cmd_id(self) -> int:
         raise NotImplementedError("Subclasses must implement get_cmd_id")

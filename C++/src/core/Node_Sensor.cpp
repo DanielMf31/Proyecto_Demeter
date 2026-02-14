@@ -63,9 +63,9 @@ void Node_Sensor::update() {
             // Let's rely on a simple periodic check here to avoid spamming.
             static unsigned long lastConnectAttempt = 0;
             if (millis() - lastConnectAttempt > 5000) {
-                 Serial.println("[Node_Sensor] State is IDLE/BOOT. Initiating Handshake with Gateway (1)...");
+                 Serial.println("[Node_Sensor] State is IDLE/BOOT. Initiating Handshake with Server (0)...");
                  Demeter::AckData context = {0, (uint8_t)Demeter::SessionContext::SENSOR_REPORT};
-                 _systemManager->initiateHandshake(1, context);
+                 _systemManager->initiateHandshake(0, context); // Handshake with Server (0)
                  lastConnectAttempt = millis();
             }
             break;
@@ -81,7 +81,7 @@ void Node_Sensor::update() {
             if (_reportIntervalMs > 0) {
                 if (millis() - _lastReportTime >= _reportIntervalMs) {
                     // DELEGATE TO SYSTEM MANAGER
-                    _systemManager->collectAndPublishSensorData(1); // Target Gateway (1)
+                    _systemManager->collectAndPublishSensorData(0); // Target Server (0) via Gateway
                     _lastReportTime = millis();
 
                     if (_deepSleepEnabled) {
@@ -96,8 +96,8 @@ void Node_Sensor::update() {
 }
 
 void Node_Sensor::collectAndSend() {
-    // Deprecated. Use _systemManager->collectAndPublishSensorData(1) directly
-    if (_systemManager) _systemManager->collectAndPublishSensorData(1);
+    // Deprecated. Use _systemManager->collectAndPublishSensorData(0) directly
+    if (_systemManager) _systemManager->collectAndPublishSensorData(0);
 }
 
 void Node_Sensor::setReportingConfig(uint32_t intervalMs, bool deepSleep) {

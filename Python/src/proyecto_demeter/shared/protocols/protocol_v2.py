@@ -63,7 +63,7 @@ class DemeterProtocolV2:
     # ==========================================
     def serialize(self, cmd: DemeterCommand) -> bytes:
         payload = b''
-        src_id = 0x00
+        src_id = cmd.source_id if cmd.source_id is not None else 0x00
 
         if isinstance(cmd, SetGpio):
             payload = struct.pack('<BBB', cmd.pin, cmd.value, cmd.flags)
@@ -130,16 +130,20 @@ class DemeterProtocolV2:
         received_crc = frame_bytes[HEADER_SIZE+length]
         
         # Verify CRC
-        if self._calculate_crc(frame_bytes[1 : HEADER_SIZE+length]) != received_crc:
-            self.logger.warning(f"CRC Error")
+        calc_crc = self._calculate_crc(frame_bytes[1 : HEADER_SIZE+length])
+        if calc_crc != received_crc:
+            self.logger.warning(f"CRC Error: Calc={calc_crc:02X} Recv={received_crc:02X} | Data={frame_bytes.hex()}")
             return None
 
         # Registry Dispatch
         parser = self._registry.get(cmd_id)
         if parser:
-            return parser(dst, src, payload)
+            cmd = parser(dst, src, payload)
+            if cmd:
+                cmd.source_id = src
+            return cmd
         
-        self.logger.info(f"Unknown Command ID: {cmd_id}")
+        self.logger.info(f"Unknown Command ID: 0x{cmd_id:02X}")
         return None
 
     # --- Parsers ---

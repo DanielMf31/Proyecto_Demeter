@@ -3,7 +3,7 @@ import json
 import webbrowser
 import os
 from tkinter import messagebox
-from ..config import settings
+from proyecto_demeter.shared.config.provider import settings
 
 class LoginWindow(ctk.CTk):
     """
@@ -17,7 +17,7 @@ class LoginWindow(ctk.CTk):
         self.resizable(False, False)
         
         # Use centralized config path
-        self.config_path = settings.CONFIG_DIR / "users.json"
+        self.config_path = os.path.join(settings.CONFIG_DIR, "users.json")
         
         self.authenticated = False
 

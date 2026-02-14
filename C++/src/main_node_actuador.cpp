@@ -58,6 +58,7 @@ void setup() {
     std::array<uint8_t, 6> gatewayMac;
     memcpy(gatewayMac.data(), GATEWAY_MAC, 6);
     espNowStrategy.registerRoute(GATEWAY_ID, gatewayMac);
+    espNowStrategy.registerRoute(0, gatewayMac); // Node 0 is Server (via Gateway)
 
     // Initialize Node
     if (node.getExecutor()) {
@@ -81,12 +82,12 @@ void setup() {
         // Execute via SystemManager (which calls Executor)
         node.getSystemManager()->injectCommand(cmd); 
         
-        // Send Feedback to Gateway
+        // Send Feedback to Server (0)
         Demeter::PinReport report;
         report.sourceId = NODE_ID;
         report.pin = cmd.pin;
         report.state = cmd.value;
-        node.getSystemManager()->sendPinStatus(GATEWAY_ID, report); 
+        node.getSystemManager()->sendPinStatus(0, report); // Target 0 
         
         Serial.println(">> [ACTUATOR] Feedback sent to Gateway.");
     });

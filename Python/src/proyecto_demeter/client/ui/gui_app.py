@@ -7,15 +7,9 @@ import logging
 import os
 import sys
 
-# Add src to path
-sys.path.append(os.path.join(os.path.dirname(__file__), '../../'))
 
-try:
-    from proyecto_demeter.shared.config.schemas import GpioCommand, ActionResponse
-except ImportError:
-     # Fallback
-    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../')))
-    from proyecto_demeter.shared.config.schemas import GpioCommand, ActionResponse, DataReport
+
+from proyecto_demeter.shared.config.schemas import GpioCommand, ActionResponse, DataReport
 
 # Configuración Visual
 ctk.set_appearance_mode("dark")

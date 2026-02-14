@@ -54,10 +54,10 @@ void Node_Actuator::update() {
             // Try to connect to Gateway (ID 1)
             static unsigned long lastConnectAttempt = 0;
             if (millis() - lastConnectAttempt > 5000) {
-                 Serial.println("[Node_Actuator] State is IDLE/BOOT. Initiating Handshake with Gateway (1)...");
+                 Serial.println("[Node_Actuator] State is IDLE/BOOT. Initiating Handshake with Server (0)...");
                  // Actuators usually listen, so GENERAL context is fine, or maybe we define a specific one later.
                  Demeter::AckData context = {0, (uint8_t)Demeter::SessionContext::GENERAL};
-                 _systemManager->initiateHandshake(1, context);
+                 _systemManager->initiateHandshake(0, context); // Target Server (0)
                  lastConnectAttempt = millis();
             }
             break;

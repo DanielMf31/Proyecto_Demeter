@@ -113,19 +113,19 @@ void setup() {
     
     // Ack Listener
     gateway.getSystemManager()->addAckListener([](const Demeter::AckData& data) {
-         Serial.printf(">> [ACK] Node %d confirmed (Ctx: 0x%02X)\n", data.sourceId, data.context);
+         // Serial.printf(">> [ACK] Node %d confirmed (Ctx: 0x%02X)\n", data.sourceId, data.context);
     });
 
     // Sensor Data Listener (Always Active)
     gateway.getSystemManager()->addSensorDataListener([](const Demeter::TempHumReport& report) {
-        Serial.printf(">> [DATA] Node %d: %.2f C, %.2f %%\n", report.sourceId, report.temperature, report.humidity);
+        // Serial.printf(">> [DATA] Node %d: %.2f C, %.2f %%\n", report.sourceId, report.temperature, report.humidity);
         // Forward to UART/Host?
         // gateway.getSystemManager()->sendSensorData(0, report); 
     });
 
     // Pin Status Listener
     gateway.getSystemManager()->addPinReportListener([](const Demeter::PinReport& report) {
-        Serial.printf(">> [STATUS] Node %d Pin %d is %s\n", report.sourceId, report.pin, report.state ? "ON" : "OFF");
+        // Serial.printf(">> [STATUS] Node %d Pin %d is %s\n", report.sourceId, report.pin, report.state ? "ON" : "OFF");
     });
     
     Serial.println("[Setup] Ready.");

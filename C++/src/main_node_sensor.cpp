@@ -38,6 +38,7 @@ void setup() {
     // MAC from Gateway Log: 9C:13:9E:A8:6F:CC
     std::array<uint8_t, 6> gatewayMac = {0x9C, 0x13, 0x9E, 0xA8, 0x6F, 0xCC}; 
     espNowStrategy.registerRoute(1, gatewayMac); // Node 1 is Gateway
+    espNowStrategy.registerRoute(0, gatewayMac); // Node 0 is Server (via Gateway)
     
     // 2. Register Sensors
     if (demeterNode.getSensorManager()) {
