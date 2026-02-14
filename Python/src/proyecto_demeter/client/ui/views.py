@@ -114,11 +114,11 @@ class ControlPanelFrame(ctk.CTkScrollableFrame):
         
         # Pumps are on Node 3
         btn_on = ctk.CTkButton(frame, text="START", width=80, fg_color="green", 
-                               command=lambda: self.command_callback(3, pin, "ON"))
+                               command=lambda: self.command_callback(1, pin, "ON"))
         btn_on.pack(side="right", padx=5, pady=5)
         
         btn_off = ctk.CTkButton(frame, text="STOP", width=80, fg_color="red", 
-                                command=lambda: self.command_callback(3, pin, "OFF"))
+                                command=lambda: self.command_callback(1, pin, "OFF"))
         btn_off.pack(side="right", padx=5, pady=5)
         return frame
 
