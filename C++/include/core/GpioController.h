@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/InternalTypes.h"
+#include "core/PinConfig.h"
 #include <vector>
 
 // Hardware Abstraction for GPIO

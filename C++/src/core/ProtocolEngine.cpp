@@ -6,64 +6,53 @@
 /**
  * @file ProtocolEngine.cpp
  * @brief Logic for Frame Parsing and Validation.
+ * Refactored to separate Parsing, Command Sending, and Frame Construction.
  */
+
+// =============================================================
+// SECTION: 1. Setup & Configuration (Parsing Logic)
+// =============================================================
 
 ProtocolEngine::ProtocolEngine(IComms* strategy) : _strategy(strategy) {}
 
-void ProtocolEngine::onSetGpio(GpioCallback cb) {
+void ProtocolEngine::setNodeId(uint8_t id) {
+    _myId = id;
+}
+
+void ProtocolEngine::onSetGpio(Demeter::GpioCallback cb) {
     _onGpioCommand = cb;
 }
 
-void ProtocolEngine::onSetPwm(PwmCallback cb) {
+void ProtocolEngine::onSetPwm(Demeter::PwmCallback cb) {
     _onPwmCommand = cb;
 }
 
-void ProtocolEngine::onExecSequence(SequenceCallback cb) {
+void ProtocolEngine::onExecSequence(Demeter::SequenceCallback cb) {
     _onSequenceCommand = cb;
 }
 
-void ProtocolEngine::onAckRecv(AckCallback cb) {
-    _onAckRecv = cb;
-}
+void ProtocolEngine::onAckRecv(Demeter::AckCallback cb) { _onAckRecv = cb; }
 
-void ProtocolEngine::onPingRecv(PingCallback cb) {
+void ProtocolEngine::onPingRecv(Demeter::PingCallback cb) {
     _onPingRecv = cb;
 }
 
-void ProtocolEngine::onTempHumReportRecv(TempHumReportCallback cb) {
+void ProtocolEngine::onTempHumReportRecv(Demeter::TempHumReportCallback cb) {
     _onTempHumReportRecv = cb;
 }
 
-void ProtocolEngine::onPinReportRecv(PinReportCallback cb) {
-    _onPinReportRecv = cb;
-}
+void ProtocolEngine::onPinReportRecv(Demeter::PinReportCallback cb) { _onPinReport = cb; }
+void ProtocolEngine::onSystemReportRecv(Demeter::SystemReportCallback cb) { _onSystemReport = cb; }
+void ProtocolEngine::onGetSensorsRecv(Demeter::GetSensorsCallback cb) { _onGetSensors = cb; }
+void ProtocolEngine::onRouteAddRecv(Demeter::RouteAddCallback cb) { _onRouteAdd = cb; }
+void ProtocolEngine::onNackRecv(Demeter::NackCallback cb) { _onNack = cb; }
+void ProtocolEngine::onSynRecv(Demeter::AckCallback cb) { _onSynRecv = cb; }
+void ProtocolEngine::onSynAckRecv(Demeter::AckCallback cb) { _onSynAckRecv = cb; }
 
-void ProtocolEngine::onSystemReportRecv(SystemReportCallback cb) {
-    _onSystemReportRecv = cb;
-}
-
-void ProtocolEngine::onGetSensorsRecv(GetSensorsCallback cb) {
-    _onGetSensorsRecv = cb;
-}
-
-// ... (calculateCRC placeholder, careful with replace_file_content matching) ...
-// Actually, I can't match across `calculateCRC`. I'll do two replaces. 
-// Wait, I can match `void ProtocolEngine::onDataReportRecv(DataReportCallback cb) {\n    _onDataReportRecv = cb;\n}` exactly.
-// Then I'll check parsing.
-
-
-/**
- * @brief Calculates a simple Modular Sum CRC (Mod 256).
- * @param data Pointer to data buffer.
- * @param len Length of data in bytes.
- * @return uint8_t Calculated CRC.
- */
-uint8_t ProtocolEngine::calculateCRC(const uint8_t* data, size_t len) {
-    uint32_t sum = 0;
-    for (size_t i = 0; i < len; i++) {
-        sum += data[i];
+void ProtocolEngine::registerRoute(uint8_t id, const std::array<uint8_t, 6>& mac) {
+    if (_strategy) { // Changed from _commsStrategy to _strategy based on constructor
+        _strategy->registerRoute(id, mac);
     }
-    return (uint8_t)(sum % 256);
 }
 
 void ProtocolEngine::update() {
@@ -106,161 +95,213 @@ void ProtocolEngine::parseFrame(const std::vector<uint8_t>& frame) {
     }
 
     // 5. Forwarding Logic
-    // If destination is not ME, try to forward via Strategy.
-    if (hdr->dst_id != _myId && hdr->dst_id != 0xFF) { // Assuming 0xFF is Broadcast? Or check if not Broadcast.
-        // Note: We might want to execute Broadcasts AND forward them? 
-        // For now, simple unicast forwarding.
+    // FORCE-ACCEPT Rule for Gateway (ID 1) as requested
+    bool isForMe = (hdr->dst_id == _myId) || (hdr->dst_id == 0xFF);
+    
+    // Explicit Override: If I am the Gateway (ID 1) or if the message is for ID 1
+    // and I'm configured to be the Gateway.
+    if (_myId == 1 && hdr->dst_id == 1) {
+        isForMe = true;
+    }
+
+    if (!isForMe) {
+        // If destination is not ME, try to forward via Strategy.
         if (_strategy) {
             _strategy->send(frame.data(), frame.size());
         }
         return; // Don't execute locally
     }
 
-    // 6. Dispatch based on CMD
-    if (hdr->cmd_id == 0x0A) { // ROUTE_ADD
-        Serial.println(">> RX: ROUTE_ADD Command");
-        if (hdr->length >= 7) { // 1 byte ID + 6 bytes MAC
-            const uint8_t* payloadPtr = frame.data() + HEADER_SIZE;
-            uint8_t nodeId = payloadPtr[0];
-            std::array<uint8_t, 6> mac;
-            std::copy(payloadPtr + 1, payloadPtr + 7, mac.begin());
-            
-            if (_strategy) {
-                _strategy->registerRoute(nodeId, mac);
+   // 6. Command Dispatch
+    Demeter::CommandType type = static_cast<Demeter::CommandType>(hdr->cmd_id);
+    
+    // Extract Payload for convenience
+    std::vector<uint8_t> payload;
+    if (frame.size() > HEADER_SIZE + 1) {
+        payload.assign(frame.begin() + HEADER_SIZE, frame.end() - 1);
+    }
+
+    switch (type) {
+        case Demeter::CommandType::PING: {
+            // [Modified] No Auto-ACK. Delegated to SystemManager.
+            if (_onPingRecv) {
+                Demeter::RequestData req = {hdr->src_id};
+                _onPingRecv(req);
             }
-            sendAck(hdr->src_id);
-        } else {
-            sendNack(hdr->src_id);
+            break;
         }
-        return;
-    }
-    else if (hdr->cmd_id == (uint8_t)Demeter::CommandType::SET_GPIO) {
-        if (hdr->length >= 3 && _onGpioCommand) {
-            Demeter::SetGpioCmd cmd;
-            const uint8_t* payloadPtr = frame.data() + HEADER_SIZE;
-            
-            cmd.pin = payloadPtr[0];
-            cmd.value = (payloadPtr[1] > 0);
-            cmd.flags = payloadPtr[2];
-            
-            _onGpioCommand(cmd);
-        }
-    }
-    else if (hdr->cmd_id == (uint8_t)Demeter::CommandType::SET_PWM) {
-        if (hdr->length >= 3 && _onPwmCommand) {
-            Demeter::SetPwmCmd cmd;
-            const uint8_t* payloadPtr = frame.data() + HEADER_SIZE;
 
-            cmd.pin = payloadPtr[0];
-            // Little Endian: Low Byte First
-            cmd.value = payloadPtr[1] | (payloadPtr[2] << 8);
-
-            _onPwmCommand(cmd);
-        }
-    }
-    else if (hdr->cmd_id == (uint8_t)Demeter::CommandType::EXEC_SEQUENCE) {
-        if (hdr->length >= 1 && _onSequenceCommand) {
-            Demeter::ExecSequenceCmd cmd;
-            const uint8_t* payloadPtr = frame.data() + HEADER_SIZE;
-            
-            uint8_t count = payloadPtr[0];
-            size_t offset = 1;
-            
-            for (uint8_t i = 0; i < count; i++) {
-                // Ensure we don't read past the frame
-                if (offset + 8 > hdr->length) break;
-                
-                Demeter::SequenceStep step;
-                // Format: [TGT] [CMD] [PIN] [VAL] [DELAY(4)]
-                
-                // step.target = payloadPtr[offset + 0]; // Ignored for now
-                // step.cmd    = payloadPtr[offset + 1]; // Ignored for now
-                step.pin = payloadPtr[offset + 2];
-                step.value = (payloadPtr[offset + 3] > 0);
-                
-                // Extract 32-bit Delay (Little Endian)
-                uint32_t delay = payloadPtr[offset + 4] | 
-                                 (payloadPtr[offset + 5] << 8) |
-                                 (payloadPtr[offset + 6] << 16) |
-                                 (payloadPtr[offset + 7] << 24);
-                step.delayMs = delay;
-                
-                cmd.steps.push_back(step);
-                offset += 8;
+        case Demeter::CommandType::ACK: {
+            if (_onAckRecv && payload.size() >= 1) {
+                Demeter::AckData ackData;
+                ackData.sourceId = hdr->src_id;
+                ackData.context = payload[0];
+                _onAckRecv(ackData);
             }
-            
-            _onSequenceCommand(cmd);
+            break;
         }
-    }
-    else if (hdr->cmd_id == (uint8_t)Demeter::CommandType::PING) {
-        if (_onPingRecv) {
-            _onPingRecv(hdr->src_id);
+
+        case Demeter::CommandType::NACK: {
+            if (_onNack && payload.size() >= 1) {
+                Demeter::NackData nackData;
+                nackData.sourceId = hdr->src_id;
+                nackData.errorCode = payload[0];
+                _onNack(nackData);
+            }
+            break;
         }
-        // Respond with ACK
-        sendAck(hdr->src_id);
-    }
-    else if (hdr->cmd_id == (uint8_t)Demeter::CommandType::ACK) {
-        if (_onAckRecv) {
-            _onAckRecv(hdr->src_id);
+
+        case Demeter::CommandType::SYN: {
+            if (_onSynRecv) {
+                Demeter::AckData data = {hdr->src_id, 0};
+                if (!payload.empty()) data.context = payload[0];
+                _onSynRecv(data);
+            }
+            break;
         }
-    }
-    else if (hdr->cmd_id == (uint8_t)Demeter::CommandType::TEMP_HUM_REPORT) {
-        if (hdr->length >= 4 && _onTempHumReportRecv) {
-            // Payload: [TempLSB] [TempMSB] [HumLSB] [HumMSB]
-            const uint8_t* p = frame.data() + HEADER_SIZE;
-            int16_t t_int = p[0] | (p[1] << 8);
-            int16_t h_int = p[2] | (p[3] << 8);
-            
-            float temp = t_int / 100.0f;
-            float hum = h_int / 100.0f;
-            
-            _onTempHumReportRecv(hdr->src_id, temp, hum);
+
+        case Demeter::CommandType::SYN_ACK: {
+            if (_onSynAckRecv) {
+                Demeter::AckData data = {hdr->src_id, 0};
+                if (!payload.empty()) data.context = payload[0];
+                _onSynAckRecv(data);
+            }
+            break;
         }
-    }
-    else if (hdr->cmd_id == (uint8_t)Demeter::CommandType::PIN_REPORT) {
-         if (hdr->length >= 2 && _onPinReportRecv) {
-             // Payload: [PIN] [STATE]
-             const uint8_t* p = frame.data() + HEADER_SIZE;
-             uint8_t pin = p[0];
-             bool state = (p[1] > 0);
-             _onPinReportRecv(hdr->src_id, pin, state);
-         }
-    }
-    else if (hdr->cmd_id == (uint8_t)Demeter::CommandType::SYSTEM_REPORT) {
-        if (hdr->length >= 8 && _onSystemReportRecv) {
-            // Payload: [MODE] [BATT_LSB] [BATT_MSB] [RES*5]
-            const uint8_t* p = frame.data() + HEADER_SIZE;
-            uint8_t mode = p[0];
-            uint16_t battery = p[1] | (p[2] << 8);
-            
-            _onSystemReportRecv(hdr->src_id, mode, battery);
+
+        case Demeter::CommandType::ROUTE_ADD: {
+            // [Modified] No Auto-Registration or ACK. Delegated to SystemManager.
+            // Payload: [TargetID(1)][MAC(6)]
+            if (payload.size() >= 7 && _onRouteAdd) {
+                Demeter::RouteAddCmd cmd;
+                cmd.nodeId = payload[0];
+                std::memcpy(cmd.mac.data(), &payload[1], 6);
+                _onRouteAdd(cmd);
+            }
+            break;
         }
-    }
-    else if (hdr->cmd_id == 0x20) { // GET_SENSORS
-        if (_onGetSensorsRecv) {
-            _onGetSensorsRecv(hdr->src_id);
+
+        case Demeter::CommandType::TEMP_HUM_REPORT: {
+            if (payload.size() >= 4 && _onTempHumReportRecv) { // Fixed: Using _onTempHumReportRecv
+                // Parse Payload: [T_L][T_H][H_L][H_H] (Int16 scaled x100)
+                int16_t t_int = (int16_t)(payload[0] | (payload[1] << 8));
+                int16_t h_int = (int16_t)(payload[2] | (payload[3] << 8));
+                
+                Demeter::TempHumReport report;
+                report.sourceId = hdr->src_id;
+                report.temperature = t_int / 100.0f;
+                report.humidity = h_int / 100.0f;
+                
+                _onTempHumReportRecv(report);
+            }
+            break;
         }
+
+        case Demeter::CommandType::PIN_REPORT: {
+            // Payload: [PIN][STATE]
+            if (payload.size() >= 2 && _onPinReport) {
+                Demeter::PinReport report;
+                report.sourceId = hdr->src_id;
+                report.pin = payload[0];
+                report.state = (payload[1] != 0);
+                _onPinReport(report);
+            }
+            break;
+        }
+
+        case Demeter::CommandType::SYSTEM_REPORT: {
+             // Payload: [Mode][BattL][BattH]
+             if (payload.size() >= 3 && _onSystemReport) {
+                 Demeter::SystemReport report;
+                 report.sourceId = hdr->src_id;
+                 report.mode = payload[0];
+                 report.batteryMv = (uint16_t)(payload[1] | (payload[2] << 8));
+                 _onSystemReport(report);
+             }
+             break;
+        }
+
+        case Demeter::CommandType::GET_SENSORS: {
+            if (_onGetSensors) {
+                Demeter::RequestData req = {hdr->src_id};
+                _onGetSensors(req);
+            }
+            break;
+        }
+
+        case Demeter::CommandType::SET_GPIO: {
+            if (payload.size() >= 3 && _onGpioCommand) {
+                Demeter::SetGpioCmd cmd;
+                cmd.pin = payload[0];
+                cmd.value = (payload[1] != 0);
+                cmd.flags = payload[2];
+                _onGpioCommand(cmd);
+            }
+            break;
+        }
+
+        case Demeter::CommandType::SET_PWM: {
+            if (payload.size() >= 3 && _onPwmCommand) {
+                Demeter::SetPwmCmd cmd;
+                cmd.pin = payload[0];
+                cmd.value = payload[1] | (payload[2] << 8);
+                _onPwmCommand(cmd);
+            }
+            break;
+        }
+
+        case Demeter::CommandType::EXEC_SEQUENCE: {
+             // Payload: [Count][Pin][Val][DelayL][DelayH][DelayH][DelayH]...
+             // Step Size = 1 + 1 + 4 = 6 bytes? Wait.
+             // Serialization check:
+             // [Count(1)] then for each: [Pin(1)][Val(1)][Delay(4)] = 6 bytes/step.
+             // Let's check serializer first.
+             // sendExecSequence puts: [Count] then loop [Step.pin][Step.val][Step.delay(4 bytes)]
+             
+             if (payload.size() >= 1 && _onSequenceCommand) {
+                 uint8_t count = payload[0];
+                 size_t expected = 1 + (count * 6);
+                 if (payload.size() >= expected) {
+                     Demeter::ExecSequenceCmd seqCmd;
+                     size_t offset = 1;
+                     for(int i=0; i<count; i++) {
+                         Demeter::SequenceStep step;
+                         step.pin = payload[offset++];
+                         step.value = (payload[offset++] != 0);
+                         uint32_t d = payload[offset++];
+                         d |= (payload[offset++] << 8);
+                         d |= (payload[offset++] << 16);
+                         d |= (payload[offset++] << 24);
+                         step.delayMs = d;
+                         seqCmd.steps.push_back(step);
+                     }
+                     _onSequenceCommand(seqCmd);
+                 }
+             }
+             break;
+        }
+
+        default:
+            Serial.printf(">> [Engine] Unknown Command: 0x%02X\n", (uint8_t)type);
+            break;
     }
 }
+   
+// =============================================================
+// SECTION: 2. High-Level Command Senders (Application Layer)
+// =============================================================
 
-void ProtocolEngine::sendAck(uint8_t targetId) {
-    std::vector<uint8_t> empty;
-    sendFrame((uint8_t)Demeter::CommandType::ACK, targetId, empty);
-}
 
-void ProtocolEngine::sendPing(uint8_t targetId) {
-    std::vector<uint8_t> empty;
-    sendFrame((uint8_t)Demeter::CommandType::PING, targetId, empty);
-}
+// DATA REPORTS
 
-void ProtocolEngine::sendTempHumReport(uint8_t targetId, float temp, float hum) {
+void ProtocolEngine::sendTempHumReport(uint8_t targetId, const Demeter::TempHumReport& report) {
     std::vector<uint8_t> payload;
     payload.reserve(4);
 
     // Convert float to Int16 scaled x100
     // Example: 25.43 -> 2543
-    int16_t t_int = (int16_t)(temp * 100.0f);
-    int16_t h_int = (int16_t)(hum * 100.0f);
+    int16_t t_int = (int16_t)(report.temperature * 100.0f);
+    int16_t h_int = (int16_t)(report.humidity * 100.0f);
 
     // Serialize Little Endian
     payload.push_back((uint8_t)(t_int & 0xFF));
@@ -271,35 +312,104 @@ void ProtocolEngine::sendTempHumReport(uint8_t targetId, float temp, float hum) 
     sendFrame((uint8_t)Demeter::CommandType::TEMP_HUM_REPORT, targetId, payload);
 }
 
-void ProtocolEngine::sendPinReport(uint8_t targetId, uint8_t pin, bool state) {
+void ProtocolEngine::sendPinReport(uint8_t targetId, const Demeter::PinReport& report) {
     std::vector<uint8_t> payload;
     payload.reserve(2);
-    payload.push_back(pin);
-    payload.push_back(state ? 1 : 0);
+    payload.push_back(report.pin);
+    payload.push_back(report.state ? 1 : 0);
     sendFrame((uint8_t)Demeter::CommandType::PIN_REPORT, targetId, payload);
 }
 
-void ProtocolEngine::sendSystemReport(uint8_t targetId, uint8_t mode, uint16_t batteryMv) {
+void ProtocolEngine::sendSystemReport(uint8_t targetId, const Demeter::SystemReport& report) {
     std::vector<uint8_t> payload;
     payload.reserve(8);
     // [MODE(1)] [BATTERY(2)] [RESERVED(5)]
-    payload.push_back(mode);
-    payload.push_back((uint8_t)(batteryMv & 0xFF));
-    payload.push_back((uint8_t)((batteryMv >> 8) & 0xFF));
+    payload.push_back(report.mode);
+    payload.push_back((uint8_t)(report.batteryMv & 0xFF));
+    payload.push_back((uint8_t)((report.batteryMv >> 8) & 0xFF));
     // Reserved padding
     for(int i=0; i<5; i++) payload.push_back(0x00);
 
     sendFrame((uint8_t)Demeter::CommandType::SYSTEM_REPORT, targetId, payload);
 }
 
-void ProtocolEngine::sendNack(uint8_t targetId) {
+void ProtocolEngine::sendPing(uint8_t targetId, const Demeter::RequestData& data) {
     std::vector<uint8_t> empty;
-    sendFrame((uint8_t)Demeter::CommandType::NACK, targetId, empty);
+    sendFrame((uint8_t)Demeter::CommandType::PING, targetId, empty);
 }
 
-void ProtocolEngine::setNodeId(uint8_t id) {
-    _myId = id;
+// HANDSHAKE
+
+
+void ProtocolEngine::sendSyn(uint8_t targetId, const Demeter::AckData& data) {
+    std::vector<uint8_t> empty;
+    sendFrame((uint8_t)Demeter::CommandType::SYN, targetId, empty);
 }
+
+void ProtocolEngine::sendSynAck(uint8_t targetId, const Demeter::AckData& data) {
+    std::vector<uint8_t> empty;
+    sendFrame((uint8_t)Demeter::CommandType::SYN_ACK, targetId, empty);
+}
+
+void ProtocolEngine::sendAck(uint8_t targetId, const Demeter::AckData& data) {
+    std::vector<uint8_t> payload;
+    if (data.context != 0) {
+        payload.push_back(data.context);
+    }
+    sendFrame((uint8_t)Demeter::CommandType::ACK, targetId, payload);
+}
+
+void ProtocolEngine::sendNack(uint8_t targetId) {
+    std::vector<uint8_t> payload;
+    payload.push_back(0xFF); // Default Generic Error
+    sendFrame((uint8_t)Demeter::CommandType::NACK, targetId, payload);
+}
+
+
+
+// ACTION REQUESTS
+
+void ProtocolEngine::sendSetGpio(uint8_t targetId, const Demeter::SetGpioCmd& cmd) {
+    std::vector<uint8_t> payload;
+    payload.reserve(3);
+    payload.push_back(cmd.pin);
+    payload.push_back(cmd.value ? 1 : 0);
+    payload.push_back(cmd.flags); // Flags
+    sendFrame((uint8_t)Demeter::CommandType::SET_GPIO, targetId, payload);
+}
+
+void ProtocolEngine::sendGetSensors(uint8_t targetId, const Demeter::RequestData& data) {
+    std::vector<uint8_t> empty;
+    sendFrame((uint8_t)Demeter::CommandType::GET_SENSORS, targetId, empty);
+}
+
+void ProtocolEngine::sendExecSequence(uint8_t targetId, const Demeter::ExecSequenceCmd& cmd) {
+    std::vector<uint8_t> payload;
+    // Format: [Count] [Step1...] [Step2...]
+    // Step: [TGT=0][CMD=0][PIN][VAL][DELAY(4)]
+    
+    payload.reserve(1 + cmd.steps.size() * 8);
+    payload.push_back((uint8_t)cmd.steps.size());
+    
+    for(const auto& step : cmd.steps) {
+        payload.push_back(0); // TGT (future use)
+        payload.push_back(0); // CMD (future use)
+        payload.push_back(step.pin);
+        payload.push_back(step.value ? 1 : 0);
+        
+        // Delay 32-bit Little Endian
+        payload.push_back((uint8_t)(step.delayMs & 0xFF));
+        payload.push_back((uint8_t)((step.delayMs >> 8) & 0xFF));
+        payload.push_back((uint8_t)((step.delayMs >> 16) & 0xFF));
+        payload.push_back((uint8_t)((step.delayMs >> 24) & 0xFF));
+    }
+
+    sendFrame((uint8_t)Demeter::CommandType::EXEC_SEQUENCE, targetId, payload);
+}
+
+// =============================================================
+// SECTION: 3. Low-Level Send Logic (Transport Layer)
+// =============================================================
 
 void ProtocolEngine::sendFrame(uint8_t cmdId, uint8_t targetId, const std::vector<uint8_t>& payload) {
     if (!_strategy) return;
@@ -331,4 +441,18 @@ void ProtocolEngine::sendFrame(uint8_t cmdId, uint8_t targetId, const std::vecto
     frame.push_back(crc);
 
     _strategy->send(frame.data(), frame.size());
+}
+
+/**
+ * @brief Calculates a simple Modular Sum CRC (Mod 256).
+ * @param data Pointer to data buffer.
+ * @param len Length of data in bytes.
+ * @return uint8_t Calculated CRC.
+ */
+uint8_t ProtocolEngine::calculateCRC(const uint8_t* data, size_t len) {
+    uint32_t sum = 0;
+    for (size_t i = 0; i < len; i++) {
+        sum += data[i];
+    }
+    return (uint8_t)(sum % 256);
 }

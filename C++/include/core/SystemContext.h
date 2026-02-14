@@ -1,120 +1,51 @@
 #pragma once
-
-#include "core/ProtocolEngine.h"
-#include "core/GpioController.h"
-#include "core/SensorManager.h"
-#include "core/InternalTypes.h"
+#include <stdint.h>
+#include "InternalTypes.h"
 #include <vector>
 
-// System States
-enum class SystemState {
-    BOOT,
-    IDLE,
-    PROCESSING,
-    ERROR
-};
-
-// Execution Mode
-enum class ExecutionMode {
-    IMMEDIATE, // Execute as soon as received (Default)
-    INTERACTIVE_QUEUE // Queue commands, execute on trigger
-};
-
-/**
- * @brief Main logic class for the Firmware.
- *
- * Implements a centralized workflow controller that bridges:
- * - Protocol Engine (Input/Output)
- * - GPIO Controller (Hardware Action)
- * - State Machine (State Management)
- */
-class SystemContext {
-private:
-    ProtocolEngine* _engine;
-    GpioController* _executor; // Optional (Actuator Node only)
-    SensorManager* _sensorManager; // Optional (Sensor Node only)
-    
-    SystemState _state;
-    ExecutionMode _execMode;
-
-    // Command Queue for Interactive Mode
-    std::vector<Demeter::SetGpioCmd> _commandQueue;
-
-    // Sequencer State
-    std::vector<Demeter::SequenceStep> _activeSequence;
-    size_t _sequenceStepIndex;
-    unsigned long _lastStepTime;
-    bool _isSequencerActive;
-
-    // Internal Callback
-    void handleGpioCommand(const Demeter::SetGpioCmd& cmd);
-
-public:
-    /**
-     * @brief Construct a new System Context.
-     * @param engine Pointer to Protocol Engine.
-     */
-    SystemContext(ProtocolEngine* engine);
+namespace Demeter {
 
     /**
-     * @brief Enable the Executor Module.
-     * @param executor Pointer to GpioController.
+     * @brief Centralized System Context.
+     * Manages Identity, State, and Configuration for the Node.
      */
-    void enableExecutor(GpioController* executor);
+    class SystemContext {
+    private:
+        // --- Identity ---
+        uint8_t _nodeId;
+        uint8_t _gatewayId;
+        NodeRole _role;
+        
+        // --- State ---
+        SystemState _currentState; 
+        uint16_t _batteryMv;
+        uint32_t _uptimeSeconds;
+        uint8_t _lastErrorCode;
 
-    /**
-     * @brief Enable the Sensor Manager Module.
-     * @param manager Pointer to SensorManager.
-     */
-    void enableSensorManager(SensorManager* manager);
+        // --- Configuration ---
+        bool _deepSleepEnabled;
+        uint32_t _reportIntervalMs;
+        std::vector<uint8_t> _activePins;
 
-    GpioController* getExecutor() const { return _executor; }
-    SensorManager* getSensorManager() const { return _sensorManager; }
+    public:
+        SystemContext();
 
-    /**
-     * @brief Initialize the system components.
-     * Sets up callbacks and initializes enabled hardware.
-     */
-    void setup();
+        // Getters & Setters
+        void setIdentity(uint8_t id, NodeRole role, uint8_t gatewayId = 1);
+        uint8_t nodeId() const { return _nodeId; }
+        uint8_t gatewayId() const { return _gatewayId; }
+        NodeRole role() const { return _role; }
 
-    /**
-     * @brief Main System Loop.
-     * Should be called in `loop()`. Handles protocol updates.
-     */
-    void loop();
+        // State Management
+        void setState(SystemState state);
+        SystemState getState() const { return _currentState; }
+        
+        void updateBattery(uint16_t mv);
+        uint16_t getBattery() const { return _batteryMv; }
 
-    /**
-     * @brief Configure the execution mode (Immediate vs Queued).
-     * @param mode Desired mode.
-     */
-    void setExecutionMode(ExecutionMode mode);
-
-    /**
-     * @brief Trigger execution of all queued commands.
-     * Used in INTERACTIVE_QUEUE mode.
-     */
-    void executeQueue();
-
-    /**
-     * @brief Clear pending commands in the queue.
-     */
-    void clearQueue();
-    
-    // Public Handler for Protocol
-    /**
-     * @brief Handle EXEC_SEQUENCE command.
-     * Loads the sequence into the active buffer and starts execution.
-     * @param cmd Command containing the list of steps.
-     */
-    void handleExecSequence(const Demeter::ExecSequenceCmd& cmd);
-    
-    // Manual Command Injection
-    /**
-     * @brief Inject a command manually (bypass parsing).
-     * Useful from `main_receptor.cpp` Serial Menu.
-     */
-    void injectCommand(const Demeter::SetGpioCmd& cmd);
-
-    SystemState getState() const { return _state; }
-    size_t getQueueSize() const { return _commandQueue.size(); }
-};
+        // Config
+        void setConfig(uint32_t intervalMs, bool deepSleep);
+        bool isDeepSleepEnabled() const { return _deepSleepEnabled; }
+        uint32_t getReportInterval() const { return _reportIntervalMs; }
+    };
+}

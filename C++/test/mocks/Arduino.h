@@ -27,15 +27,15 @@ typedef bool boolean;
 // Serial - Simplified Mock
 class HardwareSerial {
 public:
-    void begin(unsigned long baud, uint32_t config=SERIAL_8N1, int8_t rxPx=-1, int8_t txPin=-1) {}
-    void print(const char* s) {}
-    void println(const char* s) {}
-    void printf(const char* format, ...) {}
-    void flush() {}
-    int available() { return 0; }
-    int read() { return -1; }
-    size_t write(uint8_t c) { return 1; }
-    size_t write(const uint8_t *buffer, size_t size) { return size; }
+    virtual void begin(unsigned long baud, uint32_t config=SERIAL_8N1, int8_t rxPx=-1, int8_t txPin=-1) {}
+    virtual void print(const char* s) {}
+    virtual void println(const char* s) {}
+    virtual void printf(const char* format, ...) {}
+    virtual void flush() {}
+    virtual int available() { return 0; }
+    virtual int read() { return -1; }
+    virtual size_t write(uint8_t c) { return 1; }
+    virtual size_t write(const uint8_t *buffer, size_t size) { return size; }
 };
 
 extern HardwareSerial Serial;
@@ -43,6 +43,10 @@ extern HardwareSerial Serial;
 // Time Functions
 extern unsigned long millis();
 extern void delay(unsigned long ms);
+
+// Mock Time Control
+void setMockMillis(unsigned long ms);
+void advanceMockMillis(unsigned long ms);
 
 // GPIO Functions
 extern void pinMode(uint8_t pin, uint8_t mode);

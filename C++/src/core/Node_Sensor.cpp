@@ -2,12 +2,17 @@
 #include <Arduino.h>
 
 Node_Sensor::Node_Sensor(uint8_t id, ProtocolEngine* engine) 
-    : Node(id, engine), _sensorManager(new SensorManager()), 
+    : _nodeId(id), _engine(engine), _systemManager(nullptr),
+      _sensorManager(new SensorManager()), 
       _reportIntervalMs(0), _lastReportTime(0), _deepSleepEnabled(false) {
     
-    // Enable SensorManager in SystemContext
-    if (_systemContext && _sensorManager) {
-        _systemContext->enableSensorManager(_sensorManager);
+    // Dependency Injection into SystemManager
+    if (_engine) {
+        _systemManager = new SystemManager(_engine);
+        // Enable SensorManager in SystemManager
+        if (_sensorManager) {
+            _systemManager->enableSensorManager(_sensorManager);
+        }
     }
 }
 
@@ -15,57 +20,84 @@ Node_Sensor::~Node_Sensor() {
     if (_sensorManager) {
         delete _sensorManager;
     }
+    if (_systemManager) {
+        delete _systemManager;
+    }
 }
 
 void Node_Sensor::begin() {
-    Node::begin();
+    if (!_systemManager) return;
 
-    // Register Callback for Manual Read
-    if (_engine) {
-        _engine->onGetSensorsRecv([this](uint8_t srcId) {
-            Serial.printf("[Node_Sensor] Manual Read Request from %d\n", srcId);
-            this->collectAndSend();
-        });
-    }
+    // 1. Initialize Context
+    auto& ctx = _systemManager->getContext();
+    ctx.setIdentity(_nodeId, Demeter::NodeRole::SENSOR);
+    ctx.setConfig(_reportIntervalMs, _deepSleepEnabled);
+
+    // 2. Initialize SystemManager (Handles callbacks like GetSensors automatically)
+    _systemManager->setup();
 
     Serial.println("[Node_Sensor] Initialized.");
 }
 
 void Node_Sensor::update() {
-    Node::update();
+    // 1. Update System Manager (which updates Engine)
+    if (_systemManager) {
+        _systemManager->update();
+    } else {
+        return; // specific error handling or fallback?
+    }
 
-    if (_reportIntervalMs > 0) {
-        if (millis() - _lastReportTime >= _reportIntervalMs) {
-            collectAndSend();
-            _lastReportTime = millis();
+    // 2. Logic based on System State
+    Demeter::SystemState state = _systemManager->getState();
 
-            if (_deepSleepEnabled) {
-                Serial.println("[Node_Sensor] Going to Sleep...");
-                Serial.flush();
-                // esp_deep_sleep(_reportIntervalMs * 1000);
+    switch (state) {
+        case Demeter::SystemState::BOOT:
+        case Demeter::SystemState::IDLE:
+        case Demeter::SystemState::ERROR:
+            // Try to connect to Gateway (ID 1)
+            // Throttle connection attempts? SystemManager handles handshake timeout individually, 
+            // but we shouldn't spam initiateHandshake every loop if it's already "IDLE" after a failure.
+            // For now, simple logic: If IDLE, try to connect.
+            // But we need a "Retry Interval" here or inside SystemManager.
+            // SystemManager::initiateHandshake checks if already in progress, but if it failed and went back to IDLE...
+            // Let's rely on a simple periodic check here to avoid spamming.
+            static unsigned long lastConnectAttempt = 0;
+            if (millis() - lastConnectAttempt > 5000) {
+                 Serial.println("[Node_Sensor] State is IDLE/BOOT. Initiating Handshake with Gateway (1)...");
+                 Demeter::AckData context = {0, (uint8_t)Demeter::SessionContext::SENSOR_REPORT};
+                 _systemManager->initiateHandshake(1, context);
+                 lastConnectAttempt = millis();
             }
-        }
+            break;
+
+        case Demeter::SystemState::HANDSHAKE_SEND_SYN:
+        case Demeter::SystemState::HANDSHAKE_WAIT_SYN_ACK:
+        case Demeter::SystemState::HANDSHAKE_SEND_ACK:
+            // Waiting for connection...
+            break;
+
+        case Demeter::SystemState::RUNNING:
+            // 3. Connected! Periodic Reporting Logic
+            if (_reportIntervalMs > 0) {
+                if (millis() - _lastReportTime >= _reportIntervalMs) {
+                    // DELEGATE TO SYSTEM MANAGER
+                    _systemManager->collectAndPublishSensorData(1); // Target Gateway (1)
+                    _lastReportTime = millis();
+
+                    if (_deepSleepEnabled) {
+                        Serial.println("[Node_Sensor] Going to Sleep...");
+                        Serial.flush();
+                        // esp_deep_sleep(_reportIntervalMs * 1000);
+                    }
+                }
+            }
+            break;
     }
 }
 
 void Node_Sensor::collectAndSend() {
-    if (!_sensorManager || !_engine) return;
-
-    // Use SensorManager to get readings
-    auto readings = _sensorManager->readAll();
-    
-    // Send readings
-    // For V2 MVP: We take the first sensor that gives valid data.
-    // Or iterate? Protocol supports multiple reports?
-    // ProtocolEngine has sendTempHumReport.
-    
-    for (const auto& data : readings) {
-       // Determine Target (Gateway = 1)
-       // We assume data.value1 is Temp, value2 is Hum for now as per ISensor conventions in this project
-       _engine->sendTempHumReport(1, data.value1, data.value2);
-       
-       Serial.printf("[Node_Sensor] Reporting: %.2f / %.2f\n", data.value1, data.value2);
-    }
+    // Deprecated. Use _systemManager->collectAndPublishSensorData(1) directly
+    if (_systemManager) _systemManager->collectAndPublishSensorData(1);
 }
 
 void Node_Sensor::setReportingConfig(uint32_t intervalMs, bool deepSleep) {

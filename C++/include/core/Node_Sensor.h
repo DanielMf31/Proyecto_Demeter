@@ -1,15 +1,21 @@
 #pragma once
 
-#include "core/Node.h"
+#include "core/INode.h"
+#include "core/ProtocolEngine.h"
+#include "core/SystemManager.h"
 #include "core/SensorManager.h"
 
 /**
  * @file Node_Sensor.h
  * @brief Concrete Node implementation for Sensors.
+ * Manages SensorManager, ProtocolEngine, and SystemManager explicitly.
  */
 
-class Node_Sensor : public Node {
+class Node_Sensor : public INode {
 private:
+    uint8_t _nodeId;
+    ProtocolEngine* _engine;
+    SystemManager* _systemManager;
     SensorManager* _sensorManager;
     
     // Reporting Config
@@ -34,4 +40,5 @@ public:
     void setReportingConfig(uint32_t intervalMs, bool deepSleep);
 
     SensorManager* getSensorManager() { return _sensorManager; }
+    SystemManager* getSystemManager() { return _systemManager; }
 };

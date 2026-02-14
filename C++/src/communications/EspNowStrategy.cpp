@@ -9,22 +9,64 @@
 #include <WiFi.h>
 #endif
 
-// Static members initialization
+#ifndef NATIVE_ENV
+// Static members initialization (Real Hardware Only)
 std::vector<uint8_t> EspNowStrategy::_rxBuffer;
 std::map<uint8_t, std::array<uint8_t, 6>> EspNowStrategy::_routeTable;
 bool EspNowStrategy::_rxAvailable = false;
+#endif
 
 #ifdef NATIVE_ENV
-// Dummy Implementations for Native Test
-EspNowStrategy::EspNowStrategy() {}
-EspNowStrategy::~EspNowStrategy() {}
-void EspNowStrategy::begin() {}
+// -----------------------------------------------------------------------------
+// NATIVE TEST SIMULATION (Multi-Node)
+// -----------------------------------------------------------------------------
+
+// Registry of all active "Nodes" (Strategies)
+static std::vector<EspNowStrategy*> _instances;
+
+EspNowStrategy::EspNowStrategy() {
+    _instances.push_back(this);
+}
+
+EspNowStrategy::~EspNowStrategy() {
+    // Remove self from registry
+    auto it = std::find(_instances.begin(), _instances.end(), this);
+    if (it != _instances.end()) {
+        _instances.erase(it);
+    }
+}
+
+void EspNowStrategy::begin() {
+    // No hardware init needed
+}
+
 void EspNowStrategy::registerRoute(uint8_t id, const std::array<uint8_t, 6>& mac) {
     _routeTable[id] = mac;
 }
+
 bool EspNowStrategy::addPeer(const uint8_t* mac) { return true; }
-void EspNowStrategy::send(const uint8_t* data, size_t length) {}
+
+void EspNowStrategy::send(const uint8_t* data, size_t length) {
+    if (length < 6) return;
+
+    // Simulate Broadcast/Multicast in the "Ether"
+    // We send to ALL other instances. They will filter by MAC/ID if they implemented full filtering.
+    // For simplicity here, we push to everyone else's buffer.
+    
+    for (auto* node : _instances) {
+        if (node == this) continue; // Don't hear yourself
+
+        // Direct Injection to Neighbor's RX Buffer
+        // In real ESP-Now, you get (mac, data, len).
+        // We simulate the `onDataRecv` behavior by pushing to their buffer.
+        
+        node->_rxBuffer.assign(data, data + length);
+        node->_rxAvailable = true;
+    }
+}
+
 bool EspNowStrategy::available() { return _rxAvailable; }
+
 std::vector<uint8_t> EspNowStrategy::read() {
     if (_rxAvailable) {
         _rxAvailable = false;
@@ -32,11 +74,10 @@ std::vector<uint8_t> EspNowStrategy::read() {
     }
     return {};
 }
+
+// Static callbacks unused in native test, but kept for compilation if referenced
 void EspNowStrategy::onDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {}
-void EspNowStrategy::onDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
-    _rxBuffer.assign(incomingData, incomingData + len);
-    _rxAvailable = true;
-}
+void EspNowStrategy::onDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {}
 
 #else
 
@@ -142,6 +183,11 @@ void EspNowStrategy::onDataRecv(const uint8_t * mac, const uint8_t *incomingData
     
     // Auto-Learn Route
     uint8_t srcId = incomingData[3];
+    uint8_t dstId = incomingData[4];
+    uint8_t cmdId = incomingData[5];
+
+    Serial.printf(">> [ESP-NOW] RX: %d bytes from %02X:%02X:%02X:%02X:%02X:%02X | Src:%d Dst:%d Cmd:%d\n", 
+                  len, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], srcId, dstId, cmdId);
     
     // Only learn valid IDs (1..254)
     if (srcId > 0 && srcId < 255) {
