@@ -158,14 +158,16 @@ Es la forma más limpia y no requiere cambiar grupos principales.
 
 1.  **Para la Base de Datos (SQLite):**
     El usuario `grafana` necesita leer el archivo `.db` y ejecutar (entrar) en la carpeta contenedora.
-    ```bash
     # Dar permiso de lectura al archivo DB
-    setfacl -m u:grafana:r /ruta/a/Proyecto_Demeter/Python/data/demeter_data.db
+    setfacl -m u:grafana:r /home/montero/Documentos/Proyectos_Personales/Proyecto_Demeter/Python/data/demeter_data.db
     
-    # Dar permiso de ejecución (búsqueda) a las carpetas padre
-    setfacl -m u:grafana:x /ruta/a/Proyecto_Demeter/Python/data
-    setfacl -m u:grafana:x /ruta/a/Proyecto_Demeter/Python
-    ```
+    # Dar permiso de ejecución (búsqueda) a las carpetas padre (Vital para que llegue al archivo)
+    setfacl -m u:grafana:x /home/montero
+    setfacl -m u:grafana:x /home/montero/Documentos
+    setfacl -m u:grafana:x /home/montero/Documentos/Proyectos_Personales
+    setfacl -m u:grafana:x /home/montero/Documentos/Proyectos_Personales/Proyecto_Demeter
+    setfacl -m u:grafana:x /home/montero/Documentos/Proyectos_Personales/Proyecto_Demeter/Python
+    setfacl -m u:grafana:x /home/montero/Documentos/Proyectos_Personales/Proyecto_Demeter/Python/data
 
 2.  **Para los Logs:**
     Si corres Promtail como `root`, no necesitas esto. Si creaste un usuario `promtail`:
@@ -193,7 +195,7 @@ chmod g+x /ruta/a/Proyecto_Demeter/Python/data
 2.  **Añadir Data Source SQLite**:
     *   Ve a *Connections* -> *Data Sources* -> *Add*.
     *   Busca "SQLite".
-    *   **Path**: `/ruta/absoluta/a/Proyecto_Demeter/Python/data/demeter_data.db`
+    *   **Path**: `/home/montero/Documentos/Proyectos_Personales/Proyecto_Demeter/Python/data/demeter_data.db`
     *   Pulsa "Save & Test". Debería salir verde si los permisos están bien.
 3.  **Añadir Data Source Loki**:
     *   *Add Data Source* -> "Loki".
