@@ -160,13 +160,13 @@ class DemeterProtocolV2:
         return Nack(target_id=dst, original_cmd_id=orig, error_code=err)
 
     def _parse_syn(self, dst, src, payload):
-        if len(payload) < 1: return None
-        ctx = payload[0]
+        # if len(payload) < 1: return None # Fixed: Allow empty payload (ctx=0)
+        ctx = payload[0] if len(payload) > 0 else 0
         return Syn(target_id=dst, context=ctx)
 
     def _parse_syn_ack(self, dst, src, payload):
-        if len(payload) < 1: return None
-        ctx = payload[0]
+        # if len(payload) < 1: return None # Fixed: Allow empty payload
+        ctx = payload[0] if len(payload) > 0 else 0
         return SynAck(target_id=dst, context=ctx)
 
     def _parse_set_gpio(self, dst, src, payload):
