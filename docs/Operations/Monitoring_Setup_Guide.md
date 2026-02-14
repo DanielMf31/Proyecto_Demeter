@@ -41,14 +41,10 @@ sudo systemctl enable grafana-server
 Accede a Grafana en: `http://<IP-DE-TU-RASPBERRY>:3000` (Usuario/Pass por defecto: `admin` / `admin`).
 
 ### Paso 2.3: Instalar Plugin de SQLite
-A veces `grafana-cli` da error 404 con plugins de la comunidad. Lo instalaremos manualmente:
+Instala el plugin oficial usando la CLI de Grafana:
 
 ```bash
-cd /var/lib/grafana/plugins
-sudo wget https://github.com/fr-ser/grafana-sqlite-datasource/releases/download/v3.4.0/fr-ser-sqlite-datasource-3.4.0.zip
-sudo unzip fr-ser-sqlite-datasource-3.4.0.zip
-sudo rm fr-ser-sqlite-datasource-3.4.0.zip
-sudo chown -R grafana:grafana /var/lib/grafana/plugins
+sudo grafana-cli plugins install frser-sqlite-datasource
 sudo systemctl restart grafana-server
 ```
 

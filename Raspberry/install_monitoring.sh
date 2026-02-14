@@ -48,23 +48,10 @@ systemctl daemon-reload
 systemctl enable grafana-server
 systemctl start grafana-server
 
-# Install SQLite Plugin (Manual Install to avoid 404 on community plugins)
+# Install SQLite Plugin
 echo -e "${GREEN}[3/8] Installing SQLite Plugin...${NC}"
-cd /var/lib/grafana/plugins
-# Check if already installed
-if [ ! -d "fr-ser-sqlite-datasource" ]; then
-    wget -q https://github.com/fr-ser/grafana-sqlite-datasource/releases/download/v3.4.0/fr-ser-sqlite-datasource-3.4.0.zip
-    unzip -o fr-ser-sqlite-datasource-3.4.0.zip
-    rm fr-ser-sqlite-datasource-3.4.0.zip
-    # Enable unsigned plugins if necessary (usually not needed for this one, but good practice for manual installs)
-    # in grafana.ini: allow_loading_unsigned_plugins = fr-ser-sqlite-datasource
-else
-    echo "Plugin already exists."
-fi
-
-# Set permissions for the plugin directory
-chown -R grafana:grafana /var/lib/grafana/plugins
-
+# User confirmed this works (frser-sqlite-datasource)
+grafana-cli plugins install frser-sqlite-datasource
 systemctl restart grafana-server
 
 # 4. DOWNLOAD LOKI & PROMTAIL
