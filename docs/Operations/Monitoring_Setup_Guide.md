@@ -41,10 +41,14 @@ sudo systemctl enable grafana-server
 Accede a Grafana en: `http://<IP-DE-TU-RASPBERRY>:3000` (Usuario/Pass por defecto: `admin` / `admin`).
 
 ### Paso 2.3: Instalar Plugin de SQLite
-Instala el plugin oficial usando la CLI de Grafana:
+Si `grafana-cli` falla, instálalo manualmente con estos comandos:
 
 ```bash
-sudo grafana-cli plugins install frser-sqlite-datasource
+cd /var/lib/grafana/plugins
+sudo wget https://github.com/fr-ser/grafana-sqlite-datasource/releases/download/v3.4.0/fr-ser-sqlite-datasource-3.4.0.zip
+sudo unzip fr-ser-sqlite-datasource-3.4.0.zip
+sudo rm fr-ser-sqlite-datasource-3.4.0.zip
+sudo chown -R grafana:grafana /var/lib/grafana/plugins
 sudo systemctl restart grafana-server
 ```
 
@@ -196,10 +200,46 @@ chmod g+x /ruta/a/Proyecto_Demeter/Python/data
     *   **URL**: `http://localhost:3100`
     *   "Save & Test".
 
-## 6. Crear Dashboard
-1.  **Panel de Temperatura**:
-    *   Source: SQLite
-    *   Query: `SELECT timestamp, temperature FROM sensor_readings WHERE node_id = 2 ORDER BY timestamp ASC`
-2.  **Panel de Logs**:
-    *   Source: Loki
-    *   Query: `{job="demeter_logs"}`
+
+## 6. Crear Dashboard - Cheatsheet
+
+### 6.1 Gráfico de Temperatura y Humedad (SQLite)
+Para ver los datos de los sensores:
+
+1.  Crea un nuevo **Panel**.
+2.  En **Data Source**, selecciona `Demeter SQLite`.
+3.  En el editor de query, selecciona formato **Time Series** (si está disponible) o usa **Raw SQL**:
+
+**Query para Temperatura (Nodo 2):**
+```sql
+SELECT 
+  timestamp, 
+  temperature 
+FROM sensor_readings 
+WHERE node_id = 2 
+ORDER BY timestamp ASC
+```
+
+**Query para Humedad (Nodo 2):**
+```sql
+SELECT 
+  timestamp, 
+  humidity 
+FROM sensor_readings 
+WHERE node_id = 2 
+ORDER BY timestamp ASC
+```
+
+### 6.2 Visualizar Logs (Loki)
+Para ver qué está pasando en el sistema:
+
+1.  Crea un nuevo **Panel**.
+2.  En **Data Source**, selecciona `Demeter Loki`.
+3.  En el navegador de etiquetas (Log Browser), selecciona:
+    *   **job**: `demeter_logs`
+4.  O escribe la query directamente:
+    ```logql
+    {job="demeter_logs"}
+    ```
+    *   Para ver solo errores: `{job="demeter_logs"} |= "ERROR"`
+    *   Para filtrar por nodo: `{job="demeter_logs"} |= "Node 2"`
