@@ -11,7 +11,7 @@ logger = logging.getLogger("DemeterLauncher")
 
 # Add src to path if needed (though running as module is better, we keep script compat)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
-from proyecto_demeter.config import settings
+from proyecto_demeter.shared.config.provider import settings
 
 def main():
     # Parse CLI Arguments (Overrides Settings)
@@ -20,20 +20,11 @@ def main():
     parser.add_argument("--host", default=settings.HOST, help="Socket Host")
     parser.add_argument("--socket-port", default=settings.SOCKET_PORT, type=int, help="Socket Port")
     
-    # Mock default from Environment
-    mock_default = os.environ.get("DEMETER_MOCK", "False").lower() in ("true", "1", "yes")
-    
-    # Mock Modes
-    parser.add_argument("--mock-sensors", action="store_true", help="Mock Sensors Only")
-    parser.add_argument("--mock-actuator", action="store_true", help="Mock Actuator Only")
-    parser.add_argument("--mock-mixed", action="store_true", help="Mock Both (Sensors + Actuator)")
-    parser.add_argument("--mock", action="store_true", default=mock_default, help="Legacy alias for Mixed Mock")
-    
     args = parser.parse_args()
 
     # Determine paths
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    SERVICE_SCRIPT = os.path.join(BASE_DIR, "src", "proyecto_demeter", "core", "async_service.py")
+    SERVICE_SCRIPT = os.path.join(BASE_DIR, "src", "proyecto_demeter", "server", "core", "async_service.py")
     
     
     # 1. Setup Logging using Settings
@@ -52,7 +43,7 @@ def main():
 
     logger.info("--- [START] Demeter V2 Backend Launcher ---")
     logger.info(f"Logging to: {log_file}")
-    logger.info(f"Configuration: PORT={args.port}, HOST={args.host}:{args.socket_port}, MOCK={args.mock}")
+    logger.info(f"Configuration: PORT={args.port}, HOST={args.host}:{args.socket_port}")
 
     # Verify Environment
     # If running in Github Actions or specific venv, sys.executable is usually correct
@@ -118,15 +109,10 @@ def main():
         env["DEMETER_PORT"] = args.port
         env["DEMETER_HOST"] = args.host
         env["DEMETER_SOCKET_PORT"] = str(args.socket_port)
-        # Determine Mode
-        mode = "NONE"
-        if args.mock_sensors: mode = "SENSORS"
-        elif args.mock_actuator: mode = "ACTUATOR"
-        elif args.mock_mixed or args.mock: mode = "MIXED"
         
-        env["DEMETER_MOCK_MODE"] = mode
-        # Legacy compat
-        env["DEMETER_MOCK"] = "True" if mode != "NONE" else "False"
+        # Explicitly set PYTHONPATH to include src
+        src_path = os.path.join(BASE_DIR, "src")
+        env["PYTHONPATH"] = src_path + os.pathsep + env.get("PYTHONPATH", "")
 
         service_process = subprocess.Popen(
             [VENV_PYTHON, SERVICE_SCRIPT],

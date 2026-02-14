@@ -6,24 +6,21 @@ import sys
 
 # Add src to path to ensure imports work
 # Add project root to path to ensure imports work (allows importing 'tests' and 'src')
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../')))
 
 try:
     from proyecto_demeter.server.transport.async_uart import AsyncUartTransport
     from proyecto_demeter.shared.config.schemas import (
         GpioCommand, ActionResponse, PingCommand, SequenceCommand, ExecSequence, 
         GetSensorsCommand, TempHumReport, PinReport, SystemReport, Ack, Nack, CmdId,
-        SetGpio, Ping, GetSensors
+        SetGpio, Ping, GetSensors, Syn
     )
     from proyecto_demeter.shared.protocols.protocol_v2 import DemeterProtocolV2
     from proyecto_demeter.server.data.database import DatabaseManager
     from proyecto_demeter.server.data.file_logger import SensorLogger
     from proyecto_demeter.shared.config.provider import settings
-    # MockTransport is now dev-only in tests
-    try:
-        from tests.mocks.transport.mock_transport import MockTransport
-    except ImportError:
-        MockTransport = None
+    # MockTransport Removed per user request
+    pass
 except ImportError as e:
     # re-raise to debug path issues instead of silently switching class loaders
     logging.error(f"Import Error in async_service: {e}")
@@ -37,8 +34,6 @@ UART_PORT = settings.PORT
 UART_BAUD = 115200
 SOCKET_HOST = settings.HOST
 SOCKET_PORT = settings.SOCKET_PORT
-MOCK_MODE = settings.MOCK
-MOCK_TYPE = settings.MOCK_MODE
 
 class DemeterService:
     def __init__(self):
@@ -59,7 +54,6 @@ class DemeterService:
         self.protocol = DemeterProtocolV2()
         self.clients = set() # Set of TCP writers
         self.server = None
-        self.mock_gpio_state = {} # For Mock Mode
         
         # Buffer for incoming UART bytes
         self.rx_buffer = bytearray()
@@ -88,42 +82,28 @@ class DemeterService:
         addr = self.server.sockets[0].getsockname()
         self.logger.info(f"[NET] TCP Server listening on {addr}")
 
-        # 2. Start Transport (Hardware or Mock)
-        if MOCK_MODE:
-            self.logger.warning(f"[WARN] RUNNING IN MOCK MODE ({MOCK_TYPE})")
-            self.transport = MockTransport(mode=MOCK_TYPE)
-            self.transport.set_callback(self.on_uart_data)
-            await self.transport.connect()
+        # 2. Start Transport (Hardware Only)
+        # Init transport with callback
+        self.transport = AsyncUartTransport(UART_PORT, UART_BAUD)
+        self.transport.set_callback(self.on_uart_data)
+        
+        if await self.transport.connect():
+            self.logger.info(f"[HW] UART Connected to {UART_PORT}")
         else:
-            # Init transport with callback
-            self.transport = AsyncUartTransport(UART_PORT, UART_BAUD)
-            self.transport.set_callback(self.on_uart_data)
-            
-            try:
-                if await self.transport.connect():
-                    self.logger.info(f"[HW] UART Connected to {UART_PORT}")
-                else:
-                    self.logger.error("[ERR] UART Connect Failed")
-                    self.logger.warning("   -> Switching to MOCK behavior for stability.")
-                    self.transport = MockTransport(mode=MOCK_TYPE) # Use configured type even in fallback
-                    self.transport.set_callback(self.on_uart_data)
-                    await self.transport.connect()
-            except Exception as e:
-                self.logger.error(f"[ERR] UART Connection Exception: {e}")
-                self.logger.warning("   -> Switching to MOCK behavior for stability.")
-                self.transport = MockTransport(mode=MOCK_TYPE)
-                self.transport.set_callback(self.on_uart_data)
-                await self.transport.connect()
+            self.logger.error("[ERR] UART Connect Failed")
+            # Fail hard if we can't connect, as requested (no mocks)
+            # We can run without transport (listeners only) or exit.
+            # For now, just log error. Protocol commands will fail gracefully (check for self.transport).
 
         # 3. Handshake Initiation (Active Repeater Discovery)
         # We initiate handshake with known nodes to ensure routes are established
         # and to verify they are online.
-        if self.transport and not MOCK_MODE:
+        if self.transport:
              known_nodes = [2, 3] # TODO: Load from devices.json or config
              self.logger.info(f"[INIT] Initiating Handshake with Nodes {known_nodes}...")
              for node_id in known_nodes:
                  # Send SYN (Context 0 or Session Start)
-                 sys_syn = self.protocol.serialize(self.protocol.protocol_models.Syn(target_id=node_id, context=0))
+                 sys_syn = self.protocol.serialize(Syn(target_id=node_id, context=0))
                  await self.transport.send(sys_syn)
                  # We don't wait for ACK here, handled in on_uart_data callback
                  await asyncio.sleep(0.1) # Brief pause
@@ -269,16 +249,16 @@ class DemeterService:
                         cmd = GpioCommand.model_validate(msg_json)
                         self.logger.info(f"[CMD] GPIO Command: PIN={cmd.pin} ACT={cmd.action} TARGET={cmd.target_id}")
                          # Execute (Mock or Real)
-                        if MOCK_MODE or not self.transport:
-                            response_obj = await self._execute_mock_gpio(cmd)
+                        if not self.transport:
+                            response_obj = ActionResponse(status="ERROR", message="No Transport Available")
                         else:
                             response_obj = await self._execute_real_gpio(cmd)
 
                     elif cmd_type == "PING_CMD":
                         cmd = PingCommand.model_validate(msg_json)
                         self.logger.info(f"[CMD] PING Command: Target={cmd.target_id}")
-                        if MOCK_MODE or not self.transport:
-                             response_obj = ActionResponse(status="OK", message=f"MOCK: Pong from {cmd.target_id}")
+                        if not self.transport:
+                             response_obj = ActionResponse(status="ERROR", message="No Transport")
                         else:
                             await self._send_protocol_cmd(self.protocol.serialize(Ping(target_id=cmd.target_id)))
                             response_obj = ActionResponse(status="OK", message="Ping Sent")
@@ -286,8 +266,8 @@ class DemeterService:
                     elif cmd_type == "GET_SENSORS_CMD":
                         cmd = GetSensorsCommand.model_validate(msg_json)
                         self.logger.info(f"[CMD] GET_SENSORS: Target={cmd.target_id}")
-                        if MOCK_MODE or not self.transport:
-                             response_obj = ActionResponse(status="OK", message="MOCK: Data Requested")
+                        if not self.transport:
+                             response_obj = ActionResponse(status="ERROR", message="No Transport")
                         else:
                              await self._send_protocol_cmd(self.protocol.serialize(GetSensors(target_id=cmd.target_id)))
                              response_obj = ActionResponse(status="OK", message="Data Request Sent")
@@ -298,8 +278,8 @@ class DemeterService:
                         
                         exec_seq = ExecSequence(target_id=cmd.target_id, steps=cmd.steps)
                         
-                        if MOCK_MODE or not self.transport:
-                             response_obj = ActionResponse(status="OK", message="MOCK: Sequence Started")
+                        if not self.transport:
+                             response_obj = ActionResponse(status="ERROR", message="No Transport")
                         else:
                              # Serialize manually since helper might not exist for Sequence
                              bytes_seq = self.protocol.serialize(exec_seq)
@@ -334,32 +314,7 @@ class DemeterService:
                 writer.close()
             except: pass
 
-    async def _execute_mock_gpio(self, cmd: GpioCommand) -> ActionResponse:
-        """Simulate hardware action."""
-        current = self.mock_gpio_state.get(cmd.pin, False)
-        
-        if cmd.action == "ON":
-            new_state = True
-        elif cmd.action == "OFF":
-            new_state = False
-        else: # TOGGLE
-            new_state = not current
-            
-        self.mock_gpio_state[cmd.pin] = new_state
-        self.logger.info(f"[MOCK] Pin {cmd.pin} -> {new_state}")
-        
-        # Send to Transport to trigger Actuator Simulation
-        if self.transport:
-             val = 1 if new_state else 0
-             # Create payload using protocol factory
-             payload = self.protocol.serialize(SetGpio(target_id=cmd.target_id, pin=cmd.pin, value=val))
-             await self.transport.send(payload)
-        
-        return ActionResponse(
-            status="OK",
-            message=f"MOCK: Pin {cmd.pin} set to {cmd.action}",
-            pin_state=new_state
-        )
+    # _execute_mock_gpio REMOVED per user request
 
     async def _execute_real_gpio(self, cmd: GpioCommand) -> ActionResponse:
         """Send bytes to real hardware."""

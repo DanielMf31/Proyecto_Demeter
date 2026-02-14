@@ -6,8 +6,9 @@ import signal
 import logging
 
 # Add src to path
+# Add src to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
-from proyecto_demeter.config import settings
+from proyecto_demeter.shared.config.provider import settings
 
 # Setup Logging
 logging.basicConfig(level=getattr(logging, settings.LOG_LEVEL), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -36,7 +37,7 @@ def main():
     # Import here to ensure sys.path is set
     try:
         # 1. Show Login Window
-        from proyecto_demeter.ui.login_view import LoginWindow
+        from proyecto_demeter.client.ui.login_view import LoginWindow
         print("🔐 Launching Login Window...")
         login_app = LoginWindow()
         login_app.mainloop()
@@ -48,7 +49,7 @@ def main():
         print("✅ Authentication Successful. Loading Main App...")
 
         # 2. Show Main App
-        from proyecto_demeter.ui.gui_main_ctk import DemeterApp
+        from proyecto_demeter.client.ui.gui_main_ctk import DemeterApp
         app = DemeterApp()
         
         # Determine protocol for closing
