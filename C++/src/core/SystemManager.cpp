@@ -359,7 +359,7 @@ void SystemManager::collectAndPublishSensorData(uint8_t targetId) {
     mockReport.humidity = 50.0f + (rand() % 200) / 10.0f;    // 50.0 - 70.0
     
     sendSensorData(targetId, mockReport);
-    // Serial.printf("[SystemManager] Published MOCK Data to Node %d: %.2f C, %.2f %%\n", targetId, mockReport.temperature, mockReport.humidity);
+    Serial.printf("[SystemManager] Published MOCK Data to Node %d: %.2f C, %.2f %%\n", targetId, mockReport.temperature, mockReport.humidity);
 #else
     // REAL SENSOR DATA
     auto readings = _sensorManager->readAll();
@@ -384,4 +384,9 @@ void SystemManager::sendCommand(uint8_t targetId, const Demeter::SetGpioCmd& cmd
     if (_engine) {
         _engine->sendSetGpio(targetId, cmd);
     }
+}
+
+void SystemManager::injectCommand(const Demeter::SetGpioCmd& cmd) {
+    // Directly execute command via internal handler
+    handleGpioCommand(cmd);
 }

@@ -16,21 +16,23 @@
         },
         {
             "id": 2,
-            "mac": "9C:13:9E:AC:50:C4",
+            "mac": "20:6E:F1:85:58:D0",
             "type": "sensor_node",
             "description": "ESP32 Node 2",
             "pins": {
-                "led": 2,
-                "relay": 4
+                "led": 2
             }
         },
         {
             "id": 3,
-            "mac": "AA:BB:CC:DD:EE:03",
+            "mac": "9C:13:9E:AC:50:C4",
             "type": "actuator",
             "description": "ESP32 Node 3",
             "pins": {
-                "pump": 5
+                "pump_1": 4,
+                "pump_2": 5,
+                "pump_3": 6,
+                "pump_4": 7
             }
         }
     ]

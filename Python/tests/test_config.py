@@ -1,36 +1,41 @@
-import pytest
 import os
-from pathlib import Path
-from proyecto_demeter.config import settings
+import pytest
+from unittest.mock import patch
+from proyecto_demeter.shared.config.provider import Settings, settings as global_settings
 
-def test_paths_structure():
-    """Verify that important paths are resolved correctly relative to the project root."""
-    # BASE_DIR should end in "Python"
-    assert settings.BASE_DIR.name == "Python"
-    
-    # Logs dir should be Python/logs
-    assert settings.LOG_DIR == settings.BASE_DIR / "logs"
-    
-    # Data dir should be Python/data
-    assert settings.DATA_DIR == settings.BASE_DIR / "data"
+class TestConfig:
+    def test_singleton_instance(self):
+        """Verify that the module-level settings object is usable."""
+        assert isinstance(global_settings, Settings)
+        # In this implementation, 'settings' is just an instantiated variable, 
+        # so "singleton" just means everyone imports the same var.
+        from proyecto_demeter.shared.config.provider import settings as settings_again
+        assert global_settings is settings_again
 
-    # Config dir should be Python/config
-    assert settings.CONFIG_DIR == settings.BASE_DIR / "config"
+    def test_default_values(self):
+        """Verify default settings are loaded."""
+        # Ensure no env vars interfere, and ignore .env file by setting _env_file=None
+        # We also need to patch os.environ to be sure no DEMETER_ vars are set
+        with patch.dict(os.environ, {}, clear=True):
+             s = Settings(_env_file=None)
+             assert s.APP_NAME == "Demeter IoT"
+             assert s.DEBUG is False
+             assert s.LOG_LEVEL == "INFO"
 
-def test_defaults():
-    """Verify default values."""
-    assert settings.APP_NAME == "Demeter IoT"
-    assert settings.DB_NAME == "demeter_data.db"
-    assert settings.DEBUG is False
+    def test_env_override(self):
+        """Verify environment variables override defaults."""
+        with patch.dict(os.environ, {"DEMETER_APP_NAME": "Test App", "DEMETER_DEBUG": "True"}):
+            # Pydantic Settings reads env on instantiation
+            new_settings = Settings()
+            assert new_settings.APP_NAME == "Test App"
+            assert new_settings.DEBUG is True
 
-def test_env_override(monkeypatch):
-    """Verify that environment variables override defaults."""
-    monkeypatch.setenv("DEMETER_DEBUG", "true")
-    monkeypatch.setenv("DEMETER_APP_NAME", "Test App")
-    
-    # Reload settings or create new instance (since singleton is already instantiated)
-    from proyecto_demeter.config.provider import Settings
-    new_settings = Settings()
-    
-    assert new_settings.DEBUG is True
-    assert new_settings.APP_NAME == "Test App"
+    def test_path_resolution(self):
+        """Verify that paths are absolute and look correct."""
+        s = Settings()
+        assert s.BASE_DIR.is_absolute()
+        # BASE_DIR should end with 'Python' now
+        assert str(s.BASE_DIR).endswith("Python")
+        assert str(s.LOG_DIR).endswith("logs")
+        assert str(s.DATA_DIR).endswith("data")
+

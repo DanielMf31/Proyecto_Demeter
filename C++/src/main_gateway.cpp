@@ -13,8 +13,8 @@ const uint8_t MY_NODE_ID = 1;
 
 // MAC Addresses of Known Nodes
 // REPLACE THESE WITH REAL MACs FROM YOUR HARDWARE
-const uint8_t SENSOR_MAC[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}; // Node 2
-const uint8_t ACTUATOR_MAC[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}; // Node 3
+const uint8_t SENSOR_MAC[] = {0x20, 0x6E, 0xF1, 0x85, 0x58, 0xD0}; // Node 2 (User Provided)
+const uint8_t ACTUATOR_MAC[] = {0x9C, 0x13, 0x9E, 0xAC, 0x50, 0xC4}; // Node 3 (User Provided)
 
 #define RXD2 16
 #define TXD2 17
@@ -62,8 +62,23 @@ void processSerialCommand(String cmd) {
         gpioCmd.flags = 0;
 
         gateway.getSystemManager()->sendCommand(targetId, gpioCmd);
+    } else if (cmd.startsWith("CMD:HANDSHAKE:")) {
+        // Format: CMD:HANDSHAKE:<NODE_ID>
+        int firstColon = cmd.indexOf(':', 13);
+        if (firstColon != -1) {
+             String idStr = cmd.substring(14); // 13 is 'CMD:HANDSHAKE' len is 13? No. "CMD:HANDSHAKE" is 13. : is 14th?
+             // "CMD:HANDSHAKE:" length is 14. 
+             idStr = cmd.substring(14);
+             uint8_t targetId = idStr.toInt();
+             Serial.printf(">> [CMD] Initiating Handshake with Node %d\n", targetId);
+             gateway.getSystemManager()->initiateHandshake(targetId);
+        }
     } else if (cmd == "INFO") {
         Serial.println(">> [INFO] Gateway Running. Modes: Serial Loopback + ESP-NOW.");
+    } else if (cmd == "r" || cmd == "RESET") {
+        Serial.println(">> [CMD] Resetting System...");
+        delay(100);
+        ESP.restart();
     } else {
         Serial.println(">> [ERROR] Unknown Command.");
     }
