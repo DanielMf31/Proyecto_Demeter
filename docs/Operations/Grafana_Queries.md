@@ -77,6 +77,26 @@ LIMIT 10
 ```
 *(Si esto muestra datos pero el gráfico no, el problema es el formato de fecha).*
 
+### C. Problema de Hora (Desplazamiento de 1 o 2 horas)
+Si tus datos salen "en el futuro" o una hora "atrás" (problema de UTC vs Hora Local).
+SQLite no guarda zona horaria, así que tienes que ajustarlo a mano en la query.
+
+**Restar 1 hora (Si los datos están 1h adelantados):**
+```sql
+SELECT 
+  strftime('%s', timestamp, '-1 hour') as time,
+  temperature 
+FROM sensor_readings
+```
+
+**Sumar 1 hora (Si los datos están 1h atrasados):**
+```sql
+SELECT 
+  strftime('%s', timestamp, '+1 hour') as time,
+  temperature 
+FROM sensor_readings
+```*
+
 ---
 
 ## 4. Estadísticas (Stat Panel)
