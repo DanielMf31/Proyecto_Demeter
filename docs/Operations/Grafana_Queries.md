@@ -62,6 +62,23 @@ ORDER BY timestamp ASC
 
 ---
 
+## 5. Debug: Ver Datos en Crudo (Tabla)
+Si no ves gráficos, usa esta query y cambia la visualización a **"Table"** para ver si Grafana está leyendo *algo*.
+
+```sql
+SELECT 
+  timestamp, 
+  node_id,
+  temperature,
+  humidity
+FROM sensor_readings
+ORDER BY timestamp DESC
+LIMIT 10
+```
+*(Si esto muestra datos pero el gráfico no, el problema es el formato de fecha).*
+
+---
+
 ## 4. Estadísticas (Stat Panel)
 Para ver el valor actual (último recibido) en grande.
 
