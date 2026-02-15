@@ -27,36 +27,38 @@ ORDER BY timestamp ASC
 ---
 
 ## 2. Monitorizar Humedad (Gráfico B)
-Usa esta query para crear un gráfico de línea (Time Series) de la humedad.
+Grafana necesita que la columna de tiempo se llame `time` y esté en formato Unix Epoch (segundos).
 
-**Panel Settings:**
-*   **Data Source:** Demeter SQLite
-*   **Format:** Time Series
-
+**Query para Temperatura:**
 ```sql
 SELECT 
-  timestamp, 
+  strftime('%s', timestamp) as time,
+  temperature 
+FROM sensor_readings 
+WHERE node_id = 2 
+ORDER BY timestamp ASC
+```
+
+**Query para Humedad:**
+```sql
+SELECT 
+  strftime('%s', timestamp) as time,
   humidity 
 FROM sensor_readings 
 WHERE node_id = 2 
 ORDER BY timestamp ASC
 ```
 
----
-
-## 3. Monitorizar Temperatura + Humedad (Combinado)
-Si quieres ver ambos en el mismo gráfico.
-
+**Query Combinada:**
 ```sql
 SELECT 
-  timestamp, 
+  strftime('%s', timestamp) as time,
   temperature,
   humidity
 FROM sensor_readings 
 WHERE node_id = 2 
 ORDER BY timestamp ASC
 ```
-*(En la pestaña "Overrides" del panel a la derecha, puedes asignar ejes Y diferentes si las escalas son muy distintas).*
 
 ---
 
