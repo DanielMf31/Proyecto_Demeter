@@ -11,16 +11,16 @@ Si las ACLs (`setfacl`) fallan, este método utiliza los permisos estándar de L
 sudo usermod -aG montero grafana
 ```
 
-#### 2. Dar permiso de "Paso" (Ejecución +x) al grupo en toda la ruta
-Esto **NO** da permiso de lectura ni escritura, solo permite "travesar" la carpeta para llegar a una subcarpeta. Es seguro.
+#### 2. Dar permiso de "Paso" y "Lectura" (Ejecución +x y Lectura +r)
+Esto permite al grupo entrar en las carpetas Y LISTAR su contenido (necesario si Grafana intenta navegar por ellas).
 
 ```bash
-sudo chmod g+x /home/montero
-sudo chmod g+x /home/montero/Documentos
-sudo chmod g+x /home/montero/Documentos/Proyectos_Personales
-sudo chmod g+x /home/montero/Documentos/Proyectos_Personales/Proyecto_Demeter
-sudo chmod g+x /home/montero/Documentos/Proyectos_Personales/Proyecto_Demeter/Python
-sudo chmod g+x /home/montero/Documentos/Proyectos_Personales/Proyecto_Demeter/Python/data
+sudo chmod g+rx /home/montero
+sudo chmod g+rx /home/montero/Documentos
+sudo chmod g+rx /home/montero/Documentos/Proyectos_Personales
+sudo chmod g+rx /home/montero/Documentos/Proyectos_Personales/Proyecto_Demeter
+sudo chmod g+rx /home/montero/Documentos/Proyectos_Personales/Proyecto_Demeter/Python
+sudo chmod g+rx /home/montero/Documentos/Proyectos_Personales/Proyecto_Demeter/Python/data
 ```
 
 #### 3. Dar permiso de LECTURA (+r) al archivo de base de datos
@@ -30,10 +30,27 @@ Esto permite al grupo leer el contenido.
 sudo chmod g+r /home/montero/Documentos/Proyectos_Personales/Proyecto_Demeter/Python/data/demeter_data.db
 ```
 
-#### 4. Reiniciar Grafana (CRÍTICO)
-Para que el sistema reconozca que el usuario ha cambiado de grupos, hay que reiniciar el proceso.
+#### 4. Desactivar Sandboxing de Systemd (CRÍTICO)
+Muchos servicios de Grafana modernos vienen bloqueados para no ver `/home` ni con permisos.
+
+Vamos a crear el archivo de configuración manualmente para evitar el editor confuso:
 
 ```bash
+# 1. Crear la carpeta de configuración del servicio
+sudo mkdir -p /etc/systemd/system/grafana-server.service.d
+
+# 2. Crear el archivo de override directamente
+sudo bash -c 'cat <<EOF > /etc/systemd/system/grafana-server.service.d/override.conf
+[Service]
+ProtectHome=false
+EOF'
+```
+
+#### 5. Reiniciar Grafana
+Para aplicar permisos de grupo y configuración de systemd.
+
+```bash
+sudo systemctl daemon-reload
 sudo systemctl restart grafana-server
 ```
 
