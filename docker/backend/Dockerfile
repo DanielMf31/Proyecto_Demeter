@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN pip install --no-cache-dir fastapi uvicorn websockets pydantic
 
-COPY ./src/proyecto_demeter/server/remote_hub /app/remote_hub
+COPY ./Python/src/proyecto_demeter/server/remote_hub /app/remote_hub
 
 EXPOSE 8000
 
