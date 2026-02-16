@@ -49,7 +49,7 @@
 static const std::vector<uint8_t> PROTECTED_PINS = {
     PIN_UART0_TX, PIN_UART0_RX,  // Serial Monitor / Upload
     PIN_UART2_TX, PIN_UART2_RX,  // Secondary UART
-    6, 7, 8, 9, 10, 11           // ESP32 Internal Flash SPI (CRITICAL: Do Not Touch)
+    8, 9, 10, 11                 // ESP32 Internal Flash SPI (Internal)
 };
 
 /**

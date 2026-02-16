@@ -33,8 +33,8 @@ void Node_Gateway::begin() {
 
     // 2. Initialize Hardware Config
     if (auto* executor = _systemManager->getExecutor()) {
-        // Default pin configuration for Gateway (if any)
-        executor->setPins({4}); 
+        // Manage pins for the 4 web buttons
+        executor->setPins({4, 5, 6, 7}); 
     }
 
     // 3. Initialize System Logic
