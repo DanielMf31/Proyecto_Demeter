@@ -18,7 +18,6 @@ RUN pip install --no-cache-dir \
 
 # Copy the source code
 COPY ./src /app/src
-COPY .env /app/.env
 
 # Add src to PYTHONPATH
 ENV PYTHONPATH=/app/src
