@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   backend:
     build:
@@ -20,18 +18,6 @@ services:
     restart: always
     ports:
       - "80:80"
-
-  demeter-ws:
-    build:
-      context: ./Python
-      dockerfile: ./docker/ws/Dockerfile
-    container_name: demeter-ws
-    depends_on:
-      - demeter-core
-    environment:
-      - DEMETER_WS_URL=ws://patata.monters.org/ws/pi
-      - DEMETER_CORE_URL=http://demeter-core:8000
-    restart: always
 
   cloudflared:
     image: cloudflare/cloudflared:latest
