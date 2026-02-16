@@ -5,7 +5,7 @@ DB_FILE = "playground.db"
 conn = sqlite3.connect(DB_FILE)
 cursor = conn.cursor()
 
-print(f"✅ Conectado a {DB_FILE}")
+print(f" Conectado a {DB_FILE}")
 
 # 1. Leer TODOS los datos
 # SELECT * FROM sensores
@@ -30,7 +30,7 @@ cursor.execute(sql_filtro)
 filas_filtro = cursor.fetchall()
 
 if not filas_filtro:
-    print("❌ No hay sensores que cumplan esa condición.")
+    print(" No hay sensores que cumplan esa condición.")
 else:
     for fila in filas_filtro:
         print(fila)

@@ -1,0 +1,3 @@
+SequenceDiagram
+ClassDiagram
+StateDiagram

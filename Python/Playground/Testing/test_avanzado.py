@@ -25,6 +25,7 @@ from matematicas_simples import sumar
     (12345, False),     # Caso Defensive: No es string, debe devolver False (no explotar)
     ("", True),         # Caso Borde: String vacío
 ])
+
 def test_es_palindromo_casos(texto, esperado):
     # Aquí 'texto' y 'esperado' van tomando los valores de la lista de arriba, uno por uno.
     assert es_palindromo(texto) == esperado
@@ -35,5 +36,6 @@ def test_es_palindromo_casos(texto, esperado):
     (-1, 1, 0),
     (100, -50, 50),
 ])
+
 def test_sumar_varios_casos(a, b, resultado):
     assert sumar(a, b) == resultado

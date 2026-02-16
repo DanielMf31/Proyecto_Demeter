@@ -154,6 +154,8 @@ void EspNowStrategy::send(const uint8_t* data, size_t length) {
         if (result != ESP_OK) {
             Serial.printf("ERROR: ESP-Now Send Failed: %s\n", esp_err_to_name(result));
         }
+        else {}
+            
     } else {
         // Unknown Route
     }

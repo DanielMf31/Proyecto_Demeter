@@ -169,6 +169,8 @@ Es la forma más limpia y no requiere cambiar grupos principales.
     setfacl -m u:grafana:x /home/montero/Documentos/Proyectos_Personales/Proyecto_Demeter/Python
     setfacl -m u:grafana:x /home/montero/Documentos/Proyectos_Personales/Proyecto_Demeter/Python/data
 
+    /home/montero/Documentos/Proyectos_Personales/Proyecto_Demeter/Python/data/demeter_data.db
+
 2.  **Para los Logs:**
     Si corres Promtail como `root`, no necesitas esto. Si creaste un usuario `promtail`:
     ```bash

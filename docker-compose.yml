@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  demeter-core:
+    build:
+      context: ./Python
+      dockerfile: ./docker/core/Dockerfile
+    container_name: demeter-core
+    privileged: true
+    volumes:
+      - ./Python/data:/app/data
+      - ./Python/logs:/app/logs
+    devices:
+      - "/dev/serial0:/dev/serial0"
+    environment:
+      - DEMETER_PORT=/dev/serial0
+      - DEMETER_LOG_FILE=/app/logs/demeter_service.log
+      - DEMETER_DB_NAME=/app/data/demeter_data.db
+    restart: always
+    ports:
+      - "8000:8000"
+
+  demeter-ws:
+    build:
+      context: ./Python
+      dockerfile: ./docker/ws/Dockerfile
+    container_name: demeter-ws
+    depends_on:
+      - demeter-core
+    environment:
+      - DEMETER_WS_URL=ws://monters.org/demeter/ws/pi
+      - DEMETER_CORE_URL=http://demeter-core:8000
+    restart: always

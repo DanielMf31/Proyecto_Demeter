@@ -28,3 +28,4 @@ pydantic
 customtkinter
 aiosqlite
 aiosqlite
+numpy

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demeter Remote Control</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Demeter Dashboard</h1>
+            <p>Remote Control System</p>
+        </header>
+
+        <main class="grid">
+            <div class="card" onclick="sendCommand(4)">
+                <div class="card-content">
+                    <span class="pin-label">Pin 4</span>
+                    <div class="status-indicator" id="status-4"></div>
+                    <button id="btn-4">Toggle</button>
+                </div>
+            </div>
+            <div class="card" onclick="sendCommand(5)">
+                <div class="card-content">
+                    <span class="pin-label">Pin 5</span>
+                    <div class="status-indicator" id="status-5"></div>
+                    <button id="btn-5">Toggle</button>
+                </div>
+            </div>
+            <div class="card" onclick="sendCommand(6)">
+                <div class="card-content">
+                    <span class="pin-label">Pin 6</span>
+                    <div class="status-indicator" id="status-6"></div>
+                    <button id="btn-6">Toggle</button>
+                </div>
+            </div>
+            <div class="card" onclick="sendCommand(7)">
+                <div class="card-content">
+                    <span class="pin-label">Pin 7</span>
+                    <div class="status-indicator" id="status-7"></div>
+                    <button id="btn-7">Toggle</button>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div id="log-console" class="console">
+                Waiting for interaction...
+            </div>
+        </footer>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ./docker/backend/Dockerfile
+    container_name: demeter-server-backend
+    restart: always
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ./docker/frontend/Dockerfile
+    container_name: demeter-server-frontend
+    depends_on:
+      - backend
+    restart: always
+    ports:
+      - "80:80"
+
+  demeter-ws:
+    build:
+      context: ./Python
+      dockerfile: ./docker/ws/Dockerfile
+    container_name: demeter-ws
+    depends_on:
+      - demeter-core
+    environment:
+      - DEMETER_WS_URL=ws://monters.org/demeter/ws/pi
+      - DEMETER_CORE_URL=http://demeter-core:8000
+    restart: always
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: demeter-cloudflared
+    command: tunnel --no-autoupdate run --token eyJhIjoiOGUzMDU1NDM1MjEyNjdhNzEzY2I2NGQ2MGJmZjQwZTMiLCJ0IjoiZTQ1ZTI0ZjgtYjEwNC00ODU0LTgwN2QtZTU5YWJiMjdhMTU4IiwicyI6IlpqVTNOVGs0Tm1RdE1qazFaUzAwTlROakxXSTFNVFV0TjJSa05EZzBaR1ZoWlRaaSJ9
+    restart: always
