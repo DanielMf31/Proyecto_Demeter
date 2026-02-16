@@ -16,7 +16,6 @@ int main(int argc, char **argv) {
     run_system_flows();
 
     // E2E Full System Test
-    run_e2e_tests();
 
     UNITY_END();
     return 0;

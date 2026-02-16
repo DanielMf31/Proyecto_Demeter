@@ -86,15 +86,15 @@ void test_uart_integration(void) {
 
     // 4. Define Expectations
     bool pingReceivedAtB = false;
-    nodeB.onPingRecv([&](uint8_t src) {
+    nodeB.onPingRecv([&](const Demeter::RequestData& req) {
         pingReceivedAtB = true;
-        TEST_ASSERT_EQUAL(1, src); // From Node 1
+        TEST_ASSERT_EQUAL(1, req.sourceId); // From Node 1
     });
 
     bool ackReceivedAtA = false;
-    nodeA.onAckRecv([&](uint8_t src) {
+    nodeA.onAckRecv([&](const Demeter::AckData& data) {
         ackReceivedAtA = true;
-        TEST_ASSERT_EQUAL(2, src); // From Node 2
+        TEST_ASSERT_EQUAL(2, data.sourceId); // From Node 2
     });
 
     // 5. Action: Node A Pings Node B
@@ -191,13 +191,13 @@ void test_full_system_lifecycle(void) {
     
     // Track Activity
     bool ackReceived = false;
-    gateway.onAckRecv([&](uint8_t src) { ackReceived = true; });
+    gateway.onAckRecv([&](const Demeter::AckData& data) { ackReceived = true; });
     
     bool getSensorsReceived = false;
-    node.onGetSensorsRecv([&](uint8_t src) { getSensorsReceived = true; });
+    node.onGetSensorsRecv([&](const Demeter::RequestData& req) { getSensorsReceived = true; });
     
     bool sysReportReceived = false;
-    gateway.onSystemReportRecv([&](uint8_t src, uint8_t mode, uint16_t batt) { sysReportReceived = true; });
+    gateway.onSystemReportRecv([&](const Demeter::SystemReport& rep) { sysReportReceived = true; });
 
     // Step 1: Ping
     Demeter::RequestData req1 = {0};
@@ -249,9 +249,9 @@ void test_actuator_flow(void) {
     
     bool feedbackReceived = false;
     bool feedbackVal = false;
-    gateway.onPinReportRecv([&](uint8_t src, uint8_t pin, bool val) {
+    gateway.onPinReportRecv([&](const Demeter::PinReport& rep) {
         feedbackReceived = true;
-        feedbackVal = val;
+        feedbackVal = rep.state;
     });
     
     // Action

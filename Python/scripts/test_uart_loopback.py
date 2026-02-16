@@ -2,7 +2,7 @@ import serial
 import time
 import sys
 
-def test_uart_loopback(port='/dev/serial0', baudrate=115200):
+def check_uart_loopback(port='/dev/serial0', baudrate=115200):
     print(f"Opening {port} at {baudrate} baud...")
     try:
         ser = serial.Serial(port, baudrate, timeout=1)
@@ -42,4 +42,4 @@ def test_uart_loopback(port='/dev/serial0', baudrate=115200):
 
 if __name__ == "__main__":
     port = sys.argv[1] if len(sys.argv) > 1 else '/dev/serial0'
-    test_uart_loopback(port)
+    check_uart_loopback(port)

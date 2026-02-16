@@ -2,7 +2,7 @@ import asyncio
 import json
 import socket
 
-async def test_connection():
+async def check_connection():
     uri = "127.0.0.1"
     port = 8888
     print(f"🍌 Nano Banana Testing Connection to {uri}:{port}...")
@@ -38,4 +38,4 @@ async def test_connection():
         print(f"❌ Unexpected Error: {e}")
 
 if __name__ == "__main__":
-    asyncio.run(test_connection())
+    asyncio.run(check_connection())

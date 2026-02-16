@@ -28,7 +28,7 @@ def calcular_descuento(precio, descuento):
 def dividir(a, b):
     """Divide dos números."""
     if b == 0:
-        raise ValueError("No se puede dividir por cero")
+        raise ZeroDivisionError("No se puede dividir por cero")
     return a / b
 
 def obtener_elemento(lista, indice):
