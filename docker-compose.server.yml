@@ -29,12 +29,12 @@ services:
     depends_on:
       - demeter-core
     environment:
-      - DEMETER_WS_URL=ws://monters.org/demeter/ws/pi
+      - DEMETER_WS_URL=ws://patata.monters.org/ws/pi
       - DEMETER_CORE_URL=http://demeter-core:8000
     restart: always
 
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: demeter-cloudflared
-    command: tunnel --no-autoupdate run --token eyJhIjoiOGUzMDU1NDM1MjEyNjdhNzEzY2I2NGQ2MGJmZjQwZTMiLCJ0IjoiZTQ1ZTI0ZjgtYjEwNC00ODU0LTgwN2QtZTU5YWJiMjdhMTU4IiwicyI6IlpqVTNOVGs0Tm1RdE1qazFaUzAwTlROakxXSTFNVFV0TjJSa05EZzBaR1ZoWlRaaSJ9
+    command: tunnel --no-autoupdate run --token eyJhIjoiOGUzMDU1NDM1MjEyNjdhNzEzY2I2NGQ2MGJmZjQwZTMiLCJ0IjoiMTNiNjBjNmUtZjllNS00OTQ0LTg4YTktODAxY2EyMzBlYzg0IiwicyI6Ik9ESXdOelZoWXprdE1tSXlPUzAwT0RRNExXSXpaV0l0TWpjNU56ZGxPVEZpT0dWaSJ9
     restart: always

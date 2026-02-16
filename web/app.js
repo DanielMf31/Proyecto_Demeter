@@ -1,4 +1,4 @@
-const API_URL = "/demeter/api/command";
+const API_URL = "/api/command";
 const logConsole = document.getElementById("log-console");
 
 function log(message) {
