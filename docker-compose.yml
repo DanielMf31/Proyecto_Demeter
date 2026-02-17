@@ -9,7 +9,7 @@ services:
       - ./Python/data:/app/data
       - ./Python/logs:/app/logs
     devices:
-      - "/dev/serial0:/dev/serial0"
+      - "/dev/ttyS0:/dev/serial0"
     environment:
       - DEMETER_PORT=/dev/serial0
       - DEMETER_LOG_FILE=/app/logs/demeter_service.log
