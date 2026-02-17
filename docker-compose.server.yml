@@ -1,5 +1,6 @@
 services:
   backend:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-danielmf31}/proyecto_demeter/backend:latest
     build:
       context: .
       dockerfile: ./docker/backend/Dockerfile
@@ -9,6 +10,7 @@ services:
       - "8000:8000"
 
   frontend:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-danielmf31}/proyecto_demeter/frontend:latest
     build:
       context: .
       dockerfile: ./docker/frontend/Dockerfile

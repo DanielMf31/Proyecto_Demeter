@@ -1,5 +1,6 @@
 services:
   demeter-core:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-danielmf31}/proyecto_demeter/pi-core:latest
     build:
       context: ./Python
       dockerfile: ./docker/core/Dockerfile
@@ -19,6 +20,7 @@ services:
       - "8000:8000"
 
   demeter-ws:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-danielmf31}/proyecto_demeter/pi-ws:latest
     build:
       context: ./Python
       dockerfile: ./docker/ws/Dockerfile
