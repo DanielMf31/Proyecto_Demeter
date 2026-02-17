@@ -76,19 +76,19 @@ jobs:
         include:
           - image: frontend
             context: .
-            dockerfile: ./docker/frontend/Dockerfile
+            dockerfile: docker/frontend/Dockerfile
             platforms: linux/amd64
           - image: backend
             context: .
-            dockerfile: ./docker/backend/Dockerfile
+            dockerfile: docker/backend/Dockerfile
             platforms: linux/amd64
           - image: pi-core
             context: ./Python
-            dockerfile: ./docker/core/Dockerfile
+            dockerfile: Python/docker/core/Dockerfile
             platforms: linux/amd64,linux/arm64
           - image: pi-ws
             context: ./Python
-            dockerfile: ./docker/ws/Dockerfile
+            dockerfile: Python/docker/ws/Dockerfile
             platforms: linux/amd64,linux/arm64
 
     steps:
