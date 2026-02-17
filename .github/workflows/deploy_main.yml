@@ -5,8 +5,66 @@ on:
     branches: [ "main" ]
 
 jobs:
+  test-cpp:
+    name: Test Firmware (C++)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v3
+        with:
+          path: ~/.platformio
+          key: ${{ runner.os }}-platformio-${{ hashFiles('**/platformio.ini') }}
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install PlatformIO
+        run: |
+          python -m pip install --upgrade pip
+          pip install platformio
+
+      - name: Run PlatformIO Native Tests
+        run: |
+          cd C++
+          pio test -e native
+
+  test-python:
+    name: Test Backend & GUI (Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk tk-dev xvfb
+          pip install -r Python/requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Run Pytest
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/Python/src
+          xvfb-run -a pytest Python/tests
+
   build-and-push:
     name: Build Docker Image
+    needs: [test-cpp, test-python]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -59,6 +117,7 @@ jobs:
             type=ref,event=branch
             type=sha
             type=raw,value=latest
+            type=semver,pattern={{version}}
 
       - name: Build and push
         uses: docker/build-push-action@v5
