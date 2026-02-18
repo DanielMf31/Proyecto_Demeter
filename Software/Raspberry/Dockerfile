@@ -22,7 +22,7 @@ COPY Software/Raspberry /app/Software/Raspberry
 
 # 4. Environment Variables
 # Add Common and Raspberry to PYTHONPATH
-ENV PYTHONPATH="/app/Software/Raspberry:/app/Software/Common"
+ENV PYTHONPATH="/app/Software/Raspberry:/app/Software/Common:/app/Software/Raspberry/src"
 ENV DEMETER_ENV=production
 
 # 5. Run Command
