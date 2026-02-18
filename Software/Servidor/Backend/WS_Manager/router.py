@@ -46,14 +46,8 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                     # which likely checks for fields matching the model.
                     # We send the model dump directly.
                     payload = cmd.model_dump()
-                    # We might need to inject 'cmd_id' if model_dump doesn't include it by default (it's a method)
-                    # or if the validator uses it. ideally 'type' field in JSON is needed? 
-                    # Reader of code: _parse_json_command checks data structure.
-                    # Let's verify SetGpio structure. It has target_id, source_id, pin, value, flags.
-                    
-                    # We add a 'type' field just in case the dispatcher checks it for routing, 
-                    # but strictly speaking the Pydantic model validation relies on fields.
-                    # However, to be safe and clear, we send the dict.
+                    # Inject Protocol ID so Gateway knows what it is (Native Support)
+                    payload['cmd_id'] = CmdId.SET_GPIO.value 
                     
                     logger.info(f"Translating GPIO_CMD to Protocol V2: {payload}")
                     

@@ -104,8 +104,14 @@ class DemeterProtocolV2:
         Returns a specific DemeterCommand instance or raises ValidationError.
         """
         cmd_type = json_data.get("command")
+        cmd_id = json_data.get("cmd_id")
         params = json_data.get("params", {})
         
+        # Native Protocol V2 Support (Backend -> Gateway direct translation)
+        if cmd_id == CmdId.SET_GPIO:
+            # Pydantic will ignore extra fields like 'cmd_id' by default
+            return SetGpio(**json_data)
+
         # Mappings for JSON commands to Pydantic Models
         # This handles the "Standard" JSON format -> Internal Pydantic Model
         if cmd_type == "TOGGLE_PIN":

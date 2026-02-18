@@ -9,7 +9,7 @@ services:
       - ./Software/Raspberry/data:/app/Software/Raspberry/data
       - ./Software/Raspberry/logs:/app/Software/Raspberry/logs
     devices:
-      - "/dev/serial0:/dev/serial0"
+      - "/dev/ttyS0:/dev/serial0"
     environment:
       - DEMETER_PORT=/dev/serial0
       # Point to specific internal paths
