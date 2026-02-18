@@ -15,10 +15,11 @@ COPY Software/Common /app/Software/Common
 COPY Software/Servidor/Backend /app/Software/Servidor/Backend
 
 # 3. Environment
-# Set PYTHONPATH to include Backend and Common
-ENV PYTHONPATH="/app/Software/Servidor/Backend:/app/Software/Common"
-# ENV PORT=8000 (Optional, can be overridden)
+# Set PYTHONPATH to include Common (for configuration.py)
+ENV PYTHONPATH="/app/Software/Common"
 
 # 4. Run
-# Run from /app to match python path structure
-CMD ["uvicorn", "Software.Servidor.Backend.app:app", "--host", "0.0.0.0", "--port", "8000"]
+# Switch to Backend directory to simplify imports
+WORKDIR /app/Software/Servidor/Backend
+# Run app:app directly
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
