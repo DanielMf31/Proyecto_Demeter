@@ -90,7 +90,8 @@ class Settings(BaseSettings):
     # ==========================================
     model_config = SettingsConfigDict(
         env_file=".env",
-        extra="ignore"
+        extra="ignore",
+        env_prefix="DEMETER_"
     )
 
 # Singleton

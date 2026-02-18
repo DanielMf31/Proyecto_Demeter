@@ -17,6 +17,7 @@ services:
       - DEMETER_DB_NAME=demeter.db
       - PYTHONUNBUFFERED=1
       # Connect to Backend on Host or specific IP
-      - DEMETER_HOST=127.0.0.1
+      - DEMETER_HOST=patata.monters.org
+      - DEMETER_SOCKET_PORT=443
     restart: always
     network_mode: "host"
