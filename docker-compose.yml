@@ -1,31 +1,20 @@
 services:
   demeter-core:
     build:
-      context: ./Python
-      dockerfile: ./docker/core/Dockerfile
+      context: .
+      dockerfile: Software/Raspberry/Dockerfile
     container_name: demeter-core
     privileged: true
     volumes:
-      - ./Python/data:/app/data
-      - ./Python/logs:/app/logs
+      - ./Software/Raspberry/data:/app/Software/Raspberry/data
+      - ./Software/Raspberry/logs:/app/Software/Raspberry/logs
     devices:
-      - "/dev/ttyS0:/dev/serial0"
+      - "/dev/serial0:/dev/serial0"
     environment:
       - DEMETER_PORT=/dev/serial0
-      - DEMETER_LOG_FILE=/app/logs/demeter_service.log
-      - DEMETER_DB_NAME=/app/data/demeter_data.db
+      # Point to specific internal paths
+      - DEMETER_LOG_FILE=/app/Software/Raspberry/logs/demeter.log
+      - DEMETER_DB_NAME=demeter.db
+      - PYTHONUNBUFFERED=1
     restart: always
-    ports:
-      - "8000:8000"
-
-  demeter-ws:
-    build:
-      context: ./Python
-      dockerfile: ./docker/ws/Dockerfile
-    container_name: demeter-ws
-    depends_on:
-      - demeter-core
-    environment:
-      - DEMETER_WS_URL=wss://patata.monters.org/ws/pi
-      - DEMETER_CORE_URL=http://demeter-core:8000
-    restart: always
+    # network_mode: host # Uncomment if needed for local network discovery

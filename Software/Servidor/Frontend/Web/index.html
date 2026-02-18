@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sequence Planner — Control System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <!-- ══════════════════════════════════════════════════════════════
+     NAVBAR (fixed top)
+     ══════════════════════════════════════════════════════════════ -->
+    <nav class="navbar" role="navigation" aria-label="Navegación principal">
+        <div class="navbar-brand">
+            <div class="navbar-logo" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                </svg>
+            </div>
+            <span class="navbar-title">Sequence Planner</span>
+            <span class="navbar-version">v3</span>
+        </div>
+
+        <div class="navbar-links" role="tablist" aria-label="Vistas de la aplicación">
+            <button class="nav-link active" id="nav-planner" role="tab" aria-selected="true"
+                aria-controls="view-planner" data-view="planner">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                </svg>
+                Planificador de Secuencias
+            </button>
+            <button class="nav-link" id="nav-manual" role="tab" aria-selected="false" aria-controls="view-manual"
+                data-view="manual">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true">
+                    <rect x="2" y="3" width="20" height="14" rx="2" />
+                    <line x1="8" y1="21" x2="16" y2="21" />
+                    <line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+                Control Manual
+            </button>
+        </div>
+
+        <div class="navbar-actions">
+            <!-- Undo / Redo (only relevant in planner view) -->
+            <div class="history-controls" role="group" aria-label="Historial de acciones">
+                <button class="btn-icon-header" id="btn-undo" aria-label="Deshacer (Ctrl+Z)" title="Deshacer (Ctrl+Z)"
+                    disabled>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="9 14 4 9 9 4" />
+                        <path d="M20 20v-7a4 4 0 00-4-4H4" />
+                    </svg>
+                </button>
+                <button class="btn-icon-header" id="btn-redo" aria-label="Rehacer (Ctrl+Y)" title="Rehacer (Ctrl+Y)"
+                    disabled>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="15 14 20 9 15 4" />
+                        <path d="M4 20v-7a4 4 0 014-4h12" />
+                    </svg>
+                </button>
+            </div>
+
+            <span class="divider-v" aria-hidden="true"></span>
+
+            <!-- Autosave indicator -->
+            <span class="autosave-badge" id="autosave-badge" aria-live="polite" title="Estado de guardado automático">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" aria-hidden="true">
+                    <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+                    <polyline points="17 21 17 13 7 13 7 21" />
+                    <polyline points="7 3 7 8 15 8" />
+                </svg>
+                Guardado
+            </span>
+
+            <span class="clock" id="clock" aria-live="polite" aria-label="Hora actual"></span>
+
+            <!-- Theme toggle -->
+            <button class="btn-icon-header theme-toggle" id="theme-toggle" aria-label="Alternar modo claro/oscuro"
+                title="Alternar tema">
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                </svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="5" />
+                    <line x1="12" y1="1" x2="12" y2="3" />
+                    <line x1="12" y1="21" x2="12" y2="23" />
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                    <line x1="1" y1="12" x2="3" y2="12" />
+                    <line x1="21" y1="12" x2="23" y2="12" />
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ══════════════════════════════════════════════════════════════
+     MAIN VIEW CONTAINER
+     ══════════════════════════════════════════════════════════════ -->
+    <main class="main-container" id="main-container">
+
+        <!-- ════════════════════════════════════════════════════════════
+       VIEW: PLANIFICADOR DE SECUENCIAS
+       ════════════════════════════════════════════════════════════ -->
+        <section class="view" id="view-planner" role="tabpanel" aria-labelledby="nav-planner">
+            <div class="view-inner">
+
+                <!-- Inline Form -->
+                <div class="form-panel" aria-label="Formulario de configuración de paso">
+                    <div class="form-fields">
+
+                        <div class="field-group" id="group-pin">
+                            <label class="field-label" for="sel-pin">Pin</label>
+                            <div class="select-wrapper">
+                                <select class="field-control" id="sel-pin" aria-label="Seleccionar pin">
+                                    <option value="">— Pin —</option>
+                                    <option value="WAIT">⏸ Pausa (Wait)</option>
+                                    <option value="1">Pin 1</option>
+                                    <option value="2">Pin 2</option>
+                                    <option value="3">Pin 3</option>
+                                    <option value="4">Pin 4</option>
+                                </select>
+                                <span class="select-arrow" aria-hidden="true"></span>
+                            </div>
+                        </div>
+
+                        <div class="field-group" id="group-estado">
+                            <label class="field-label" for="sel-estado">Estado</label>
+                            <div class="select-wrapper">
+                                <select class="field-control" id="sel-estado" aria-label="Seleccionar estado">
+                                    <option value="">— Estado —</option>
+                                    <option value="ON">ON</option>
+                                    <option value="OFF">OFF</option>
+                                </select>
+                                <span class="select-arrow" aria-hidden="true"></span>
+                            </div>
+                        </div>
+
+                        <div class="field-group">
+                            <label class="field-label" for="inp-tiempo">Tiempo (ms)</label>
+                            <div class="input-wrapper">
+                                <input type="number" class="field-control" id="inp-tiempo" placeholder="p.ej. 500"
+                                    min="1" max="99999" aria-label="Duración en milisegundos" />
+                                <span class="input-unit" aria-hidden="true">ms</span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <button class="btn-primary" id="btn-add" aria-label="Añadir paso a la secuencia">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        Añadir paso
+                    </button>
+                </div>
+
+                <!-- Bulk Bar -->
+                <div class="bulk-bar" id="bulk-bar" role="toolbar" aria-label="Acciones en lote" hidden>
+                    <span class="bulk-info" id="bulk-info"></span>
+                    <button class="btn-danger" id="btn-bulk-delete" aria-label="Eliminar pasos seleccionados">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                            <path d="M10 11v6M14 11v6M9 6V4h6v2" />
+                        </svg>
+                        Eliminar seleccionados
+                    </button>
+                </div>
+
+                <!-- Table Section -->
+                <div class="table-section" aria-label="Tabla de pasos de secuencia">
+                    <div class="table-header-bar">
+                        <span class="table-title">Pasos de la secuencia</span>
+                        <span class="row-count" id="row-count" aria-live="polite">0 pasos</span>
+                    </div>
+
+                    <div class="empty-state" id="empty-state" role="status" aria-live="polite">
+                        <div class="empty-icon-bg" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                                <line x1="3" y1="9" x2="21" y2="9" />
+                                <line x1="9" y1="21" x2="9" y2="9" />
+                            </svg>
+                        </div>
+                        <p class="empty-title">Sin pasos configurados</p>
+                        <p class="empty-desc">Selecciona un pin (o una pausa), define el estado y la
+                            duración.<br />Pulsa <strong>Añadir paso</strong> para comenzar tu secuencia.</p>
+                        <div class="empty-hint">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                            Los pasos se ejecutan en orden · Ctrl+Z para deshacer
+                        </div>
+                    </div>
+
+                    <div class="table-scroll" id="table-scroll" style="display:none;" role="region"
+                        aria-label="Lista de pasos">
+                        <table aria-label="Secuencia de pasos">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="col-drag" aria-label="Reordenar"></th>
+                                    <th scope="col" class="col-check">
+                                        <label class="checkbox-wrap" aria-label="Seleccionar todos">
+                                            <input type="checkbox" id="chk-all"
+                                                aria-label="Seleccionar todos los pasos" />
+                                            <span class="checkmark" aria-hidden="true"></span>
+                                        </label>
+                                    </th>
+                                    <th scope="col" class="col-num">#</th>
+                                    <th scope="col">Tipo / Pin</th>
+                                    <th scope="col">Estado</th>
+                                    <th scope="col">Tiempo</th>
+                                    <th scope="col" class="col-actions">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Timeline Section -->
+                <div class="timeline-section" id="timeline-section" aria-label="Vista de línea de tiempo">
+                    <div class="timeline-header-bar">
+                        <div class="timeline-header-left">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                            </svg>
+                            <span>Timeline de ejecución</span>
+                            <span class="total-time-badge" id="total-time-badge" aria-live="polite"></span>
+                        </div>
+                        <div class="sim-controls" role="group" aria-label="Controles de simulación">
+                            <button class="btn-sim" id="btn-play" aria-label="Iniciar simulación"
+                                title="Simular ejecución" disabled>
+                                <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <polygon points="5 3 19 12 5 21 5 3" />
+                                </svg>
+                                <svg class="icon-stop" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"
+                                    style="display:none">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                                </svg>
+                                <span class="sim-label">Simular</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="sim-progress-wrap" id="sim-progress-wrap" style="display:none"
+                        aria-label="Progreso de simulación">
+                        <div class="sim-progress-bar" id="sim-progress-bar" role="progressbar" aria-valuenow="0"
+                            aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+
+                    <div class="timeline-track-wrap">
+                        <div class="timeline-track" id="timeline-track" aria-label="Línea de tiempo de pasos">
+                            <div class="timeline-empty" id="timeline-empty">
+                                <span>La línea de tiempo aparecerá aquí cuando añadas pasos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Global CTA -->
+                <div class="cta-bar">
+                    <p class="cta-hint" id="cta-hint">Añade al menos un paso para enviar la configuración.</p>
+                    <button class="btn-cta" id="btn-send" aria-label="Enviar configuración al sistema" disabled>
+                        <span class="btn-cta-inner" id="btn-send-inner">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <line x1="22" y1="2" x2="11" y2="13" />
+                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                            </svg>
+                            Enviar Configuración
+                        </span>
+                        <span class="btn-cta-loading" id="btn-send-loading" style="display:none" aria-hidden="true">
+                            <svg class="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2.5">
+                                <circle cx="12" cy="12" r="10" stroke-opacity=".25" />
+                                <path d="M12 2a10 10 0 0110 10" stroke-linecap="round" />
+                            </svg>
+                            Enviando…
+                        </span>
+                    </button>
+                </div>
+
+            </div><!-- /.view-inner -->
+        </section>
+
+        <!-- ════════════════════════════════════════════════════════════
+       VIEW: CONTROL MANUAL
+       ════════════════════════════════════════════════════════════ -->
+        <section class="view" id="view-manual" role="tabpanel" aria-labelledby="nav-manual" style="display:none">
+            <div class="view-inner">
+
+                <!-- View header -->
+                <div class="manual-header">
+                    <div class="manual-header-left">
+                        <div class="manual-header-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="3" width="20" height="14" rx="2" />
+                                <line x1="8" y1="21" x2="16" y2="21" />
+                                <line x1="12" y1="17" x2="12" y2="21" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="manual-title">Panel de Control Manual</h2>
+                            <p class="manual-subtitle">Activación directa de dispositivos en tiempo real</p>
+                        </div>
+                    </div>
+                    <div class="manual-status-summary" id="manual-status-summary" aria-live="polite">
+                        <span class="summary-dot" aria-hidden="true"></span>
+                        <span id="manual-active-count">0 activos</span>
+                    </div>
+                </div>
+
+                <!-- Control Grid -->
+                <div class="control-grid">
+
+                    <!-- ── Fila Superior: Bombas ── -->
+                    <div class="device-row">
+                        <div class="device-row-header">
+                            <div class="device-row-icon pump-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22a10 10 0 100-20 10 10 0 000 20z" />
+                                    <path d="M12 8v4l3 3" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="device-row-title">Arreglo de Bombas</h3>
+                                <p class="device-row-subtitle">Control de activación de bombas hidráulicas</p>
+                            </div>
+                            <span class="device-row-count" id="pump-active-count">0 / 4 activas</span>
+                        </div>
+                        <div class="cards-grid" role="group" aria-label="Bombas">
+                            <button class="control-card" data-device="pump" data-id="1" aria-pressed="false"
+                                aria-label="Bomba 1, estado OFF">
+                                <div class="card-icon pump" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 22a10 10 0 100-20 10 10 0 000 20z" />
+                                        <path d="M12 8v4l3 3" />
+                                    </svg>
+                                </div>
+                                <div class="card-body">
+                                    <span class="card-name">Bomba 1</span>
+                                    <span class="card-id">ID: P-01</span>
+                                </div>
+                                <div class="card-status-wrap">
+                                    <span class="status-dot-card" aria-hidden="true"></span>
+                                    <span class="card-state-label">OFF</span>
+                                </div>
+                            </button>
+
+                            <button class="control-card" data-device="pump" data-id="2" aria-pressed="false"
+                                aria-label="Bomba 2, estado OFF">
+                                <div class="card-icon pump" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 22a10 10 0 100-20 10 10 0 000 20z" />
+                                        <path d="M12 8v4l3 3" />
+                                    </svg>
+                                </div>
+                                <div class="card-body">
+                                    <span class="card-name">Bomba 2</span>
+                                    <span class="card-id">ID: P-02</span>
+                                </div>
+                                <div class="card-status-wrap">
+                                    <span class="status-dot-card" aria-hidden="true"></span>
+                                    <span class="card-state-label">OFF</span>
+                                </div>
+                            </button>
+
+                            <button class="control-card" data-device="pump" data-id="3" aria-pressed="false"
+                                aria-label="Bomba 3, estado OFF">
+                                <div class="card-icon pump" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 22a10 10 0 100-20 10 10 0 000 20z" />
+                                        <path d="M12 8v4l3 3" />
+                                    </svg>
+                                </div>
+                                <div class="card-body">
+                                    <span class="card-name">Bomba 3</span>
+                                    <span class="card-id">ID: P-03</span>
+                                </div>
+                                <div class="card-status-wrap">
+                                    <span class="status-dot-card" aria-hidden="true"></span>
+                                    <span class="card-state-label">OFF</span>
+                                </div>
+                            </button>
+
+                            <button class="control-card" data-device="pump" data-id="4" aria-pressed="false"
+                                aria-label="Bomba 4, estado OFF">
+                                <div class="card-icon pump" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 22a10 10 0 100-20 10 10 0 000 20z" />
+                                        <path d="M12 8v4l3 3" />
+                                    </svg>
+                                </div>
+                                <div class="card-body">
+                                    <span class="card-name">Bomba 4</span>
+                                    <span class="card-id">ID: P-04</span>
+                                </div>
+                                <div class="card-status-wrap">
+                                    <span class="status-dot-card" aria-hidden="true"></span>
+                                    <span class="card-state-label">OFF</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ── Fila Inferior: Válvulas ── -->
+                    <div class="device-row">
+                        <div class="device-row-header">
+                            <div class="device-row-icon valve-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2v20M2 12h20" />
+                                    <circle cx="12" cy="12" r="4" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="device-row-title">Arreglo de Válvulas</h3>
+                                <p class="device-row-subtitle">Control de apertura/cierre de válvulas de flujo</p>
+                            </div>
+                            <span class="device-row-count" id="valve-active-count">0 / 4 activas</span>
+                        </div>
+                        <div class="cards-grid" role="group" aria-label="Válvulas">
+                            <button class="control-card" data-device="valve" data-id="1" aria-pressed="false"
+                                aria-label="Válvula 1, estado OFF">
+                                <div class="card-icon valve" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 2v20M2 12h20" />
+                                        <circle cx="12" cy="12" r="4" />
+                                    </svg>
+                                </div>
+                                <div class="card-body">
+                                    <span class="card-name">Válvula 1</span>
+                                    <span class="card-id">ID: V-01</span>
+                                </div>
+                                <div class="card-status-wrap">
+                                    <span class="status-dot-card" aria-hidden="true"></span>
+                                    <span class="card-state-label">OFF</span>
+                                </div>
+                            </button>
+
+                            <button class="control-card" data-device="valve" data-id="2" aria-pressed="false"
+                                aria-label="Válvula 2, estado OFF">
+                                <div class="card-icon valve" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 2v20M2 12h20" />
+                                        <circle cx="12" cy="12" r="4" />
+                                    </svg>
+                                </div>
+                                <div class="card-body">
+                                    <span class="card-name">Válvula 2</span>
+                                    <span class="card-id">ID: V-02</span>
+                                </div>
+                                <div class="card-status-wrap">
+                                    <span class="status-dot-card" aria-hidden="true"></span>
+                                    <span class="card-state-label">OFF</span>
+                                </div>
+                            </button>
+
+                            <button class="control-card" data-device="valve" data-id="3" aria-pressed="false"
+                                aria-label="Válvula 3, estado OFF">
+                                <div class="card-icon valve" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 2v20M2 12h20" />
+                                        <circle cx="12" cy="12" r="4" />
+                                    </svg>
+                                </div>
+                                <div class="card-body">
+                                    <span class="card-name">Válvula 3</span>
+                                    <span class="card-id">ID: V-03</span>
+                                </div>
+                                <div class="card-status-wrap">
+                                    <span class="status-dot-card" aria-hidden="true"></span>
+                                    <span class="card-state-label">OFF</span>
+                                </div>
+                            </button>
+
+                            <button class="control-card" data-device="valve" data-id="4" aria-pressed="false"
+                                aria-label="Válvula 4, estado OFF">
+                                <div class="card-icon valve" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 2v20M2 12h20" />
+                                        <circle cx="12" cy="12" r="4" />
+                                    </svg>
+                                </div>
+                                <div class="card-body">
+                                    <span class="card-name">Válvula 4</span>
+                                    <span class="card-id">ID: V-04</span>
+                                </div>
+                                <div class="card-status-wrap">
+                                    <span class="status-dot-card" aria-hidden="true"></span>
+                                    <span class="card-state-label">OFF</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                </div><!-- /.control-grid -->
+
+                <!-- Emergency Stop -->
+                <div class="emergency-bar">
+                    <div class="emergency-info">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="8" x2="12" y2="12" />
+                            <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                        <span>Los cambios de estado son inmediatos. Usa el paro de emergencia para desactivar
+                            todo.</span>
+                    </div>
+                    <button class="btn-emergency" id="btn-emergency"
+                        aria-label="Paro de emergencia: desactivar todos los dispositivos">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10" />
+                            <rect x="9" y="9" width="6" height="6" />
+                        </svg>
+                        Paro de Emergencia
+                    </button>
+                </div>
+
+            </div><!-- /.view-inner -->
+        </section>
+
+    </main><!-- /.main-container -->
+
+    <!-- Toast container -->
+    <div class="toast-container" id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
