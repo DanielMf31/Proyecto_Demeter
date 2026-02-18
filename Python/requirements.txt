@@ -27,5 +27,8 @@ pyserial-asyncio
 pydantic
 customtkinter
 aiosqlite
-aiosqlite
 numpy
+fastapi
+uvicorn
+websockets
+httpx
