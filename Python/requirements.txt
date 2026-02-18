@@ -19,7 +19,7 @@ pytest>=7.4.3
 
 # --- Hardware (Raspberry Pi Only) ---
 # Uncomment if running on RPi hardware
-RPi.GPIO
+
 
 # --- Async Core (Demeter V2) ---
 textual
