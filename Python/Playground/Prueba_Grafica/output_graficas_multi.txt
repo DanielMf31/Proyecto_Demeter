@@ -1,0 +1,3 @@
+📂 Leyendo datos multi-nodo de: /home/danielmf31/Documentos/PlatformIO/Projects/Proyecto_Demeter/Python/Playground/Resultados_Simulacion.xlsx
+✅ Gráficas comparativas generadas (T, VPD, Rad).
+🎉 Todas las gráficas comparativas guardadas en: /home/danielmf31/Documentos/PlatformIO/Projects/Proyecto_Demeter/Python/Playground/Resultados_Graficos

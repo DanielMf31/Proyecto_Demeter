@@ -32,16 +32,27 @@ class Command(BaseModel):
     pin: int
     action: str
     target_id: int = 1
+    type: str = "GPIO"
+
+class SequenceStep(BaseModel):
+    pin: int
+    action: str
+    duration: int
+
+class SequenceCommand(BaseModel):
+    type: str = "SEQUENCE"
+    target_id: int = 1
+    steps: List[SequenceStep]
 
 @app.post("/command")
-async def receive_command(cmd: Command):
+async def receive_command(cmd: dict):
     logger.info(f"Received command from UI: {cmd}")
     
     if not manager.active_connections:
         raise HTTPException(status_code=503, detail="No Raspberry Pi connected")
     
-    # Relay message to all connected Pis (or target specific one if needed)
-    await manager.broadcast(cmd.dict())
+    # Relay the raw dictionary to the Pi
+    await manager.broadcast(cmd)
     return {"status": "dispatched", "target_count": len(manager.active_connections)}
 
 @app.websocket("/ws/pi")

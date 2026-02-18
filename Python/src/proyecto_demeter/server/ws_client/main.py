@@ -17,18 +17,26 @@ async def handle_message(message):
         data = json.loads(message)
         logger.info(f"Received message: {data}")
         
-        # Example: {"action": "ON", "pin": 4, "target_id": 1}
-        if "action" in data and "pin" in data:
+        # Route messages based on type
+        msg_type = data.get("type", "GPIO_CMD")
+        
+        if msg_type == "SEQUENCE":
+            # Forward sequence to core
+            async with httpx.AsyncClient() as client:
+                response = await client.post(f"{CORE_URL}/command/sequence", json=data)
+                logger.info(f"Sequence forwarded: {response.status_code}")
+        
+        elif "action" in data and "pin" in data:
+            # Legacy or direct GPIO command
             payload = {
                 "type": "GPIO_CMD",
                 "target_id": data.get("target_id", 1),
                 "pin": data["pin"],
                 "action": data["action"]
             }
-            
             async with httpx.AsyncClient() as client:
                 response = await client.post(f"{CORE_URL}/command/gpio", json=payload)
-                logger.info(f"Forwarded to core: {response.status_code} - {response.text}")
+                logger.info(f"GPIO Forwarded: {response.status_code}")
                 
     except Exception as e:
         logger.error(f"Error handling message: {e}")
