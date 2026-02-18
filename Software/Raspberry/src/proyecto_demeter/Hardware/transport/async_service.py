@@ -20,7 +20,8 @@ if RASPBERRY_DIR not in sys.path:
      sys.path.append(RASPBERRY_DIR)
 
 try:
-    from proyecto_demeter.Hardware.transport.async_uart import AsyncUartTransport
+    from proyecto_demeter.Hardware.transport.uart_processor import UartProcessor
+    from proyecto_demeter.Hardware.ws_client.client import DemeterWebsocketClient
     from demeter_protocol import DemeterProtocolV2
     from schemas import (
         DemeterCommand, GpioCommand, ActionResponse, PingCommand, SequenceCommand, ExecSequence, 

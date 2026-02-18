@@ -20,7 +20,7 @@ try:
         GetSensorsCommand, TempHumReport, PinReport, SystemReport, Ack, Nack, CmdId,
         SetGpio, Ping, GetSensors, Syn, SynAck, SetPwm, RouteAdd
     )
-    from proyecto_demeter.server.core.config_provider import settings
+    from configuration import settings
 
 except ImportError as e:
     logging.error(f"Import Error in Uart_processor: {e}")
