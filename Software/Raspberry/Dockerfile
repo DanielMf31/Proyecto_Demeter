@@ -27,4 +27,4 @@ ENV DEMETER_ENV=production
 
 # 5. Run Command
 # Launch the Async Main Service (Command Dispatcher)
-CMD ["python", "Software/Raspberry/main_async.py"]
+CMD ["python", "Software/Raspberry/src/proyecto_demeter/Hardware/orchestration/command_dispatcher.py"]
