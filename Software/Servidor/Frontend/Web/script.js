@@ -605,7 +605,8 @@ function stopSimulation(completed = false) {
 
 let ws = null;
 let wsConnected = false;
-const WS_URL = `ws://${window.location.host}/ws/frontend-web`;
+const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const WS_URL = `${protocol}//${window.location.host}/ws/frontend-web`;
 
 function initWebSocket() {
     console.log('Connecting to WebSocket:', WS_URL);
