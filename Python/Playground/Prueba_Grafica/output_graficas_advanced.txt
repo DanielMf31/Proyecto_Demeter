@@ -1,8 +1,0 @@
-📂 Leyendo datos multi-nodo de: /home/danielmf31/Documentos/PlatformIO/Projects/Proyecto_Demeter/Python/Playground/Resultados_Simulacion.xlsx
-📊 Generando comparativas globales...
-   ✅ Comparativas estadísticas generadas.
-📊 Generando reportes individuales...
-   ✅ Reporte individual generado: Planta_Control_A
-   ✅ Reporte individual generado: Planta_Sequia_B
-   ✅ Reporte individual generado: Planta_Sombra_C
-🎉 Reporte gráfico completo generado en: /home/danielmf31/Documentos/PlatformIO/Projects/Proyecto_Demeter/Python/Playground/Resultados_Graficos

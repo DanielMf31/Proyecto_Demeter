@@ -28,6 +28,6 @@ services:
     depends_on:
       - demeter-core
     environment:
-      - DEMETER_WS_URL=ws://patata.monters.org/ws/pi
+      - DEMETER_WS_URL=wss://patata.monters.org/ws/pi
       - DEMETER_CORE_URL=http://demeter-core:8000
     restart: always
