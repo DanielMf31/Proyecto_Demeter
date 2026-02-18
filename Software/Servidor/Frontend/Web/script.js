@@ -734,7 +734,7 @@ function toggleCard(card) {
             // { "type": "GPIO_CMD", "target_id": 2, "pin": 4, "action": "ON" }
             const cmd = {
                 type: 'GPIO_CMD',
-                target_id: 2, // Assuming Node 2 is the Actuator Controller
+                target_id: 1, // Target Node 1 (Actuator Controller)
                 pin: pin,
                 action: isOn ? 'ON' : 'OFF'
             };

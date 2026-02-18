@@ -27,7 +27,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
             elif msg_type == "GPIO_CMD":
                 # Translate Frontend Command -> Protocol V2 (SetGpio)
                 try:
-                    target_id = data.get("target_id", 2)
+                    target_id = data.get("target_id", 1)
                     pin = data.get("pin")
                     action = data.get("action")
                     value = 1 if action == "ON" else 0
