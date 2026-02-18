@@ -1,7 +1,7 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
 from .manager import manager
 from Core.logger import setup_logger
-from Software.Common.schemas import SetGpio, CmdId # Import Protocol Models
+from schemas import SetGpio, CmdId # Import Protocol Models
 
 router = APIRouter()
 logger = setup_logger("ws_router")
