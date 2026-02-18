@@ -731,7 +731,7 @@ function toggleCard(card) {
         const pin = pinMap[id];
         if (pin) {
             // Strict Schema: GpioCommand
-            // { "type": "GPIO_CMD", "target_id": 2, "pin": 4, "action": "ON" }
+            // { "type": "GPIO_CMD", "target_id": 1, "pin": 4, "action": "ON" }
             const cmd = {
                 type: 'GPIO_CMD',
                 target_id: 1, // Target Node 1 (Actuator Controller)
