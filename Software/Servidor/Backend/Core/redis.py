@@ -23,8 +23,9 @@ class RedisManager:
                 await self.redis.ping()
                 logger.info("Connected to Redis.")
             except Exception as e:
-                logger.error(f"Failed to connect to Redis: {e}")
-                raise e
+                logger.warning(f"Failed to connect to Redis: {e}. Running in Standalone Mode (No Pub/Sub).")
+                self.redis = None # Ensure it is None so fallback logic works
+                # Do NOT raise e
 
     async def close(self):
         """Closes the Redis connection."""

@@ -32,7 +32,11 @@ def create_application() -> FastAPI:
     async def startup_event():
         logger.info("Application starting up...")
         from Core.redis import redis_manager
-        await redis_manager.connect()
+        # Attempt connection, but don't block app startup on failure
+        try:
+            await redis_manager.connect()
+        except Exception as e:
+            logger.warning(f"Redis Connection Warning: {e}")
 
     @application.on_event("shutdown")
     async def shutdown_event():
