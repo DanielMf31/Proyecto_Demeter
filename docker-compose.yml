@@ -9,9 +9,9 @@ services:
       - ./Software/Raspberry/data:/app/Software/Raspberry/data
       - ./Software/Raspberry/logs:/app/Software/Raspberry/logs
     devices:
-      - "/dev/ttyUSB0:/dev/ttyUSB0"
+      - "/dev/serial0:/dev/serial0"
     environment:
-      - DEMETER_PORT=/dev/ttyUSB0
+      - DEMETER_PORT=/dev/serial0
       # Point to specific internal paths
       - DEMETER_LOG_FILE=/app/Software/Raspberry/logs/demeter.log
       - DEMETER_DB_NAME=demeter.db
