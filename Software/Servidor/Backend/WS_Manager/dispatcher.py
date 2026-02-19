@@ -95,11 +95,8 @@ async def handle_gateway_message(data: dict) -> None:
                 f"TH report — nodo {report.node_id}: "
                 f"{report.temperature}°C / {report.humidity}%"
             )
-            await registry.broadcast_except(GATEWAY_ID, {
-                "type": "telemetry",
-                "sensor": "temp_hum",
-                "data": report.model_dump(),
-            })
+            # Re-transmitimos el reporte tal cual al frontend
+            await registry.broadcast_except(GATEWAY_ID, report.model_dump())
         except Exception as exc:
             logger.error(f"temp_hum_report parse error: {exc}")
         return
@@ -111,11 +108,7 @@ async def handle_gateway_message(data: dict) -> None:
                 f"Pin report — nodo {report.node_id}: "
                 f"pin {report.pin} = {report.state}"
             )
-            await registry.broadcast_except(GATEWAY_ID, {
-                "type": "telemetry",
-                "sensor": "pin",
-                "data": report.model_dump(),
-            })
+            await registry.broadcast_except(GATEWAY_ID, report.model_dump())
         except Exception as exc:
             logger.error(f"pin_report parse error: {exc}")
         return
@@ -127,11 +120,7 @@ async def handle_gateway_message(data: dict) -> None:
                 f"System report — nodo {report.node_id}: "
                 f"mode={report.mode} batt={report.battery_mv}mV"
             )
-            await registry.broadcast_except(GATEWAY_ID, {
-                "type": "telemetry",
-                "sensor": "system",
-                "data": report.model_dump(exclude={"reserved"}),
-            })
+            await registry.broadcast_except(GATEWAY_ID, report.model_dump(exclude={"reserved"}))
         except Exception as exc:
             logger.error(f"system_report parse error: {exc}")
         return
