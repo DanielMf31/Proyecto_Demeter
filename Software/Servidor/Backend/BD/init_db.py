@@ -1,13 +1,16 @@
 import asyncio
 from Core.database import engine, Base
-from BD.models import User, Device, Sequence, SequenceStep, ActivityLog
+# Import all models so they are registered in Base.metadata
+from BD.models import (
+    User, Device, Sequence, SequenceStep, ActivityLog,
+    TelemetryTH, PinHistory, SystemHistory
+)
 
 async def init_tables():
     async with engine.begin() as conn:
-        # Check if tables exist or just create all
-        # In production use Alembic, but for dev this is fine
+        # Create all tables that don't exist
         await conn.run_sync(Base.metadata.create_all)
-    print("Tables created successfully.")
+    print("Database tables initialized successfully.")
 
 if __name__ == "__main__":
     asyncio.run(init_tables())
