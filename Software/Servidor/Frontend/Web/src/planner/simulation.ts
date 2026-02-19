@@ -73,9 +73,12 @@ function startSimulation(): void {
             simProgressBar.setAttribute("aria-valuenow", String(pct));
         }
 
-        // Highlight current row
+        // Highlight current row and timeline node
         document.querySelectorAll<HTMLElement>("#table-body tr").forEach((tr, i) => {
             tr.classList.toggle("sim-active", i === stepIdx);
+        });
+        document.querySelectorAll<HTMLElement>(".tl-node").forEach((node, i) => {
+            node.classList.toggle("sim-active", i === stepIdx);
         });
 
         elapsed += step.tiempo;

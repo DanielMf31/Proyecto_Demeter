@@ -38,27 +38,44 @@ export function renderTimeline(): void {
 
     btnPlay.disabled = false;
 
-    // Remove old segments (keep the empty placeholder)
-    const existing = timelineTrack.querySelectorAll(".tl-segment");
-    existing.forEach(el => el.remove());
+    const track = timelineTrack;
+    const empty = timelineEmpty;
 
-    steps.forEach((step) => {
-        const pct = totalMs > 0 ? (step.tiempo / totalMs) * 100 : 0;
-        const seg = document.createElement("div");
-        seg.className = `tl-segment ${step.pin === "WAIT" ? "tl-wait" : step.estado === "ON" ? "tl-on" : "tl-off"}`;
-        seg.style.width = `${Math.max(pct, 2)}%`;
-        seg.setAttribute("role", "listitem");
+    // Clear old items (keep the empty placeholder)
+    const children = Array.from(track.children);
+    children.forEach(child => {
+        if (child !== empty) child.remove();
+    });
 
-        const label = step.pin === "WAIT"
-            ? `⏸ ${step.tiempo} ms`
-            : `P${step.pin} ${step.estado} ${step.tiempo} ms`;
-        seg.setAttribute("aria-label", label);
+    steps.forEach((step, index) => {
+        // ── Item Container ──
+        const item = document.createElement("div");
+        item.className = "tl-item";
+        item.dataset["index"] = String(index);
 
-        const inner = document.createElement("span");
-        inner.className = "tl-label";
-        inner.textContent = label;
-        seg.appendChild(inner);
+        // ── Node ──
+        const node = document.createElement("div");
+        const stateClass = step.pin === "WAIT" ? "wait" : (step.estado === "ON" ? "on" : "off");
+        node.className = `tl-node ${stateClass}`;
 
-        timelineTrack!.appendChild(seg);
+        const pinLabel = step.pin === "WAIT" ? "WAIT" : `PIN ${step.pin}`;
+        const stateLabel = step.pin === "WAIT" ? "PAUSA" : step.estado;
+        const timeLabel = `${step.tiempo}ms`;
+
+        node.innerHTML = `
+            <span class="tl-pin">${pinLabel}</span>
+            <span class="tl-state">${stateLabel}</span>
+            <span class="tl-time">${timeLabel}</span>
+        `;
+
+        item.appendChild(node);
+        track.appendChild(item);
+
+        // ── Arrow (except for last item) ──
+        if (index < steps.length - 1) {
+            const arrow = document.createElement("div");
+            arrow.className = "tl-arrow";
+            track.appendChild(arrow);
+        }
     });
 }
