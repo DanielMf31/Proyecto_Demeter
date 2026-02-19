@@ -23,5 +23,5 @@ export function showToast(message: string, type: ToastType = "info"): void {
     setTimeout(() => {
         toast.classList.remove("toast-visible");
         toast.addEventListener("transitionend", () => toast.remove(), { once: true });
-    }, 3500);
+    }, 5000);
 }
