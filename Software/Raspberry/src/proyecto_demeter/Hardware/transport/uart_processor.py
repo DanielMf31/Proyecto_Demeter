@@ -16,8 +16,8 @@ try:
     from proyecto_demeter.Hardware.transport.async_uart import AsyncUartTransport
     from demeter_protocol import DemeterProtocolV2
     from schemas import (
-        DemeterCommand, GpioCommand, ActionResponse, PingCommand, SequenceCommand, ExecSequence, 
-        GetSensorsCommand, TempHumReport, PinReport, SystemReport, Ack, Nack, CmdId,
+        DemeterCommand, ExecSequence, 
+        TempHumReport, PinReport, SystemReport, Ack, Nack, CmdId,
         SetGpio, Ping, GetSensors, Syn, SynAck, SetPwm, RouteAdd
     )
     from configuration import settings

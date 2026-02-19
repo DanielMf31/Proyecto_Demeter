@@ -57,27 +57,32 @@ class Settings(BaseSettings):
         return str(self.DATA_DIR / self.DB_NAME)
 
     # ==========================================
-    # 5. Database (Backend Postgres)
+    # 5. Database & External Services
     # ==========================================
-    POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
-    POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "password")
-    POSTGRES_SERVER: str = os.getenv("POSTGRES_SERVER", "localhost")
-    POSTGRES_PORT: str = os.getenv("POSTGRES_PORT", "5432")
-    POSTGRES_DB: str = os.getenv("POSTGRES_DB", "demeter_db")
+    # Backend Postgres
+    POSTGRES_USER: str = "postgres"
+    POSTGRES_PASSWORD: str = "password"
+    POSTGRES_SERVER: str = "db"
+    POSTGRES_PORT: str = "5432"
+    POSTGRES_DB: str = "demeter_db"
     
     @property
     def DATABASE_URL(self) -> str:
         return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     # Redis
-    REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
+    REDIS_URL: str = "redis://redis:6379/0"
 
     # ==========================================
     # 6. Network / API
     # ==========================================
-    HOST: str = "localhost" # Internal Host
+    HOST: str = "0.0.0.0" # Bind Host
     SOCKET_PORT: int = 8000 # Backend Port
-    API_PREFIX: str = "/api/v1"
+    API_PREFIX: str = "/api"
+
+    # Connectivity (for Raspberry → Server)
+    BACKEND_URL: str = "localhost"
+    BACKEND_PORT: int = 80
 
     # ==========================================
     # 7. Hardware (Raspberry UART)

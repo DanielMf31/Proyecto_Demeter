@@ -10,7 +10,15 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
-    <link rel="stylesheet" href="style.css" />
+    <!-- ── Modular CSS ─────────────────────────────────────────────── -->
+    <link rel="stylesheet" href="css/variables.css" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/navbar.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/planner.css" />
+    <link rel="stylesheet" href="css/manual.css" />
+    <link rel="stylesheet" href="css/toast.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
 </head>
 
 <body>
@@ -88,7 +96,7 @@
             <span class="clock" id="clock" aria-live="polite" aria-label="Hora actual"></span>
 
             <!-- Theme toggle -->
-            <button class="btn-icon-header theme-toggle" id="theme-toggle" aria-label="Alternar modo claro/oscuro"
+            <button class="btn-icon-header theme-toggle" id="btn-theme" aria-label="Alternar modo claro/oscuro"
                 title="Alternar tema">
                 <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -284,10 +292,10 @@
                 </div>
 
                 <!-- Global CTA -->
-                <div class="cta-bar">
+                <div class="cta-bar" id="cta-section">
                     <p class="cta-hint" id="cta-hint">Añade al menos un paso para enviar la configuración.</p>
-                    <button class="btn-cta" id="btn-send" aria-label="Enviar configuración al sistema" disabled>
-                        <span class="btn-cta-inner" id="btn-send-inner">
+                    <button class="btn-cta" id="btn-cta" aria-label="Enviar configuración al sistema" disabled>
+                        <span class="btn-cta-inner">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <line x1="22" y1="2" x2="11" y2="13" />
@@ -295,7 +303,7 @@
                             </svg>
                             Enviar Configuración
                         </span>
-                        <span class="btn-cta-loading" id="btn-send-loading" style="display:none" aria-hidden="true">
+                        <span class="btn-cta-loading" style="display:none" aria-hidden="true">
                             <svg class="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                 stroke-width="2.5">
                                 <circle cx="12" cy="12" r="10" stroke-opacity=".25" />
@@ -331,9 +339,9 @@
                             <p class="manual-subtitle">Activación directa de dispositivos en tiempo real</p>
                         </div>
                     </div>
-                    <div class="manual-status-summary" id="manual-status-summary" aria-live="polite">
+                    <div class="manual-status-summary" id="manual-summary" aria-live="polite">
                         <span class="summary-dot" aria-hidden="true"></span>
-                        <span id="manual-active-count">0 activos</span>
+                        <span id="manual-summary-label">Todo apagado</span>
                     </div>
                 </div>
 
@@ -341,7 +349,7 @@
                 <div class="control-grid">
 
                     <!-- ── Fila Superior: Bombas ── -->
-                    <div class="device-row">
+                    <div class="device-row" data-device="pump">
                         <div class="device-row-header">
                             <div class="device-row-icon pump-icon" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -436,7 +444,7 @@
                     </div>
 
                     <!-- ── Fila Inferior: Válvulas ── -->
-                    <div class="device-row">
+                    <div class="device-row" data-device="valve">
                         <div class="device-row-header">
                             <div class="device-row-icon valve-icon" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -563,7 +571,8 @@
     <!-- Toast container -->
     <div class="toast-container" id="toast-container" aria-live="assertive" aria-atomic="true"></div>
 
-    <script src="script.js"></script>
+    <!-- ── Compiled bundle (esbuild) ──────────────────────────── -->
+    <script src="dist/bundle.js" defer></script>
 </body>
 
 </html>

@@ -1,0 +1,68 @@
+/* ═══════════════════════════════════════════════════════════════
+   layout.css — Main container, views & transitions
+   ═══════════════════════════════════════════════════════════════ */
+
+.main-container {
+    margin-top: var(--navbar-h);
+    height: calc(100vh - var(--navbar-h));
+    overflow: hidden;
+    position: relative;
+}
+
+.view {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.view::-webkit-scrollbar {
+    width: 5px;
+}
+
+.view::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.view::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+/* ── View inner layout ──────────────────────────────────────── */
+.view-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 20px 16px;
+    height: 100%;
+}
+
+/* Planner view: tight flex, no scroll on the inner */
+#view-planner .view-inner {
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Manual view: scrolls freely */
+#view-manual .view-inner {
+    height: auto;
+    min-height: 100%;
+}
+
+/* ── View transition animation ──────────────────────────────── */
+.view-enter {
+    animation: viewIn 220ms cubic-bezier(.4, 0, .2, 1) forwards;
+}
+
+@keyframes viewIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

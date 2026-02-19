@@ -1,0 +1,36 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.venv
+venv
+env
+.pytest_cache
+.coverage
+
+# Node
+node_modules
+npm-debug.log
+
+# IDEs
+.vscode
+.idea
+.gemini
+.agent
+
+# Project Specific
+Software/Raspberry/logs/*
+Software/Raspberry/data/*.db
+!Software/Raspberry/data/.gitkeep
+Software/Servidor/Frontend/Web/dist/*
+
+# PlatformIO
+.pio
+.pioenvs
+.piolibdeps

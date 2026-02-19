@@ -10,14 +10,15 @@ class DemeterWebsocketClient:
     """
     Manages the persistent WebSocket connection to the Backend.
     """
-    def __init__(self, on_message_callback: Callable[[str], Awaitable[None]]):
+    def __init__(self, on_message_callback: Callable[[str], Awaitable[None]], on_open_callback: Optional[Callable[[], Awaitable[None]]] = None):
         self.logger = logging.getLogger("WS_Client")
         self.on_message = on_message_callback
+        self.on_open = on_open_callback
         
         # Determine URI
         ws_scheme = "ws"
-        if settings.SOCKET_PORT == 443: ws_scheme = "wss"
-        self.uri = f"{ws_scheme}://{settings.HOST}:{settings.SOCKET_PORT}/ws/raspberry_gateway"
+        if settings.BACKEND_PORT == 443: ws_scheme = "wss"
+        self.uri = f"{ws_scheme}://{settings.BACKEND_URL}:{settings.BACKEND_PORT}/ws/raspberry_gateway"
         
         self.connection = None
         self.running = False
@@ -59,10 +60,11 @@ class DemeterWebsocketClient:
             try:
                 async with websockets.connect(self.uri) as ws:
                     self.connection = ws
-                    self.logger.info("WebSocket Connected!")
-                    
-                    # Identity Handshake
-                    await ws.send(json.dumps({"type": "identity", "client": "gateway"}))
+                    self.logger.info(f"WebSocket Connected to {self.uri}")
+
+                    # Notify on_open
+                    if self.on_open:
+                        await self.on_open()
 
                     # Read Loop
                     try:

@@ -1,0 +1,385 @@
+/* ═══════════════════════════════════════════════════════════════
+   manual.css — Manual Control view styles
+   Covers: header, control grid, device rows, cards, emergency bar
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── View header ────────────────────────────────────────────── */
+.manual-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.manual-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.manual-header-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--info), #2563EB);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 14px rgba(59, 130, 246, .3);
+    flex-shrink: 0;
+}
+
+.manual-header-icon svg {
+    width: 20px;
+    height: 20px;
+    color: #fff;
+}
+
+.manual-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -.3px;
+}
+
+.manual-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* ── Active count summary ───────────────────────────────────── */
+.manual-status-summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 7px 14px;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    transition: border-color var(--transition);
+}
+
+.manual-status-summary.has-active {
+    border-color: var(--card-on-bd);
+    color: var(--accent);
+}
+
+.summary-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--status-off-color);
+    transition: background var(--transition), box-shadow var(--transition);
+}
+
+.manual-status-summary.has-active .summary-dot {
+    background: var(--status-on-color);
+    box-shadow: 0 0 6px var(--status-on-color);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .4;
+    }
+}
+
+/* ── Control Grid ───────────────────────────────────────────── */
+.control-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1;
+}
+
+/* ── Device Row ─────────────────────────────────────────────── */
+.device-row {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    transition: background var(--transition), border-color var(--transition);
+}
+
+.device-row-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+}
+
+.device-row-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.pump-icon {
+    background: var(--row-icon-pump-bg);
+    color: var(--row-icon-pump-tx);
+}
+
+.valve-icon {
+    background: var(--row-icon-valve-bg);
+    color: var(--row-icon-valve-tx);
+}
+
+.device-row-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.device-row-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.device-row-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.device-row-count {
+    margin-left: auto;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--text-subtle);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 9px;
+    transition: color var(--transition), border-color var(--transition), background var(--transition);
+}
+
+.device-row-count.has-active {
+    color: var(--accent);
+    border-color: var(--card-on-bd);
+    background: var(--card-on-glow);
+}
+
+/* ── Cards grid ─────────────────────────────────────────────── */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+/* ── Control Card ───────────────────────────────────────────── */
+.control-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    background: var(--card-bg);
+    border: 1.5px solid var(--card-bd);
+    border-radius: var(--radius-lg);
+    padding: 18px 12px 14px;
+    cursor: pointer;
+    text-align: center;
+    transition:
+        background var(--transition),
+        border-color var(--transition),
+        box-shadow var(--transition),
+        transform var(--transition);
+    outline: none;
+    user-select: none;
+}
+
+.control-card:hover {
+    background: var(--card-hover-bg);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-card);
+}
+
+.control-card:active {
+    transform: translateY(-1px) scale(.98);
+}
+
+.control-card:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* ON state */
+.control-card.is-on {
+    background: var(--card-on-glow);
+    border-color: var(--card-on-bd);
+    box-shadow: 0 0 20px var(--card-on-glow), inset 0 0 0 1px var(--card-on-bd);
+}
+
+/* Card icon */
+.card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition), transform var(--transition);
+}
+
+.card-icon.pump {
+    background: var(--card-icon-pump-bg);
+    color: var(--card-icon-pump-tx);
+}
+
+.card-icon.valve {
+    background: var(--card-icon-valve-bg);
+    color: var(--card-icon-valve-tx);
+}
+
+.card-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.control-card.is-on .card-icon {
+    transform: scale(1.08);
+}
+
+/* Card body */
+.card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.card-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.card-id {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--text-subtle);
+}
+
+/* Status wrap */
+.card-status-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 10px;
+    transition: background var(--transition), border-color var(--transition);
+}
+
+.control-card.is-on .card-status-wrap {
+    background: var(--badge-on-bg);
+    border-color: var(--badge-on-bd);
+}
+
+/* Status dot on card */
+.status-dot-card {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--status-off-color);
+    transition: background var(--transition), box-shadow var(--transition);
+    flex-shrink: 0;
+}
+
+.control-card.is-on .status-dot-card {
+    background: var(--status-on-color);
+    box-shadow: 0 0 6px var(--status-on-color);
+    animation: pulse 2s infinite;
+}
+
+/* State label */
+.card-state-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-subtle);
+    transition: color var(--transition);
+}
+
+.control-card.is-on .card-state-label {
+    color: var(--badge-on-tx);
+}
+
+/* ── Emergency Bar ──────────────────────────────────────────── */
+.emergency-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    background: var(--emergency-bg);
+    border: 1px solid var(--emergency-bd);
+    border-radius: var(--radius-lg);
+    padding: 12px 18px;
+    flex-shrink: 0;
+    transition: background var(--transition), border-color var(--transition);
+}
+
+.emergency-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+    flex: 1;
+}
+
+.emergency-info svg {
+    width: 14px;
+    height: 14px;
+    color: var(--danger);
+    flex-shrink: 0;
+}
+
+.btn-emergency {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--danger);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 9px 20px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
+    white-space: nowrap;
+}
+
+.btn-emergency:hover {
+    background: var(--danger-dim);
+    box-shadow: 0 0 18px var(--danger-glow);
+}
+
+.btn-emergency:active {
+    transform: scale(.97);
+}
+
+.btn-emergency svg {
+    width: 14px;
+    height: 14px;
+}

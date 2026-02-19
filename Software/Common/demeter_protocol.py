@@ -1,14 +1,16 @@
 import struct
 import logging
-from typing import Optional, Union, Any, Dict, Type
+from typing import Optional, Any, Dict
 
+from pydantic import TypeAdapter, ValidationError
 from schemas import (
-    DemeterCommand, 
-    SetGpio, 
+    AnyDemeterCommand,
+    DemeterCommand,
+    SetGpio,
     SetPwm,
-    ExecSequence, 
-    RouteAdd, 
-    Ping, 
+    ExecSequence,
+    RouteAdd,
+    Ping,
     SequenceStep,
     Ack,
     Nack,
@@ -18,8 +20,11 @@ from schemas import (
     TempHumReport,
     PinReport,
     SystemReport,
-    GetSensors
+    GetSensors,
 )
+
+# Adaptador reutilizable para parsear cualquier comando desde JSON/dict
+_CMD_ADAPTER: TypeAdapter[AnyDemeterCommand] = TypeAdapter(AnyDemeterCommand)
 
 # Constants
 SYNC_BYTE = 0xFE
@@ -100,33 +105,23 @@ class DemeterProtocolV2:
 
     def validate_json_message(self, json_data: Dict[str, Any]) -> DemeterCommand:
         """
-        Validate a generic JSON dictionary against known Command Models.
-        Returns a specific DemeterCommand instance or raises ValidationError.
+        Parsea un dict JSON hacia el modelo Pydantic correcto usando el campo
+        discriminador `type`.
+
+        El frontend (o cualquier cliente) debe enviar un JSON con `type`:
+            {"type": "set_gpio", "target_id": 1, "pin": 4, "value": 1}
+            {"type": "exec_sequence", "target_id": 1, "steps": [...]}
+            {"type": "ping", "target_id": 1}
+
+        Pydantic selecciona el modelo correcto automáticamente sin if/elif.
+        Lanza ValidationError si el `type` es desconocido o los datos son inválidos.
         """
-        cmd_type = json_data.get("command")
-        cmd_id = json_data.get("cmd_id")
-        params = json_data.get("params", {})
-        
-        # Native Protocol V2 Support (Backend -> Gateway direct translation)
-        if cmd_id == CmdId.SET_GPIO:
-            # Pydantic will ignore extra fields like 'cmd_id' by default
-            return SetGpio(**json_data)
-
-        # Mappings for JSON commands to Pydantic Models
-        # This handles the "Standard" JSON format -> Internal Pydantic Model
-        if cmd_type == "TOGGLE_PIN":
-            # Map params: gpio -> pin, state -> value
-            state_val = 1 if params.get("state") == "ON" else 0
-            return SetGpio(
-                target_id=params.get("target_id", 1), # Default to node 1 if not specified
-                pin=params.get("gpio"),
-                value=state_val
-            )
-        
-        if cmd_type == "PING":
-             return Ping(target_id=params.get("target_id", 1))
-
-        raise ValueError(f"Unknown command type: {cmd_type}")
+        try:
+            return _CMD_ADAPTER.validate_python(json_data)
+        except ValidationError:
+            raise
+        except Exception as exc:
+            raise ValueError(f"validate_json_message: error inesperado: {exc}") from exc
 
     # ==========================================
     # DESERIALIZATION (Bytes -> Model)

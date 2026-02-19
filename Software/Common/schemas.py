@@ -1,7 +1,6 @@
 from enum import IntEnum
-from typing import List, Optional, Literal, Union, Dict, Any
-from dataclasses import dataclass
-from pydantic import BaseModel, Field, ValidationError
+from typing import Annotated, List, Optional, Literal, Union, Dict, Any
+from pydantic import BaseModel, Field, ValidationError, field_serializer
 
 # ==========================================
 # Enums (Protocol Constants)
@@ -29,49 +28,64 @@ class CmdId(IntEnum):
 # Protocol V2 Models (Binary Structure Abstraction)
 # ==========================================
 class DemeterCommand(BaseModel):
-    """Base class for all Protocol Commands."""
+    """
+    Base class for all Protocol Commands.
+
+    The `type` field present in subclasses acts as a **discriminator** for JSON
+    parsing (Frontend ↔ Backend ↔ Raspberry) and is NEVER serialized to binary
+    bytes — pack_frame() only reads the concrete data fields of each subclass.
+    """
     target_id: int = Field(ge=0, le=254, description="Node ID of the recipient")
     source_id: Optional[int] = Field(default=None, ge=0, le=255, description="Node ID of the sender")
-    
+
     def get_cmd_id(self) -> int:
         raise NotImplementedError("Subclasses must implement get_cmd_id")
 
 # --- Control Commands ---
 class Ping(DemeterCommand):
+    type: Literal["ping"] = "ping"
     def get_cmd_id(self) -> int: return CmdId.PING
 
 class Ack(DemeterCommand):
+    type: Literal["ack"] = "ack"
     original_cmd_id: int = Field(ge=0, le=255)
     def get_cmd_id(self) -> int: return CmdId.ACK
 
 class Nack(DemeterCommand):
+    type: Literal["nack"] = "nack"
     original_cmd_id: int = Field(ge=0, le=255)
     error_code: int = Field(ge=0, le=255)
     def get_cmd_id(self) -> int: return CmdId.NACK
 
 class Syn(DemeterCommand):
+    type: Literal["syn"] = "syn"
     context: int = Field(default=0, ge=0, le=255)
     def get_cmd_id(self) -> int: return CmdId.SYN
 
 class SynAck(DemeterCommand):
-    context: int = Field(default=0, ge=0, le=255) 
+    type: Literal["syn_ack"] = "syn_ack"
+    context: int = Field(default=0, ge=0, le=255)
     def get_cmd_id(self) -> int: return CmdId.SYN_ACK
 
 class SetGpio(DemeterCommand):
+    type: Literal["set_gpio"] = "set_gpio"
     pin: int = Field(ge=0, le=40)
     value: int = Field(ge=0, le=1)
     flags: int = Field(default=0, ge=0, le=255)
     def get_cmd_id(self) -> int: return CmdId.SET_GPIO
 
 class SetPwm(DemeterCommand):
+    type: Literal["set_pwm"] = "set_pwm"
     pin: int = Field(ge=0, le=40)
     value: int = Field(ge=0, le=65535)
     def get_cmd_id(self) -> int: return CmdId.SET_PWM
 
 class GetSensors(DemeterCommand):
+    type: Literal["get_sensors"] = "get_sensors"
     def get_cmd_id(self) -> int: return CmdId.GET_SENSORS
 
 class RouteAdd(DemeterCommand):
+    type: Literal["route_add"] = "route_add"
     node_id_to_register: int = Field(ge=0, le=254)
     mac_address_bytes: bytes = Field(min_length=6, max_length=6)
     def get_cmd_id(self) -> int: return CmdId.ROUTE_ADD
@@ -85,12 +99,14 @@ class SequenceStep(BaseModel):
     delay_ms: int = Field(ge=0, le=4294967295)
 
 class ExecSequence(DemeterCommand):
+    type: Literal["exec_sequence"] = "exec_sequence"
     steps: List[SequenceStep] = Field(min_length=1, max_length=30)
     def get_cmd_id(self) -> int: return CmdId.EXEC_SEQUENCE
 
 # --- Reports ---
 
 class TempHumReport(DemeterCommand):
+    type: Literal["temp_hum_report"] = "temp_hum_report"
     node_id: int = Field(..., ge=0, le=254)
     temperature: float
     humidity: float
@@ -98,50 +114,46 @@ class TempHumReport(DemeterCommand):
     def get_cmd_id(self) -> int: return CmdId.TEMP_HUM_REPORT
 
 class PinReport(DemeterCommand):
+    type: Literal["pin_report"] = "pin_report"
     node_id: int = Field(..., ge=0, le=254)
     pin: int = Field(ge=0, le=40)
     state: int = Field(ge=0, le=1)
     def get_cmd_id(self) -> int: return CmdId.PIN_REPORT
 
 class SystemReport(DemeterCommand):
+    type: Literal["system_report"] = "system_report"
     node_id: int = Field(..., ge=0, le=254)
     mode: int = Field(ge=0, le=255)
     battery_mv: int = Field(ge=0, le=65535)
     reserved: bytes = Field(default=b'\x00'*5, min_length=5, max_length=5)
     def get_cmd_id(self) -> int: return CmdId.SYSTEM_REPORT
 
+
 # ==========================================
-# JSON Command Models (Frontend -> Backend -> IoT)
+# Discriminated Union — parseo automático desde JSON
 # ==========================================
-
-class ActionResponse(BaseModel):
-    status: str
-    message: str
-
-class GpioCommand(BaseModel):
-    type: Literal["GPIO_CMD"] = "GPIO_CMD"
-    target_id: int
-    pin: int
-    action: Literal["ON", "OFF"]
-
-class PingCommand(BaseModel):
-    type: Literal["PING_CMD"] = "PING_CMD"
-    target_id: int
-
-class GetSensorsCommand(BaseModel):
-    type: Literal["GET_SENSORS_CMD"] = "GET_SENSORS_CMD"
-    target_id: int
-
-class SequenceCommand(BaseModel):
-    type: Literal["SEQ_CMD"] = "SEQ_CMD"
-    target_id: int
-    steps: List[SequenceStep]
-
-class JsonCommand(BaseModel):
-    """
-    Standard format for commands sent via WebSocket/JSON.
-    Example: { "type": "command", "command": "TOGGLE_PIN", "params": { "gpio": 4, "state": "ON" } }
-    """
-    type: str # Relaxed from Literal to allow more flexibility during dev
-    command: Optional[str] = None
-    params: Dict[str, Any] = {}
+# Agrupa todos los tipos posibles. Pydantic usa el campo `type` para
+# saber cuál instanciar sin ninguna lógica manual.
+#
+# Uso:
+#   from schemas import AnyDemeterCommand
+#   cmd = TypeAdapter(AnyDemeterCommand).validate_python(json.loads(raw_json))
+#
+AnyDemeterCommand = Annotated[
+    Union[
+        SetGpio,
+        SetPwm,
+        ExecSequence,
+        GetSensors,
+        Ping,
+        Ack,
+        Nack,
+        Syn,
+        SynAck,
+        RouteAdd,
+        TempHumReport,
+        PinReport,
+        SystemReport,
+    ],
+    Field(discriminator="type"),
+]

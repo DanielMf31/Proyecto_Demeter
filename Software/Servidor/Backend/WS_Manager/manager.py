@@ -1,39 +1,60 @@
-from typing import Dict, List, Optional
+"""
+manager.py — Pure connection registry.
+
+Single responsibility: maintain the dict {client_id → WebSocket}
+and provide send/broadcast helpers. No business logic here.
+"""
+
+from typing import Dict
 from fastapi import WebSocket
 from Core.logger import setup_logger
 
-logger = setup_logger("ws_manager")
+logger = setup_logger("ws_registry")
 
-class WebSocketManager:
+
+class ConnectionRegistry:
     def __init__(self):
-        # Maps client_id -> WebSocket
-        self.active_connections: Dict[str, WebSocket] = {}
+        self.active: Dict[str, WebSocket] = {}
 
-    async def connect(self, websocket: WebSocket, client_id: str):
+    async def connect(self, websocket: WebSocket, client_id: str) -> None:
         await websocket.accept()
-        self.active_connections[client_id] = websocket
-        logger.info(f"Client {client_id} connected. Total connections: {len(self.active_connections)}")
+        self.active[client_id] = websocket
+        logger.info(f"Connected: '{client_id}' | total={len(self.active)}")
 
-    def disconnect(self, client_id: str):
-        if client_id in self.active_connections:
-            del self.active_connections[client_id]
-            logger.info(f"Client {client_id} disconnected. Total connections: {len(self.active_connections)}")
+    def disconnect(self, client_id: str) -> None:
+        if client_id in self.active:
+            del self.active[client_id]
+            logger.info(f"Disconnected: '{client_id}' | total={len(self.active)}")
 
-    async def send_personal_message(self, message: dict, client_id: str):
-        if client_id in self.active_connections:
-            websocket = self.active_connections[client_id]
-            try:
-                await websocket.send_json(message)
-            except Exception as e:
-                logger.error(f"Error sending message to {client_id}: {e}")
-                self.disconnect(client_id)
+    def is_connected(self, client_id: str) -> bool:
+        return client_id in self.active
 
-    async def broadcast(self, message: dict):
-        for client_id, websocket in list(self.active_connections.items()):
-            try:
-                await websocket.send_json(message)
-            except Exception as e:
-                logger.error(f"Error broadcasting to {client_id}: {e}")
-                self.disconnect(client_id)
+    async def send(self, client_id: str, payload: dict) -> None:
+        """Send a JSON payload to a specific client. No-op if not connected."""
+        ws = self.active.get(client_id)
+        if ws is None:
+            logger.warning(f"send() — '{client_id}' not connected, dropping message.")
+            return
+        try:
+            await ws.send_json(payload)
+        except Exception as exc:
+            logger.error(f"send() error for '{client_id}': {exc}")
+            self.disconnect(client_id)
 
-manager = WebSocketManager()
+    async def broadcast(self, payload: dict) -> None:
+        """Send a JSON payload to all connected clients."""
+        for client_id in list(self.active):
+            await self.send(client_id, payload)
+
+    async def broadcast_except(self, exclude_id: str, payload: dict) -> None:
+        """Send a JSON payload to all clients except the one specified.
+        Used by the dispatcher to forward gateway telemetry to frontends
+        without echoing back to the Raspberry itself.
+        """
+        for client_id in list(self.active):
+            if client_id != exclude_id:
+                await self.send(client_id, payload)
+
+
+# Singleton used across the app
+registry = ConnectionRegistry()
