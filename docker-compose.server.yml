@@ -33,12 +33,12 @@ services:
     depends_on:
       - redis
 
-    # ----------------------------------------------------------------
-    # REDIS: Mandatory for Discovery & Command Coordination
-    # ----------------------------------------------------------------
-    redis:
-      image: redis:alpine
-      container_name: demeter-redis
-      ports:
-        - "6379:6379"
-      restart: always
+  # ----------------------------------------------------------------
+  # REDIS: Mandatory for Discovery & Command Coordination
+  # ----------------------------------------------------------------
+  redis:
+    image: redis:alpine
+    container_name: demeter-redis
+    ports:
+      - "6379:6379"
+    restart: always
