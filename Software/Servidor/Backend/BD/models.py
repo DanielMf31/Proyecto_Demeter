@@ -17,7 +17,9 @@ class User(Base):
     is_active = Column(Boolean, default=True)
 
     # Soft Delete logic would typically be handled in the CRUD layer or via a custom method/mixin
+    # interactions
     sequences = relationship("Sequence", back_populates="creator")
+    activity_logs = relationship("ActivityLog", back_populates="user")
 
 class Device(Base):
     __tablename__ = "devices"
@@ -27,7 +29,9 @@ class Device(Base):
     device_type = Column(String, nullable=False) # 'pump', 'valve'
     gpio_pin = Column(Integer, nullable=False)
 
+    # Relationships
     sequence_steps = relationship("SequenceStep", back_populates="device")
+    activity_logs = relationship("ActivityLog", back_populates="device")
 
 class Sequence(Base):
     __tablename__ = "sequences"
@@ -60,10 +64,14 @@ class ActivityLog(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
-    user_id = Column(UUID(as_uuid=True), nullable=True) # Removed FK for robustness in logging
-    device_id = Column(Integer, nullable=True)          # Removed FK to avoid crashes without device records
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    device_id = Column(Integer, ForeignKey("devices.id"), nullable=True)
     action_type = Column(String, nullable=False) # 'button_press', 'sequence_exec', etc.
     description = Column(Text)
+
+    # Relationships
+    user = relationship("User", back_populates="activity_logs")
+    device = relationship("Device", back_populates="activity_logs")
 
     # Index on timestamp as requested for performance
     __table_args__ = (
