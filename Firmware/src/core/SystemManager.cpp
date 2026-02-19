@@ -92,6 +92,10 @@ void SystemManager::setup() {
             this->handleRouteAdd(cmd);
         });
     }
+
+    // Entering IDLE state after successful boot
+    _context.setState(Demeter::SystemState::IDLE);
+    Serial.println(">> [System] Setup Complete. State: IDLE");
 }
 
 // =============================================================
