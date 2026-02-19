@@ -251,21 +251,17 @@ void ProtocolEngine::parseFrame(const std::vector<uint8_t>& frame) {
         }
 
         case Demeter::CommandType::EXEC_SEQUENCE: {
-             // Payload: [Count][Pin][Val][DelayL][DelayH][DelayH][DelayH]...
-             // Step Size = 1 + 1 + 4 = 6 bytes? Wait.
-             // Serialization check:
-             // [Count(1)] then for each: [Pin(1)][Val(1)][Delay(4)] = 6 bytes/step.
-             // Let's check serializer first.
-             // sendExecSequence puts: [Count] then loop [Step.pin][Step.val][Step.delay(4 bytes)]
-             
+             // Payload: [Count] [TGT][CMD][Pin][Val][DelayL][DelayH][DelayH][DelayH]... (8 bytes per step)
              if (payload.size() >= 1 && _onSequenceCommand) {
                  uint8_t count = payload[0];
-                 size_t expected = 1 + (count * 6);
+                 size_t expected = 1 + (count * 8); 
                  if (payload.size() >= expected) {
                      Demeter::ExecSequenceCmd seqCmd;
                      size_t offset = 1;
                      for(int i=0; i<count; i++) {
                          Demeter::SequenceStep step;
+                         // Skip Reserved TGT/CMD (2 bytes)
+                         offset += 2;
                          step.pin = payload[offset++];
                          step.value = (payload[offset++] != 0);
                          uint32_t d = payload[offset++];

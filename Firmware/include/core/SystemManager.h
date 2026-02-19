@@ -73,6 +73,9 @@ private:
     // Protocol Logic
     void runHandshakeLogic();
 
+    // Sequencer Helper
+    void executeSequenceStep(size_t index);
+
 public:
     /**
      * @brief Construct a new System Manager.

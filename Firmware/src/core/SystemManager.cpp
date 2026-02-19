@@ -147,22 +147,17 @@ void SystemManager::update() {
             if (_isSequencerActive && !_activeSequence.empty() && _executor) {
                 if (_sequenceStepIndex < _activeSequence.size()) {
                     unsigned long currentTime = millis();
+                    // Check if the delay of the CURRENT step has passed
                     if (currentTime - _lastStepTime >= _activeSequence[_sequenceStepIndex].delayMs) {
                         // Move to next step
                         _sequenceStepIndex++;
                         
                         if (_sequenceStepIndex < _activeSequence.size()) {
-                            // Execute Next Step
-                            const auto& step = _activeSequence[_sequenceStepIndex];
-                            
-                            Demeter::SetGpioCmd gpioCmd;
-                            gpioCmd.pin = step.pin;
-                            gpioCmd.value = step.value;
-                            gpioCmd.flags = 0; 
-                            
-                            _executor->execute(gpioCmd);
+                            // Execute NEXT Step
+                            executeSequenceStep(_sequenceStepIndex);
                             _lastStepTime = currentTime;
                         } else {
+                            Serial.println(">> [System] Sequence Execution Finished.");
                             _isSequencerActive = false;
                         }
                     }
@@ -274,7 +269,30 @@ void SystemManager::handleExecSequence(const Demeter::ExecSequenceCmd& cmd) {
     _isSequencerActive = true;
     _lastStepTime = millis();
     
-    Serial.printf(">> [System] Started Execution Sequence (%d steps)\n", (int)cmd.steps.size());
+    Serial.printf(">> [System] Start Executing Sequence (%d steps)\n", (int)cmd.steps.size());
+    
+    // Execute Step 0 Immediately
+    executeSequenceStep(0);
+}
+
+void SystemManager::executeSequenceStep(size_t index) {
+    if (index >= _activeSequence.size()) return;
+    const auto& step = _activeSequence[index];
+
+    if (step.pin == 0) {
+        Serial.printf(">> [Sequencer] Step %d: WAIT for %lu ms\n", (int)index, step.delayMs);
+    } else {
+        Serial.printf(">> [Sequencer] Step %d: PIN %d -> %s (Wait: %lu ms)\n", 
+            (int)index, step.pin, step.value ? "ON" : "OFF", step.delayMs);
+        
+        if (_executor) {
+            Demeter::SetGpioCmd gpioCmd;
+            gpioCmd.pin = step.pin;
+            gpioCmd.value = step.value;
+            gpioCmd.flags = 0;
+            _executor->execute(gpioCmd);
+        }
+    }
 }
 
 
