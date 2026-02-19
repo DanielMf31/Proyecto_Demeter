@@ -671,6 +671,30 @@ function updateCTA() {
     ctaHint.classList.remove('error-hint');
 }
 
+/**
+ * Envía un comando a la API genérica.
+ * @param {Object} payload - El comando formateado para el protocolo.
+ * @returns {Promise<any>}
+ */
+async function apiSendCommand(payload) {
+    try {
+        const response = await fetch('/api/command', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.detail || 'Error en el servidor');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error("API Command Error:", error);
+        showToast(`Error: ${error.message}`, 'error');
+        throw error;
+    }
+}
+
 function sendConfiguration() {
     if (steps.length === 0) return;
 
@@ -688,14 +712,37 @@ function sendConfiguration() {
     ctaHint.textContent = 'Enviando configuración al sistema…';
     ctaHint.classList.remove('error-hint');
 
-    setTimeout(() => {
-        btnSend.disabled = false;
-        btnSendInner.style.display = 'flex';
-        btnSendLoading.style.display = 'none';
-        showToast(`✓ Configuración enviada — ${steps.length} pasos registrados.`, 'success');
-        clearStorage();
-        ctaHint.textContent = 'Configuración enviada correctamente.';
-    }, 2000);
+    // Mapear pasos del frontend al esquema de la API (ExecSequence)
+    const formattedSteps = steps.map(s => {
+        const isWait = s.pin === 'WAIT' || s.estado === 'WAIT';
+        return {
+            target_id: 1, // Por defecto al Actuador
+            cmd_id: 0x10, // SET_GPIO
+            pin: isWait ? 0 : Number(s.pin),
+            value: (s.estado === 'ON') ? 1 : 0,
+            delay_ms: Number(s.tiempo)
+        };
+    });
+
+    apiSendCommand({
+        type: 'exec_sequence',
+        target_id: 1,
+        steps: formattedSteps
+    })
+        .then(() => {
+            showToast(`✓ Configuración enviada — ${steps.length} pasos registrados.`, 'success');
+            clearStorage();
+            ctaHint.textContent = 'Configuración enviada correctamente.';
+        })
+        .catch(() => {
+            ctaHint.textContent = 'Fallo al enviar la configuración.';
+            ctaHint.classList.add('error-hint');
+        })
+        .finally(() => {
+            btnSend.disabled = false;
+            btnSendInner.style.display = 'flex';
+            btnSendLoading.style.display = 'none';
+        });
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -723,28 +770,37 @@ function toggleCard(card) {
     updateDeviceCount(device);
     updateManualSummary();
 
-    // WebSocket Command
-    // Map Pump 1-4 to Pin 4-7
-    // NOTE: This is a direct mapping for demonstration.
+    // Map Pump/Valve IDs to Pins
     if (device === 'pump') {
         const pinMap = { '1': 4, '2': 5, '3': 6, '4': 7 };
         const pin = pinMap[id];
         if (pin) {
-            // Strict Schema: GpioCommand
-            // { "type": "GPIO_CMD", "target_id": 1, "pin": 4, "action": "ON" }
-            const cmd = {
-                type: 'GPIO_CMD',
-                target_id: 1, // Target Node 1 (Actuator Controller)
+            apiSendCommand({
+                type: 'set_gpio',
+                target_id: 1,
                 pin: pin,
-                action: isOn ? 'ON' : 'OFF'
-            };
-
-            if (ws && wsConnected) {
-                console.log("Sending GPIO_CMD:", cmd);
-                ws.send(JSON.stringify(cmd));
-            } else {
-                showToast('Comando no enviado: Sin conexión WS', 'error');
-            }
+                value: isOn ? 1 : 0
+            }).catch(() => {
+                // Revert UI on failure
+                card.classList.toggle('is-on', !isOn);
+                updateDeviceCount(device);
+                updateManualSummary();
+            });
+        }
+    } else if (device === 'valve') {
+        const pinMap = { '1': 8, '2': 9, '3': 10, '4': 11 };
+        const pin = pinMap[id];
+        if (pin) {
+            apiSendCommand({
+                type: 'set_gpio',
+                target_id: 1,
+                pin: pin,
+                value: isOn ? 1 : 0
+            }).catch(() => {
+                card.classList.toggle('is-on', !isOn);
+                updateDeviceCount(device);
+                updateManualSummary();
+            });
         }
     }
 
