@@ -9,7 +9,7 @@ from API.routers.system_router import router as system_router
 from API.routers.ws_router import router as ws_router
 from API.routers.command_router import router as command_router
 from API.routers.discovery_router import router as discovery_router
-from WS_Manager.dispatcher import start_redis_listener
+from WS_Manager.dispatcher import start_redis_listener, start_activity_batch_flusher
 
 settings = get_settings()
 logger = setup_logger("app")
@@ -41,7 +41,8 @@ def create_application() -> FastAPI:
             logger.warning(f"Redis Connection Warning: {e}")
 
         asyncio.create_task(start_redis_listener())
-        logger.info("Dispatcher task launched.")
+        asyncio.create_task(start_activity_batch_flusher())
+        logger.info("Dispatcher and Batch Flusher tasks launched.")
 
     @application.on_event("shutdown")
     async def shutdown_event():

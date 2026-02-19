@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, Index
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, Index, Float
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
@@ -66,7 +66,7 @@ class ActivityLog(Base):
     timestamp = Column(DateTime, default=datetime.utcnow)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     device_id = Column(Integer, ForeignKey("devices.id"), nullable=True)
-    action_type = Column(String, nullable=False)
+    action_type = Column(String, nullable=False) # 'button_press', 'sequence_exec', etc.
     description = Column(Text)
 
     # Relationships
@@ -77,3 +77,32 @@ class ActivityLog(Base):
     __table_args__ = (
         Index('idx_activity_log_timestamp', 'timestamp'),
     )
+
+# --- Telemetry Models ---
+
+class TelemetryTH(Base):
+    __tablename__ = "telemetry_th"
+
+    id = Column(Integer, primary_key=True, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    node_id = Column(Integer, nullable=False, index=True)
+    temperature = Column(Float, nullable=False)
+    humidity = Column(Float, nullable=False)
+
+class PinHistory(Base):
+    __tablename__ = "pin_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    node_id = Column(Integer, nullable=False, index=True)
+    pin = Column(Integer, nullable=False)
+    state = Column(Boolean, nullable=False)
+
+class SystemHistory(Base):
+    __tablename__ = "system_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    node_id = Column(Integer, nullable=False, index=True)
+    mode = Column(Integer, nullable=False)
+    battery_mv = Column(Integer, nullable=False)

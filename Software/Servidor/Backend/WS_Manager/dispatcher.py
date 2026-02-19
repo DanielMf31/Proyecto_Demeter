@@ -26,9 +26,17 @@ Flujo completo:
 
 import asyncio
 import json
+from datetime import datetime
 from pydantic import TypeAdapter, ValidationError
 from Core.logger import setup_logger
 from Core.redis import redis_manager
+from Core.database import AsyncSessionLocal
+from BD.models import (
+    TelemetryTH, 
+    PinHistory, 
+    SystemHistory, 
+    ActivityLog
+)
 from .manager import registry
 from schemas import (
     AnyDemeterCommand,
@@ -59,7 +67,7 @@ async def handle_gateway_message(data: dict) -> None:
       - Confirmaciones: ack, nack
       - Control: ping
 
-    Todo se retransmite al frontend conectado (si existe).
+    Todo se retransmite al frontend conectado (si existe) y se guarda en DB.
     """
     msg_type = data.get("type")
 
@@ -95,10 +103,24 @@ async def handle_gateway_message(data: dict) -> None:
                 f"TH report — nodo {report.node_id}: "
                 f"{report.temperature}°C / {report.humidity}%"
             )
-            # Re-transmitimos el reporte tal cual al frontend
+            # 1. DB Persistence
+            async with AsyncSessionLocal() as session:
+                db_report = TelemetryTH(
+                    node_id=report.node_id,
+                    temperature=report.temperature,
+                    humidity=report.humidity,
+                    timestamp=datetime.utcnow()
+                )
+                session.add(db_report)
+                await session.commit()
+            
+            # 2. Redis Cache (optional but good for real-time)
+            await redis_manager.save_telemetry(report.node_id, report.model_dump())
+
+            # 3. Broadcast to Frontends
             await registry.broadcast_except(GATEWAY_ID, report.model_dump())
         except Exception as exc:
-            logger.error(f"temp_hum_report parse error: {exc}")
+            logger.error(f"temp_hum_report processing error: {exc}")
         return
 
     if msg_type == "pin_report":
@@ -108,9 +130,24 @@ async def handle_gateway_message(data: dict) -> None:
                 f"Pin report — nodo {report.node_id}: "
                 f"pin {report.pin} = {report.state}"
             )
+            # 1. DB Persistence
+            async with AsyncSessionLocal() as session:
+                db_report = PinHistory(
+                    node_id=report.node_id,
+                    pin=report.pin,
+                    state=bool(report.state),
+                    timestamp=datetime.utcnow()
+                )
+                session.add(db_report)
+                await session.commit()
+
+            # 2. Update Device State in Redis
+            await redis_manager.set_device_state(report.pin, bool(report.state))
+
+            # 3. Broadcast
             await registry.broadcast_except(GATEWAY_ID, report.model_dump())
         except Exception as exc:
-            logger.error(f"pin_report parse error: {exc}")
+            logger.error(f"pin_report processing error: {exc}")
         return
 
     if msg_type == "system_report":
@@ -120,12 +157,57 @@ async def handle_gateway_message(data: dict) -> None:
                 f"System report — nodo {report.node_id}: "
                 f"mode={report.mode} batt={report.battery_mv}mV"
             )
+            # 1. DB Persistence
+            async with AsyncSessionLocal() as session:
+                db_report = SystemHistory(
+                    node_id=report.node_id,
+                    mode=report.mode,
+                    battery_mv=report.battery_mv,
+                    timestamp=datetime.utcnow()
+                )
+                session.add(db_report)
+                await session.commit()
+
+            # 2. Broadcast
             await registry.broadcast_except(GATEWAY_ID, report.model_dump(exclude={"reserved"}))
         except Exception as exc:
-            logger.error(f"system_report parse error: {exc}")
+            logger.error(f"system_report processing error: {exc}")
         return
 
     logger.warning(f"[gateway] Tipo no manejado: '{msg_type}'")
+
+
+# ── Background Tasks ──────────────────────────────────────────────────────────
+
+async def start_activity_batch_flusher() -> None:
+    """
+    Task en background que vacía la cola de eventos de Redis ('demeter:activity:batch')
+    y los inserta en la base de datos (ActivityLog) cada 1 segundo.
+    """
+    logger.info("Activity Batch Flusher arrancando.")
+    while True:
+        try:
+            if redis_manager.redis:
+                batch = await redis_manager.pop_activity_batch(100)
+                if batch:
+                    logger.debug(f"Flushing {len(batch)} activity events to DB.")
+                    async with AsyncSessionLocal() as session:
+                        for event in batch:
+                            log = ActivityLog(
+                                action_type=event.get("action_type", "unknown"),
+                                device_id=event.get("device_id"),
+                                description=event.get("description"),
+                                timestamp=datetime.fromisoformat(event["timestamp"]) if "timestamp" in event else datetime.utcnow()
+                            )
+                            session.add(log)
+                        await session.commit()
+            
+            await asyncio.sleep(1) # Flush every second
+        except asyncio.CancelledError:
+            break
+        except Exception as exc:
+            logger.error(f"Activity Batch Flusher error: {exc}")
+            await asyncio.sleep(5)
 
 
 # ── Redis listener (asyncio.Task) ─────────────────────────────────────────────

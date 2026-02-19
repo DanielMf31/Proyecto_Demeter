@@ -39,15 +39,22 @@ class RedisManager:
             await self.connect()
         return self.redis
 
-    # --- A. Device State (Persistent) ---
+    # --- A. Device State (Persistent & Cache) ---
     async def set_device_state(self, device_id: int, state: bool):
-        """Sets the ON/OFF state of a device."""
+        """Sets the ON/OFF state of a device (Persistent)."""
         if not self.redis: return
         key = f"device:{device_id}:state"
         value = "ON" if state else "OFF"
         await self.redis.set(key, value)
         # Also publish event
         await self.publish_event("state_change", {"device_id": device_id, "state": value})
+
+    async def cache_device_state(self, device_id: int, state: bool, ttl: int = 60):
+        """Caches intended device state for a short period (Default 60s)."""
+        if not self.redis: return
+        key = f"demeter:cache:device:{device_id}"
+        value = "ON" if state else "OFF"
+        await self.redis.setex(key, ttl, value)
 
     async def get_device_state(self, device_id: int) -> bool:
         """Gets the device state, defaults to False (OFF) if not set."""
@@ -73,7 +80,22 @@ class RedisManager:
             return json.loads(data)
         return None
 
-    # --- C. Pub/Sub System ---
+    # --- C. Event Batching (for ActivityLog) ---
+    async def push_activity_event(self, event: dict):
+        """Pushes an activity event to a Redis list for batch processing."""
+        if not self.redis: return
+        await self.redis.lpush("demeter:activity:batch", json.dumps(event))
+
+    async def pop_activity_batch(self, count: int = 100) -> list:
+        """Pops a batch of activity events from the Redis list."""
+        if not self.redis: return []
+        pipe = self.redis.pipeline()
+        pipe.lrange("demeter:activity:batch", -count, -1)
+        pipe.ltrim("demeter:activity:batch", 0, -(count + 1))
+        results = await pipe.execute()
+        return [json.loads(e) for e in (results[0] if results else [])]
+
+    # --- D. Pub/Sub System ---
     async def publish_event(self, event_type: str, payload: dict):
         """Publishes an event to the 'iot_events' channel."""
         if not self.redis: return
@@ -93,6 +115,7 @@ class RedisManager:
             logger.error(f"PubSub error: {e}")
         finally:
             await pubsub.unsubscribe("iot_events")
+            logger.info("PubSub unsubscribed.")
 
 # Singleton Instance
 redis_manager = RedisManager()

@@ -27,6 +27,7 @@ Ventajas sobre WS desde el Frontend:
 
 import json
 import logging
+from datetime import datetime
 from fastapi import APIRouter, HTTPException, status
 from pydantic import TypeAdapter, ValidationError
 
@@ -107,7 +108,20 @@ async def post_command(body: dict) -> dict:
     await redis_manager.redis.publish(REDIS_CHANNEL, payload_json)
     logger.debug(f"Publicado en Redis [{REDIS_CHANNEL}]: {payload_json}")
 
-    # ── 3. Informar al frontend si la Raspberry está conectada ───────────────
+    # ── 3. Caché de Estado y Registro de Actividad (Batch) ────────────────────
+    if cmd_type == "set_gpio":
+        # Guardamos en caché por 60s
+        await redis_manager.cache_device_state(cmd.pin, bool(cmd.value)) # type: ignore[attr-defined]
+        
+        # Encolamos para guardado por lotes en DB (ActivityLog)
+        await redis_manager.push_activity_event({
+            "action_type": "button_press",
+            "device_id": cmd.pin, # Por ahora usamos pin como device_id simplificado
+            "description": f"Manual toggle Node:{cmd.target_id} Pin:{cmd.pin} -> {cmd.value}", # type: ignore[attr-defined]
+            "timestamp": datetime.utcnow().isoformat()
+        })
+
+    # ── 4. Informar al frontend si la Raspberry está conectada ───────────────
     gateway_online = registry.is_connected(GATEWAY_ID)
     if not gateway_online:
         logger.warning(f"Comando publicado pero la Raspberry no está conectada.")
