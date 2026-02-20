@@ -4,11 +4,6 @@ pydantic-settings
 python-dotenv
 pyserial>=3.5
 
-# --- GUI & Data ---
-# Note: Tkinter must be installed via apt (python3-tk) on Linux/RPi
-pillow>=10.0
-pandas>=2.0
-
 # --- Testing ---
 pytest>=7.4.3
  pytest-mock
@@ -25,7 +20,6 @@ pytest>=7.4.3
 textual
 pyserial-asyncio
 pydantic
-customtkinter
 aiosqlite
 numpy
 fastapi

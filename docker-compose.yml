@@ -19,3 +19,56 @@ services:
       - "${SERIAL_PORT_HOST:-/dev/ttyS0}:/dev/serial0"
     restart: always
     network_mode: "host"
+
+  redis:
+    image: redis:alpine
+    container_name: demeter-redis
+    ports:
+      - "6380:6379"
+    restart: always
+    networks:
+      - demeter-net
+
+  api:
+    build:
+      context: .
+      dockerfile: Software/Servidor/docker/backend/Dockerfile
+    container_name: demeter-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - shared_data:/app/shared
+      - ./Software/Common:/app/Software/Common
+      - ./Software/Servidor/Backend:/app/Software/Servidor/Backend
+    environment:
+      - REDIS_URL=redis://demeter-redis:6379/0
+    depends_on:
+      - redis
+    restart: always
+    networks:
+      - demeter-net
+
+  math-worker:
+    build:
+      context: .
+      dockerfile: Software/Servidor/docker/backend/Dockerfile
+    container_name: demeter-math-worker
+    command: rq worker demeter_tasks --url redis://demeter-redis:6379/0
+    volumes:
+      - shared_data:/app/shared
+      - ./Software/Common:/app/Software/Common
+      - ./Software/Servidor/Backend:/app/Software/Servidor/Backend
+    environment:
+      - REDIS_URL=redis://demeter-redis:6379/0
+    depends_on:
+      - redis
+    restart: always
+    networks:
+      - demeter-net
+
+networks:
+  demeter-net:
+    driver: bridge
+
+volumes:
+  shared_data:

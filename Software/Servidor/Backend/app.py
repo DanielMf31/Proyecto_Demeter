@@ -9,6 +9,7 @@ from API.routers.system_router import router as system_router
 from API.routers.ws_router import router as ws_router
 from API.routers.command_router import router as command_router
 from API.routers.discovery_router import router as discovery_router
+from API.routers.analysis_router import router as analysis_router
 from WS_Manager.dispatcher import start_redis_listener, start_activity_batch_flusher
 from BD.init_db import init_tables
 
@@ -84,6 +85,11 @@ def create_application() -> FastAPI:
         discovery_router,
         prefix=f"{settings.API_PREFIX}",
         tags=["Discovery"],
+    )
+    application.include_router(
+        analysis_router,
+        prefix=f"{settings.API_PREFIX}/analysis",
+        tags=["Analytics"],
     )
 
     return application

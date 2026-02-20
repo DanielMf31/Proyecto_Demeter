@@ -38,7 +38,7 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
             headerName: 'VALVE_STATE',
             flex: 1,
             cellRenderer: (p: any) => (
-                <span className={`px-1 font-mono text-[10px] font-black ${p.value ? 'text-green-600' : 'text-slate-400'
+                <span className={`px-2 py-0.5 font-mono text-xs font-black border-2 ${p.value ? 'bg-green-100 text-green-700 border-green-300' : 'bg-slate-100 text-slate-400 border-slate-200'
                     }`}>
                     {p.value ? '[ ACTIVE ]' : '[ CLOSED ]'}
                 </span>
@@ -52,20 +52,20 @@ export const DataTable: React.FC<DataTableProps> = ({ data }) => {
     }), []);
 
     return (
-        <div className="bg-white border border-slate-300 rounded-none overflow-hidden">
-            <div className="bg-slate-100 px-3 py-1.5 border-b border-slate-300 flex items-center justify-between">
-                <h3 className="text-[10px] font-mono font-black text-slate-600 uppercase tracking-widest">Raw Data Stream</h3>
-                <span className="text-[9px] font-mono text-slate-400">Total Records: {data.length}</span>
+        <div className="bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-800 rounded-none overflow-hidden">
+            <div className="bg-slate-100 dark:bg-slate-800 px-5 py-3 border-b-2 border-slate-300 dark:border-slate-800 flex items-center justify-between">
+                <h3 className="text-xs font-mono font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">Memory_Buffer_Data_Stream</h3>
+                <span className="text-xs font-mono text-slate-400">TOTAL_RECORDS: {data.length}</span>
             </div>
-            <div className="ag-theme-balham w-full h-[300px]">
+            <div className="ag-theme-balham w-full h-[500px]">
                 <AgGridReact
                     rowData={data}
                     columnDefs={columnDefs}
                     defaultColDef={defaultColDef}
                     pagination={true}
-                    paginationPageSize={20}
-                    rowHeight={28}
-                    headerHeight={32}
+                    paginationPageSize={10}
+                    rowHeight={40}
+                    headerHeight={44}
                 />
             </div>
         </div>

@@ -39,67 +39,67 @@ export const ExperimentDashboard: React.FC = () => {
             <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
                 <TopBar />
 
-                <main className="flex-1 p-6 overflow-y-auto selection:bg-blue-100 dark:selection:bg-blue-900/30">
-                    <div className="max-w-7xl mx-auto space-y-6">
+                <main className="flex-1 p-10 overflow-y-auto selection:bg-blue-100 dark:selection:bg-blue-900/30">
+                    <div className="max-w-[1600px] mx-auto space-y-10">
 
                         {/* Status Header Strip */}
-                        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
-                            <div className="flex items-center gap-4">
-                                <div className="bg-slate-100 dark:bg-slate-900 p-2 border border-slate-300 dark:border-slate-800">
-                                    <Database size={24} className="text-slate-600 dark:text-slate-400" />
+                        <div className="flex items-center justify-between border-b-2 border-slate-200 dark:border-slate-800 pb-6">
+                            <div className="flex items-center gap-6">
+                                <div className="bg-slate-100 dark:bg-slate-900 p-3 border border-slate-300 dark:border-slate-800">
+                                    <Database size={32} className="text-slate-600 dark:text-slate-400" />
                                 </div>
                                 <div>
-                                    <div className="flex items-center gap-2">
-                                        <h1 className="text-xl font-mono font-black tracking-tight text-slate-900 dark:text-white uppercase">
+                                    <div className="flex items-center gap-3">
+                                        <h1 className="text-3xl font-mono font-black tracking-tight text-slate-900 dark:text-white uppercase">
                                             {MOCK_SUMMARY.nombre}
                                         </h1>
-                                        <span className="px-1.5 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 font-mono text-[9px] font-bold border border-green-300 dark:border-green-800">RUNNING</span>
+                                        <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 font-mono text-xs font-bold border border-green-300 dark:border-green-800">RUNNING</span>
                                     </div>
-                                    <div className="flex items-center gap-4 text-[10px] font-mono text-slate-500 mt-1 uppercase">
+                                    <div className="flex items-center gap-6 text-sm font-mono text-slate-500 mt-2 uppercase">
                                         <span>Ref_ID: {MOCK_SUMMARY.id}</span>
                                         <span>Start_Sync: {MOCK_SUMMARY.fecha_inicio}</span>
-                                        <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400"><Info size={10} /> Kernel_v4.2.1-lts</span>
+                                        <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400"><Info size={14} /> Kernel_v4.2.1-lts</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="hidden md:flex gap-1">
-                                <button className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-[10px] font-mono font-bold hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-300 transition-colors">
-                                    <Download size={12} /> EXPORT_RAW
+                            <div className="hidden xl:flex gap-2">
+                                <button className="flex items-center gap-3 px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-mono font-bold hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-300 transition-colors">
+                                    <Download size={16} /> EXPORT_RAW_DATA
                                 </button>
-                                <button className="flex items-center gap-2 px-3 py-1.5 bg-slate-900 dark:bg-blue-600 text-white text-[10px] font-mono font-bold hover:bg-black dark:hover:bg-blue-700 transition-colors border border-slate-900 dark:border-blue-700">
-                                    <FileArchive size={12} /> DOWNLOAD_BUNDLE
+                                <button className="flex items-center gap-3 px-5 py-2.5 bg-slate-900 dark:bg-blue-600 text-white text-xs font-mono font-bold hover:bg-black dark:hover:bg-blue-700 transition-colors border border-slate-900 dark:border-blue-700">
+                                    <FileArchive size={16} /> DOWNLOAD_BUNDLE
                                 </button>
                             </div>
                         </div>
 
                         {/* Summary View KPIs (Only in DATAVIZ) */}
                         {currentView === 'DATAVIZ' && (
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                                <div className="border border-slate-300 dark:border-slate-800 p-3 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div className="border-2 border-slate-300 dark:border-slate-800 p-6 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
                                     <div>
-                                        <p className="text-[10px] font-mono font-bold text-slate-500 uppercase">AVG_TEMP</p>
-                                        <h3 className="text-xl font-mono font-black text-slate-900 dark:text-white">24.85<span className="text-sm">°C</span></h3>
+                                        <p className="text-xs font-mono font-bold text-slate-500 uppercase mb-1">AVG_TEMPERATURE</p>
+                                        <h3 className="text-4xl font-mono font-black text-slate-900 dark:text-white">24.85<span className="text-xl">°C</span></h3>
                                     </div>
-                                    <div className="text-[10px] font-mono text-green-600 bg-green-50 dark:bg-green-900/10 px-1 border border-green-200 dark:border-green-800">+2.4%</div>
+                                    <div className="text-xs font-mono text-green-600 bg-green-50 dark:bg-green-900/10 px-2 py-0.5 border border-green-200 dark:border-green-800">+2.4%</div>
                                 </div>
-                                <div className="border border-slate-300 dark:border-slate-800 p-3 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
+                                <div className="border-2 border-slate-300 dark:border-slate-800 p-6 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
                                     <div>
-                                        <p className="text-[10px] font-mono font-bold text-slate-500 uppercase">MAX_HUM</p>
-                                        <h3 className="text-xl font-mono font-black text-slate-900 dark:text-white">68.21<span className="text-sm">%</span></h3>
+                                        <p className="text-xs font-mono font-bold text-slate-500 uppercase mb-1">MAX_HUMIDITY</p>
+                                        <h3 className="text-4xl font-mono font-black text-slate-900 dark:text-white">68.21<span className="text-xl">%</span></h3>
                                     </div>
-                                    <div className="text-[10px] font-mono text-red-600 bg-red-50 dark:bg-red-900/10 px-1 border border-red-200 dark:border-red-800">-1.2%</div>
+                                    <div className="text-xs font-mono text-red-600 bg-red-50 dark:bg-red-900/10 px-2 py-0.5 border border-red-200 dark:border-red-800">-1.2%</div>
                                 </div>
-                                <div className="border border-slate-300 dark:border-slate-800 p-3 bg-slate-50 dark:bg-slate-900">
-                                    <p className="text-[10px] font-mono font-bold text-slate-500 uppercase">VALVE_SYSTEM</p>
-                                    <h3 className="text-xl font-mono font-black text-slate-900 dark:text-white uppercase">STABLE_v1</h3>
+                                <div className="border-2 border-slate-300 dark:border-slate-800 p-6 bg-slate-50 dark:bg-slate-900">
+                                    <p className="text-xs font-mono font-bold text-slate-500 uppercase mb-1">VALVE_SYSTEM_STATUS</p>
+                                    <h3 className="text-4xl font-mono font-black text-slate-900 dark:text-white uppercase">STABLE_v1</h3>
                                 </div>
-                                <div className="border border-slate-300 dark:border-slate-800 p-3 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
+                                <div className="border-2 border-slate-300 dark:border-slate-800 p-6 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
                                     <div>
-                                        <p className="text-[10px] font-mono font-bold text-slate-500 uppercase">ACTIVE_ALERTS</p>
-                                        <h3 className="text-xl font-mono font-black text-red-700 dark:text-red-500">0{MOCK_SUMMARY.alertas_activas}</h3>
+                                        <p className="text-xs font-mono font-bold text-slate-500 uppercase mb-1">ACTIVE_ALERTS</p>
+                                        <h3 className="text-4xl font-mono font-black text-red-700 dark:text-red-500">0{MOCK_SUMMARY.alertas_activas}</h3>
                                     </div>
-                                    <div className="w-2 h-2 bg-red-600 animate-pulse"></div>
+                                    <div className="w-4 h-4 bg-red-600 animate-pulse"></div>
                                 </div>
                             </div>
                         )}
@@ -115,9 +115,9 @@ export const ExperimentDashboard: React.FC = () => {
             {/* AI Call-to-Action */}
             <button
                 onClick={toggleAISidebar}
-                className="fixed bottom-6 right-6 flex items-center gap-2 px-4 py-3 bg-slate-900 dark:bg-blue-600 text-white font-mono font-bold text-[10px] border-t-2 border-blue-500 dark:border-white shadow-2xl hover:bg-black dark:hover:bg-blue-700 transition-all z-40 uppercase tracking-widest"
+                className="fixed bottom-10 right-10 flex items-center gap-3 px-8 py-5 bg-slate-900 dark:bg-blue-600 text-white font-mono font-bold text-sm border-t-4 border-blue-500 dark:border-white shadow-2xl hover:bg-black dark:hover:bg-blue-700 transition-all z-40 uppercase tracking-widest"
             >
-                <Sparkles size={14} />
+                <Sparkles size={20} />
                 Initialize_AI_Core
             </button>
 

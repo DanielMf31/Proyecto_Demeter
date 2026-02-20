@@ -8,3 +8,7 @@ asyncpg
 databases[postgresql]
 python-multipart
 requests
+rq
+pandas
+matplotlib
+openpyxl
