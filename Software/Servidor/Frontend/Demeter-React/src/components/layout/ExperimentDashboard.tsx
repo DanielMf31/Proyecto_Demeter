@@ -13,11 +13,16 @@ import { AISidebar } from '../ai/AISidebar';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { useUIStore } from '../../store/useUIStore';
-import { generateMockSensorData, MOCK_SUMMARY } from '../../mocks/sensorData';
+import { MOCK_SUMMARY } from '../../mocks/sensorData';
+import { apiService } from '../../services/apiService';
+import { useTelemetry } from '../../hooks/useTelemetry';
 
 export const ExperimentDashboard: React.FC = () => {
-    const [data] = useState(generateMockSensorData());
     const { toggleAISidebar, currentView } = useUIStore();
+    const [isGenerating, setIsGenerating] = useState(false);
+
+    // Live Telemetry Hook
+    const { data, isConnected } = useTelemetry(50); // Keep last 50 points
 
     const handleExportRawData = () => {
         // Mock CSV generation
@@ -35,9 +40,40 @@ export const ExperimentDashboard: React.FC = () => {
         document.body.removeChild(link);
     };
 
-    const handleDownloadBundle = () => {
-        // Placeholder for polling the Background Worker (RQ) API
-        alert("BACKGROUND WORKER TRIGGERED: The API is currently generating the ZIP bundle with Excel and High-Res PNGs. This feature will be linked to the backend soon.");
+    const handleDownloadBundle = async () => {
+        if (isGenerating) return;
+        setIsGenerating(true);
+        try {
+            const res = await apiService.generateAnalysisBundle(1);
+            if (!res || !res.task_id) {
+                alert("Failed to start analysis task on the backend.");
+                setIsGenerating(false);
+                return;
+            }
+
+            console.log("Background Task Started:", res.task_id);
+            const interval = setInterval(async () => {
+                const statusRes = await apiService.checkAnalysisStatus(res.task_id);
+                if (statusRes) {
+                    if (statusRes.status === 'finished' && statusRes.result) {
+                        clearInterval(interval);
+                        setIsGenerating(false);
+                        const downloadUrl = apiService.getDownloadUrl(statusRes.result.filename);
+                        // Trigger download
+                        window.location.href = downloadUrl;
+                    } else if (statusRes.status === 'failed') {
+                        clearInterval(interval);
+                        setIsGenerating(false);
+                        alert("Background Worker failed: " + statusRes.error);
+                    }
+                }
+            }, 2000);
+
+        } catch (error) {
+            console.error(error);
+            setIsGenerating(false);
+            alert("Error trying to connect with backend worker.");
+        }
     };
 
     const renderViewContent = () => {
@@ -74,7 +110,9 @@ export const ExperimentDashboard: React.FC = () => {
                                         <h1 className="text-3xl font-mono font-black tracking-tight text-slate-900 dark:text-white uppercase">
                                             {MOCK_SUMMARY.nombre}
                                         </h1>
-                                        <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 font-mono text-xs font-bold border border-green-300 dark:border-green-800">RUNNING</span>
+                                        <span className={`px-2 py-0.5 font-mono text-xs font-bold border ${isConnected ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 border-green-300 dark:border-green-800' : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 border-red-300 dark:border-red-800'}`}>
+                                            {isConnected ? 'RUNNING' : 'OFFLINE'}
+                                        </span>
                                     </div>
                                     <div className="flex items-center gap-6 text-sm font-mono text-slate-500 mt-2 uppercase">
                                         <span>Ref_ID: {MOCK_SUMMARY.id}</span>
@@ -93,9 +131,13 @@ export const ExperimentDashboard: React.FC = () => {
                                 </button>
                                 <button
                                     onClick={handleDownloadBundle}
-                                    className="flex items-center gap-3 px-5 py-2.5 bg-slate-900 dark:bg-blue-600 text-white text-xs font-mono font-bold hover:bg-black dark:hover:bg-blue-700 transition-colors border border-slate-900 dark:border-blue-700"
+                                    disabled={isGenerating}
+                                    className={`flex items-center gap-3 px-5 py-2.5 text-white text-xs font-mono font-bold transition-colors border ${isGenerating
+                                        ? 'bg-slate-700 border-slate-700 cursor-not-allowed animate-pulse'
+                                        : 'bg-slate-900 border-slate-900 dark:bg-blue-600 dark:border-blue-700 hover:bg-black dark:hover:bg-blue-700'
+                                        }`}
                                 >
-                                    <FileArchive size={16} /> DOWNLOAD_BUNDLE
+                                    <FileArchive size={16} /> {isGenerating ? 'GENERATING BUNDLE...' : 'DOWNLOAD_BUNDLE'}
                                 </button>
                             </div>
                         </div>
