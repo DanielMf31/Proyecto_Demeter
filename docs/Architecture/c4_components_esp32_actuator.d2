@@ -1,0 +1,54 @@
+direction: right
+vars: {
+  d2-config: {
+    layout-engine: dagre
+  }
+}
+style: {
+  stroke: "#2b6cb0"
+  fill: "white"
+}
+
+title: Diagrama C4 Nivel 3 - Componentes (Nodo Actuador ESP32)
+
+"Nodo Gateway (RF)": {
+  shape: rectangle
+  style: { fill: "#e9c46a" }
+  description: "Trámites RF"
+}
+
+"Nodo Actuador (ESP32)": {
+  style: {
+    fill: "#ebf8ff"
+    stroke: "#2b6cb0"
+    stroke-dash: 5
+    stroke-width: 2
+  }
+
+  "Receptor de Comandos": {
+    shape: rectangle
+    description: "Filtra comandos setGPIO destinados a este nodo"
+  }
+
+  "Controlador GPIO": {
+    shape: rectangle
+    description: "Mueve los pines y actúa en Bombas o Motores de ventana"
+  }
+
+  "Generador de Reportes": {
+    shape: rectangle
+    description: "Envía pinreport y systemreport tras cambio de estado o polling"
+  }
+}
+
+"Sistema Eléctrico (Relés)": {
+  shape: cylinder
+  style: { fill: "#e76f51"; font-color: white }
+}
+
+"Nodo Gateway (RF)" -> "Receptor de Comandos": "Oye trama Comando: setGPIO"
+"Receptor de Comandos" -> "Controlador GPIO": "Solicita cierre/apertura HW"
+"Controlador GPIO" -> "Sistema Eléctrico (Relés)": "Estado Eléctrico"
+
+"Controlador GPIO" -> "Generador de Reportes": "Notifica acción exitosa"
+"Generador de Reportes" -> "Nodo Gateway (RF)": "Transmite: pinreport / systemreport"

@@ -1,0 +1,82 @@
+direction: right
+vars: {
+  d2-config: {
+    layout-engine: dagre
+  }
+}
+
+title: Diagrama C4 Nivel 2 - Contenedores
+
+"Usuario Investigador": {
+  shape: person
+  style: { fill: "#f4a261" }
+}
+
+"Nodos ESP32": {
+  shape: rectangle
+  style: { fill: "#e9c46a" }
+  tooltip: "Sensores y Actuadores en campo"
+}
+
+"Red Local / WiFi": {
+  shape: cylinder
+  style: { fill: transparent; stroke-dash: 5 }
+  
+  "Raspberry Pi (Gateway)": {
+    shape: rectangle
+    style: { fill: "#2a9d8f"; font-color: white }
+    tooltip: "Actúa como puente de red y procesador perimetral local"
+    
+    "Servicio de Enrutamiento UART/TCP": {
+        shape: rectangle
+        style: { fill: "#264653"; font-color: white }
+    }
+  }
+}
+
+"Servidor Demeter (Cloud / Localhost)": {
+  style: { fill: transparent; stroke-dash: 5 }
+  
+  "Demeter React (Frontend)": {
+    shape: rectangle
+    style: { fill: "#2a9d8f"; font-color: white }
+    tooltip: "Aplicación SPA servida vía Vite"
+  }
+  
+  "Demeter API (FastAPI)": {
+    shape: rectangle
+    style: { fill: "#264653"; font-color: white }
+    tooltip: "Lógica de negocio, autenticación y endpoints"
+  }
+  
+  "Demeter Worker (RQ)": {
+    shape: rectangle
+    style: { fill: "#e76f51"; font-color: white }
+    tooltip: "Procesos en segundo plano interactuando con Pandas"
+  }
+  
+  "Redis (Cache & Queue)": {
+    shape: cylinder
+    style: { fill: "#d62828"; font-color: white }
+    tooltip: "Gestor de Cola (DB 1) y Pub/Sub (DB 0)"
+  }
+  
+  "PostgreSQL (Database)": {
+    shape: cylinder
+    style: { fill: "#0077b6"; font-color: white }
+    tooltip: "Almacenamiento persistente relacional y series temporales"
+  }
+}
+
+# Relaciones
+"Usuario Investigador" -> "Servidor Demeter (Cloud / Localhost)"."Demeter React (Frontend)": Interactúa con Dashboard
+"Servidor Demeter (Cloud / Localhost)"."Demeter React (Frontend)" -> "Servidor Demeter (Cloud / Localhost)"."Demeter API (FastAPI)": Llamadas API (REST / JSON)
+
+"Nodos ESP32" -> "Red Local / WiFi"."Raspberry Pi (Gateway)"."Servicio de Enrutamiento UART/TCP": Envía datos crudos
+"Red Local / WiFi"."Raspberry Pi (Gateway)"."Servicio de Enrutamiento UART/TCP" -> "Servidor Demeter (Cloud / Localhost)"."Demeter API (FastAPI)": Comunicación TCP / WS en vivo
+
+"Servidor Demeter (Cloud / Localhost)"."Demeter API (FastAPI)" -> "Servidor Demeter (Cloud / Localhost)"."PostgreSQL (Database)": Lee/Escribe vía SQLAlchemy
+"Servidor Demeter (Cloud / Localhost)"."Demeter API (FastAPI)" -> "Servidor Demeter (Cloud / Localhost)"."Redis (Cache & Queue)": Encola tareas de exportación
+
+"Servidor Demeter (Cloud / Localhost)"."Redis (Cache & Queue)" -> "Servidor Demeter (Cloud / Localhost)"."Demeter Worker (RQ)": Delega mensajes/jobs
+"Servidor Demeter (Cloud / Localhost)"."Demeter Worker (RQ)" -> "Servidor Demeter (Cloud / Localhost)"."PostgreSQL (Database)": Consulta mediciones masivas para análisis

@@ -66,5 +66,28 @@ export const apiService = {
 
     getDownloadUrl(filename: string): string {
         return `${API_BASE}/analysis/download/${filename}`;
+    },
+
+    async fetchNodeHistory(nodeId: number, days: number = 30): Promise<any[] | null> {
+        try {
+            const token = localStorage.getItem('demeter_token');
+            const headers: Record<string, string> = {};
+
+            // Si el token existe (el usuario hizo login), se adjunta
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const response = await fetch(`${API_BASE}/history/node/${nodeId}?days=${days}`, {
+                method: 'GET',
+                headers: headers
+            });
+
+            if (!response.ok) throw new Error("Failed to fetch node history");
+            return await response.json();
+        } catch (e) {
+            console.error(e);
+            return null;
+        }
     }
 };

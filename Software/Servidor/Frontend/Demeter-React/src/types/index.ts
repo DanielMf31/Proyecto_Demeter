@@ -2,7 +2,8 @@ export interface SensorData {
     timestamp: string;
     temperatura: number;
     humedad: number;
-    estado_riego: boolean;
+    estado_riego?: boolean;
+    vpd?: number;
 }
 
 export interface ExperimentSummary {
@@ -12,7 +13,7 @@ export interface ExperimentSummary {
     alertas_activas: number;
 }
 
-export type MetricType = 'temperatura' | 'humedad';
+export type MetricType = 'temperatura' | 'humedad' | 'vpd';
 export type ViewType = 'DATAVIZ' | 'MANUAL' | 'PLANNER';
 
 // ─────────────────────────────────────────────────────────────────────────────

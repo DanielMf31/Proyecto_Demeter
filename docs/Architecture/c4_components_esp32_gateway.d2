@@ -1,0 +1,56 @@
+direction: right
+vars: {
+  d2-config: {
+    layout-engine: dagre
+  }
+}
+style: {
+  stroke: "#2b6cb0"
+  fill: "white"
+}
+
+title: Diagrama C4 Nivel 3 - Componentes (Nodo Gateway ESP32)
+
+"Raspberry Pi (UART)": {
+  shape: rectangle
+  style: { fill: "#2a9d8f"; font-color: white }
+}
+
+"Nodo Gateway (ESP32)": {
+  style: {
+    fill: "#ebf8ff"
+    stroke: "#2b6cb0"
+    stroke-dash: 5
+    stroke-width: 2
+  }
+
+  "Módulo UART": {
+    shape: rectangle
+    description: "Recibe y envía tramas crudas a la Raspberry"
+  }
+
+  "Motor Enrutador RF": {
+    shape: rectangle
+    description: "Parsea setGPIO y GetSensor hacia ID específico en malla RF"
+  }
+
+  "Módulo de Radio (RF24)": {
+    shape: rectangle
+    description: "Hardware antena NRF24L01 / Emisión Malla"
+  }
+}
+
+"Nodos (Sensores/Actuadores)": {
+  shape: rectangle
+  style: { fill: "#e9c46a" }
+}
+
+"Raspberry Pi (UART)" -> "Módulo UART": "Envía Comandos (GetSensor / setGPIO)"
+"Módulo UART" -> "Motor Enrutador RF": "Aplica trama al destino RF"
+"Motor Enrutador RF" -> "Módulo de Radio (RF24)": "Escribe en Antena"
+"Módulo de Radio (RF24)" -> "Nodos (Sensores/Actuadores)": "Transmite tramas inalámbricas"
+
+"Nodos (Sensores/Actuadores)" -> "Módulo de Radio (RF24)": "Recibe pinreport / datos"
+"Módulo de Radio (RF24)" -> "Motor Enrutador RF": "Construye paquete"
+"Motor Enrutador RF" -> "Módulo UART": "Escribe en bus Serial"
+"Módulo UART" -> "Raspberry Pi (UART)": "Llega respuesta serializada"

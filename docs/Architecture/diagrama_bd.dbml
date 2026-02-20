@@ -1,0 +1,33 @@
+Table usuarios {
+  id uuid [pk, default: `uuid.uuid4()`, note: 'Clave Primaria']
+  username varchar [unique, not null, note: 'Nombre de usuario']
+  password_hash varchar [not null, note: 'Hash bcrypt']
+  role varchar [default: 'user', note: 'Rol del usuario (admin, user)']
+  is_active boolean [default: true]
+}
+
+Table plantas {
+  id integer [pk, increment, note: 'ID de la Planta/Nodo']
+  name varchar [not null, note: 'Nombre o Alias de la Planta']
+  location varchar [note: 'Ubicación física']
+}
+
+Table mediciones {
+  id integer [pk, increment]
+  timestamp datetime [not null, note: 'Fecha y hora de la medición']
+  node_id integer [not null, ref: > plantas.id, note: 'FK a la planta']
+  temperatura_aire float [not null, note: 'Temp en grados Celsius']
+  humedad_relativa float [not null, note: 'HR en porcentaje']
+  humedad_suelo float [note: 'Humedad del suelo (si aplica)']
+  vpd_calculado float [note: 'Vapor Pressure Deficit (Opcional en DB, calculado frecuentemente)']
+}
+
+Table trabajos_exportacion {
+  id uuid [pk, default: `uuid.uuid4()`, note: 'ID del Job en RQ']
+  requested_by uuid [not null, ref: > usuarios.id, note: 'Usuario que solicitó la exportación']
+  status varchar [not null, default: 'pending', note: 'Estados: pending, processing, completed, failed']
+  created_at datetime [default: `now()`]
+  completed_at datetime [note: 'Timestamp de finalización']
+  file_path varchar [note: 'Ruta absoluta en el volumen compartido al ZIP generado']
+  error_logs text [note: 'Trazas de error si el worker falla']
+}

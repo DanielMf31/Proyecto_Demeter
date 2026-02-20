@@ -26,8 +26,10 @@ services:
       - .env
     volumes:
       - shared_data:/app/shared
+      - export_data:/app/exports
     environment:
       - REDIS_URL=redis://demeter-redis:6379/0
+      - RQ_REDIS_URL=redis://demeter-redis:6379/1
       - DATABASE_URL=postgresql://postgres:postgres_local_pass@demeter-db:5432/demeter_db
     depends_on:
       - redis
@@ -35,19 +37,20 @@ services:
     networks:
       - demeter-net
 
-  # 3. BACKGROUND WORKER (Math/Analytics)
   math-worker:
     build:
       context: .
       dockerfile: Software/Servidor/docker/backend/Dockerfile
     container_name: demeter-math-worker
-    command: rq worker demeter_tasks --url redis://demeter-redis:6379/0
+    command: rq worker demeter_tasks --url redis://demeter-redis:6379/1
     env_file:
       - .env
     volumes:
       - shared_data:/app/shared
+      - export_data:/app/exports
     environment:
       - REDIS_URL=redis://demeter-redis:6379/0
+      - RQ_REDIS_URL=redis://demeter-redis:6379/1
       - DATABASE_URL=postgresql://postgres:postgres_local_pass@demeter-db:5432/demeter_db
     depends_on:
       - redis
@@ -82,3 +85,4 @@ networks:
 volumes:
   shared_data:
   postgres_data:
+  export_data:

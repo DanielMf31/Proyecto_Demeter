@@ -12,3 +12,7 @@ rq
 pandas
 matplotlib
 openpyxl
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt
+seaborn

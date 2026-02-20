@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Database,
     Download,
     FileArchive,
     Info,
-    Sparkles
+    Sparkles,
+    Activity
 } from 'lucide-react';
 import { ScientificDataVisualizer } from '../dashboard/ScientificDataVisualizer';
 import { ManualControl } from '../dashboard/ManualControl';
@@ -12,85 +13,84 @@ import { SequencePlanner } from '../dashboard/SequencePlanner';
 import { AISidebar } from '../ai/AISidebar';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
+import { ExportDrawer } from './ExportDrawer';
 import { useUIStore } from '../../store/useUIStore';
 import { MOCK_SUMMARY } from '../../mocks/sensorData';
-import { apiService } from '../../services/apiService';
 import { useTelemetry } from '../../hooks/useTelemetry';
+import { apiService } from '../../services/apiService';
+import { SensorData } from '../../types';
 
 export const ExperimentDashboard: React.FC = () => {
     const { toggleAISidebar, currentView } = useUIStore();
-    const [isGenerating, setIsGenerating] = useState(false);
+    const [isExportDrawerOpen, setIsExportDrawerOpen] = useState(false);
+    const [selectedNode, setSelectedNode] = useState<number>(1);
+    const [historicalData, setHistoricalData] = useState<SensorData[]>([]);
+    const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
-    // Live Telemetry Hook
-    const { data, isConnected } = useTelemetry(50); // Keep last 50 points
+    // Live Telemetry Hook (still running for status)
+    const { isConnected } = useTelemetry(50);
+
+    // Fetch 30-day metrics on mount and when node changes
+    useEffect(() => {
+        setIsLoadingHistory(true);
+        apiService.fetchNodeHistory(selectedNode, 30).then(res => {
+            if (res) {
+                const processed = res.map(row => {
+                    const T = row.temperature;
+                    const RH = row.humidity;
+                    // Calculate VPD
+                    const svp = 0.61078 * Math.exp((17.27 * T) / (T + 237.3));
+                    const avp = svp * (RH / 100.0);
+                    const vpd = svp - avp;
+
+                    return {
+                        timestamp: row.timestamp,
+                        temperatura: T,
+                        humedad: RH,
+                        vpd: vpd
+                    } as SensorData;
+                });
+                setHistoricalData(processed);
+            }
+            setIsLoadingHistory(false);
+        });
+    }, [selectedNode]);
 
     const handleExportRawData = () => {
         // Mock CSV generation
-        const headers = ['timestamp', 'temperatura', 'humedad', 'estado_riego'];
+        const headers = ['timestamp', 'temperatura', 'humedad', 'vpd'];
         const csvContent = "data:text/csv;charset=utf-8,"
             + headers.join(",") + "\n"
-            + data.map(row => `${row.timestamp},${row.temperatura.toFixed(2)},${row.humedad.toFixed(2)},${row.estado_riego}`).join("\n");
+            + historicalData.map(row => `${row.timestamp},${row.temperatura.toFixed(2)},${row.humedad.toFixed(2)},${row.vpd?.toFixed(2) || 0}`).join("\n");
 
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `demeter_raw_telemetry_${Date.now()}.csv`);
+        link.setAttribute("download", `demeter_history_planta_${selectedNode}_${Date.now()}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     };
 
-    const handleDownloadBundle = async () => {
-        if (isGenerating) return;
-        setIsGenerating(true);
-        try {
-            const res = await apiService.generateAnalysisBundle(1);
-            if (!res || !res.task_id) {
-                alert("Failed to start analysis task on the backend.");
-                setIsGenerating(false);
-                return;
-            }
-
-            console.log("Background Task Started:", res.task_id);
-            const interval = setInterval(async () => {
-                const statusRes = await apiService.checkAnalysisStatus(res.task_id);
-                if (statusRes) {
-                    if (statusRes.status === 'finished' && statusRes.result) {
-                        clearInterval(interval);
-                        setIsGenerating(false);
-                        const downloadUrl = apiService.getDownloadUrl(statusRes.result.filename);
-                        // Trigger download
-                        window.location.href = downloadUrl;
-                    } else if (statusRes.status === 'failed') {
-                        clearInterval(interval);
-                        setIsGenerating(false);
-                        alert("Background Worker failed: " + statusRes.error);
-                    }
-                }
-            }, 2000);
-
-        } catch (error) {
-            console.error(error);
-            setIsGenerating(false);
-            alert("Error trying to connect with backend worker.");
-        }
+    const handleOpenExportDrawer = () => {
+        setIsExportDrawerOpen(true);
     };
 
     const renderViewContent = () => {
         switch (currentView) {
             case 'DATAVIZ':
-                return <ScientificDataVisualizer data={data} />;
+                return <ScientificDataVisualizer data={historicalData} />;
             case 'MANUAL':
                 return <ManualControl />;
             case 'PLANNER':
                 return <SequencePlanner />;
             default:
-                return <ScientificDataVisualizer data={data} />;
+                return <ScientificDataVisualizer data={historicalData} />;
         }
     };
 
     return (
-        <div className="flex bg-white dark:bg-slate-950 transition-colors duration-200">
+        <div className="flex bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
             <Sidebar />
 
             <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
@@ -116,7 +116,18 @@ export const ExperimentDashboard: React.FC = () => {
                                     </div>
                                     <div className="flex items-center gap-6 text-sm font-mono text-slate-500 mt-2 uppercase">
                                         <span>Ref_ID: {MOCK_SUMMARY.id}</span>
-                                        <span>Start_Sync: {MOCK_SUMMARY.fecha_inicio}</span>
+                                        <span className="flex items-center gap-2">
+                                            SELECT_NODE:
+                                            <select
+                                                value={selectedNode}
+                                                onChange={(e) => setSelectedNode(Number(e.target.value))}
+                                                className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-bold px-2 py-1 ml-1 outline-none focus:ring-2 focus:ring-blue-500 rounded-none cursor-pointer"
+                                            >
+                                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
+                                                    <option key={n} value={n}>Planta {n}</option>
+                                                ))}
+                                            </select>
+                                        </span>
                                         <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400"><Info size={14} /> Kernel_v4.2.1-lts</span>
                                     </div>
                                 </div>
@@ -127,17 +138,13 @@ export const ExperimentDashboard: React.FC = () => {
                                     onClick={handleExportRawData}
                                     className="flex items-center gap-3 px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-mono font-bold hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-300 transition-colors"
                                 >
-                                    <Download size={16} /> EXPORT_RAW_DATA
+                                    <Download size={16} /> EXPORT_RAW_CSV
                                 </button>
                                 <button
-                                    onClick={handleDownloadBundle}
-                                    disabled={isGenerating}
-                                    className={`flex items-center gap-3 px-5 py-2.5 text-white text-xs font-mono font-bold transition-colors border ${isGenerating
-                                        ? 'bg-slate-700 border-slate-700 cursor-not-allowed animate-pulse'
-                                        : 'bg-slate-900 border-slate-900 dark:bg-blue-600 dark:border-blue-700 hover:bg-black dark:hover:bg-blue-700'
-                                        }`}
+                                    onClick={handleOpenExportDrawer}
+                                    className="flex items-center gap-3 px-5 py-2.5 text-white text-xs font-mono font-bold transition-colors border bg-slate-900 border-slate-900 dark:bg-blue-600 dark:border-blue-700 hover:bg-black dark:hover:bg-blue-700"
                                 >
-                                    <FileArchive size={16} /> {isGenerating ? 'GENERATING BUNDLE...' : 'DOWNLOAD_BUNDLE'}
+                                    <FileArchive size={16} /> DOWNLOAD_BUNDLE
                                 </button>
                             </div>
                         </div>
@@ -145,30 +152,33 @@ export const ExperimentDashboard: React.FC = () => {
                         {/* Summary View KPIs (Only in DATAVIZ) */}
                         {currentView === 'DATAVIZ' && (
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                                <div className="border-2 border-slate-300 dark:border-slate-800 p-6 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
-                                    <div>
-                                        <p className="text-xs font-mono font-bold text-slate-500 uppercase mb-1">AVG_TEMPERATURE</p>
-                                        <h3 className="text-4xl font-mono font-black text-slate-900 dark:text-white">24.85<span className="text-xl">°C</span></h3>
-                                    </div>
-                                    <div className="text-xs font-mono text-green-600 bg-green-50 dark:bg-green-900/10 px-2 py-0.5 border border-green-200 dark:border-green-800">+2.4%</div>
+                                <div className="border border-slate-300 dark:border-slate-800 p-6 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between">
+                                    <p className="text-xs font-mono font-bold text-slate-500 uppercase mb-1 flex items-center gap-2"><Activity size={12} /> DATA_POINTS_LOADED</p>
+                                    <h3 className="text-4xl font-mono font-black text-slate-900 dark:text-white mt-2">
+                                        {isLoadingHistory ? '...' : historicalData.length}
+                                        <span className="text-sm ml-2 text-slate-500 font-normal tracking-tight">/ 30 DAYS</span>
+                                    </h3>
                                 </div>
-                                <div className="border-2 border-slate-300 dark:border-slate-800 p-6 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
-                                    <div>
-                                        <p className="text-xs font-mono font-bold text-slate-500 uppercase mb-1">MAX_HUMIDITY</p>
-                                        <h3 className="text-4xl font-mono font-black text-slate-900 dark:text-white">68.21<span className="text-xl">%</span></h3>
-                                    </div>
-                                    <div className="text-xs font-mono text-red-600 bg-red-50 dark:bg-red-900/10 px-2 py-0.5 border border-red-200 dark:border-red-800">-1.2%</div>
+                                <div className="border border-slate-300 dark:border-slate-800 p-6 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between">
+                                    <p className="text-xs font-mono font-bold text-slate-500 uppercase mb-1">AVG_TEMPERATURE</p>
+                                    <h3 className="text-4xl font-mono font-black text-slate-900 dark:text-white mt-2">
+                                        {isLoadingHistory || !historicalData.length ? '--' : (historicalData.reduce((acc, curr) => acc + curr.temperatura, 0) / historicalData.length).toFixed(1)}
+                                        <span className="text-xl">°C</span>
+                                    </h3>
                                 </div>
-                                <div className="border-2 border-slate-300 dark:border-slate-800 p-6 bg-slate-50 dark:bg-slate-900">
-                                    <p className="text-xs font-mono font-bold text-slate-500 uppercase mb-1">VALVE_SYSTEM_STATUS</p>
-                                    <h3 className="text-4xl font-mono font-black text-slate-900 dark:text-white uppercase">STABLE_v1</h3>
+                                <div className="border border-slate-300 dark:border-slate-800 p-6 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between">
+                                    <p className="text-xs font-mono font-bold text-slate-500 uppercase mb-1">AVG_HUMIDITY</p>
+                                    <h3 className="text-4xl font-mono font-black text-slate-900 dark:text-white mt-2">
+                                        {isLoadingHistory || !historicalData.length ? '--' : (historicalData.reduce((acc, curr) => acc + curr.humedad, 0) / historicalData.length).toFixed(1)}
+                                        <span className="text-xl">%</span>
+                                    </h3>
                                 </div>
-                                <div className="border-2 border-slate-300 dark:border-slate-800 p-6 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
+                                <div className="border border-slate-300 dark:border-slate-800 p-6 bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between">
                                     <div>
-                                        <p className="text-xs font-mono font-bold text-slate-500 uppercase mb-1">ACTIVE_ALERTS</p>
-                                        <h3 className="text-4xl font-mono font-black text-red-700 dark:text-red-500">0{MOCK_SUMMARY.alertas_activas}</h3>
+                                        <p className="text-xs font-mono font-bold text-slate-500 uppercase mb-1">SYSTEM_ALERTS</p>
+                                        <h3 className="text-4xl font-mono font-black text-red-600 dark:text-red-500">0{MOCK_SUMMARY.alertas_activas}</h3>
                                     </div>
-                                    <div className="w-4 h-4 bg-red-600 animate-pulse"></div>
+                                    <div className="w-4 h-4 bg-red-600 animate-pulse rounded-none"></div>
                                 </div>
                             </div>
                         )}
@@ -191,6 +201,7 @@ export const ExperimentDashboard: React.FC = () => {
             </button>
 
             <AISidebar />
+            <ExportDrawer isOpen={isExportDrawerOpen} onClose={() => setIsExportDrawerOpen(false)} />
         </div>
     );
 };

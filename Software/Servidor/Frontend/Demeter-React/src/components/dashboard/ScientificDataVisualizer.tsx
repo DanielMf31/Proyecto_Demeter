@@ -22,7 +22,7 @@ export const ScientificDataVisualizer: React.FC<ScientificDataVisualizerProps> =
             <section className="bg-white dark:bg-slate-900 p-6">
                 <div className="flex items-center gap-3 mb-4 px-1">
                     <div className="w-2 h-5 bg-slate-800 dark:bg-blue-600"></div>
-                    <h4 className="text-sm font-mono font-black text-slate-800 dark:text-white uppercase tracking-widest">Telemetry_Engine_Plot_v2.0_ENGINE_RUN</h4>
+                    <h4 className="text-lg font-mono font-black text-slate-800 dark:text-white uppercase tracking-widest">Telemetry_Engine_Plot</h4>
                 </div>
                 <div className="h-[450px]">
                     <ScientificChart data={data} metric={metric} />
@@ -33,15 +33,15 @@ export const ScientificDataVisualizer: React.FC<ScientificDataVisualizerProps> =
             <section className="bg-white dark:bg-slate-900 p-6">
                 <div className="flex items-center gap-3 mb-4 px-1">
                     <div className="w-2 h-5 bg-slate-800 dark:bg-blue-600"></div>
-                    <h4 className="text-sm font-mono font-black text-slate-800 dark:text-white uppercase tracking-widest">Memory_Allocation_Buffer_Table</h4>
+                    <h4 className="text-lg font-mono font-black text-slate-800 dark:text-white uppercase tracking-widest">Memory_Allocation_Buffer_Table</h4>
                 </div>
                 <DataTable data={data} />
             </section>
 
             {/* Footer Info */}
             <div className="bg-slate-100 dark:bg-slate-800/50 px-6 py-2 flex items-center justify-between">
-                <span className="text-xs font-mono text-slate-500 font-bold tracking-tight">K_SYS_ID: DEMETER_SCADA_NODE_01</span>
-                <span className="text-xs font-mono text-slate-500 font-bold tracking-tight">SYSTEM_TIME_STAMP: {new Date().toISOString()}</span>
+                <span className="text-sm font-mono text-slate-500 font-bold tracking-tight">K_SYS_ID: DEMETER_SCADA_NODE_01</span>
+                <span className="text-sm font-mono text-slate-500 font-bold tracking-tight">SYSTEM_TIME_STAMP: {new Date().toISOString()}</span>
             </div>
         </div>
     );

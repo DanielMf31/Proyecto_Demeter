@@ -10,7 +10,7 @@ interface ThemeState {
 export const useThemeStore = create<ThemeState>()(
     persist(
         (set) => ({
-            isDarkMode: false,
+            isDarkMode: true, // Default to dark mode
             toggleTheme: () => set((state) => {
                 const next = !state.isDarkMode;
                 if (next) {
@@ -31,6 +31,16 @@ export const useThemeStore = create<ThemeState>()(
         }),
         {
             name: 'demeter-theme-storage',
+            onRehydrateStorage: () => (state) => {
+                // Ensure the DOM reflects the state immediately after hydration
+                if (state) {
+                    if (state.isDarkMode) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                }
+            }
         }
     )
 );

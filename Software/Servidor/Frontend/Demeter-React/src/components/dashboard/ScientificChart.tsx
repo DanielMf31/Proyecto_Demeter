@@ -1,6 +1,7 @@
 import React from 'react';
 import Plot from 'react-plotly.js';
 import { SensorData, MetricType } from '../../types';
+import { useThemeStore } from '../../store/useThemeStore';
 
 interface ScientificChartProps {
     data: SensorData[];
@@ -10,24 +11,37 @@ interface ScientificChartProps {
 const config = {
     temperatura: {
         name: 'TEMPERATURA',
-        color: '#d62728', // Brick Red
+        color: '#ef4444', // Red 500
         unit: '°C'
     },
     humedad: {
         name: 'HUMEDAD',
-        color: '#1f77b4', // Steel Blue
+        color: '#3b82f6', // Blue 500
         unit: '%'
+    },
+    vpd: {
+        name: 'VPD',
+        color: '#10b981', // Emerald 500
+        unit: 'kPa'
     }
 };
 
 export const ScientificChart: React.FC<ScientificChartProps> = ({ data, metric }) => {
+    const { isDarkMode } = useThemeStore();
     const current = config[metric];
 
-    const xData = data.map(d => d.timestamp);
-    const yData = data.map(d => d[metric as keyof SensorData] as number);
+    // Safety check just in case VPD wasn't calculated for live buffer yet
+    const validData = data.filter(d => d[metric as keyof SensorData] !== undefined);
+
+    const xData = validData.map(d => d.timestamp);
+    const yData = validData.map(d => Number(d[metric as keyof SensorData]).toFixed(2));
+
+    const bgColor = isDarkMode ? '#0f172a' : '#ffffff';
+    const gridColor = isDarkMode ? '#334155' : '#e5e7eb';
+    const tickColor = isDarkMode ? '#94a3b8' : '#64748b';
 
     return (
-        <div className="bg-white border border-slate-300 rounded-none overflow-hidden h-[400px]">
+        <div className={`border rounded-none overflow-hidden h-[400px] transition-colors ${isDarkMode ? 'border-slate-800 bg-slate-900' : 'border-slate-300 bg-white'}`}>
             <Plot
                 data={[
                     {
@@ -45,30 +59,30 @@ export const ScientificChart: React.FC<ScientificChartProps> = ({ data, metric }
                             size: 5,
                             symbol: 'square',
                             color: current.color,
-                            line: { width: 1, color: '#fff' }
+                            line: { width: 1, color: isDarkMode ? '#0f172a' : '#fff' }
                         }
                     }
                 ]}
                 layout={{
                     autosize: true,
-                    margin: { t: 30, r: 30, b: 40, l: 50 },
+                    margin: { t: 50, r: 50, b: 70, l: 80 },
                     showlegend: false,
-                    plot_bgcolor: '#ffffff',
-                    paper_bgcolor: '#ffffff',
+                    plot_bgcolor: bgColor,
+                    paper_bgcolor: bgColor,
                     xaxis: {
-                        gridcolor: '#e5e7eb',
+                        gridcolor: gridColor,
                         zeroline: false,
-                        tickfont: { family: 'Monaco, monospace', size: 10, color: '#64748b' },
+                        tickfont: { family: 'Monaco, monospace', size: 20, color: tickColor },
                         gridwidth: 1,
                     },
                     yaxis: {
-                        gridcolor: '#e5e7eb',
+                        gridcolor: gridColor,
                         zeroline: false,
-                        tickfont: { family: 'Monaco, monospace', size: 10, color: '#64748b' },
+                        tickfont: { family: 'Monaco, monospace', size: 20, color: tickColor },
                         gridwidth: 1,
                         title: {
                             text: `[ ${current.name} / ${current.unit} ]`,
-                            font: { family: 'Monaco, monospace', size: 10, color: '#94a3b8' }
+                            font: { family: 'Monaco, monospace', size: 20, color: tickColor }
                         }
                     },
                     hovermode: 'closest',

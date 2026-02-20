@@ -1,0 +1,76 @@
+direction: right
+vars: {
+  d2-config: {
+    layout-engine: dagre
+  }
+}
+style: {
+  stroke: "#2b6cb0"
+  fill: "white"
+}
+
+title: Diagrama C4 Nivel 2 - Contenedores (Topología Edge ESP32)
+
+"Servidor Central (Demeter API)": {
+  shape: rectangle
+  style: { fill: "#264653"; font-color: white }
+}
+
+"Raspberry Pi (Servidor Edge)": {
+  shape: queue
+  style: { fill: "#2a9d8f"; font-color: white }
+  description: "Almacenamiento temporal, procesamiento y buffering."
+}
+
+"Red Inalámbrica (RF24)": {
+  style: { fill: transparent; stroke-dash: 5 }
+
+  "Nodo Gateway (ESP32)": {
+    shape: rectangle
+    style: { fill: "#e9c46a" }
+    description: "Coordinador de radio."
+  }
+
+  "Nodos Sensores (ESP32)": {
+    shape: rectangle
+    style: { fill: "#f4a261" }
+    description: "Plantilla genérica de multi-sensores"
+  }
+
+  "Nodo Actuador 1 (ESP32)": {
+    shape: rectangle
+    style: { fill: "#e76f51"; font-color: white }
+    description: "Bombas y Electroválvulas"
+  }
+
+  "Nodo Actuador 2 (ESP32)": {
+    shape: rectangle
+    style: { fill: "#e76f51"; font-color: white }
+    description: "Ventanas Laterales"
+  }
+
+  "Nodo Actuador 3 (ESP32)": {
+    shape: rectangle
+    style: { fill: "#e76f51"; font-color: white }
+    description: "Ventanas Cenitales"
+  }
+}
+
+# Flujo Core - UART Edge
+"Servidor Central (Demeter API)" -> "Raspberry Pi (Servidor Edge)": "Sincroniza datos"
+"Raspberry Pi (Servidor Edge)" -> "Servidor Central (Demeter API)": "Envía lotes procesados"
+
+"Raspberry Pi (Servidor Edge)" -> "Nodo Gateway (ESP32)": "Envía peticiones y comandos (UART)"
+"Nodo Gateway (ESP32)" -> "Raspberry Pi (Servidor Edge)": "Reenvía telemetría y reportes (UART)"
+
+# Flujo RF24 Comandos
+"Nodo Gateway (ESP32)" -> "Nodos Sensores (ESP32)": "GetSensor"
+"Nodos Sensores (ESP32)" -> "Nodo Gateway (ESP32)": "Datos de Sensores"
+
+"Nodo Gateway (ESP32)" -> "Nodo Actuador 1 (ESP32)": "setGPIO"
+"Nodo Gateway (ESP32)" -> "Nodo Actuador 2 (ESP32)": "setGPIO"
+"Nodo Gateway (ESP32)" -> "Nodo Actuador 3 (ESP32)": "setGPIO"
+
+"Nodo Actuador 1 (ESP32)" -> "Nodo Gateway (ESP32)": "pinreport / systemreport"
+"Nodo Actuador 2 (ESP32)" -> "Nodo Gateway (ESP32)": "pinreport / systemreport"
+"Nodo Actuador 3 (ESP32)" -> "Nodo Gateway (ESP32)": "pinreport / systemreport"

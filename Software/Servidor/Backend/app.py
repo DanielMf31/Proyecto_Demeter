@@ -10,8 +10,12 @@ from API.routers.ws_router import router as ws_router
 from API.routers.command_router import router as command_router
 from API.routers.discovery_router import router as discovery_router
 from API.routers.analysis_router import router as analysis_router
+from API.routers.auth_router import router as auth_router
+from API.routers.export_router import router as export_router
 from WS_Manager.dispatcher import start_redis_listener, start_activity_batch_flusher
 from BD.init_db import init_tables
+from Core.startup import create_default_admin
+from BD.seed import seed_test_data
 
 settings = get_settings()
 logger = setup_logger("app")
@@ -31,6 +35,7 @@ def create_application() -> FastAPI:
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+        expose_headers=["Content-Disposition"],
     )
 
     @application.on_event("startup")
@@ -48,7 +53,16 @@ def create_application() -> FastAPI:
             # We don't exit here to allow the app to try to run, 
             # but functionality will be limited.
 
-        # 2. Connect to Redis
+        # 2. Add Default Admin User & Seed Test Data
+        from Core.database import AsyncSessionLocal
+        try:
+            async with AsyncSessionLocal() as session:
+                await create_default_admin(session)
+                await seed_test_data(session)
+        except Exception as e:
+            logger.error(f"Error creating default admin or seeding data: {e}")
+
+        # 3. Connect to Redis
         from Core.redis import redis_manager
         try:
             await redis_manager.connect()
@@ -90,6 +104,20 @@ def create_application() -> FastAPI:
         analysis_router,
         prefix=f"{settings.API_PREFIX}/analysis",
         tags=["Analytics"],
+    )
+    application.include_router(
+        auth_router,
+        prefix=f"{settings.API_PREFIX}",
+    )
+    application.include_router(
+        export_router,
+        prefix=f"{settings.API_PREFIX}",
+    )
+    
+    from API.routers.history_router import router as history_router
+    application.include_router(
+        history_router,
+        prefix=f"{settings.API_PREFIX}",
     )
 
     return application
