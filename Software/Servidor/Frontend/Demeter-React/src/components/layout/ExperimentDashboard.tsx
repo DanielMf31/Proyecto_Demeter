@@ -19,6 +19,27 @@ export const ExperimentDashboard: React.FC = () => {
     const [data] = useState(generateMockSensorData());
     const { toggleAISidebar, currentView } = useUIStore();
 
+    const handleExportRawData = () => {
+        // Mock CSV generation
+        const headers = ['timestamp', 'temperatura', 'humedad', 'estado_riego'];
+        const csvContent = "data:text/csv;charset=utf-8,"
+            + headers.join(",") + "\n"
+            + data.map(row => `${row.timestamp},${row.temperatura.toFixed(2)},${row.humedad.toFixed(2)},${row.estado_riego}`).join("\n");
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `demeter_raw_telemetry_${Date.now()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleDownloadBundle = () => {
+        // Placeholder for polling the Background Worker (RQ) API
+        alert("BACKGROUND WORKER TRIGGERED: The API is currently generating the ZIP bundle with Excel and High-Res PNGs. This feature will be linked to the backend soon.");
+    };
+
     const renderViewContent = () => {
         switch (currentView) {
             case 'DATAVIZ':
@@ -64,10 +85,16 @@ export const ExperimentDashboard: React.FC = () => {
                             </div>
 
                             <div className="hidden xl:flex gap-2">
-                                <button className="flex items-center gap-3 px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-mono font-bold hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-300 transition-colors">
+                                <button
+                                    onClick={handleExportRawData}
+                                    className="flex items-center gap-3 px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-mono font-bold hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-300 transition-colors"
+                                >
                                     <Download size={16} /> EXPORT_RAW_DATA
                                 </button>
-                                <button className="flex items-center gap-3 px-5 py-2.5 bg-slate-900 dark:bg-blue-600 text-white text-xs font-mono font-bold hover:bg-black dark:hover:bg-blue-700 transition-colors border border-slate-900 dark:border-blue-700">
+                                <button
+                                    onClick={handleDownloadBundle}
+                                    className="flex items-center gap-3 px-5 py-2.5 bg-slate-900 dark:bg-blue-600 text-white text-xs font-mono font-bold hover:bg-black dark:hover:bg-blue-700 transition-colors border border-slate-900 dark:border-blue-700"
+                                >
                                     <FileArchive size={16} /> DOWNLOAD_BUNDLE
                                 </button>
                             </div>
