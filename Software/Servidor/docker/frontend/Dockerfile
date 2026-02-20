@@ -2,25 +2,20 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 # Install dependencies
-COPY package.json .
+COPY Software/Servidor/Frontend/Demeter-React/package*.json ./
 RUN npm install
 
 # Copy sources
-COPY tsconfig.json .
-COPY Software/Servidor/Frontend/Web/src ./Software/Servidor/Frontend/Web/src
+COPY Software/Servidor/Frontend/Demeter-React ./
 
-# Build
+# Build the app using Vite
 RUN npm run build
 
 # ── Stage 2: Serve with Nginx ──────────────────────────────────────────────
 FROM nginx:alpine
 
-# Static files
-COPY --from=builder /app/Software/Servidor/Frontend/Web/dist/ /usr/share/nginx/html/dist/
-COPY Software/Servidor/Frontend/Web/index.html /usr/share/nginx/html/
-COPY Software/Servidor/Frontend/Web/css /usr/share/nginx/html/css
-# Optional: Copy assets if they exist
-# COPY Software/Servidor/Frontend/Web/assets /usr/share/nginx/html/assets
+# Static files from React build
+COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Nginx config
 COPY Software/Servidor/Backend/Nginx/nginx.conf /etc/nginx/conf.d/default.conf

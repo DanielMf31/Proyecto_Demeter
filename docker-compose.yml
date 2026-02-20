@@ -1,68 +1,77 @@
+# ==========================================
+# BASE DOCKER COMPOSE CONFIGURATION
+# ==========================================
+# This file defines the core services, networks, and volumes for the Demeter Platform.
+# CRITICAL: No `ports:` are exposed here for security. Services communicate via the internal `demeter-net` network.
+
 services:
-  demeter-core:
+  # 1. FRONTEND
+  frontend:
     build:
       context: .
-      dockerfile: Software/Raspberry/Dockerfile
-    container_name: demeter-core
-    privileged: true
-    volumes:
-      - ./Software/Raspberry/data:/app/Software/Raspberry/data
-      - ./Software/Raspberry/logs:/app/Software/Raspberry/logs
+      dockerfile: Software/Servidor/docker/frontend/Dockerfile
+    container_name: demeter-frontend
     env_file:
       - .env
-    environment:
-      # These will be populated from .env via DEMETER_ prefix in code, 
-      # but we map SERIAL_PORT_HOST to internal name for compatibility if needed.
-      - DEMETER_PORT=/dev/serial0
-      - PYTHONUNBUFFERED=1
-    devices:
-      - "${SERIAL_PORT_HOST:-/dev/ttyS0}:/dev/serial0"
-    restart: always
-    network_mode: "host"
-
-  redis:
-    image: redis:alpine
-    container_name: demeter-redis
-    ports:
-      - "6380:6379"
-    restart: always
     networks:
       - demeter-net
 
+  # 2. BACKEND API
   api:
     build:
       context: .
       dockerfile: Software/Servidor/docker/backend/Dockerfile
     container_name: demeter-api
-    ports:
-      - "8000:8000"
+    env_file:
+      - .env
     volumes:
       - shared_data:/app/shared
-      - ./Software/Common:/app/Software/Common
-      - ./Software/Servidor/Backend:/app/Software/Servidor/Backend
     environment:
       - REDIS_URL=redis://demeter-redis:6379/0
+      - DATABASE_URL=postgresql://postgres:postgres_local_pass@demeter-db:5432/demeter_db
     depends_on:
       - redis
-    restart: always
+      - db
     networks:
       - demeter-net
 
+  # 3. BACKGROUND WORKER (Math/Analytics)
   math-worker:
     build:
       context: .
       dockerfile: Software/Servidor/docker/backend/Dockerfile
     container_name: demeter-math-worker
     command: rq worker demeter_tasks --url redis://demeter-redis:6379/0
+    env_file:
+      - .env
     volumes:
       - shared_data:/app/shared
-      - ./Software/Common:/app/Software/Common
-      - ./Software/Servidor/Backend:/app/Software/Servidor/Backend
     environment:
       - REDIS_URL=redis://demeter-redis:6379/0
+      - DATABASE_URL=postgresql://postgres:postgres_local_pass@demeter-db:5432/demeter_db
     depends_on:
       - redis
-    restart: always
+      - db
+    networks:
+      - demeter-net
+
+  # 4. DATABASE (PostgreSQL)
+  db:
+    image: postgres:15-alpine
+    container_name: demeter-db
+    environment:
+      - POSTGRES_USER=${DEMETER_POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${DEMETER_POSTGRES_PASSWORD:-password}
+      - POSTGRES_DB=${DEMETER_POSTGRES_DB:-demeter_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - demeter-net
+
+  # 5. REDIS BROKER
+  redis:
+    image: redis:alpine
+    container_name: demeter-redis
     networks:
       - demeter-net
 
@@ -72,3 +81,4 @@ networks:
 
 volumes:
   shared_data:
+  postgres_data:

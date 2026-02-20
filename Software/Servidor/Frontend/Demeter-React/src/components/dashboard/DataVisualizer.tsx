@@ -3,7 +3,7 @@ import { SensorData, MetricType } from '../../types';
 import { MetricToggle } from './MetricToggle';
 import { SensorChart } from './SensorChart';
 import { DataTable } from './DataTable';
-import { LayoutGrid, Table as TableIcon } from 'lucide-react';
+import { Table as TableIcon } from 'lucide-react';
 
 interface DataVisualizerProps {
     data: SensorData[];

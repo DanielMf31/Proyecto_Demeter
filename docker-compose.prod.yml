@@ -1,0 +1,39 @@
+# ==========================================
+# PRODUCTION & STAGING OVERRIDE CONFIGURATION
+# ==========================================
+# This file is applied ONLY in Staging and Production.
+# It enforces strict restart policies and configures reverse proxies (e.g. Traefik) labels.
+#
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  frontend:
+    restart: always
+    # Example labels for Reverse Proxy (Traefik) - Replace patata.monters.org with the actual domain
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.demeter-frontend.rule=Host(`patata.monters.org`)"
+      - "traefik.http.services.demeter-frontend.loadbalancer.server.port=80"
+    # Ensure network matches where the proxy is connected
+    # networks:
+    #   - traefik-proxy
+
+  api:
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.demeter-api.rule=Host(`patata.monters.org`) && PathPrefix(`/api/`)"
+      - "traefik.http.routers.demeter-ws.rule=Host(`patata.monters.org`) && PathPrefix(`/ws/`)"
+      - "traefik.http.services.demeter-api.loadbalancer.server.port=8000"
+
+  math-worker:
+    restart: always
+
+  db:
+    restart: always
+    # Production databases should never expose ports directly to host
+    # Volumes should ideally be mapped to a highly durable remote drive if outside cloud
+
+  redis:
+    restart: always
+    # No exposed ports
