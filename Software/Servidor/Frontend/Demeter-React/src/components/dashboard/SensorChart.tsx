@@ -15,7 +15,7 @@ interface SensorChartProps {
     metric: MetricType;
 }
 
-const metricConfigs = {
+const metricConfigs: Record<MetricType, { color: string; gradient: string; name: string; unit: string }> = {
     temperatura: {
         color: '#f97316', // Orange 500
         gradient: 'url(#colorTemp)',
@@ -27,6 +27,12 @@ const metricConfigs = {
         gradient: 'url(#colorHum)',
         name: 'Humedad',
         unit: '%'
+    },
+    vpd: {
+        color: '#14b8a6', // Teal 500
+        gradient: 'url(#colorVpd)',
+        name: 'VPD',
+        unit: ' kPa'
     }
 };
 
@@ -59,6 +65,10 @@ export const SensorChart: React.FC<SensorChartProps> = ({ data, metric }) => {
                             <linearGradient id="colorHum" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
                                 <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                            </linearGradient>
+                            <linearGradient id="colorVpd" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.15} />
+                                <stop offset="95%" stopColor="#14b8a6" stopOpacity={0} />
                             </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
