@@ -15,6 +15,7 @@ export const ExportDrawer: React.FC<ExportDrawerProps> = ({ isOpen, onClose }) =
   const [status, setStatus] = useState<'idle' | 'queued' | 'started' | 'finished' | 'failed'>('idle');
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [errorMSG, setErrorMSG] = useState<string | null>(null);
+  const [selectedRange, setSelectedRange] = useState<string>('30');
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
@@ -29,8 +30,14 @@ export const ExportDrawer: React.FC<ExportDrawerProps> = ({ isOpen, onClose }) =
       const response = await fetch(`${API_URL}/export/plants`, {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
-        }
+        },
+        body: JSON.stringify({
+          experimento_id: 1, // Por ahora está acoplado al Experimento 1 por defecto
+          fecha_referencia: new Date().toISOString(),
+          rango_dias: parseInt(selectedRange, 10)
+        })
       });
 
       if (!response.ok) throw new Error('Fallo al iniciar el motor de exportación');
@@ -130,10 +137,17 @@ export const ExportDrawer: React.FC<ExportDrawerProps> = ({ isOpen, onClose }) =
 
             <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4">
               <h3 className="text-sm font-medium text-slate-300 mb-2">Rango de datos a descargar</h3>
-              <select className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none">
-                <option value="24h">Últimas 24h (Datos de Prueba)</option>
-                <option value="7d" disabled>Últimos 7 días</option>
-                <option value="30d" disabled>Último mes</option>
+              <select
+                value={selectedRange}
+                onChange={(e) => setSelectedRange(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none"
+              >
+                <option value="1">Últimas 24h (Datos de Prueba)</option>
+                <option value="7">Últimos 7 días</option>
+                <option value="14">Últimos 14 días</option>
+                <option value="30">Último mes (30 días)</option>
+                <option value="90">Últimos 3 meses (90 días)</option>
+                <option value="180">Últimos 6 meses (180 días)</option>
               </select>
             </div>
 

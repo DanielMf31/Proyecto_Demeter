@@ -30,3 +30,6 @@ docker-compose.override.yml
 Software/Raspberry/data/*.db
 Software/Raspberry/logs/*.log
 Python/data/*.db
+.venv_sdk/
+SDK/dist/
+SDK/*.egg-info/

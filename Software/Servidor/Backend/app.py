@@ -12,10 +12,12 @@ from API.routers.discovery_router import router as discovery_router
 from API.routers.analysis_router import router as analysis_router
 from API.routers.auth_router import router as auth_router
 from API.routers.export_router import router as export_router
+from API.routers.sdk_router import router as sdk_router
+from API.routers.lims_router import router as lims_router
 from WS_Manager.dispatcher import start_redis_listener, start_activity_batch_flusher
 from BD.init_db import init_tables
 from Core.startup import create_default_admin
-from BD.seed import seed_test_data
+from BD.seed_data import seed_historical_data
 
 settings = get_settings()
 logger = setup_logger("app")
@@ -42,14 +44,14 @@ def create_application() -> FastAPI:
     async def startup_event():
         logger.info("Application starting up…")
         
-        # 1. Initialize Database Tables
-        logger.info("Initializing database tables…")
+        # 1. Database is now managed by Alembic
+        logger.info("Database schema is managed by Alembic. Waiting for warmup...")
         try:
             # Short sleep to let Postgres warm up in Docker
             await asyncio.sleep(2) 
-            await init_tables()
+            # await init_tables() # Disabled! Alembic manages this now
         except Exception as e:
-            logger.error(f"Database Initialization Error: {e}")
+            logger.error(f"Database Warmup Error: {e}")
             # We don't exit here to allow the app to try to run, 
             # but functionality will be limited.
 
@@ -58,7 +60,7 @@ def create_application() -> FastAPI:
         try:
             async with AsyncSessionLocal() as session:
                 await create_default_admin(session)
-                await seed_test_data(session)
+                await seed_historical_data(session)
         except Exception as e:
             logger.error(f"Error creating default admin or seeding data: {e}")
 
@@ -117,6 +119,14 @@ def create_application() -> FastAPI:
     from API.routers.history_router import router as history_router
     application.include_router(
         history_router,
+        prefix=f"{settings.API_PREFIX}",
+    )
+    application.include_router(
+        sdk_router,
+        prefix=f"{settings.API_PREFIX}",
+    )
+    application.include_router(
+        lims_router,
         prefix=f"{settings.API_PREFIX}",
     )
 

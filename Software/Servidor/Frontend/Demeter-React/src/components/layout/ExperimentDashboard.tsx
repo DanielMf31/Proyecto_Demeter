@@ -10,15 +10,15 @@ import {
 import { ScientificDataVisualizer } from '../dashboard/ScientificDataVisualizer';
 import { ManualControl } from '../dashboard/ManualControl';
 import { SequencePlanner } from '../dashboard/SequencePlanner';
+import { LIMS_Dashboard } from '../lims/LIMS_Dashboard';
 import { AISidebar } from '../ai/AISidebar';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { ExportDrawer } from './ExportDrawer';
 import { useUIStore } from '../../store/useUIStore';
-import { MOCK_SUMMARY } from '../../mocks/sensorData';
 import { useTelemetry } from '../../hooks/useTelemetry';
 import { apiService } from '../../services/apiService';
-import { SensorData } from '../../types';
+import { SensorData, ExperimentLIMS } from '../../types';
 
 export const ExperimentDashboard: React.FC = () => {
     const { toggleAISidebar, currentView } = useUIStore();
@@ -27,10 +27,26 @@ export const ExperimentDashboard: React.FC = () => {
     const [historicalData, setHistoricalData] = useState<SensorData[]>([]);
     const [isLoadingHistory, setIsLoadingHistory] = useState(true);
 
+    // Experiment Selector State
+    const [experiments, setExperiments] = useState<ExperimentLIMS[]>([]);
+    const [selectedExpId, setSelectedExpId] = useState<number | null>(null);
+
     // Live Telemetry Hook (still running for status)
     const { isConnected } = useTelemetry(50);
 
-    // Fetch 30-day metrics on mount and when node changes
+    // Fetch experiments on mount
+    useEffect(() => {
+        apiService.fetchExperiments().then(res => {
+            if (res && res.length > 0) {
+                setExperiments(res);
+                setSelectedExpId(res[0].id);
+            }
+        });
+    }, []);
+
+    const selectedExperiment = experiments.find(e => e.id === selectedExpId);
+
+    // Fetch 30-day metrics when node changes
     useEffect(() => {
         setIsLoadingHistory(true);
         apiService.fetchNodeHistory(selectedNode, 30).then(res => {
@@ -38,11 +54,9 @@ export const ExperimentDashboard: React.FC = () => {
                 const processed = res.map(row => {
                     const T = row.temperature;
                     const RH = row.humidity;
-                    // Calculate VPD
                     const svp = 0.61078 * Math.exp((17.27 * T) / (T + 237.3));
                     const avp = svp * (RH / 100.0);
                     const vpd = svp - avp;
-
                     return {
                         timestamp: row.timestamp,
                         temperatura: T,
@@ -84,6 +98,8 @@ export const ExperimentDashboard: React.FC = () => {
                 return <ManualControl />;
             case 'PLANNER':
                 return <SequencePlanner />;
+            case 'LIMS_CATALOG':
+                return <LIMS_Dashboard />;
             default:
                 return <ScientificDataVisualizer data={historicalData} />;
         }
@@ -100,51 +116,67 @@ export const ExperimentDashboard: React.FC = () => {
                     <div className="max-w-[1600px] mx-auto space-y-10">
 
                         {/* Status Header Strip */}
-                        <div className="flex items-center justify-between border-b-2 border-slate-200 dark:border-slate-800 pb-6">
+                        <div className="flex items-center justify-between border-b-2 border-slate-200 dark:border-slate-800 pb-8">
                             <div className="flex items-center gap-6">
-                                <div className="bg-slate-100 dark:bg-slate-900 p-3 border border-slate-300 dark:border-slate-800">
-                                    <Database size={32} className="text-slate-600 dark:text-slate-400" />
+                                <div className="bg-slate-100 dark:bg-slate-900 p-4 border border-slate-300 dark:border-slate-800">
+                                    <Database size={40} className="text-slate-600 dark:text-slate-400" />
                                 </div>
                                 <div>
-                                    <div className="flex items-center gap-3">
-                                        <h1 className="text-3xl font-mono font-black tracking-tight text-slate-900 dark:text-white uppercase">
-                                            {MOCK_SUMMARY.nombre}
+                                    <div className="flex items-center gap-4">
+                                        <h1 className="text-4xl font-mono font-black tracking-tight text-slate-900 dark:text-white uppercase">
+                                            {selectedExperiment?.name || 'Demeter Dashboard'}
                                         </h1>
-                                        <span className={`px-2 py-0.5 font-mono text-xs font-bold border ${isConnected ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 border-green-300 dark:border-green-800' : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 border-red-300 dark:border-red-800'}`}>
+                                        <span className={`px-3 py-1 font-mono text-sm font-bold border ${isConnected ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 border-green-300 dark:border-green-800' : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 border-red-300 dark:border-red-800'}`}>
                                             {isConnected ? 'RUNNING' : 'OFFLINE'}
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-6 text-sm font-mono text-slate-500 mt-2 uppercase">
-                                        <span>Ref_ID: {MOCK_SUMMARY.id}</span>
+                                    <div className="flex items-center gap-5 text-base font-mono text-slate-500 mt-3 uppercase flex-wrap">
                                         <span className="flex items-center gap-2">
-                                            SELECT_NODE:
+                                            EXPERIMENTO:
                                             <select
-                                                value={selectedNode}
-                                                onChange={(e) => setSelectedNode(Number(e.target.value))}
-                                                className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-bold px-2 py-1 ml-1 outline-none focus:ring-2 focus:ring-blue-500 rounded-none cursor-pointer"
+                                                value={selectedExpId || ''}
+                                                onChange={(e) => setSelectedExpId(Number(e.target.value))}
+                                                className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base px-3 py-1.5 ml-1 outline-none focus:ring-2 focus:ring-blue-500 rounded-none cursor-pointer"
                                             >
-                                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
-                                                    <option key={n} value={n}>Planta {n}</option>
+                                                {experiments.map(exp => (
+                                                    <option key={exp.id} value={exp.id}>{exp.name}</option>
                                                 ))}
                                             </select>
                                         </span>
-                                        <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400"><Info size={14} /> Kernel_v4.2.1-lts</span>
+                                        <span className="flex items-center gap-2">
+                                            PLANTA:
+                                            <select
+                                                value={selectedNode}
+                                                onChange={(e) => setSelectedNode(Number(e.target.value))}
+                                                className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white font-bold text-base px-3 py-1.5 ml-1 outline-none focus:ring-2 focus:ring-blue-500 rounded-none cursor-pointer"
+                                            >
+                                                {(selectedExperiment?.plants || []).map(p => (
+                                                    <option key={p.node_id} value={p.node_id}>{p.name}</option>
+                                                ))}
+                                                {(!selectedExperiment?.plants?.length) && (
+                                                    <option value={1}>Planta 1</option>
+                                                )}
+                                            </select>
+                                        </span>
+                                        <span className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                                            <Info size={16} /> Kernel_v4.2.1-lts
+                                        </span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="hidden xl:flex gap-2">
+                            <div className="hidden xl:flex gap-3">
                                 <button
                                     onClick={handleExportRawData}
-                                    className="flex items-center gap-3 px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-xs font-mono font-bold hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-300 transition-colors"
+                                    className="flex items-center gap-3 px-6 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-sm font-mono font-bold hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-300 transition-colors"
                                 >
-                                    <Download size={16} /> EXPORT_RAW_CSV
+                                    <Download size={18} /> EXPORT_CSV
                                 </button>
                                 <button
                                     onClick={handleOpenExportDrawer}
-                                    className="flex items-center gap-3 px-5 py-2.5 text-white text-xs font-mono font-bold transition-colors border bg-slate-900 border-slate-900 dark:bg-blue-600 dark:border-blue-700 hover:bg-black dark:hover:bg-blue-700"
+                                    className="flex items-center gap-3 px-6 py-3 text-white text-sm font-mono font-bold transition-colors border bg-slate-900 border-slate-900 dark:bg-blue-600 dark:border-blue-700 hover:bg-black dark:hover:bg-blue-700"
                                 >
-                                    <FileArchive size={16} /> DOWNLOAD_BUNDLE
+                                    <FileArchive size={18} /> BUNDLE
                                 </button>
                             </div>
                         </div>
@@ -152,33 +184,35 @@ export const ExperimentDashboard: React.FC = () => {
                         {/* Summary View KPIs (Only in DATAVIZ) */}
                         {currentView === 'DATAVIZ' && (
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                                <div className="border border-slate-300 dark:border-slate-800 p-6 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between">
-                                    <p className="text-xs font-mono font-bold text-slate-500 uppercase mb-1 flex items-center gap-2"><Activity size={12} /> DATA_POINTS_LOADED</p>
-                                    <h3 className="text-4xl font-mono font-black text-slate-900 dark:text-white mt-2">
+                                <div className="border border-slate-300 dark:border-slate-800 p-8 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between">
+                                    <p className="text-base font-mono font-bold text-slate-500 uppercase mb-2 flex items-center gap-2">
+                                        <Activity size={16} /> DATA_POINTS
+                                    </p>
+                                    <h3 className="text-5xl font-mono font-black text-slate-900 dark:text-white mt-2">
                                         {isLoadingHistory ? '...' : historicalData.length}
-                                        <span className="text-sm ml-2 text-slate-500 font-normal tracking-tight">/ 30 DAYS</span>
+                                        <span className="text-lg ml-2 text-slate-500 font-normal tracking-tight">/ 30d</span>
                                     </h3>
                                 </div>
-                                <div className="border border-slate-300 dark:border-slate-800 p-6 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between">
-                                    <p className="text-xs font-mono font-bold text-slate-500 uppercase mb-1">AVG_TEMPERATURE</p>
-                                    <h3 className="text-4xl font-mono font-black text-slate-900 dark:text-white mt-2">
+                                <div className="border border-slate-300 dark:border-slate-800 p-8 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between">
+                                    <p className="text-base font-mono font-bold text-slate-500 uppercase mb-2">AVG_TEMPERATURE</p>
+                                    <h3 className="text-5xl font-mono font-black text-slate-900 dark:text-white mt-2">
                                         {isLoadingHistory || !historicalData.length ? '--' : (historicalData.reduce((acc, curr) => acc + curr.temperatura, 0) / historicalData.length).toFixed(1)}
-                                        <span className="text-xl">°C</span>
+                                        <span className="text-2xl">°C</span>
                                     </h3>
                                 </div>
-                                <div className="border border-slate-300 dark:border-slate-800 p-6 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between">
-                                    <p className="text-xs font-mono font-bold text-slate-500 uppercase mb-1">AVG_HUMIDITY</p>
-                                    <h3 className="text-4xl font-mono font-black text-slate-900 dark:text-white mt-2">
+                                <div className="border border-slate-300 dark:border-slate-800 p-8 bg-white dark:bg-slate-900 shadow-sm flex flex-col justify-between">
+                                    <p className="text-base font-mono font-bold text-slate-500 uppercase mb-2">AVG_HUMIDITY</p>
+                                    <h3 className="text-5xl font-mono font-black text-slate-900 dark:text-white mt-2">
                                         {isLoadingHistory || !historicalData.length ? '--' : (historicalData.reduce((acc, curr) => acc + curr.humedad, 0) / historicalData.length).toFixed(1)}
-                                        <span className="text-xl">%</span>
+                                        <span className="text-2xl">%</span>
                                     </h3>
                                 </div>
-                                <div className="border border-slate-300 dark:border-slate-800 p-6 bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between">
+                                <div className="border border-slate-300 dark:border-slate-800 p-8 bg-white dark:bg-slate-900 shadow-sm flex items-center justify-between">
                                     <div>
-                                        <p className="text-xs font-mono font-bold text-slate-500 uppercase mb-1">SYSTEM_ALERTS</p>
-                                        <h3 className="text-4xl font-mono font-black text-red-600 dark:text-red-500">0{MOCK_SUMMARY.alertas_activas}</h3>
+                                        <p className="text-base font-mono font-bold text-slate-500 uppercase mb-2">PLANTS_IN_EXP</p>
+                                        <h3 className="text-5xl font-mono font-black text-red-600 dark:text-red-500">{selectedExperiment?.plants?.length || 0}</h3>
                                     </div>
-                                    <div className="w-4 h-4 bg-red-600 animate-pulse rounded-none"></div>
+                                    <div className="w-5 h-5 bg-red-600 animate-pulse rounded-none"></div>
                                 </div>
                             </div>
                         )}

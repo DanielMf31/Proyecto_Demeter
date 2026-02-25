@@ -2,6 +2,7 @@
 # BASE DOCKER COMPOSE CONFIGURATION
 # ==========================================
 # This file defines the core services, networks, and volumes for the Demeter Platform.
+# It serves as the FOUNDATION for all environments (Dev, Staging, Prod).
 # CRITICAL: No `ports:` are exposed here for security. Services communicate via the internal `demeter-net` network.
 
 services:
@@ -48,6 +49,26 @@ services:
     volumes:
       - shared_data:/app/shared
       - export_data:/app/exports
+    environment:
+      - REDIS_URL=redis://demeter-redis:6379/0
+      - RQ_REDIS_URL=redis://demeter-redis:6379/1
+      - DATABASE_URL=postgresql://postgres:postgres_local_pass@demeter-db:5432/demeter_db
+    depends_on:
+      - redis
+      - db
+    networks:
+      - demeter-net
+
+  sequencer:
+    build:
+      context: .
+      dockerfile: Software/Servidor/docker/backend/Dockerfile
+    container_name: demeter-sequencer
+    command: python Software/Servidor/Backend/Secuenciador/main.py
+    env_file:
+      - .env
+    volumes:
+      - shared_data:/app/shared
     environment:
       - REDIS_URL=redis://demeter-redis:6379/0
       - RQ_REDIS_URL=redis://demeter-redis:6379/1

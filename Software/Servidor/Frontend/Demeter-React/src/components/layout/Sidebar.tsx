@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Hand, ListTree, Activity } from 'lucide-react';
+import { LayoutDashboard, Hand, ListTree, Activity, TestTubes } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
 import { ViewType } from '../../types';
 import { clsx } from 'clsx';
@@ -16,6 +16,7 @@ export const Sidebar: React.FC = () => {
         { type: 'DATAVIZ', label: 'ANALYTICS', Icon: LayoutDashboard },
         { type: 'MANUAL', label: 'MANUAL_CTRL', Icon: Hand },
         { type: 'PLANNER', label: 'SEQ_PLANNER', Icon: ListTree },
+        { type: 'LIMS_CATALOG', label: 'LIMS_CATALOG', Icon: TestTubes },
     ];
 
     return (

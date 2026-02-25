@@ -1,5 +1,5 @@
-from datetime import datetime
-from typing import Optional, List
+from datetime import datetime, date
+from typing import Optional, List, Dict, Any
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 
@@ -75,4 +75,45 @@ class ActivityLogResponse(ActivityLogBase):
     id: int
     timestamp: datetime
     user_id: UUID
+    model_config = ConfigDict(from_attributes=True)
+
+# --- LIMS Schemas (Plants & Experiments) ---
+class PlantBase(BaseModel):
+    name: str
+    identificador_fisico: str
+    especie_variedad: str
+    fecha_siembra: date
+    estado_vital: str = "Activa"
+    metadata_cientifica: Dict[str, Any] = {}
+    node_id: int
+
+class PlantCreate(PlantBase):
+    pass
+
+class PlantUpdate(BaseModel):
+    name: Optional[str] = None
+    especie_variedad: Optional[str] = None
+    fecha_siembra: Optional[date] = None
+    estado_vital: Optional[str] = None
+    metadata_cientifica: Optional[Dict[str, Any]] = None
+    node_id: Optional[int] = None
+
+class PlantResponse(PlantBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)
+
+class ExperimentBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+class ExperimentCreate(ExperimentBase):
+    plant_ids: List[int] = []  # IDs chosen in the Frontend Cart 
+
+class ExperimentResponse(ExperimentBase):
+    id: int
+    created_at: datetime
+    user_id: Optional[UUID] = None
+    api_key: str
+    plants: List[PlantResponse] = []
+    
     model_config = ConfigDict(from_attributes=True)

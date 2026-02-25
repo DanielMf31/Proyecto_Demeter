@@ -13,8 +13,43 @@ export interface ExperimentSummary {
     alertas_activas: number;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// LIMS Architecture (Models)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface Plant {
+    id: number;
+    name: string;
+    identificador_fisico: string;
+    especie_variedad: string;
+    fecha_siembra: string; // ISO Date String
+    estado_vital: string;
+    metadata_cientifica: Record<string, any>;
+    node_id: number;
+    experiments?: ExperimentLIMS[];
+}
+
+export interface ExperimentLIMS {
+    id: number;
+    name: string;
+    description: string;
+    created_at: string;
+    api_key: string;
+    plants: Plant[];
+}
+
+export interface PlantTelemetryRecord {
+    timestamp: string;
+    node_id: number;
+    temperature: number;
+    humidity: number;
+}
+
+export type PlantSortKey = 'name' | 'especie_variedad' | 'fecha_siembra';
+export type SortDirection = 'asc' | 'desc';
+
 export type MetricType = 'temperatura' | 'humedad' | 'vpd';
-export type ViewType = 'DATAVIZ' | 'MANUAL' | 'PLANNER';
+export type ViewType = 'DATAVIZ' | 'MANUAL' | 'PLANNER' | 'LIMS_CATALOG';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Comandos de Control (Frontend → API → Raspberry)

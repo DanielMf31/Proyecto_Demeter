@@ -5,6 +5,7 @@ from fastapi.responses import FileResponse
 from rq.job import Job
 from rq.exceptions import NoSuchJobError
 import logging
+from pydantic import BaseModel
 
 from Core.auth import get_current_active_user
 from BD.models import User
@@ -23,8 +24,13 @@ task_queue = Queue("demeter_tasks", connection=redis_conn)
 
 router = APIRouter(prefix="/export", tags=["Exports"])
 
+class ExportRequest(BaseModel):
+    experimento_id: int
+    fecha_referencia: str
+    rango_dias: int
+
 @router.post("/plants", summary="Start Async Export Job")
-async def start_export(current_user: User = Depends(get_current_active_user)):
+async def start_export(req: ExportRequest, current_user: User = Depends(get_current_active_user)):
     """
     Enqueues an RQ job to extract and process plant telemetry data asynchronously.
     Returns a Job ID immediately to avoid blocking the API.
@@ -35,8 +41,10 @@ async def start_export(current_user: User = Depends(get_current_active_user)):
     try:
         # Import task function as string path to avoid circular imports or loading heavy libraries in API memory
         job = task_queue.enqueue(
-            "Analisis_datos.export_worker.generate_export_bundle", 
-            job_id,
+            "Worker.tasks.export_experiment_data", 
+            req.experimento_id,
+            req.fecha_referencia,
+            req.rango_dias,
             job_id=job_id,
             job_timeout='10m'
         )

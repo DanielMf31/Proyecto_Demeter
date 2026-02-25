@@ -39,7 +39,7 @@ def graficar_comparativa(datos_nodos: dict, output_dir: str):
     plt.ylabel("Temperatura (°C)")
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig(os.path.join(comparativa_dir, "grafica_temperatura_global.pdf"))
+    plt.savefig(os.path.join(comparativa_dir, "grafica_temperatura_global.png"))
     plt.close()
     
     # 2. VPD
@@ -56,7 +56,7 @@ def graficar_comparativa(datos_nodos: dict, output_dir: str):
     plt.legend()
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig(os.path.join(comparativa_dir, "grafica_vpd_global.pdf"))
+    plt.savefig(os.path.join(comparativa_dir, "grafica_vpd_global.png"))
     plt.close()
 
 def graficar_comparativa_avanzada(datos_nodos: dict, output_dir: str):
@@ -84,7 +84,7 @@ def graficar_comparativa_avanzada(datos_nodos: dict, output_dir: str):
     axes[1].tick_params(axis='x', rotation=15)
     
     plt.tight_layout()
-    plt.savefig(os.path.join(comparativa_dir, "boxplot_estadistico.pdf"))
+    plt.savefig(os.path.join(comparativa_dir, "boxplot_estadistico.png"))
     plt.close()
     
     # 2. Bar Chart (Resumen Métricas)
@@ -104,7 +104,7 @@ def graficar_comparativa_avanzada(datos_nodos: dict, output_dir: str):
     axes[1].tick_params(axis='x', rotation=15)
 
     plt.tight_layout()
-    plt.savefig(os.path.join(comparativa_dir, "resumen_barras.pdf"))
+    plt.savefig(os.path.join(comparativa_dir, "resumen_barras.png"))
     plt.close()
 
 def graficar_nodo_individual(df: pd.DataFrame, nodo_id: str, base_output_dir: str):
@@ -135,7 +135,7 @@ def graficar_nodo_individual(df: pd.DataFrame, nodo_id: str, base_output_dir: st
     
     plt.suptitle(f"Análisis Horario: Planta {nodo_id}", fontsize=16)
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, f"grafica_planta_{nodo_id}_panel.pdf"))
+    plt.savefig(os.path.join(output_dir, f"grafica_planta_{nodo_id}_panel.png"))
     plt.close()
 
 def procesar_graficas_generales(datos_nodos: dict, output_dir: str):

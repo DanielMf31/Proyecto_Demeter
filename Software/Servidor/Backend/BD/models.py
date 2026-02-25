@@ -1,5 +1,7 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, Index, Float
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, Index, Float, Date
+from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
@@ -20,6 +22,7 @@ class User(Base):
     # interactions
     sequences = relationship("Sequence", back_populates="creator")
     activity_logs = relationship("ActivityLog", back_populates="user")
+    experiments = relationship("Experiment", back_populates="user")
 
 class Device(Base):
     __tablename__ = "devices"
@@ -78,7 +81,44 @@ class ActivityLog(Base):
         Index('idx_activity_log_timestamp', 'timestamp'),
     )
 
+class ExperimentoPlantaLink(Base):
+    __tablename__ = "experimento_planta_link"
+    
+    experiment_id = Column(Integer, ForeignKey("experiments.id", ondelete="CASCADE"), primary_key=True)
+    plant_id = Column(Integer, ForeignKey("plants.id", ondelete="CASCADE"), primary_key=True)
+    linked_at = Column(DateTime, default=datetime.utcnow)
+
+class Experiment(Base):
+    __tablename__ = "experiments"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    api_key = Column(String, unique=True, index=True, default=lambda: str(uuid.uuid4()))
+    
+    user = relationship("User", back_populates="experiments")
+    plants = relationship("Plant", secondary="experimento_planta_link", back_populates="experiments")
+
+class Plant(Base):
+    __tablename__ = "plants"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    
+    # LIMS Physical Identifiers & Biology
+    identificador_fisico = Column(String, unique=True, index=True, nullable=False)
+    especie_variedad = Column(String, nullable=False)
+    fecha_siembra = Column(Date, nullable=False)
+    estado_vital = Column(String, default="Activa", nullable=False) # e.g., Activa, Cosechada, Muerta
+    metadata_cientifica = Column(JSONB, nullable=False, default={})
+    
+    node_id = Column(Integer, unique=True, nullable=False) 
+    
+    experiments = relationship("Experiment", secondary="experimento_planta_link", back_populates="plants")
+
 # --- Telemetry Models ---
+
 
 class TelemetryTH(Base):
     __tablename__ = "telemetry_th"

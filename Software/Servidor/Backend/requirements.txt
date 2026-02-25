@@ -16,3 +16,5 @@ python-jose[cryptography]
 passlib[bcrypt]
 bcrypt
 seaborn
+apscheduler
+alembic==1.13.1

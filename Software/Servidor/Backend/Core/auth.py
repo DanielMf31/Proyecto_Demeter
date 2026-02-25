@@ -4,14 +4,14 @@ from typing import Optional
 from jose import JWTError, jwt
 import bcrypt
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, APIKeyHeader
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 # We'll need the settings explicitly or just directly define
 from Core.config import get_settings
-from BD.models import User
+from BD.models import User, Experiment
 from Core.database import get_db
 
 settings = get_settings()
@@ -67,3 +67,34 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
+# ── API Key Security for SDK ──────────────────────────────────────────────────
+api_key_header_scheme = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+async def get_api_key_or_403(
+    experimento_id: int,
+    api_key_header: str = Depends(api_key_header_scheme),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Validates that the provided X-API-Key header matches the given experimento_id.
+    """
+    if not api_key_header:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Missing X-API-Key in headers required for SDK access."
+        )
+        
+    result = await db.execute(select(Experiment).where(Experiment.id == experimento_id))
+    experiment = result.scalar_one_or_none()
+    
+    if not experiment:
+        raise HTTPException(status_code=404, detail="Experiment not found")
+        
+    if experiment.api_key != api_key_header:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Invalid API Key for this experiment."
+        )
+        
+    return experiment

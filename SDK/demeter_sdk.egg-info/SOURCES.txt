@@ -1,0 +1,17 @@
+README.md
+pyproject.toml
+setup.py
+demeter_sdk/__init__.py
+demeter_sdk/_session.py
+demeter_sdk/_types.py
+demeter_sdk/client.py
+demeter_sdk/export.py
+demeter_sdk/fetcher.py
+demeter_sdk/science.py
+demeter_sdk/transform.py
+demeter_sdk/viz.py
+demeter_sdk.egg-info/PKG-INFO
+demeter_sdk.egg-info/SOURCES.txt
+demeter_sdk.egg-info/dependency_links.txt
+demeter_sdk.egg-info/requires.txt
+demeter_sdk.egg-info/top_level.txt

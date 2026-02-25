@@ -1,4 +1,4 @@
-import { CommandPayload, CommandResponse, DiscoveryResponse } from '../types';
+import { CommandPayload, CommandResponse, DiscoveryResponse, Plant, ExperimentLIMS, PlantTelemetryRecord } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
@@ -84,6 +84,99 @@ export const apiService = {
             });
 
             if (!response.ok) throw new Error("Failed to fetch node history");
+            return await response.json();
+        } catch (e) {
+            console.error(e);
+            return null;
+        }
+    },
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // LIMS ARCHITECTURE (Plants & Experiments)
+    // ─────────────────────────────────────────────────────────────────────────────
+
+    async fetchPlants(): Promise<Plant[] | null> {
+        try {
+            const response = await fetch(`${API_BASE}/lims/plantas`);
+            if (!response.ok) throw new Error("Failed fetching plants");
+            return await response.json();
+        } catch (e) {
+            console.error(e);
+            return null;
+        }
+    },
+
+    async fetchExperiments(): Promise<ExperimentLIMS[] | null> {
+        try {
+            const response = await fetch(`${API_BASE}/lims/experimentos`);
+            if (!response.ok) throw new Error("Failed fetching experiments");
+            return await response.json();
+        } catch (e) {
+            console.error(e);
+            return null;
+        }
+    },
+
+    async generateExperiment(name: string, description: string, plant_ids: number[]): Promise<ExperimentLIMS | null> {
+        try {
+            const response = await fetch(`${API_BASE}/lims/experimentos/generar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description, plant_ids })
+            });
+            if (!response.ok) throw new Error("Failed generating experiment");
+            return await response.json();
+        } catch (e) {
+            console.error(e);
+            return null;
+        }
+    },
+
+    async fetchPlantDetail(plantId: number): Promise<Plant | null> {
+        try {
+            const response = await fetch(`${API_BASE}/lims/plantas/${plantId}`);
+            if (!response.ok) throw new Error(`Failed fetching plant ${plantId}`);
+            return await response.json();
+        } catch (e) {
+            console.error(e);
+            return null;
+        }
+    },
+
+    async fetchPlantTelemetry(plantId: number): Promise<PlantTelemetryRecord[] | null> {
+        try {
+            const response = await fetch(`${API_BASE}/lims/plantas/${plantId}/telemetry`);
+            if (!response.ok) throw new Error(`Failed fetching telemetry for plant ${plantId}`);
+            return await response.json();
+        } catch (e) {
+            console.error(e);
+            return null;
+        }
+    },
+
+    async updatePlant(plantId: number, data: Partial<Plant>): Promise<Plant | null> {
+        try {
+            const response = await fetch(`${API_BASE}/lims/plantas/${plantId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) throw new Error(`Failed updating plant ${plantId}`);
+            return await response.json();
+        } catch (e) {
+            console.error(e);
+            return null;
+        }
+    },
+
+    async createPlant(data: Omit<Plant, 'id' | 'experiments'>): Promise<Plant | null> {
+        try {
+            const response = await fetch(`${API_BASE}/lims/plantas`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            if (!response.ok) throw new Error('Failed creating plant');
             return await response.json();
         } catch (e) {
             console.error(e);

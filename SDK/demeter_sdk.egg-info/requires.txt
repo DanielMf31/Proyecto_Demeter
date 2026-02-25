@@ -1,0 +1,17 @@
+requests>=2.31
+urllib3>=2.0
+pandas>=2.0
+numpy>=1.26
+matplotlib>=3.8
+seaborn>=0.13
+openpyxl>=3.1
+pyarrow>=14.0
+
+[dev]
+pytest>=8.0
+pytest-cov
+ruff
+
+[plotly]
+plotly>=5.18
+kaleido>=0.2
