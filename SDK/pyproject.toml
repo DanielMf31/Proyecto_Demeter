@@ -9,7 +9,7 @@ description = "Official Python SDK for the Demeter IoT Agricultural Platform"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
-authors = [{ name = "Daniel M.F.", email = "demeter@project.local" }]
+authors = [{ name = "Daniel M.F.", email = "danielmf310506@gmail.com" }]
 keywords = ["iot", "agtech", "sensor", "telemetry", "agronomy", "greenhouse"]
 classifiers = [
     "Development Status :: 4 - Beta",

@@ -33,3 +33,5 @@ Python/data/*.db
 .venv_sdk/
 SDK/dist/
 SDK/*.egg-info/
+token.md
+*.pypirc

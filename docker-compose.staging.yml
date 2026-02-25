@@ -1,0 +1,61 @@
+# ==========================================
+# STAGING OVERRIDE CONFIGURATION
+# ==========================================
+# Deploy staging locally on this laptop (no VPS needed):
+#
+#   cp .env.staging .env.staging.local  # add API key
+#   docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d --build
+#
+# Access:
+#   Frontend → http://localhost:5175
+#   API      → http://localhost:8001/api/docs
+#   DB       → localhost:5433
+#   Redis    → localhost:6381
+
+services:
+  frontend:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Software/Servidor/docker/frontend/Dockerfile # production build
+    ports:
+      - "5175:80" # staging frontend on 5175 (avoids conflict with dev on 80)
+    environment:
+      - VITE_API_URL=http://localhost:8001/api
+      - VITE_WS_URL=ws://localhost:8001/ws
+
+  api:
+    restart: unless-stopped
+    ports:
+      - "8001:8000" # staging API on 8001 (avoids conflict with dev on 8000)
+    environment:
+      - DEMETER_ENV=staging
+      - DEBUG=True # enable /docs and /redoc in staging
+      - DATABASE_URL=postgresql://${DEMETER_POSTGRES_USER:-demeter_stage_user}:${DEMETER_POSTGRES_PASSWORD:-secure_staging_password_123}@demeter-db:5432/${DEMETER_POSTGRES_DB:-demeter_staging}
+      - REDIS_URL=redis://demeter-redis:6379/0
+      - RQ_REDIS_URL=redis://demeter-redis:6379/1
+
+  math-worker:
+    restart: unless-stopped
+
+  sequencer:
+    restart: unless-stopped
+
+  db:
+    restart: unless-stopped
+    ports:
+      - "5433:5432" # staging DB on 5433
+    environment:
+      - POSTGRES_USER=${DEMETER_POSTGRES_USER:-demeter_stage_user}
+      - POSTGRES_PASSWORD=${DEMETER_POSTGRES_PASSWORD:-secure_staging_password_123}
+      - POSTGRES_DB=${DEMETER_POSTGRES_DB:-demeter_staging}
+    volumes:
+      - postgres_staging:/var/lib/postgresql/data # separate volume from dev
+
+  redis:
+    restart: unless-stopped
+    ports:
+      - "6381:6379" # staging Redis on 6381
+
+volumes:
+  postgres_staging: # isolated staging DB volume
