@@ -51,3 +51,11 @@ BD, SQL, 1:N N:1 N:M, consultas avanzadas, JOIN, subconsultas, funciones de agre
     8. Se crea un archivo en la carpeta "versions" que contiene el script de migración
     9. Ejecutamos el script de migración con "alembic upgrade head"
     10. Para no tener que hacerlo de forma manual, podemos añadir un script que ejecute el script de migración al iniciar el servidor o en el contenedor de Docker a la hora de inicializarlo, ya que centraliza todo. Por ejemplo, en el contenedor de Docker, podemos añadir un script que ejecute el script de migración al iniciar el servidor.
+
+## 4: Cómo hacer para añadir una descripción a cada planta
+
+Problema: Cada investigador querrá anotar una cosa específica. Si tenemos 200 celdas para cada tipo de planta o posible valor, la mayoría de las celdas estarán vacías
+
+Solución: Implementamos una celda e tipo JSON que permite incluir metadata en formato clave-valor. Por ejemplo: {"genotipo": "indica", "edad": "2 semanas", "altura": "10 cm", "peso": "20 g"}. Esto permite que cada investigador anote lo que quiera sin necesidad de modificar la estructura de la tabla. Además podemos serializarlo como labels para que se vea más bonito
+
+

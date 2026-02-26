@@ -1,6 +1,5 @@
 README.md
 pyproject.toml
-setup.py
 demeter_sdk/__init__.py
 demeter_sdk/_session.py
 demeter_sdk/_types.py
@@ -15,3 +14,8 @@ demeter_sdk.egg-info/SOURCES.txt
 demeter_sdk.egg-info/dependency_links.txt
 demeter_sdk.egg-info/requires.txt
 demeter_sdk.egg-info/top_level.txt
+tests/conftest.py
+tests/test_client_offline.py
+tests/test_export.py
+tests/test_science.py
+tests/test_transform.py

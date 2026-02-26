@@ -23,6 +23,8 @@ services:
     container_name: demeter-cloudflared
     restart: unless-stopped
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    environment:
+      - TUNNEL_TRANSPORT_PROTOCOL=http2
     networks:
       - demeter-net
     depends_on:

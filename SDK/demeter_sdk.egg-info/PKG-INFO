@@ -2,8 +2,7 @@ Metadata-Version: 2.4
 Name: demeter_sdk
 Version: 1.0.0
 Summary: Official Python SDK for the Demeter IoT Agricultural Platform
-Author: Demeter Team
-Author-email: "Daniel M.F." <demeter@project.local>
+Author-email: "Daniel M.F." <danielmf31.dev@gmail.com>
 License: MIT
 Keywords: iot,agtech,sensor,telemetry,agronomy,greenhouse
 Classifier: Development Status :: 4 - Beta
@@ -11,7 +10,7 @@ Classifier: Intended Audience :: Science/Research
 Classifier: Programming Language :: Python :: 3.11
 Classifier: Programming Language :: Python :: 3.12
 Classifier: Topic :: Scientific/Engineering :: Bio-Informatics
-Requires-Python: >=3.8
+Requires-Python: >=3.11
 Description-Content-Type: text/markdown
 Requires-Dist: requests>=2.31
 Requires-Dist: urllib3>=2.0
@@ -28,8 +27,6 @@ Requires-Dist: ruff; extra == "dev"
 Provides-Extra: plotly
 Requires-Dist: plotly>=5.18; extra == "plotly"
 Requires-Dist: kaleido>=0.2; extra == "plotly"
-Dynamic: author
-Dynamic: requires-python
 
 # Demeter Python SDK (`demeter-sdk`) 🌾
 

@@ -50,3 +50,4 @@ Capa de transporte ultra-rápida y persistente, optimizada puramente para teleme
 Testing inicial para cálculo asíncrono.
 - `POST /analysis/generate`: Encola una tarea puramente estadística (dummy).
 - `GET /analysis/status/{task_id}` y `GET /analysis/download/{filename}` equivalentes al flujo de Exportación.
+0

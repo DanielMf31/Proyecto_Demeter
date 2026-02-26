@@ -1,10 +1,9 @@
 RFC: Secuenciador
 Autor: Daniel Montero Fernández
 Fecha: 21 de Febrero de 2026
-Estado: Pending
+Estado: Pending Review
 
 ## 1. Contexto y Motivación
-Explica brevemente el "Por qué". ¿Cuál es el problema actual del sistema que te obliga a crear esto? (Ej: "Actualmente la API se bloquea al procesar Excel, necesitamos un Worker", o "Necesitamos un Secuenciador para organizar las tareas programadas").
 
 El Backend de nuestro servidor debe ser capaz de realizar una serie de tareas rutinarias de sincronización, cálculos y tareas varias. 
 

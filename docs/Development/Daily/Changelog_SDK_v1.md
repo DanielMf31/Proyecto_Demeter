@@ -151,7 +151,7 @@ Cambios respecto a la versión anterior:
 | `make logs-db` | Logs de PostgreSQL |
 | `make status` | Estado de todos los contenedores Demeter |
 | `make clean` | Para contenedores (mantiene datos) |
-| `make clean-all` | Para + borra volúmenes (⚠️ borra datos) |
+| `make clean-all` | Para + borra volúmenes ( borra datos) |
 | `make tunnel-staging` | Instrucciones para Cloudflare tunnel |
 | `make api-key` | Muestra API keys de experimentos en DB |
 

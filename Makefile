@@ -192,7 +192,7 @@ clean-all:
 api-key:
 	@echo "API Keys de experimentos:"
 	@docker exec demeter-db psql -U postgres -d demeter_staging \
-		-c "SELECT id, name, api_key FROM experimentos ORDER BY id;" 2>/dev/null || \
+		-c "SELECT id, name, api_key FROM experiments ORDER BY id;" 2>/dev/null || \
 	docker exec demeter-db psql -U postgres -d demeter_db \
-		-c "SELECT id, name, api_key FROM experimentos ORDER BY id;" 2>/dev/null || \
+		-c "SELECT id, name, api_key FROM experiments ORDER BY id;" 2>/dev/null || \
 	echo "No se pudo conectar. Asegurate de que el stack esta levantado."
