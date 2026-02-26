@@ -14,6 +14,7 @@
         dev dev-build dev-down dev-logs dev-seed \
         staging staging-build staging-down staging-logs staging-seed staging-restart \
         prod \
+        migrate dev-migrate \
         seed logs logs-api logs-db logs-redis logs-frontend \
         clean clean-all status ps pull \
         tunnel-staging api-key
@@ -44,6 +45,8 @@ help:
 	@echo ""
 	@echo "  UTILIDADES"
 	@echo "  -----------------------------------------------"
+	@echo "  migrate          Corre migraciones Alembic en staging (upgrade head)"
+	@echo "  dev-migrate      Corre migraciones Alembic en dev"
 	@echo "  seed             Puebla la DB activa con datos de prueba"
 	@echo "  logs             Todos los logs del stack activo"
 	@echo "  logs-api         Logs de la API (FastAPI)"
@@ -77,7 +80,12 @@ dev-down:
 dev-logs:
 	docker compose logs -f --tail=80
 
-dev-seed:
+dev-migrate:
+	@echo "Corriendo migraciones Alembic (dev)..."
+	docker exec demeter-api sh -c "cd /app/Software/Servidor/Backend && alembic upgrade head"
+	@echo "Migraciones completadas"
+
+dev-seed: dev-migrate
 	@echo "Seeding dev DB..."
 	docker exec demeter-api python -m BD.seed_data
 	@echo "Seed completado"
@@ -108,7 +116,12 @@ staging-restart:
 staging-logs:
 	$(STAGING_COMPOSE) logs -f --tail=80
 
-staging-seed:
+migrate:
+	@echo "Corriendo migraciones Alembic (staging)..."
+	docker exec demeter-api sh -c "cd /app/Software/Servidor/Backend && alembic upgrade head"
+	@echo "Migraciones completadas"
+
+staging-seed: migrate
 	@echo "Seeding staging DB..."
 	docker exec demeter-api python -m BD.seed_data
 	@echo "Seed completado"
@@ -132,7 +145,7 @@ prod:
 	@echo ""
 
 # ─── UTILIDADES ───────────────────────────────────────────────────────────────
-seed:
+seed: migrate
 	@echo "Seeding DB activa..."
 	docker exec demeter-api python -m BD.seed_data
 
