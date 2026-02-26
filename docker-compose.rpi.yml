@@ -1,0 +1,70 @@
+# ==========================================
+# RASPBERRY PI COMPOSE OVERRIDE
+# ==========================================
+# Despliega el GatewayOrchestrator en la Raspberry Pi.
+# El Gateway se conecta al Backend via WebSocket y lee/escribe
+# mensajes al bus UART donde están los ESP32.
+#
+# Uso:
+#   make rpi-up     ← Arranca el gateway
+#   make rpi-down   ← Para el gateway
+#   make rpi-logs   ← Ver logs en vivo
+#   make rpi-shell  ← Entrar al contenedor
+#
+# Acceso al puerto UART:
+#   - La RPi expone /dev/serial0 (GPIO UART)
+#   - El servicio lo monta como /dev/ttyS0 dentro del contenedor
+#   - Si usas un adaptador USB, cámbialo a /dev/ttyUSB0
+
+services:
+
+  # ─── Gateway Orchestrator ─────────────────────────────────────────────────
+  # Proceso principal: puente UART ↔ WebSocket → Backend
+  gateway:
+    image: demeter-gateway:latest
+    container_name: demeter-gateway
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Software/Raspberry/Dockerfile
+    environment:
+      # ── Entorno ──────────────────────────────────────────────────────────
+      - DEMETER_ENV=${DEMETER_ENV:-production}
+      - DEMETER_DEBUG=${DEMETER_DEBUG:-false}
+      - DEMETER_LOG_LEVEL=${DEMETER_LOG_LEVEL:-INFO}
+
+      # ── Backend WebSocket ─────────────────────────────────────────────
+      # Apunta a patata.monters.org en producción o a la IP local en dev
+      - DEMETER_BACKEND_URL=${DEMETER_BACKEND_URL:-patata.monters.org}
+      - DEMETER_BACKEND_PORT=${DEMETER_BACKEND_PORT:-443}
+
+      # ── UART / Hardware ───────────────────────────────────────────────
+      # GPIO UART de Raspberry Pi: /dev/serial0  →  montado en /dev/ttyS0
+      # Adaptador USB:             /dev/ttyUSB0  →  sin cambios
+      - DEMETER_PORT=${DEMETER_PORT:-/dev/ttyS0}
+      - DEMETER_UART_BAUD=${DEMETER_UART_BAUD:-115200}
+
+    # Acceso al hardware serie
+    devices:
+      - "${HOST_SERIAL_PORT:-/dev/serial0}:/dev/ttyS0"
+
+    # Necesario para acceder a /dev/* en contenedores
+    privileged: false
+    group_add:
+      - dialout # Grupo para acceso serie en Debian/Raspberry Pi OS
+
+    # Logs persistentes
+    volumes:
+      - ./Software/Raspberry/logs:/app/logs
+      - ./Software/Raspberry/data:/app/data
+
+    # Red host para alcanzar IPs locales si el backend está en la misma red
+    network_mode: host
+
+    # Límite de recursos (RPi tiene recursos limitados)
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 64M

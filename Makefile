@@ -15,9 +15,12 @@
         staging staging-build staging-down staging-logs staging-seed staging-restart \
         prod \
         migrate dev-migrate \
+        rpi-up rpi-build rpi-down rpi-logs rpi-shell rpi-status \
         seed logs logs-api logs-db logs-redis logs-frontend \
         clean clean-all status ps pull \
         tunnel-staging api-key
+
+RPI_COMPOSE = docker compose -f docker-compose.rpi.yml --env-file .env.rpi
 
 STAGING_COMPOSE = docker compose -f docker-compose.yml -f docker-compose.staging.yml
 
@@ -59,6 +62,15 @@ help:
 	@echo "  clean            Para contenedores (mantiene datos)"
 	@echo "  clean-all        Para y borra volúmenes (pierde datos DB)"
 	@echo "  api-key          Muestra API keys de experimentos en la DB"
+	@echo ""
+	@echo "  RASPBERRY PI (ejecutar EN la Raspberry)"
+	@echo "  -----------------------------------------------"
+	@echo "  rpi-up           Arranca el Gateway Orchestrator en la RPi"
+	@echo "  rpi-build        Arranca con rebuild completo de la imagen"
+	@echo "  rpi-down         Para el gateway"
+	@echo "  rpi-logs         Sigue los logs del gateway en tiempo real"
+	@echo "  rpi-shell        Abre una shell dentro del contenedor gateway"
+	@echo "  rpi-status       Estado del contenedor gateway"
 	@echo ""
 
 # ─── DESARROLLO ───────────────────────────────────────────────────────────────
@@ -196,3 +208,32 @@ api-key:
 	docker exec demeter-db psql -U postgres -d demeter_db \
 		-c "SELECT id, name, api_key FROM experiments ORDER BY id;" 2>/dev/null || \
 	echo "No se pudo conectar. Asegurate de que el stack esta levantado."
+
+# ─── RASPBERRY PI ─────────────────────────────────────────────────────────────
+rpi-up:
+	@echo "Arrancando Gateway Orchestrator en la Raspberry Pi..."
+	$(RPI_COMPOSE) up -d
+	@echo "Gateway listo. Logs: make rpi-logs"
+
+rpi-build:
+	@echo "Rebuildeando imagen del Gateway..."
+	$(RPI_COMPOSE) up -d --build
+	@echo "Imagen reconstruida y gateway arrancado"
+
+rpi-down:
+	@echo "Parando Gateway Orchestrator..."
+	$(RPI_COMPOSE) down
+
+rpi-logs:
+	$(RPI_COMPOSE) logs -f --tail=100
+
+rpi-shell:
+	@echo "Abriendo shell en el contenedor gateway..."
+	docker exec -it demeter-gateway /bin/bash
+
+rpi-status:
+	@echo "Estado del Gateway Orchestrator:"
+	@docker ps --filter "name=demeter-gateway" --format "table {{.Names}}\t{{.Status}}\t{{.Image}}"
+	@echo ""
+	@echo "Variables activas:"
+	@docker exec demeter-gateway env 2>/dev/null | grep DEMETER_ | sort || echo "  (contenedor no arrancado)"
