@@ -64,7 +64,7 @@ services:
       context: .
       dockerfile: Software/Servidor/docker/backend/Dockerfile
     container_name: demeter-sequencer
-    command: python Software/Servidor/Backend/Secuenciador/main.py
+    command: python Secuenciador/main.py
     env_file:
       - .env
     volumes:
