@@ -1,61 +1,82 @@
 # ==========================================
 # STAGING OVERRIDE CONFIGURATION
 # ==========================================
-# Deploy staging locally on this laptop (no VPS needed):
+# Despliegue en portátil accesible via Cloudflare Tunnel en patata.monters.org
 #
-#   cp .env.staging .env.staging.local  # add API key
-#   docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d --build
+# Uso:
+#   make staging       ← arranca todo + túnel Cloudflare
+#   make staging-down  ← para todo
 #
-# Access:
-#   Frontend → http://localhost:5175
-#   API      → http://localhost:8001/api/docs
-#   DB       → localhost:5433
-#   Redis    → localhost:6381
+# Acceso (una vez levantado):
+#   https://patata.monters.org   → Frontend
+#   https://patata.monters.org/api/docs → Swagger API
+#   localhost:5175   → Frontend directo (sin túnel)
+#   localhost:8001   → API directo (sin túnel)
 
 services:
+
+  # ─── Cloudflare Tunnel ────────────────────────────────────────────────────
+  # Expone el stack de staging en patata.monters.org sin abrir puertos
+  # El token se obtiene en: dash.cloudflare.com → Zero Trust → Tunnels
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: demeter-cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    networks:
+      - demeter-net
+    depends_on:
+      - frontend
+      - api
+
+  # ─── Frontend ─────────────────────────────────────────────────────────────
   frontend:
     restart: unless-stopped
     build:
       context: .
-      dockerfile: Software/Servidor/docker/frontend/Dockerfile # production build
+      dockerfile: Software/Servidor/docker/frontend/Dockerfile # build de producción
     ports:
-      - "5175:80" # staging frontend on 5175 (avoids conflict with dev on 80)
+      - "5175:80" # acceso directo sin túnel
     environment:
-      - VITE_API_URL=http://localhost:8001/api
-      - VITE_WS_URL=ws://localhost:8001/ws
+      - VITE_API_URL=https://patata.monters.org/api
+      - VITE_WS_URL=wss://patata.monters.org/ws
 
+  # ─── API ──────────────────────────────────────────────────────────────────
   api:
     restart: unless-stopped
     ports:
-      - "8001:8000" # staging API on 8001 (avoids conflict with dev on 8000)
+      - "8001:8000" # acceso directo sin túnel
     environment:
       - DEMETER_ENV=staging
-      - DEBUG=True # enable /docs and /redoc in staging
-      - DATABASE_URL=postgresql://${DEMETER_POSTGRES_USER:-demeter_stage_user}:${DEMETER_POSTGRES_PASSWORD:-secure_staging_password_123}@demeter-db:5432/${DEMETER_POSTGRES_DB:-demeter_staging}
+      - DEBUG=True
+      - DATABASE_URL=postgresql://${DEMETER_POSTGRES_USER:-postgres}:${DEMETER_POSTGRES_PASSWORD:-postgres_local_pass}@demeter-db:5432/${DEMETER_POSTGRES_DB:-demeter_staging}
       - REDIS_URL=redis://demeter-redis:6379/0
       - RQ_REDIS_URL=redis://demeter-redis:6379/1
 
+  # ─── Workers ──────────────────────────────────────────────────────────────
   math-worker:
     restart: unless-stopped
 
   sequencer:
     restart: unless-stopped
 
+  # ─── Base de datos ────────────────────────────────────────────────────────
   db:
     restart: unless-stopped
     ports:
-      - "5433:5432" # staging DB on 5433
+      - "5433:5432" # acceso directo para debugging con psql
     environment:
-      - POSTGRES_USER=${DEMETER_POSTGRES_USER:-demeter_stage_user}
-      - POSTGRES_PASSWORD=${DEMETER_POSTGRES_PASSWORD:-secure_staging_password_123}
+      - POSTGRES_USER=${DEMETER_POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${DEMETER_POSTGRES_PASSWORD:-postgres_local_pass}
       - POSTGRES_DB=${DEMETER_POSTGRES_DB:-demeter_staging}
     volumes:
-      - postgres_staging:/var/lib/postgresql/data # separate volume from dev
+      - postgres_staging:/var/lib/postgresql/data # volumen aislado
 
+  # ─── Redis ────────────────────────────────────────────────────────────────
   redis:
     restart: unless-stopped
     ports:
-      - "6381:6379" # staging Redis on 6381
+      - "6381:6379" # acceso directo para redis-cli
 
 volumes:
-  postgres_staging: # isolated staging DB volume
+  postgres_staging: # volumen aislado — no mezcla datos con dev ni prod
