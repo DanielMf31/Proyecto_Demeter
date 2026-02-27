@@ -1,0 +1,17 @@
+<map id="ProtocolEngine::onTempHumReportRecv" name="ProtocolEngine::onTempHumReportRecv">
+<area shape="rect" id="Node000001" title=" " alt="" coords="544,47,753,87"/>
+<area shape="rect" id="Node000002" href="$classSystemManager.html#a2ed1972442d36a8a964882eb3735f7e2" title="Initialize the system components. Sets up callbacks and initializes enabled hardware." alt="" coords="324,55,496,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="530,70,496,70,496,65,530,65"/>
+<area shape="rect" id="Node000003" href="$classNode__Actuator.html#af54ed12f9b1d196df4c05b31f725e993" title="Inicializa los controladores hardware subyacentes." alt="" coords="113,5,275,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="340,54,250,33,251,28,341,49"/>
+<area shape="rect" id="Node000005" href="$classNode__Gateway.html#ab304a9b88d40c06a9db44ea3e52c6c16" title="Arranca los administradores de sensores, pines y la máquina de estados." alt="" coords="112,55,276,80"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="310,70,276,70,276,65,310,65"/>
+<area shape="rect" id="Node000007" href="$classNode__Sensor.html#ae2f8de7388f598988e6ae30a15de3841" title="Arranca los subsistemas hardware y máquinas de estado en init." alt="" coords="119,104,269,129"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="341,86,251,107,250,101,340,80"/>
+<area shape="rect" id="Node000004" href="$main__node__actuador_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,5,64,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="99,21,64,21,64,15,99,15"/>
+<area shape="rect" id="Node000006" href="$main__gateway_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,55,64,80"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="98,70,64,70,64,65,98,65"/>
+<area shape="rect" id="Node000008" href="$main__node__sensor_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,104,64,129"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="105,119,64,119,64,114,105,114"/>
+</map>

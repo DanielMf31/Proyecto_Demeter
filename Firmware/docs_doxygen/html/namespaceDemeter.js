@@ -1,0 +1,66 @@
+var namespaceDemeter =
+[
+    [ "Sensors", "namespaceDemeter_1_1Sensors.html", "namespaceDemeter_1_1Sensors" ],
+    [ "AckData", "structDemeter_1_1AckData.html", "structDemeter_1_1AckData" ],
+    [ "ExecSequenceCmd", "structDemeter_1_1ExecSequenceCmd.html", "structDemeter_1_1ExecSequenceCmd" ],
+    [ "ISensor", "classDemeter_1_1ISensor.html", "classDemeter_1_1ISensor" ],
+    [ "NackData", "structDemeter_1_1NackData.html", "structDemeter_1_1NackData" ],
+    [ "PinReport", "structDemeter_1_1PinReport.html", "structDemeter_1_1PinReport" ],
+    [ "RequestData", "structDemeter_1_1RequestData.html", "structDemeter_1_1RequestData" ],
+    [ "RouteAddCmd", "structDemeter_1_1RouteAddCmd.html", "structDemeter_1_1RouteAddCmd" ],
+    [ "SensorReading", "structDemeter_1_1SensorReading.html", "structDemeter_1_1SensorReading" ],
+    [ "SequenceStep", "structDemeter_1_1SequenceStep.html", "structDemeter_1_1SequenceStep" ],
+    [ "SetGpioCmd", "structDemeter_1_1SetGpioCmd.html", "structDemeter_1_1SetGpioCmd" ],
+    [ "SetPwmCmd", "structDemeter_1_1SetPwmCmd.html", "structDemeter_1_1SetPwmCmd" ],
+    [ "SystemContext", "classDemeter_1_1SystemContext.html", "classDemeter_1_1SystemContext" ],
+    [ "SystemReport", "structDemeter_1_1SystemReport.html", "structDemeter_1_1SystemReport" ],
+    [ "TempHumReport", "structDemeter_1_1TempHumReport.html", "structDemeter_1_1TempHumReport" ],
+    [ "AckCallback", "namespaceDemeter.html#afab5818deefbf9d03e22f8a64031772f", null ],
+    [ "GetSensorsCallback", "namespaceDemeter.html#ab09694659da0e237ae1937ab512e03ab", null ],
+    [ "GpioCallback", "namespaceDemeter.html#a325c4874395376e26355218cb2ad5798", null ],
+    [ "NackCallback", "namespaceDemeter.html#ac5f12c2dd3c36d8a91ca759f85b83255", null ],
+    [ "PingCallback", "namespaceDemeter.html#a90636eaaf429040ba026f6db0a3e2a83", null ],
+    [ "PinReportCallback", "namespaceDemeter.html#aca69ef23c3846766c7d6a4084d0a990c", null ],
+    [ "PwmCallback", "namespaceDemeter.html#a0d2aa07f237464acf4482d341bd96dd5", null ],
+    [ "RouteAddCallback", "namespaceDemeter.html#a25011309f1d9921d7e111c8fad58a030", null ],
+    [ "SequenceCallback", "namespaceDemeter.html#aa6f5a9cb47b0c6d320bbc5d736338dd2", null ],
+    [ "SystemReportCallback", "namespaceDemeter.html#afbd3fe93dad7971d1a9c48751e9142d3", null ],
+    [ "TempHumReportCallback", "namespaceDemeter.html#af757607533381423b3b12cb1fb7d1948", null ],
+    [ "CommandType", "namespaceDemeter.html#a9900644216d6d724ceb0bdd698a92e55", [
+      [ "PING", "namespaceDemeter.html#a9900644216d6d724ceb0bdd698a92e55ae07ff41a486c27c095a15898dcca34d1", null ],
+      [ "ACK", "namespaceDemeter.html#a9900644216d6d724ceb0bdd698a92e55a0fc437bc317835cad5faafc12a83fad5", null ],
+      [ "NACK", "namespaceDemeter.html#a9900644216d6d724ceb0bdd698a92e55aa68c6c77586d4c740ec1b75b65b37946", null ],
+      [ "SYN", "namespaceDemeter.html#a9900644216d6d724ceb0bdd698a92e55abab6eed0f7cd8bd721e728003b63b54d", null ],
+      [ "SYN_ACK", "namespaceDemeter.html#a9900644216d6d724ceb0bdd698a92e55a33deeec92482e9ee9eaa720efc60bbd2", null ],
+      [ "ROUTE_ADD", "namespaceDemeter.html#a9900644216d6d724ceb0bdd698a92e55a507f9d9597aa70c81e2c9906cbe77258", null ],
+      [ "TEMP_HUM_REPORT", "namespaceDemeter.html#a9900644216d6d724ceb0bdd698a92e55a956db690b0dbb950b56c0f170921136a", null ],
+      [ "PIN_REPORT", "namespaceDemeter.html#a9900644216d6d724ceb0bdd698a92e55ab7455bf3ca133ac08f6fe13dbe70fdc7", null ],
+      [ "SYSTEM_REPORT", "namespaceDemeter.html#a9900644216d6d724ceb0bdd698a92e55ad3b5a4c7b51213f1cf1cf973c377714f", null ],
+      [ "SET_GPIO", "namespaceDemeter.html#a9900644216d6d724ceb0bdd698a92e55a38d92190276091e7838ba8e2451c9c44", null ],
+      [ "SET_PWM", "namespaceDemeter.html#a9900644216d6d724ceb0bdd698a92e55a3a585520eddd27c13872377e3f655b80", null ],
+      [ "EXEC_SEQUENCE", "namespaceDemeter.html#a9900644216d6d724ceb0bdd698a92e55a857a73a444c748989ab8df947e549a23", null ],
+      [ "GET_SENSORS", "namespaceDemeter.html#a9900644216d6d724ceb0bdd698a92e55aaea93a2dbaed83e7ef3c368843e8fdbb", null ],
+      [ "UNKNOWN", "namespaceDemeter.html#a9900644216d6d724ceb0bdd698a92e55a696b031073e74bf2cb98e5ef201d4aa3", null ]
+    ] ],
+    [ "NodeRole", "namespaceDemeter.html#a58697db3ac5d64c2570b09cfece9b603", [
+      [ "SENSOR", "namespaceDemeter.html#a58697db3ac5d64c2570b09cfece9b603a72700b6ac14b90435377dcbaeb77e908", null ],
+      [ "ACTUATOR", "namespaceDemeter.html#a58697db3ac5d64c2570b09cfece9b603ae4ad238c25dd7d39e2831428adaf7332", null ],
+      [ "GATEWAY", "namespaceDemeter.html#a58697db3ac5d64c2570b09cfece9b603a440cdde6c35c88ad8799575226adda15", null ],
+      [ "HYBRID", "namespaceDemeter.html#a58697db3ac5d64c2570b09cfece9b603a3bf07fe8ac3883060b1558113ba248d4", null ]
+    ] ],
+    [ "SessionContext", "namespaceDemeter.html#ad09685709cdb5d7b064d5ce88e73bb11", [
+      [ "GENERAL", "namespaceDemeter.html#ad09685709cdb5d7b064d5ce88e73bb11ab61773b9b3968a9988d765d728985862", null ],
+      [ "SENSOR_REPORT", "namespaceDemeter.html#ad09685709cdb5d7b064d5ce88e73bb11a1c23f891cb133258271b6e1472b15b76", null ],
+      [ "COMMAND", "namespaceDemeter.html#ad09685709cdb5d7b064d5ce88e73bb11a26097a57f572fe88a7cdf80543422cb1", null ],
+      [ "CRITICAL_ALERT", "namespaceDemeter.html#ad09685709cdb5d7b064d5ce88e73bb11acf50fa336f71bb411fe5f24df85e6c2b", null ]
+    ] ],
+    [ "SystemState", "namespaceDemeter.html#a6fd40e5ce00fcefae286c9d0a304a6a6", [
+      [ "BOOT", "namespaceDemeter.html#a6fd40e5ce00fcefae286c9d0a304a6a6adf9a77cdc2fe29972274b189cf7bac7c", null ],
+      [ "HANDSHAKE_SEND_SYN", "namespaceDemeter.html#a6fd40e5ce00fcefae286c9d0a304a6a6aa60c878440d36333cce8a88208bc8326", null ],
+      [ "HANDSHAKE_WAIT_SYN_ACK", "namespaceDemeter.html#a6fd40e5ce00fcefae286c9d0a304a6a6abdde61ac7784da4cf9b4832b69135498", null ],
+      [ "HANDSHAKE_SEND_ACK", "namespaceDemeter.html#a6fd40e5ce00fcefae286c9d0a304a6a6a9facc6fc1204d9219b9d81636a101b5e", null ],
+      [ "IDLE", "namespaceDemeter.html#a6fd40e5ce00fcefae286c9d0a304a6a6aa5daf7f2ebbba4975d61dab1c40188c7", null ],
+      [ "RUNNING", "namespaceDemeter.html#a6fd40e5ce00fcefae286c9d0a304a6a6a43491564ebcfd38568918efbd6e840fd", null ],
+      [ "ERROR", "namespaceDemeter.html#a6fd40e5ce00fcefae286c9d0a304a6a6abb1ca97ec761fc37101737ba0aa2e7c5", null ]
+    ] ]
+];

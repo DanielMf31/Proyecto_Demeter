@@ -1,3 +1,8 @@
+"""
+BD/init_db.py — Autoconfiguración y recreación de tablas.
+Script standalone en caso de no usar Alembic localmente para crear todas
+las tablas de `Base.metadata` que aún no formen parte del esquema actual.
+"""
 import asyncio
 from Core.database import engine, Base
 # Import all models so they are registered in Base.metadata

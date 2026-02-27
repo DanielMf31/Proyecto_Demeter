@@ -1,10 +1,20 @@
 import sys
 import os
-import pytest
+from unittest.mock import MagicMock
 
-# Add 'src' to sys.path so tests can import 'proyecto_demeter'
-# This assumes conftest.py is in Python/tests/
-# and src is in Python/src/
-core_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src'))
-if core_path not in sys.path:
-    sys.path.insert(0, core_path)
+# Inyectar src/ y Common/ en sys.path para que pytest encuentre los paquetes
+_tests_dir = os.path.dirname(__file__)
+_raspberry_root = os.path.abspath(os.path.join(_tests_dir, '..'))
+_src = os.path.join(_raspberry_root, 'src')
+_common = os.path.abspath(os.path.join(_raspberry_root, '../../Common'))
+
+for _path in (_src, _common):
+    if _path not in sys.path:
+        sys.path.insert(0, _path)
+
+# Mockear módulos de hardware que no están disponibles fuera de la Raspberry Pi
+# para que el código pueda importarse correctamente en el entorno de test.
+_hw_mocks = ['serial_asyncio', 'serial', 'RPi', 'RPi.GPIO']
+for _mod in _hw_mocks:
+    if _mod not in sys.modules:
+        sys.modules[_mod] = MagicMock()

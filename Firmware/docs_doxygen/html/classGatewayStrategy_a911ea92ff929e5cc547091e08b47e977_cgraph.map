@@ -1,0 +1,7 @@
+<map id="GatewayStrategy::read" name="GatewayStrategy::read">
+<area shape="rect" id="Node000001" title="Vacía el buffer de la primera interfaz que reporte datos (Prioridad: UART)." alt="" coords="5,31,176,56"/>
+<area shape="rect" id="Node000002" href="$classIComms.html#ac3c07488a81ee960491c0dd2c7dadc7b" title="Comprueba subyacente si hay datos pendientes de consumir en el buffer RX." alt="" coords="224,5,368,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,30,210,26,211,31,177,35"/>
+<area shape="rect" id="Node000003" href="$classIComms.html#a74d93ccb65cc02fda609dfa2bf0d895e" title="Extrae todos los bytes disponibles del buffer RX del hardware." alt="" coords="239,55,353,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="177,51,226,56,225,62,176,56"/>
+</map>

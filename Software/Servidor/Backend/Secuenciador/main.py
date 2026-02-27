@@ -1,3 +1,16 @@
+"""
+Secuenciador/main.py — Daemon de Tareas Programadas (Cronjobs) para Demeter.
+
+Este módulo inicializa un bucle asíncrono utilizando APScheduler (AsyncIOScheduler).
+Su propósito es disparar trabajos periódicos en segundo plano sin bloquear 
+la API principal (FastAPI) ni los WebSockets.
+
+Responsabilidades actuales:
+ - Sincronizar periódicamente la caché estática de Redis.
+ - Emular el flujo de sensores insertando datos falsos cada media hora (Testing).
+ - Orquestar el proceso pesado de Extracción, Transformación y Carga (ETL) en las madrugadas.
+"""
+
 import asyncio
 import logging
 from apscheduler.schedulers.asyncio import AsyncIOScheduler

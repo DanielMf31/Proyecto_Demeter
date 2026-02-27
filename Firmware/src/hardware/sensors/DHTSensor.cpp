@@ -1,3 +1,19 @@
+/**
+ * @file DHTSensor.cpp
+ * @brief Implementación del driver para sensores de humedad y temperatura DHT (DHT11/DHT22).
+ * 
+ * ============================================================================
+ * DECISIONES DE ARQUITECTURA Y DISEÑO
+ * ============================================================================
+ * 1. **Modo Mock (Simulación):** Esta implementación incluye lógica condicional
+ *    (`_isMock` y macros `NATIVE_ENV`) que permite instanciar el sensor devolviendo
+ *    senoidales (math.h) en lugar de requerir el hardware físico. Esto acelera el
+ *    desarrollo Frontend/Backend sin depender de protoboards.
+ * 2. **Encapsulamiento del Driver Secundario:** El puntero `_dhtInstance` esconde
+ *    la librería de terceros Adafruit DHT.h. Si mañana cambiamos de librería,
+ *    ninguna otra clase del firmware se enteringará.
+ */
+
 #include "hardware/sensors/DHTSensor.h"
 #include <Arduino.h>
 #include <cmath>

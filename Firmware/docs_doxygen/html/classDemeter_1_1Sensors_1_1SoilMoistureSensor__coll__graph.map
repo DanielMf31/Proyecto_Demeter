@@ -1,0 +1,9 @@
+<map id="Demeter::Sensors::SoilMoistureSensor" name="Demeter::Sensors::SoilMoistureSensor">
+<area shape="rect" id="Node000001" title="Driver for Analog Capacitive Soil Moisture Sensor (v1.2)." alt="" coords="5,323,224,523"/>
+<area shape="rect" id="Node000002" href="$classDemeter_1_1ISensor.html" title="Clase Base Abstracta (Interfaz) para todo hardware de sensado." alt="" coords="9,135,135,260"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,273,98,322,93,323,84,274"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="159,165,238,230"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="189,231,160,308,155,306,184,229"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="133,5,264,85"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="201,99,201,164,196,164,196,99"/>
+</map>

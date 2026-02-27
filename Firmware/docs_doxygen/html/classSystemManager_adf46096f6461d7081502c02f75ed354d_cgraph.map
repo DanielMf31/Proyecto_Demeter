@@ -1,0 +1,11 @@
+<map id="SystemManager::handleSynRecv" name="SystemManager::handleSynRecv">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,241,56"/>
+<area shape="rect" id="Node000002" href="$classProtocolEngine.html#a1b27b443d00335a6c6c21e00cf33b0c8" title="Send SYN&#45;ACK (Handshake 2/3)." alt="" coords="289,31,496,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="242,41,276,41,276,46,242,46"/>
+<area shape="rect" id="Node000003" href="$classProtocolEngine.html#a756248b6415af686ad17659d13a86273" title="Desciende estamento lógico a una Trama Binaria y la escupe por COMMS. Envuelve el payload crudo antep..." alt="" coords="544,31,743,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="496,41,530,41,530,46,496,46"/>
+<area shape="rect" id="Node000004" href="$classProtocolEngine.html#ad93203ceed2aada77a73556411fd8043" title="Calculates a simple Modular Sum CRC (Mod 256)." alt="" coords="791,5,1004,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="743,31,777,27,777,33,743,36"/>
+<area shape="rect" id="Node000005" href="$classIComms.html#ad776ff948007fd56d75719d5a6704e30" title="Transmite un tren de bytes crudos a través del medio." alt="" coords="840,55,955,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="743,50,827,58,826,63,743,55"/>
+</map>

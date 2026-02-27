@@ -64,7 +64,11 @@ async def seed_historical_data(db: AsyncSession):
     """
     Inyecta datos históricos (6 meses) simulando una arquitectura LIMS.
     20 Plantas (4 especies × 5 variedades) → 3 Experimentos entrelazados.
-    Guarda telemetría en Postgres y cachea por planta en Redis.
+    Guarda telemetría en Postgres y cachea por planta en Redis para lectura inmediata.
+    También inyecta telemetría cruda para graficación con Pandas (Dióxido de Carbono virtual, 
+    Humedad, Temperatura ambiental de invernadero).
+    
+    :param db: Sesión AsyncSession inyectada en tiempo de ejecución.
     """
     logger.info("Verificando/Creando Usuario Admin...")
     

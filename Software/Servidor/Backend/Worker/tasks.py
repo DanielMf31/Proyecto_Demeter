@@ -23,6 +23,20 @@ logger = logging.getLogger("worker_tasks")
 logging.basicConfig(level=logging.INFO)
 
 async def _async_export_experiment_data(experimento_id: int, ref_date_str: str, days: int) -> str:
+    """
+    Motor ETL Complejo de Exportación ejecutado en Background (RQ Worker).
+    
+    1. Extrae datos crudos (desde Redis o fallback a PostgreSQL).
+    2. Transforma la serie temporal usando Pandas (Calcula VPD, GDD, Entalpía, Z-Scores).
+    3. Carga los resultados en Redis para lectura ultrarrápida (dashboard temporal).
+    4. Serializa gráficos y genera excels diarios por planta.
+    5. Empaqueta un ZIP que luego puede descargar el usuario.
+    
+    :param experimento_id: ID Relacional del Experimento.
+    :param ref_date_str: Fecha ancla límite de extracción (ISO 8601).
+    :param days: Ventana retrospectiva de días a calcular (típicamente 30).
+    :return: Ruta en disco del ZIP temporal generado.
+    """
     logger.info(f"Iniciando Exportación ETL para Experimento {experimento_id}, Días: {days}")
     start_time = time.time()
     

@@ -1,3 +1,11 @@
+"""
+Core/config.py — Enlace con Variables de Entorno del Sistema.
+
+Este archivo actúa como puente, cargando las clases y propiedades de entorno
+que vienen provistas en `Software/Common/configuration.py`.
+Permite consumir en cualquier lugar: `settings = get_settings()` con Pydantic.
+"""
+
 import sys
 from pathlib import Path
 

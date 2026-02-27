@@ -2,7 +2,20 @@
 
 /**
  * @file UartStrategy.cpp
- * @brief Implementation of UART Communication Strategy.
+ * @brief Implementación de la Estrategia de Comunicación Serie/UART.
+ * 
+ * ============================================================================
+ * DECISIONES DE ARQUITECTURA Y DISEÑO
+ * ============================================================================
+ * 1. **Punteros a Interfaces Nativas Arduino:** Recibe `HardwareSerial*`. 
+ *    Esto permite que la aplicación inyecte `&Serial` (para debug por USB)
+ *    o `&Serial2` (para comunicarse con una Pi por los pines paralelos TX/RX),
+ *    sin cambiar esta clase.
+ * 2. **Buffer de Drenaje Iterativo:** `read()` ejecuta un bucle `while-available()`.
+ *    A diferencia de TCP o ESP-NOW que manejan paquetes indivisibles por bloques MAC,
+ *    el protocolo serial es un Stream. Se extraen agresivamente todos los bytes 
+ *    existentes en cola para evitar cuellos de botella FIFO. La clase `ProtocolEngine`
+ *    se encargará luego de reagrupar y sincronizar basándose en la cabecera del byte magico `0xAA`.
  */
 
 #ifndef ARDUINO

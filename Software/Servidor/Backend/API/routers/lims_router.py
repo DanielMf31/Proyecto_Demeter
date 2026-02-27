@@ -8,7 +8,8 @@ from sqlalchemy.orm import selectinload
 
 from Core.database import get_db
 from Core.redis import redis_manager
-from BD.models import Plant, Experiment, ExperimentoPlantaLink
+from Core.auth import get_current_active_user
+from BD.models import Experiment, User, Plant, ExperimentoPlantaLink
 from BD.schemas import PlantCreate, PlantUpdate, PlantResponse, ExperimentCreate, ExperimentResponse
 
 logger = logging.getLogger("lims_router")
@@ -105,7 +106,7 @@ async def create_planta(plant_in: PlantCreate, db: AsyncSession = Depends(get_db
 
 # ─────────────────────────────────────────────────────────────────────────────
 # EXPERIMENTS
-# ─────────────────────────────────────────────────────────────────────────────
+# ── EXPERIMENTOS ─────────────────────────────────────────────────────────────
 
 @router.get("/experimentos", response_model=List[ExperimentResponse])
 async def get_experimentos(db: AsyncSession = Depends(get_db)):

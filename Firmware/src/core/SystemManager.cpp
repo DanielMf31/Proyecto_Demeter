@@ -3,7 +3,19 @@
 
 /**
  * @file SystemManager.cpp
- * @brief Workflow Orchestrator Implementation.
+ * @brief Orquestador del Workflow y Máquina de Estados Central.
+ * 
+ * ============================================================================
+ * DECISIONES DE ARQUITECTURA Y DISEÑO
+ * ============================================================================
+ * ¿Por qué existe un SystemManager si ya existe un ProtocolEngine?
+ * 1. **Separación de Responsabilidades (SRP):** El ProtocolEngine sabe "cómo" 
+ *    hablar (parsear bytes, checksums, tipos de tramas), pero el SystemManager 
+ *    sabe "de qué" hablar y "cuándo". Gestionar reintentos, tiempos de espera 
+ *    (timeouts) y el estado global (ej. BOOT vs RUNNING) es pura lógica de negocio.
+ * 2. **Patrón Observer (Callbacks):** Mantiene desacoplados los componentes.
+ *    El hardware avisa de un cambio de pin y el SystemManager reacciona,
+ *    sin que el hardware tenga que importar librerías de red.
  */
 
 // Constants for Handshake
@@ -24,6 +36,14 @@ void SystemManager::enableSensorManager(SensorManager* manager) {
     _sensorManager = manager;
 }
 
+/**
+ * @brief Configura el comportamiento base, inyecta dependencias al motor e inicializa el hardware.
+ * 
+ * ¿Por qué enganchamos los lambdas `[this]` al ProtocolEngine aquí?
+ * Para hacer el "Bridge" entre la red y nuestra lógica. El motor disparará un
+ * lambda cuando detecte una trama válida; ese lambda llamará a un método privado
+ * como `handleGpioCommand`.
+ */
 void SystemManager::setup() {
     _context.setState(Demeter::SystemState::BOOT);
     
@@ -130,6 +150,16 @@ void SystemManager::addSystemReportListener(Demeter::SystemReportCallback cb) {
 // UPDATE
 // =============================================================
 
+/**
+ * @brief Tick maestro de alta frecuencia.
+ * 
+ * ¿Por qué gestionamos el Sequencer y la Máquina de Estados de Handshake aquí?
+ * Porque este método se llama continuamente desde el `loop()` iterativo principal.
+ * Usando la diferencia entre el instante actual `millis()` y el momento en que 
+ * se lanzó una acción `_lastStepTime`, evitamos detener el microcontrolador.
+ * Si usáramos un `delay(1000)` para una secuencia, el ProtocolEngine se "quedaría 
+ * sordo" durante ese segundo entero y se perderían paquetes.
+ */
 void SystemManager::update() {
     if (_context.getState() == Demeter::SystemState::ERROR) {
         return;
@@ -180,6 +210,15 @@ void SystemManager::update() {
 // HANDSHAKE LOGIC
 // =============================================================
 
+/**
+ * @brief Detona un proceso de conexión segura en 3 Vías (3-Way Handshake TCP-like).
+ * 
+ * ¿Por qué simulamos un estado asíncrono en lugar de esperar la respuesta en línea?
+ * En un sistema embebido Mono-Hilo interactuando con radios (ESP-NOW), "bloquearse" 
+ * esperando la respuesta provocaría perder mensajes de otros nodos.
+ * Marcamos el estado interno temporal a `HANDSHAKE_SEND_SYN` y dejamos que 
+ * los ciclos sigan pasando hasta que recibamos la respuesta vía Callback.
+ */
 void SystemManager::initiateHandshake(uint8_t targetId, const Demeter::AckData& initialContext) {
     if (_context.getState() == Demeter::SystemState::HANDSHAKE_WAIT_SYN_ACK) return; // Already in progress
 
@@ -255,6 +294,12 @@ void SystemManager::handleSynAckRecv(const Demeter::AckData& data) {
 // COMMAND LOGIC IMPLEMENTATION
 // =============================================================
 
+/**
+ * @brief Manejador inyectado ejecutado cuando la red nos manda cambiar un Pin.
+ * 
+ * Al separarlo, si en el futuro queremos que el pin parpadee o cambie paulatinamente (PWM),
+ * solo modificamos esta función sin tocar la capa de red.
+ */
 void SystemManager::handleGpioCommand(const Demeter::SetGpioCmd& cmd) {
     if (_executor) {
         // Execute Immediately for now
@@ -369,6 +414,14 @@ void SystemManager::sendSystemStatus(uint8_t targetId, const Demeter::SystemRepo
     }
 }
 
+/**
+ * @brief Agrupa las métricas estáticas leídas de cada cable hardware empaquetándolas.
+ * 
+ * ¿Por qué MOCK_DATA_ENABLED? 
+ * Durante el desarrollo frontend/backend a veces la parte electrónica del sensor real
+ * no está montada en la protoboard. Enchufando este flag generamos varianza 
+ * pseudoaleatoria para testear los gráficos de grafana y la Base de Datos.
+ */
 void SystemManager::collectAndPublishSensorData(uint8_t targetId) {
     if (!_sensorManager) return;
 

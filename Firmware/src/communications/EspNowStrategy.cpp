@@ -1,3 +1,22 @@
+/**
+ * @file EspNowStrategy.cpp
+ * @brief Implementación concreta del protocolo de radio P2P de Espressif.
+ * 
+ * ============================================================================
+ * DECISIONES DE ARQUITECTURA Y DISEÑO
+ * ============================================================================
+ * 1. **Polimorfismo (Patrón Strategy):** Al heredar de `IComms`, el core del firmware
+ *    llama a `espNowStrategy.send()` sin saber que debajo hay llamadas a la API
+ *    propietaria de ESP-IDF (`esp_now_send`). Esto acopla la radio a un solo archivo.
+ * 2. **Buffers Estáticos (Zero Allocation):** En la recepción asíncrona (ISR-level),
+ *    no podemos hacer `new` ni `std::vector::push_back` (riesgo de Heap Fragmentation
+ *    y Kernel Panic). Usamos un `_rxBuffer` estático pre-reservado que se llena
+ *    rápidamente y luego el loop principal lo transfiere.
+ * 3. **Macro NATIVE_ENV:** Fundamental para Integración Continua (CI/CD). Permite
+ *    compilar (mockear) este archivo en Linux/Windows para correr Tests Unitarios
+ *    sin tener un ESP32 físico conectado.
+ */
+
 #include "communications/EspNowStrategy.h"
 #include <Arduino.h>
 #include <cstring>
@@ -81,13 +100,28 @@ void EspNowStrategy::onDataRecv(const uint8_t * mac, const uint8_t *incomingData
 
 #else
 
-// Real Implementation
+// ============================================================================
+// REAL IMPLEMENTATION (ESP32 HARDWARE)
+// ============================================================================
+
+/**
+ * @brief Constructor para hardware real.
+ * Pre-reserva memoria estática para evitar fragmentar el Heap al recibir arrays C.
+ */
 EspNowStrategy::EspNowStrategy() {
     _rxBuffer.reserve(250);
 }
 
 EspNowStrategy::~EspNowStrategy() {}
 
+/**
+ * @brief Configura la antena WiFi y registra eventos del RTOS.
+ * 
+ * ¿Por qué `WIFI_STA` y Promiscuous Mode?
+ * ESP-NOW requiere que la antena esté encendida (Station Mode), aunque no nos
+ * conectemos a un router TCP/IP. El truco del "Channel 1" resuelve un bug del
+ * ESP32-S3 donde las radios se desincronizan si buscan APs en background.
+ */
 void EspNowStrategy::begin() {
     // Init WiFi in Station Mode
     WiFi.mode(WIFI_STA);
@@ -104,7 +138,7 @@ void EspNowStrategy::begin() {
     Serial.println("ESP-Now Channel set to 1");
     // END FIX
 
-    // Register Callbacks
+    // Register Callbacks - C Pointers to Static Methods
     esp_now_register_send_cb(EspNowStrategy::onDataSent);
     esp_now_register_recv_cb(EspNowStrategy::onDataRecv);
     
@@ -139,6 +173,12 @@ bool EspNowStrategy::addPeer(const uint8_t* mac) {
     return true;
 }
 
+/**
+ * @brief Transmite un array de bytes al éter (aire).
+ * 
+ * Extrae mágicamente el Destino del protocolo (Byte 4) para averiguar
+ * qué dirección MAC usar de la tabla de enrutamiento estática.
+ */
 void EspNowStrategy::send(const uint8_t* data, size_t length) {
     if (length < 6) return; // Min header
     
@@ -154,10 +194,8 @@ void EspNowStrategy::send(const uint8_t* data, size_t length) {
         if (result != ESP_OK) {
             Serial.printf("ERROR: ESP-Now Send Failed: %s\n", esp_err_to_name(result));
         }
-        else {}
-            
     } else {
-        // Unknown Route
+        // Unknown Route (podría implementarse un broadcast aquí como fallback)
     }
 }
 

@@ -1,3 +1,19 @@
+/**
+ * @file DS18B20Sensor.cpp
+ * @brief Implementación del driver para el termómetro de suelo DS18B20 (1-Wire).
+ * 
+ * ============================================================================
+ * DECISIONES DE ARQUITECTURA Y DISEÑO
+ * ============================================================================
+ * 1. **Mapeo al Contractual SensorReading:** El DS18B20 sólo lee temperatura, pero
+ *    el contrato `SensorReading` exige `value1` y `value2`. Aquí forzamos `value2 = 0.0f`
+ *    y satisfacemos la inferfaz estandarizada del `SensorManager`.
+ * 2. **Transparencia del Bus 1-Wire:** Internamente gestionamos el puntero a la
+ *    instancia `OneWire`. Aunque podríamos tener varios DS18B20 en el mismo pin
+ *    (bus indexado), hemos optado por la simplicidad de `getTempCByIndex(0)`
+ *    asumiendo 1 sensor por objeto en este nodo.
+ */
+
 #include "hardware/sensors/DS18B20Sensor.h"
 #include <Arduino.h>
 

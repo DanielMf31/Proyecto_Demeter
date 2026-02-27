@@ -1,0 +1,400 @@
+% ============================================================
+% SECCIÓN 5: Backend Centralizado
+% ============================================================
+\chapter{Servidor Central: Backend en Google Cloud}
+\label{sec:backend}
+
+% ─────────────────────────────────────────────────────────────
+\section{Visión General del Servidor}
+
+El \textbf{servidor central} de Demeter es el núcleo digital del sistema: el punto de convergencia
+donde la telemetría de campo adquiere persistencia, donde los experimentos científicos cobran forma, 
+y desde donde los investigadores pueden actuar sobre el entorno físico del invernadero. Está 
+desplegado en una \textbf{máquina virtual de Google Cloud Platform} (GCP), con acceso público 
+protegido por TLS y orientado a múltiples clientes simultáneos.
+
+El software del servidor está organizado en un conjunto de \textbf{contenedores Docker independientes} 
+que colaboran a través de una red interna privada, sin puertos expuestos entre ellos al exterior, 
+siguiendo el principio de mínimo acceso. Un \textbf{Nginx} actúa como proxy inverso único, 
+terminando TLS y dirigiendo el tráfico al servicio correcto.
+
+La arquitectura completa de contenedores, volúmenes y comunicaciones se muestra en la 
+Sección~\ref{fig:anx_backend_docker} del Anexo.
+
+% ─────────────────────────────────────────────────────────────
+\section{Arquitectura de Contenedores Docker}
+
+La pila de producción del servidor se compone de \textbf{seis contenedores} que conviven en una 
+red privada interna denominada \texttt{demeter-net}:
+
+\begin{table}[H]
+    \centering
+    \caption{Contenedores del sistema Demeter en producción}
+    \begin{tabular}{lllp{5.8cm}}
+        \toprule
+        \textbf{Contenedor} & \textbf{Imagen base} & \textbf{Escala} & \textbf{Función} \\
+        \midrule
+        \texttt{demeter-frontend}   & Nginx + React build  & 1 instancia   & SPA distribuida al navegador. \\
+        \texttt{demeter-api}        & Python (FastAPI)     & 1 instancia   & API REST + WebSocket + Lógica. \\
+        \texttt{demeter-math-worker}& Python (misma base)  & Escalable     & Worker de cálculos pesados. \\
+        \texttt{demeter-sequencer}  & Python (misma base)  & 1 instancia   & Motor de secuencias temporizadas. \\
+        \texttt{demeter-db}         & PostgreSQL 15        & 1 instancia   & Persistencia relacional. \\
+        \texttt{demeter-redis}      & Redis Alpine         & 1 instancia   & Broker, caché y cola de tareas. \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:docker_containers}
+\end{table}
+
+\textbf{Volúmenes persistentes:}
+\begin{itemize}[leftmargin=*, label=--]
+    \item \texttt{postgres\_data}: datos de la base de datos PostgreSQL. 
+    \item \texttt{shared\_data}: archivos intermedios generados por el worker 
+          y accesibles desde la API (\texttt{/app/shared}).
+    \item \texttt{export\_data}: archivos de exportación de datos históricos 
+          (\texttt{/app/exports}).
+\end{itemize}
+
+\textbf{Variables de entorno}: cada contenedor recibe su configuración mediante un fichero 
+\texttt{.env}, evitando credenciales en el repositorio de código. La URL de Redis, PostgreSQL, 
+los secretos JWT y las claves de API son inyectadas en tiempo de ejecución.
+
+
+% ─────────────────────────────────────────────────────────────
+\section{Redis: Bus de Mensajes y Caché}
+
+Redis desempeña el rol más transversal del sistema: no es únicamente una caché de velocidad, 
+sino el \textbf{bus de mensajes central} que cohesiona los distintos procesos Python que corren 
+en contenedores independientes. Opera con dos bases de datos lógicas:
+
+\begin{table}[H]
+    \centering
+    \caption{Bases de datos Redis y su propósito}
+    \begin{tabular}{llp{8cm}}
+        \toprule
+        \textbf{DB} & \textbf{URL} & \textbf{Datos} \\
+        \midrule
+        DB/0 & \texttt{redis://...6379/0} & Caché de aplicación y Pub/Sub \\
+        DB/1 & \texttt{redis://...6379/1} & Cola de tareas RQ (\textit{demeter\_tasks}) \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Las Cuatro Categorías de Datos en Redis}
+
+\begin{enumerate}
+
+\item \textbf{Estado de Dispositivo} (\texttt{device:\{id\}:state})\\ 
+Almacena el estado ON/OFF \textit{confirmado} de cada pin de actuador, tras recibir la 
+confirmación de ejecución del nodo (CMD\_ACK). Persiste indefinidamente hasta ser sobreescrito.
+
+\item \textbf{Caché de Intención} (\texttt{demeter:cache:device:\{id\}}, TTL 60~s)\\
+Cuando el usuario pulsa un botón, el estado \textit{previsto} se almacena inmediatamente con 
+un TTL de 60 segundos. El dashboard refleja este estado optimista antes de recibir confirmación 
+del hardware, haciendo la interfaz percibida como instantánea.
+
+\item \textbf{Telemetría} (\texttt{sensor:\{id\}:telemetry}, TTL 60~s)\\
+Cada nueva trama de sensor que llega desde la Raspberry Pi es almacenada en Redis con expiración 
+de un minuto. Endpoints de tiempo real la consultan directamente para responder en 
+microsegundos, sin tocar PostgreSQL.
+
+\item \textbf{Lote de Actividad} (\texttt{demeter:activity:batch}, cola FIFO)\\
+Cada acción del usuario (botón pulsado, secuencia ejecutada) se encola en Redis en lugar de 
+escribirse directamente en PostgreSQL. Una tarea en background (\textit{Batch Flusher}) 
+los vuelca periódicamente en la tabla \texttt{ActivityLog} de forma agrupada, evitando una 
+avalancha de escrituras en la base de datos ante interacciones rápidas.
+
+\end{enumerate}
+
+\subsection{Canales Pub/Sub}
+
+Redis Pub/Sub es el mecanismo que permite a procesos en diferentes contenedores comunicarse 
+sin acoplamiento directo:
+
+\begin{table}[H]
+    \centering
+    \caption{Canales Pub/Sub y sus productores/consumidores}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Canal} & \textbf{Publicador} & \textbf{Suscriptor} \\
+        \midrule
+        \texttt{demeter:commands} & \texttt{POST /api/command} & \texttt{WS Dispatcher} (asyncio task) \\
+        \texttt{iot\_events}      & RedisManager               & Frontend (retransmisión WS broadcast) \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+El flujo completo de un comando desde el navegador hasta el ESP32, pasando por Redis y la 
+Raspberry Pi, se muestra en la Sección~\ref{fig:anx_redis_flow} del Anexo.
+
+
+% ─────────────────────────────────────────────────────────────
+\section{PostgreSQL: Persistencia y Esquema de Datos}
+
+PostgreSQL almacena toda la información de largo plazo del sistema. El esquema evoluciona 
+mediante \textbf{Alembic}, el gestor de migraciones de SQLAlchemy, garantizando que cualquier 
+cambio en el modelo de datos sea reproducible y trazable en todos los entornos.
+
+Las tablas principales son:
+
+\begin{table}[H]
+    \centering
+    \caption{Tablas principales de PostgreSQL}
+    \begin{tabular}{lp{10cm}}
+        \toprule
+        \textbf{Tabla}            & \textbf{Datos almacenados} \\
+        \midrule
+        \texttt{users}            & Credenciales de acceso, roles (admin/viewer) y estado activo. \\
+        \texttt{plants}           & Registro botánico de plantas: especie, variedad, fecha de siembra, estado vital, metadatos científicos, nodo asignado. \\
+        \texttt{experiments}      & Agrupación de plantas en experimentos de investigación. \\
+        \texttt{experimento\_planta\_link} & Tabla intermedia N:M entre plantas y experimentos. \\
+        \texttt{telemetry\_th}    & Serie temporal de mediciones de temperatura y humedad por nodo. \\
+        \texttt{activity\_log}    & Registro de acciones (comandos enviados, interacciones de usuario). \\
+        \texttt{sequences}        & Secuencias de pasos de riego configuradas por los usuarios. \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:postgres_tables}
+\end{table}
+
+El diagrama entidad-relación completo puede consultarse en la Sección~\ref{fig:anx_db_schema} del Anexo.
+
+
+% ─────────────────────────────────────────────────────────────
+\section{El Worker Matemático}
+
+El \textbf{Math Worker} (\texttt{demeter-math-worker}) es un proceso Python independiente que 
+escucha la cola de tareas \texttt{demeter\_tasks} en Redis (DB/1) usando la librería 
+\textbf{RQ} (\textit{Redis Queue}).
+
+Su función es absorber los cálculos \textit{pesados y no urgentes} que no deben bloquear la 
+API principal. Las tareas que ejecuta incluyen:
+
+\begin{itemize}[leftmargin=*, label=--]
+    \item \textbf{Análisis científico por experimento}: cálculo de estadísticos de las series 
+          temporales de temperatura y humedad asociadas a un experimento (media, varianza, 
+          tendencias, correlación entre nodos).
+    \item \textbf{Generación de informes}: empaquetamiento de los análisis en archivos de 
+          resultados exportables al volumen compartido \texttt{/app/shared}.
+    \item \textbf{Nightly Batch}: tareas programadas de limpieza, compactación de telemetría 
+          histórica y recálculo de estadísticos agregados.
+\end{itemize}
+
+El proceso de encolar una tarea sigue este patrón: el cliente llama a 
+\texttt{POST /api/analysis/generate}, el backend encola la tarea en Redis y devuelve un 
+\texttt{task\_id}. El cliente puede consultar \texttt{GET /api/analysis/status/\{task\_id\}} 
+para conocer el progreso y, una vez completada, descarga el resultado de 
+\texttt{GET /api/analysis/download/\{filename\}}.
+
+
+% ─────────────────────────────────────────────────────────────
+\section{El Secuenciador}
+
+El \textbf{Secuenciador} (\texttt{demeter-sequencer}) es un proceso Python independiente con 
+un único propósito: ejecutar secuencias de pasos de riego multi-acción de forma temporizada, 
+sin bloquear la API ni consumir recursos del worker matemático.
+
+Una secuencia puede definir, por ejemplo: \textit{``Abrir válvula A durante 10 segundos, 
+esperar 2 segundos, abrir bomba B durante 30 segundos, cerrar todo''}. 
+
+El Secuenciador traduce cada paso temporizado en un comando individual y lo lanza al canal 
+Redis \texttt{demeter:commands}, que el Dispatcher convierte en una trama que llega al 
+actuador físico. Entre paso y paso, duerme el tiempo de espera definido sin bloquear 
+ningún otro proceso del sistema.
+
+
+% ─────────────────────────────────────────────────────────────
+\section{El Backend FastAPI}
+
+La \textbf{API principal} (\texttt{demeter-api}) es el componente central y más complejo 
+del servidor. Implementada con el framework \textbf{FastAPI} sobre \texttt{asyncio}, 
+combina en un único proceso el servidor HTTP REST, el servidor WebSocket, 
+y dos tareas en background permanentes:
+
+\begin{itemize}[leftmargin=*, label=--]
+    \item \textbf{Redis Command Listener}: escucha el canal \texttt{demeter:commands} y 
+          retransmite comandos a la Raspberry Pi conectada por WebSocket.
+    \item \textbf{Activity Batch Flusher}: cada 30 segundos vuelca el lote de 
+          eventos de actividad de Redis a PostgreSQL.
+\end{itemize}
+
+Todas las rutas que acceden a la base de datos lo hacen de forma \textbf{completamente asíncrona} 
+mediante \texttt{AsyncSession} de SQLAlchemy, garantizando que las consultas lentas no 
+bloqueen otras peticiones en curso.
+
+
+% ─────────────────────────────────────────────────────────────
+\section{El Frontend React}
+
+El \textbf{frontend} es una \textit{Single Page Application} (SPA) construida en React,
+servida como ficheros estáticos a través de Nginx. Una vez cargada en el navegador, 
+se comunica directamente con la API del backend mediante peticiones HTTPS y WebSocket. 
+Ofrece las siguientes funcionalidades:
+
+\begin{table}[H]
+    \centering
+    \caption{Módulos del frontend React}
+    \begin{tabular}{lp{9.5cm}}
+        \toprule
+        \textbf{Módulo}          & \textbf{Funcionalidades} \\
+        \midrule
+        Dashboard en tiempo real & Visualización de temperatura, humedad y suelo con gráficos actualizados vía WebSocket. \\
+        Control Manual           & Botones para activar/desactivar pines de actuadores individualmente. \\
+        Planificador de Secuencias & Creación, guardado y ejecución de secuencias de riego multi-paso. \\
+        LIMS                     & Registro y gestión de plantas, asignación a experimentos, consulta de telemetría por planta. \\
+        SDK / Exportación        & Descarga de datos en formatos académicos, acceso programático para análisis externos. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+% ─────────────────────────────────────────────────────────────
+\section{Documentación de la API REST}
+
+El servidor expone una API REST bajo el prefijo \texttt{/api}, con documentación interactiva 
+generada automáticamente por FastAPI en \texttt{/api/docs}. A continuación se detallan todos 
+los \textit{routers} y sus endpoints más relevantes.
+
+\subsection{Sistema (\texttt{/api/system})}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{llp{7.5cm}}
+        \toprule
+        \textbf{Método} & \textbf{Ruta}   & \textbf{Descripción} \\
+        \midrule
+        \texttt{GET}  & \texttt{/api/system/health} & Comprueba el estado del servidor y la conexión a Redis y PostgreSQL. Devuelve un JSON de estado. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Autenticación (\texttt{/api/auth})}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{llp{7.5cm}}
+        \toprule
+        \textbf{Método} & \textbf{Ruta}             & \textbf{Descripción} \\
+        \midrule
+        \texttt{POST} & \texttt{/api/auth/login}    & Recibe usuario y contraseña. Devuelve un JWT Bearer Token con el rol del usuario y expiración configurable. \\
+        \texttt{POST} & \texttt{/api/auth/register} & Registra un nuevo usuario (admin). Almacena la contraseña hasheada con bcrypt. \\
+        \texttt{GET}  & \texttt{/api/auth/me}       & Devuelve el perfil del usuario activo autenticado mediante el token. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Comandos (\texttt{/api/command})}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{llp{7.5cm}}
+        \toprule
+        \textbf{Método} & \textbf{Ruta}          & \textbf{Descripción} \\
+        \midrule
+        \texttt{POST} & \texttt{/api/command}    & Envía un comando al hardware. El campo \texttt{type} discrimina el subtipo (\texttt{set\_gpio}, \texttt{set\_pwm}, \texttt{exec\_sequence}, \texttt{ping}, \texttt{get\_sensors}). El comando es validado con Pydantic y publicado en Redis. Devuelve \texttt{202 Accepted}. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Descubrimiento (\texttt{/api/discovery})}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{llp{7.5cm}}
+        \toprule
+        \textbf{Método} & \textbf{Ruta}               & \textbf{Descripción} \\
+        \midrule
+        \texttt{GET}  & \texttt{/api/discovery/nodes} & Lista todos los nodos activos conocidos por el sistema con su último estado. \\
+        \texttt{GET}  & \texttt{/api/discovery/nodes/\{id\}} & Estado detallado y telemetría en caché de un nodo específico. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Historial de Telemetría (\texttt{/api/history})}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{llp{7.5cm}}
+        \toprule
+        \textbf{Método} & \textbf{Ruta}              & \textbf{Descripción} \\
+        \midrule
+        \texttt{GET}  & \texttt{/api/history/node/\{id\}} & Devuelve hasta \texttt{days} días de telemetría histórica de temperatura y humedad para el nodo indicado. Requiere autenticación JWT. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{LIMS --- Plantas y Experimentos (\texttt{/api/lims})}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{llp{6.8cm}}
+        \toprule
+        \textbf{Método}   & \textbf{Ruta}                   & \textbf{Descripción} \\
+        \midrule
+        \texttt{GET}    & \texttt{/api/lims/plantas}          & Lista todas las plantas registradas. \\
+        \texttt{POST}   & \texttt{/api/lims/plantas}          & Registra una nueva planta con metadatos botánicos completos. \\
+        \texttt{GET}    & \texttt{/api/lims/plantas/\{id\}}   & Detalle de una planta con sus experimentos asociados. \\
+        \texttt{PATCH}  & \texttt{/api/lims/plantas/\{id\}}   & Actualiza parcialmente los datos de una planta. \\
+        \texttt{GET}    & \texttt{/api/lims/plantas/\{id\}/telemetry} & Telemetría de 6 meses del nodo asignado a la planta, directo de Redis. \\
+        \texttt{GET}    & \texttt{/api/lims/experimentos}     & Lista todos los experimentos vigentes. \\
+        \texttt{POST}   & \texttt{/api/lims/experimentos/generar} & Crea un experimento y asigna plantas existentes. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Análisis Científico (\texttt{/api/analysis})}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{llp{6.8cm}}
+        \toprule
+        \textbf{Método} & \textbf{Ruta}                     & \textbf{Descripción} \\
+        \midrule
+        \texttt{POST} & \texttt{/api/analysis/generate}       & Encola un análisis estadístico completo de un experimento en el Math Worker (RQ). Devuelve el \texttt{task\_id}. \\
+        \texttt{GET}  & \texttt{/api/analysis/status/\{id\}}  & Consulta el estado de la tarea encolada: \textit{queued}, \textit{started}, \textit{finished} o \textit{failed}. \\
+        \texttt{GET}  & \texttt{/api/analysis/download/\{f\}} & Descarga el archivo de análisis generado (ZIP) desde el volumen compartido. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{SDK Científico (\texttt{/api/sdk})}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{llp{7.5cm}}
+        \toprule
+        \textbf{Método} & \textbf{Ruta}                     & \textbf{Descripción} \\
+        \midrule
+        \texttt{GET}  & \texttt{/api/sdk/mediciones/\{exp\_id\}} & Devuelve la telemetría cruda en JSON de todas las plantas del experimento. Protegido por \texttt{X-API-Key}. Prioriza caché Redis sobre consulta directa a PostgreSQL. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Exportación (\texttt{/api/export})}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{llp{7.5cm}}
+        \toprule
+        \textbf{Método} & \textbf{Ruta}             & \textbf{Descripción} \\
+        \midrule
+        \texttt{GET}  & \texttt{/api/export/\{formato\}} & Exporta los datos históricos en formatos CSV o XLSX para análisis externo. Se genera y devuelve como descarga directa. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+% ─────────────────────────────────────────────────────────────
+\section{El Canal WebSocket}
+
+El servidor expone el endpoint \texttt{/ws/\{client\_id\}} como punto de entrada único para 
+todas las conexiones WebSocket. El comportamiento varía según el identificador con el que 
+se conecta el cliente:
+
+\begin{table}[H]
+    \centering
+    \caption{Diferencia de comportamiento por tipo de cliente WebSocket}
+    \begin{tabular}{lllp{5cm}}
+        \toprule
+        \textbf{client\_id}          & \textbf{Tipo}    & \textbf{Dirección} & \textbf{Mensajes} \\
+        \midrule
+        \texttt{raspberry\_gateway}  & Máquina          & Bidireccional      & Recibe JSON de comandos, envía JSON de telemetría. \\
+        Cualquier otro               & Frontend/Monitor & Solo recepción     & Solo recibe push de telemetría. Los intentos de enviar comandos son rechazados con un mensaje informativo. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Esta separación es una decisión de diseño deliberada: el canal WebSocket queda reservado para 
+el flujo de datos en tiempo real (telemetría), mientras los comandos circulan por HTTP POST. 
+Esto simplifica el frontend (sin lógica de reconexión de socket) y hace los comandos 
+trivialmente verificables con herramientas estándar como \texttt{curl} o la documentación 
+Swagger de la API.

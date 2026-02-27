@@ -19,7 +19,15 @@ from Core.config import get_settings
 logger = logging.getLogger("sec_tasks")
 
 async def sync_sensor_data_to_redis():
-    """Lee las últimas 24h de TelemetryTH y actualiza el caché crudo."""
+    """
+    Sincroniza los últimos 24 horas de datos de sensores (TelemetryTH)
+    desde PostgreSQL principal hacia la memoria caché rápida en Redis.
+    
+    Permite absorber ráfagas de lectura del Frontend sin saturar la Base de Datos.
+    
+    Nota de diseño: El caché particiona los datos por ID de Experimento
+    (ej: "demeter:raw_data:experimento_1") facilitando el acceso O(1).
+    """
     logger.info("Secuenciador: Iniciando Sync PostgreSQL -> Redis (Últimas 24h)...")
     await redis_manager.connect()
     outdated_date = datetime.utcnow() - timedelta(days=1)
@@ -63,7 +71,13 @@ async def sync_sensor_data_to_redis():
         await redis_manager.close()
 
 async def dummy_insert_test_data():
-    """Para DEMO: Genera 1 registro nuevo con data random por cada planta y lo inserta en Postgres y Redis."""
+    """
+    Función de testeo (DEMO). Simula tráfico entrante M2M generando registros aleatorios 
+    de temperatura y humedad para todas las plantas (Node IDs) activas en el sistema,
+    insertándolos en la BD y recargando el caché.
+    
+    Debería deshabilitarse o eliminarse en el despliegue a Producción (PROD).
+    """
     logger.info("Secuenciador: Job Dummy (TEST_DATA) insertando registros aleatorios actuales...")
     now = datetime.utcnow()
     
@@ -93,7 +107,14 @@ async def dummy_insert_test_data():
     await sync_sensor_data_to_redis()
 
 async def enqueue_nightly_etl():
-    """Encola en el Worker la tarea pesada de ETL de 30 días para todos los experimentos (3:00 AM)"""
+    """
+    Programa vía RQ (Redis Queue) la tarea pesada nocturna de Extracción, 
+    Transformación y Carga (ETL). Extrae 30 días móviles de historial,
+    computa cálculos agronómicos masivos en paralelo y guarda perfiles CSV limpios.
+    
+    Esta función NO procesa en sí, únicamente hace "trigger" al pool de Workers de RQ 
+    para liberar el hilo del Secuenciador de inmediato.
+    """
     logger.info("Secuenciador: Iniciando Trigger Nocturno de Cálculos ETL en Worker...")
     settings = get_settings()
     redis_url = getattr(settings, "RQ_REDIS_URL", "redis://redis:6379/1")

@@ -1,0 +1,23 @@
+<map id="include/core/SystemManager.h" name="include/core/SystemManager.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="741,5,964,31"/>
+<area shape="rect" id="Node000002" href="$Node__Actuator_8h.html" title=" " alt="" coords="225,79,437,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="756,35,416,81,415,76,755,30"/>
+<area shape="rect" id="Node000005" href="$Node__Gateway_8h.html" title=" " alt="" coords="629,79,844,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="824,40,757,81,754,76,821,35"/>
+<area shape="rect" id="Node000008" href="$Node__Sensor_8h.html" title=" " alt="" coords="868,79,1069,104"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="884,35,951,76,948,81,881,40"/>
+<area shape="rect" id="Node000011" href="$SystemManager_8cpp.html" title="Orquestador del Workflow y Máquina de Estados Central." alt="" coords="1093,79,1303,104"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="922,31,1143,76,1142,81,921,36"/>
+<area shape="rect" id="Node000003" href="$Node__Actuator_8cpp.html" title="Implementación de la Lógica del Nodo Acutador y su Máquina de Estados." alt="" coords="5,152,204,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="283,111,142,154,141,149,281,106"/>
+<area shape="rect" id="Node000004" href="$main__node__actuador_8cpp.html" title="Firmware de Entrada Principal (Entry Point) para un Nodo tipo Actuador." alt="" coords="228,152,435,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="334,118,334,152,329,152,329,118"/>
+<area shape="rect" id="Node000006" href="$Node__Gateway_8cpp.html" title="Implementación de la Lógica del Nodo Concentrador." alt="" coords="459,152,660,177"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="696,112,589,154,587,149,694,107"/>
+<area shape="rect" id="Node000007" href="$main__gateway_8cpp.html" title="Firmware de Entrada Principal (Entry Point) para el Nodo Gateway (ID 1)." alt="" coords="684,152,851,177"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="750,116,765,151,760,153,745,118"/>
+<area shape="rect" id="Node000009" href="$Node__Sensor_8cpp.html" title="Firmware lógico para el Nodo Extremo de tipo Sensor." alt="" coords="875,152,1063,177"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="971,118,971,152,966,152,966,118"/>
+<area shape="rect" id="Node000010" href="$main__node__sensor_8cpp.html" title="Firmware de Entrada Principal (Entry Point) para un Nodo tipo Sensor." alt="" coords="1087,152,1280,177"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="1017,106,1149,149,1148,154,1015,111"/>
+</map>

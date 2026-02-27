@@ -1,0 +1,9 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$classINode.html" title=" " alt="" coords="5,55,65,80"/>
+<area shape="rect" id="Node000001" href="$classNode__Actuator.html" title="Implementación concreta de Nodo para perfiles estrictamente Actuadores." alt="" coords="115,5,233,31"/>
+<area shape="poly" id="edge7_Node000000_Node000001" title=" " alt="" coords="77,50,137,28,138,33,79,55"/>
+<area shape="rect" id="Node000002" href="$classNode__Gateway.html" title="Especialización de Hardware híbrida que funciona como Concentrador." alt="" coords="113,55,235,80"/>
+<area shape="poly" id="edge8_Node000000_Node000002" title=" " alt="" coords="79,65,113,65,113,70,79,70"/>
+<area shape="rect" id="Node000003" href="$classNode__Sensor.html" title="Implementación concreta de Nodo para perfiles estrictamente de Sensor." alt="" coords="121,104,227,129"/>
+<area shape="poly" id="edge9_Node000000_Node000003" title=" " alt="" coords="79,80,138,101,137,106,77,85"/>
+</map>

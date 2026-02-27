@@ -1,0 +1,7 @@
+<map id="Node_Gateway::Node_Gateway" name="Node_Gateway::Node_Gateway">
+<area shape="rect" id="Node000001" title="Construye el rol Gateway." alt="" coords="5,27,168,67"/>
+<area shape="rect" id="Node000002" href="$classSystemManager.html#a1f07216e2ea2e7ce950fd0fbf0189b8c" title="Enable the Executor Module." alt="" coords="216,5,452,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,35,213,30,214,35,168,40"/>
+<area shape="rect" id="Node000003" href="$classSystemManager.html#ac473c1dfc4700ca221f39dc58a3214f9" title="Enable the Sensor Manager Module." alt="" coords="222,55,446,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="168,54,208,58,208,64,168,59"/>
+</map>

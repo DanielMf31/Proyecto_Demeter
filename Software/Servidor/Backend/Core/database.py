@@ -24,6 +24,14 @@ Base = declarative_base()
 
 # Dependency for FastAPI
 async def get_db():
+    """
+    FastAPI Yield Dependency para adquirir, proveer y limpiar conexiones 
+    a PostgreSQL (vía AsyncSessionLocal).
+    
+    Ejemplo de inyección:
+        @router.get("/plantas/")
+        async def get_plantas(db: AsyncSession = Depends(get_db)):
+    """
     async with AsyncSessionLocal() as session:
         try:
             yield session

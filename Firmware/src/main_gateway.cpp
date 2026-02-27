@@ -1,3 +1,10 @@
+/**
+ * @file main_gateway.cpp
+ * @brief Firmware de Entrada Principal (Entry Point) para el Nodo Gateway (ID 1).
+ * 
+ * Arranca la configuración Dual (UART a la Pi + ESP-NOW hacia la red de malla).
+ * Inicia la clase GatewayStrategy y procesa comandos asíncronos encolados por Serie.
+ */
 #include <Arduino.h>
 #include <WiFi.h>
 #include "communications/UartStrategy.h"
@@ -34,6 +41,15 @@ Node_Gateway gateway(MY_NODE_ID, &engine);
 // Format: "CMD:SET_GPIO:<NODE_ID>:<PIN>:<VALUE>"
 // Example: "CMD:SET_GPIO:3:2:1" -> Node 3, Pin 2, HIGH
 
+/**
+ * @brief Procesa de forma interactiva una cadena recibida por Serial (UART).
+ * 
+ * Herramienta de Debug/Control Directo que inyecta comandos binarios a la red
+ * traduciendo desde Strings amigables enviadas desde un monitor Serial o un Backend Python.
+ * 
+ * Formato esperado: "CMD:SET_GPIO:<NODE_ID>:<PIN>:<VALUE>"
+ * @param cmd String capturada vía `Serial.readStringUntil`.
+ */
 void processSerialCommand(String cmd) {
     cmd.trim();
     if (cmd.startsWith("CMD:SET_GPIO:")) {

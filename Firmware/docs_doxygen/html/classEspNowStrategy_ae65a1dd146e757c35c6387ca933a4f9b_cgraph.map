@@ -1,0 +1,5 @@
+<map id="EspNowStrategy::registerRoute" name="EspNowStrategy::registerRoute">
+<area shape="rect" id="Node000001" title="Añade una entrada vinculante [ID &#45;&gt; MAC] en la tabla de ruteo. Seguidamente llama a esp_now_add_peer ..." alt="" coords="5,5,192,45"/>
+<area shape="rect" id="Node000002" href="$classEspNowStrategy.html#a77b4b711e7ea3e9c777241b493fe969a" title="Helper que inscribe un Peer al framework nativo." alt="" coords="240,13,429,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,23,227,23,227,28,192,28"/>
+</map>

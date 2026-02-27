@@ -1,0 +1,5 @@
+<map id="ProtocolEngine::sendGetSensors" name="ProtocolEngine::sendGetSensors">
+<area shape="rect" id="Node000001" title="Request Sensor Data from a node." alt="" coords="289,5,521,31"/>
+<area shape="rect" id="Node000002" href="$classSystemManager.html#a5b00c257b48be557a99d1b73c7aa3c6c" title=" " alt="" coords="5,5,241,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="276,21,242,21,242,15,276,15"/>
+</map>

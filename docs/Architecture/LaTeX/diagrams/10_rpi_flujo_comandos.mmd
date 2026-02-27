@@ -1,0 +1,32 @@
+sequenceDiagram
+    participant Back as Backend FastAPI
+    participant WS as WebSocketClient
+    participant Disp as CommandDispatcher
+    participant UART as AsyncUART
+    participant GW as Gateway ESP32
+
+    %% Título: Flujo Descendente de Comandos (Servidor -> Nodos)
+
+    Note over Back, GW: Backend solicita encender pin 4 en actuador 0x01
+    Back->>WS: ws.send("{\"action\": \"control_actuator\", \"node_id\": 1...}")
+    
+    activate WS
+    WS->>WS: on_message() 
+    WS->>Disp: dispatch(command_type, raw_data)
+    deactivate WS
+    
+    activate Disp
+    Disp->>Disp: validate_schema(raw_data)
+    alt Payload Inválido o Nodo Inexistente
+        Disp-->>WS: emit('error', {'msg': 'Bad Command'})
+    else Comando Válido
+        Disp->>UART: send_command(CMD_SET_GPIO, node_id, params)
+        deactivate Disp
+        activate UART
+        UART->>UART: serialize_payload()
+        UART->>UART: prepend_header(length, src=0x00, dst=0x01)
+        UART->>UART: calculate_crc16()
+        UART->>GW: [Binario] 0xAA 0x00 0x00 0x01 0x0C ...
+        deactivate UART
+        Note over UART, GW: Actuador ejecutará, enviará NACK si falla<br/>o CMD_ACK si tiene éxito.
+    end

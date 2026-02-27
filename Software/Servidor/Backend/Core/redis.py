@@ -8,11 +8,24 @@ settings = get_settings()
 logger = setup_logger("redis_manager")
 
 class RedisManager:
+    """
+    Gestor centralizado para las conexiones asíncronas con Redis.
+    Maneja el pool de conexiones y proporciona métodos auxiliares para 
+    cachear telemetría, estados de dispositivos, eventos pub/sub y colas de logs.
+    
+    Ejemplo de uso general:
+        manager = RedisManager()
+        await manager.connect()
+        await manager.set_device_state(device_id=1, state=True)
+    """
     def __init__(self):
         self.redis: Optional[redis.Redis] = None
 
     async def connect(self):
-        """Initializes the Redis connection pool."""
+        """
+        Inicializa el pool de conexiones asíncronas hacia Redis.
+        Si la conexión falla, inicializa en modo Standalone (sin Redis).
+        """
         if not self.redis:
             try:
                 self.redis = redis.from_url(
@@ -41,7 +54,13 @@ class RedisManager:
 
     # --- A. Device State (Persistent & Cache) ---
     async def set_device_state(self, device_id: int, state: bool):
-        """Sets the ON/OFF state of a device (Persistent)."""
+        """
+        Establece el estado persistente (ON/OFF) de un dispositivo en Redis y alerta
+        por Pub/Sub sobre el cambio.
+        
+        :param device_id: ID numérico del dispositivo (ej: pin del relé).
+        :param state: Booleano indicando el estado deseado (True=ON).
+        """
         if not self.redis: return
         key = f"device:{device_id}:state"
         value = "ON" if state else "OFF"
@@ -50,14 +69,25 @@ class RedisManager:
         await self.publish_event("state_change", {"device_id": device_id, "state": value})
 
     async def cache_device_state(self, device_id: int, state: bool, ttl: int = 60):
-        """Caches intended device state for a short period (Default 60s)."""
+        """
+        Guarda temporalmente una orden de cambio de estado enviada a un dispositivo.
+        
+        :param device_id: ID del dispositivo u actuador.
+        :param state: Estado enviado (True=ON).
+        :param ttl: Tiempo de vida en segundos antes de expirar.
+        """
         if not self.redis: return
         key = f"demeter:cache:device:{device_id}"
         value = "ON" if state else "OFF"
         await self.redis.setex(key, ttl, value)
 
     async def get_device_state(self, device_id: int) -> bool:
-        """Gets the device state, defaults to False (OFF) if not set."""
+        """
+        Recupera el último estado conocido de un actuador.
+        
+        :param device_id: ID del actuador.
+        :return: True si está en ON, False en OFF o si no se encuentra.
+        """
         if not self.redis: return False
         key = f"device:{device_id}:state"
         value = await self.redis.get(key)
@@ -65,7 +95,13 @@ class RedisManager:
 
     # --- B. Telemetry (Ephemeral with TTL) ---
     async def save_telemetry(self, sensor_id: int, data: dict, ttl: int = 60):
-        """Saves sensor telemetry with a TTL (default 60s)."""
+        """
+        Guarda registros de telemetría de sensores volatilmente para acceso P2P.
+        
+        :param sensor_id: ID del nodo/sensor emisor.
+        :param data: Objeto dict() con las mediciones (ej: TempHumReport).
+        :param ttl: Caducidad natural del dato en Redis.
+        """
         if not self.redis: return
         key = f"sensor:{sensor_id}:telemetry"
         # Serialize dict to JSON string
@@ -82,12 +118,22 @@ class RedisManager:
 
     # --- C. Event Batching (for ActivityLog) ---
     async def push_activity_event(self, event: dict):
-        """Pushes an activity event to a Redis list for batch processing."""
+        """
+        Suma un evento (por ejemplo, encendido de Válvula) a la lista asíncrona,
+        permitiendo guardados masivos a la BD (batching) en vez de bloquear el dispatcher.
+        
+        :param event: Diccionario con la acción, descripcion y device_id.
+        """
         if not self.redis: return
         await self.redis.lpush("demeter:activity:batch", json.dumps(event))
 
     async def pop_activity_batch(self, count: int = 100) -> list:
-        """Pops a batch of activity events from the Redis list."""
+        """
+        Extrae y borra atómicamente un lote de eventos desde la lista asíncrona.
+        
+        :param count: Máximo número de eventos a extraer en un hit de Pipelining.
+        :return: Lista de JSON serializados listos para su Commit a BBDD.
+        """
         if not self.redis: return []
         pipe = self.redis.pipeline()
         pipe.lrange("demeter:activity:batch", -count, -1)

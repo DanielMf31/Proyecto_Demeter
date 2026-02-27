@@ -1,0 +1,19 @@
+<map id="Node_Sensor::collectAndSend" name="Node_Sensor::collectAndSend">
+<area shape="rect" id="Node000001" title="Tarea Ticking que itera los sensores, recaba la info y se la envía al Protocol Engine." alt="" coords="5,70,220,95"/>
+<area shape="rect" id="Node000002" href="$classSystemManager.html#a2f90e34d84a66db20ca8bc58c7f4faf2" title="Collects data from SensorManager and publishes it." alt="" coords="268,63,472,103"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="220,80,255,80,255,85,220,85"/>
+<area shape="rect" id="Node000003" href="$classDemeter_1_1SystemContext.html#a045bcc42e2c47efb0da48e2352dee01d" title=" " alt="" coords="548,5,735,45"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="465,60,534,45,535,50,466,65"/>
+<area shape="rect" id="Node000004" href="$classSensorManager.html#a80f7f580cc42bdcfbcea0e8832e1f6ac" title="Lee secuencialmente todos los sensores de la colección." alt="" coords="553,70,730,95"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="472,80,539,80,539,85,472,85"/>
+<area shape="rect" id="Node000005" href="$classSystemManager.html#a4ad900176b56da31672334215a0488d1" title=" " alt="" coords="520,119,763,145"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="473,99,558,114,557,119,472,104"/>
+<area shape="rect" id="Node000006" href="$classProtocolEngine.html#afd14d7a6e415874d64665173ef9c32ce" title="Send Sensor Data Report (Temp/Hum)." alt="" coords="811,112,1004,152"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="763,129,797,129,797,135,763,135"/>
+<area shape="rect" id="Node000007" href="$classProtocolEngine.html#a756248b6415af686ad17659d13a86273" title="Desciende estamento lógico a una Trama Binaria y la escupe por COMMS. Envuelve el payload crudo antep..." alt="" coords="1052,119,1251,145"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="1004,129,1038,129,1038,135,1004,135"/>
+<area shape="rect" id="Node000008" href="$classProtocolEngine.html#ad93203ceed2aada77a73556411fd8043" title="Calculates a simple Modular Sum CRC (Mod 256)." alt="" coords="1299,94,1512,119"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="1251,119,1285,116,1285,121,1251,125"/>
+<area shape="rect" id="Node000009" href="$classIComms.html#ad776ff948007fd56d75719d5a6704e30" title="Transmite un tren de bytes crudos a través del medio." alt="" coords="1348,143,1463,169"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="1251,139,1335,147,1334,152,1251,144"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="EspNowStrategy::onDataRecv" name="EspNowStrategy::onDataRecv">
+<area shape="rect" id="Node000001" title=" " alt="" coords="332,5,547,31"/>
+<area shape="rect" id="Node000002" href="$classEspNowStrategy.html#a00645feab1ea662309827ae3d303205b" title="Inicializa WiFi en modo STA y arranca la capa ESP&#45;NOW." alt="" coords="112,5,284,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="318,21,284,21,284,15,318,15"/>
+<area shape="rect" id="Node000003" href="$main__node__actuador_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,5,64,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="98,21,64,21,64,15,98,15"/>
+</map>

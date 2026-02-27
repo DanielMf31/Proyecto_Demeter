@@ -1,0 +1,15 @@
+<map id="SystemManager::update" name="SystemManager::update">
+<area shape="rect" id="Node000001" title="Bucle Principal del Sistema (Tick OBLIGATORIO)." alt="" coords="325,55,507,80"/>
+<area shape="rect" id="Node000002" href="$classNode__Actuator.html#aba4308a373cbf9ba8c6f5cdde23b7502" title="Tick regular ligado al firmware Arduino loop." alt="" coords="105,5,276,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="344,54,249,33,250,28,345,49"/>
+<area shape="rect" id="Node000004" href="$classNode__Gateway.html#af3315261cd44b048d250d8f2ed5da4da" title="Tarea regular Arduino loop() delegada hacia SystemManager." alt="" coords="104,55,277,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="311,70,278,70,278,65,311,65"/>
+<area shape="rect" id="Node000006" href="$classNode__Sensor.html#a4ef0a51ec48c9f9de1cea5167672e707" title="Tarea a correr ininterrumpidamente en el loop() de Arduino." alt="" coords="111,104,271,129"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="345,86,250,107,249,101,344,80"/>
+<area shape="rect" id="Node000003" href="$main__node__actuador_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="91,21,56,21,56,15,91,15"/>
+<area shape="rect" id="Node000005" href="$main__gateway_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,55,56,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="90,70,57,70,57,65,90,65"/>
+<area shape="rect" id="Node000007" href="$main__node__sensor_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,104,56,129"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="97,119,56,119,56,114,97,114"/>
+</map>

@@ -7,8 +7,10 @@ hay conectados y configurados en la Raspberry sin tener que hardcodearlos.
 
 import json
 import logging
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from Core.redis import redis_manager
+from Core.auth import get_current_active_user
+from BD.models import User
 
 logger = logging.getLogger("discovery_router")
 router = APIRouter()
@@ -20,7 +22,7 @@ REDIS_KEY = "demeter:discovery:config"
     summary="Listar dispositivos descubiertos",
     description="Retorna el mapeo de hardware reportado por la Raspberry Pi."
 )
-async def get_devices():
+async def get_devices(current_user: User = Depends(get_current_active_user)):
     """
     Lee la configuración guardada en Redis y la retorna.
     Si no hay configuración (Raspberry no conectada aún), retorna un error 404.

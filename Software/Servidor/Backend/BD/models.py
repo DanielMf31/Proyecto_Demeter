@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, Index, Float, Date
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, Index, Float, Date, JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
@@ -10,6 +10,10 @@ import uuid
 from Core.database import Base
 
 class User(Base):
+    """
+    Representa un usuario del sistema (Administrador, Científico, Operador).
+    Soporta UUID nativo en Postgres y almacenamiento de HASH de contraseña.
+    """
     __tablename__ = "users"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -25,6 +29,11 @@ class User(Base):
     experiments = relationship("Experiment", back_populates="user")
 
 class Device(Base):
+    """
+    Mapeo físico de hardware (Actuadores).
+    Actualmente modela bombas ('pump') y electroválvulas ('valve') ubicados 
+    físicamente en el arreglo de relés.
+    """
     __tablename__ = "devices"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -37,6 +46,10 @@ class Device(Base):
     activity_logs = relationship("ActivityLog", back_populates="device")
 
 class Sequence(Base):
+    """
+    Estructura macro de un Planificador de Secuencias. Agrupa un conjunto de 
+    pasos temporizados ejecutados en orden para el riego automático.
+    """
     __tablename__ = "sequences"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -49,6 +62,10 @@ class Sequence(Base):
     steps = relationship("SequenceStep", back_populates="sequence", cascade="all, delete-orphan")
 
 class SequenceStep(Base):
+    """
+    Definición individual de un paso dentro de una secuencia (Sequence).
+    Indica qué dispositivo encender/apagar y cuánto tiempo mantener dicho estado.
+    """
     __tablename__ = "sequence_steps"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -63,6 +80,10 @@ class SequenceStep(Base):
     device = relationship("Device", back_populates="sequence_steps")
 
 class ActivityLog(Base):
+    """
+    Bitácora (Audit Trail) del sistema. Guarda un histórico inmutable
+    de quién operó un dispositivo externo o quién activó una secuencia remota.
+    """
     __tablename__ = "activity_log"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -82,6 +103,10 @@ class ActivityLog(Base):
     )
 
 class ExperimentoPlantaLink(Base):
+    """
+    Tabla de unión Muchos-A-Muchos (M2M) para la relación entre un `Experiment`
+    (Conjunto de muestreo) y una o varias `Plant` botánicas físicas.
+    """
     __tablename__ = "experimento_planta_link"
     
     experiment_id = Column(Integer, ForeignKey("experiments.id", ondelete="CASCADE"), primary_key=True)
@@ -89,6 +114,11 @@ class ExperimentoPlantaLink(Base):
     linked_at = Column(DateTime, default=datetime.utcnow)
 
 class Experiment(Base):
+    """
+    Un Experimento representa un ensayo de control bajo el LIMS.
+    Genera automáticamente una `api_key` única para permitir
+    vínculos externos en el SDK de Python LIMS-Engine.
+    """
     __tablename__ = "experiments"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
@@ -101,6 +131,11 @@ class Experiment(Base):
     plants = relationship("Plant", secondary="experimento_planta_link", back_populates="experiments")
 
 class Plant(Base):
+    """
+    Representa un sujeto botánico único real monitoreado por el hardware.
+    Mapeado a través de su `node_id` contra los mensajes MQTT/Serial JSON.
+    Incluye un JSONB para indexación de metadata científica dinámica.
+    """
     __tablename__ = "plants"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -111,7 +146,7 @@ class Plant(Base):
     especie_variedad = Column(String, nullable=False)
     fecha_siembra = Column(Date, nullable=False)
     estado_vital = Column(String, default="Activa", nullable=False) # e.g., Activa, Cosechada, Muerta
-    metadata_cientifica = Column(JSONB, nullable=False, default={})
+    metadata_cientifica = Column(JSON().with_variant(JSONB, "postgresql"), nullable=False, default={})
     
     node_id = Column(Integer, unique=True, nullable=False) 
     
@@ -121,6 +156,10 @@ class Plant(Base):
 
 
 class TelemetryTH(Base):
+    """
+    Histórico crudo Series Temporales (TSDB en SQL) 
+    para reportes de Temperatura y Humedad emitidos por la telemetría.
+    """
     __tablename__ = "telemetry_th"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -130,6 +169,10 @@ class TelemetryTH(Base):
     humidity = Column(Float, nullable=False)
 
 class PinHistory(Base):
+    """
+    Histórico crudo de transiciones eléctricas de bajo nivel (ON/OFF).
+    Proviene directamente de los ACKs emitidos por la placa ESP32.
+    """
     __tablename__ = "pin_history"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -139,6 +182,10 @@ class PinHistory(Base):
     state = Column(Boolean, nullable=False)
 
 class SystemHistory(Base):
+    """
+    Bitácora de salud del Gateway/Nodos. 
+    Voltajes de batería, señales y modo de comunicación (LoRa/WiFi).
+    """
     __tablename__ = "system_history"
 
     id = Column(Integer, primary_key=True, index=True)

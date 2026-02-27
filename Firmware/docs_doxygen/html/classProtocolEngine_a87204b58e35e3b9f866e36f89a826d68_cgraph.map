@@ -1,0 +1,5 @@
+<map id="ProtocolEngine::registerRoute" name="ProtocolEngine::registerRoute">
+<area shape="rect" id="Node000001" title="Register a static route in the underlying comms strategy." alt="" coords="5,5,183,45"/>
+<area shape="rect" id="Node000002" href="$classIComms.html#a48c8483a8218a2996c895287aa18ee02" title="Vincula lógicamente un Nodo Demeter a una dirección MAC física. Únicamente utilizable en implementaci..." alt="" coords="231,13,403,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="183,23,217,23,217,28,183,28"/>
+</map>

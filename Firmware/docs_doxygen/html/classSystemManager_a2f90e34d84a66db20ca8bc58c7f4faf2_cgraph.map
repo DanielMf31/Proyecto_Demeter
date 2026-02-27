@@ -1,0 +1,17 @@
+<map id="SystemManager::collectAndPublishSensorData" name="SystemManager::collectAndPublishSensorData">
+<area shape="rect" id="Node000001" title="Collects data from SensorManager and publishes it." alt="" coords="5,63,209,103"/>
+<area shape="rect" id="Node000002" href="$classDemeter_1_1SystemContext.html#a045bcc42e2c47efb0da48e2352dee01d" title=" " alt="" coords="285,5,472,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="202,60,271,45,272,50,203,65"/>
+<area shape="rect" id="Node000003" href="$classSensorManager.html#a80f7f580cc42bdcfbcea0e8832e1f6ac" title="Lee secuencialmente todos los sensores de la colección." alt="" coords="290,70,467,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="209,80,276,80,276,85,209,85"/>
+<area shape="rect" id="Node000004" href="$classSystemManager.html#a4ad900176b56da31672334215a0488d1" title=" " alt="" coords="257,119,500,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="210,99,295,114,294,119,209,104"/>
+<area shape="rect" id="Node000005" href="$classProtocolEngine.html#afd14d7a6e415874d64665173ef9c32ce" title="Send Sensor Data Report (Temp/Hum)." alt="" coords="548,112,741,152"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="500,129,534,129,534,135,500,135"/>
+<area shape="rect" id="Node000006" href="$classProtocolEngine.html#a756248b6415af686ad17659d13a86273" title="Desciende estamento lógico a una Trama Binaria y la escupe por COMMS. Envuelve el payload crudo antep..." alt="" coords="789,119,988,145"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="741,129,776,129,776,135,741,135"/>
+<area shape="rect" id="Node000007" href="$classProtocolEngine.html#ad93203ceed2aada77a73556411fd8043" title="Calculates a simple Modular Sum CRC (Mod 256)." alt="" coords="1036,94,1249,119"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="988,119,1022,116,1023,121,989,125"/>
+<area shape="rect" id="Node000008" href="$classIComms.html#ad776ff948007fd56d75719d5a6704e30" title="Transmite un tren de bytes crudos a través del medio." alt="" coords="1085,143,1200,169"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="989,139,1072,147,1071,152,988,144"/>
+</map>

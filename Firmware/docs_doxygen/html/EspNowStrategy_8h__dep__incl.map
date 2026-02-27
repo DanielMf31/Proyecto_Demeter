@@ -1,0 +1,11 @@
+<map id="include/communications/EspNowStrategy.h" name="include/communications/EspNowStrategy.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="286,5,467,45"/>
+<area shape="rect" id="Node000002" href="$EspNowStrategy_8cpp.html" title="Implementación concreta del protocolo de radio P2P de Espressif." alt="" coords="5,93,164,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="300,52,149,96,148,91,299,47"/>
+<area shape="rect" id="Node000003" href="$main__gateway_8cpp.html" title="Firmware de Entrada Principal (Entry Point) para el Nodo Gateway (ID 1)." alt="" coords="188,101,355,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="344,56,288,102,284,98,341,52"/>
+<area shape="rect" id="Node000004" href="$main__node__actuador_8cpp.html" title="Firmware de Entrada Principal (Entry Point) para un Nodo tipo Actuador." alt="" coords="379,101,585,126"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="412,52,469,98,466,102,409,56"/>
+<area shape="rect" id="Node000005" href="$main__node__sensor_8cpp.html" title="Firmware de Entrada Principal (Entry Point) para un Nodo tipo Sensor." alt="" coords="609,101,803,126"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="463,46,663,98,662,103,461,51"/>
+</map>

@@ -1,0 +1,25 @@
+var classDemeter_1_1SystemContext =
+[
+    [ "SystemContext", "classDemeter_1_1SystemContext.html#ae5fdbf67cbbe0b445fccebea01a2eee4", null ],
+    [ "gatewayId", "classDemeter_1_1SystemContext.html#aed26b153900206d9d304a41e63234c72", null ],
+    [ "getBattery", "classDemeter_1_1SystemContext.html#a667739a0134e4f1659b4e28a2a87d7ee", null ],
+    [ "getReportInterval", "classDemeter_1_1SystemContext.html#a139fa85821f2cb6ec0d70d993a6f3fd0", null ],
+    [ "getState", "classDemeter_1_1SystemContext.html#af5e37e6b803d0e412475ba4db681527f", null ],
+    [ "isDeepSleepEnabled", "classDemeter_1_1SystemContext.html#a5a44de51d99faa72b946c3b7d4b62f43", null ],
+    [ "nodeId", "classDemeter_1_1SystemContext.html#a045bcc42e2c47efb0da48e2352dee01d", null ],
+    [ "role", "classDemeter_1_1SystemContext.html#a268fe3d2ed1c05fddae4f6bb9a70ab57", null ],
+    [ "setConfig", "classDemeter_1_1SystemContext.html#a835dcfaba8f4d4506798faad26c196b8", null ],
+    [ "setIdentity", "classDemeter_1_1SystemContext.html#acb6cd8bc91951b2e0edee7c5c1aa921c", null ],
+    [ "setState", "classDemeter_1_1SystemContext.html#ae7c2e73ec3905e661f920286615d4537", null ],
+    [ "updateBattery", "classDemeter_1_1SystemContext.html#a8db1dca1129fc71328c7680f00974fd5", null ],
+    [ "_activePins", "classDemeter_1_1SystemContext.html#abbb2bae6b17df815c5de1043959b8791", null ],
+    [ "_batteryMv", "classDemeter_1_1SystemContext.html#a4682c58a8a01f21b83aa2116e0ca0c6b", null ],
+    [ "_currentState", "classDemeter_1_1SystemContext.html#a8e7f34d65ecb431895660d617c30edbd", null ],
+    [ "_deepSleepEnabled", "classDemeter_1_1SystemContext.html#a43b818f3eb0dbb6a15bab76c5fe0b8b3", null ],
+    [ "_gatewayId", "classDemeter_1_1SystemContext.html#a5649ed619bf8603ec54bf7f4d7468be8", null ],
+    [ "_lastErrorCode", "classDemeter_1_1SystemContext.html#a48b272fb45d1a3c3e00aa329902626ed", null ],
+    [ "_nodeId", "classDemeter_1_1SystemContext.html#a41b22de608d7047e5100e574783d144e", null ],
+    [ "_reportIntervalMs", "classDemeter_1_1SystemContext.html#a43b2bdd400117908a93db64dab730a2e", null ],
+    [ "_role", "classDemeter_1_1SystemContext.html#a3d0b0f0bfb1a4b58274d710acc2fddba", null ],
+    [ "_uptimeSeconds", "classDemeter_1_1SystemContext.html#a8db7e7e0a14ff60ce4738e73f89810ba", null ]
+];

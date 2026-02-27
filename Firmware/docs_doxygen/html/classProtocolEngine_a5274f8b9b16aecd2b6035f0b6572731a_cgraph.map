@@ -1,0 +1,9 @@
+<map id="ProtocolEngine::sendNack" name="ProtocolEngine::sendNack">
+<area shape="rect" id="Node000001" title="Emite una trama genérica de Error o Ausencia Lógica." alt="" coords="5,31,196,56"/>
+<area shape="rect" id="Node000002" href="$classProtocolEngine.html#a756248b6415af686ad17659d13a86273" title="Desciende estamento lógico a una Trama Binaria y la escupe por COMMS. Envuelve el payload crudo antep..." alt="" coords="244,31,443,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,41,230,41,230,46,196,46"/>
+<area shape="rect" id="Node000003" href="$classProtocolEngine.html#ad93203ceed2aada77a73556411fd8043" title="Calculates a simple Modular Sum CRC (Mod 256)." alt="" coords="491,5,704,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="443,31,477,27,477,33,443,36"/>
+<area shape="rect" id="Node000004" href="$classIComms.html#ad776ff948007fd56d75719d5a6704e30" title="Transmite un tren de bytes crudos a través del medio." alt="" coords="540,55,655,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="443,50,527,58,526,63,443,55"/>
+</map>

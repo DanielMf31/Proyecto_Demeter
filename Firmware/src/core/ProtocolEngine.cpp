@@ -5,8 +5,20 @@
 
 /**
  * @file ProtocolEngine.cpp
- * @brief Logic for Frame Parsing and Validation.
- * Refactored to separate Parsing, Command Sending, and Frame Construction.
+ * @brief Protocolo Binario V2, empaquetado y decodificación.
+ * 
+ * ============================================================================
+ * DECISIONES DE ARQUITECTURA Y DISEÑO
+ * ============================================================================
+ * 1. **Diseño "Zero Allocation" en la Recepción:** En sistemas embebidos
+ *    evitamos hacer `new` u objetos String constantes. Parseamos los buffers
+ *    planos usando Casteos C de alto rendimiento: `reinterpret_cast<Header*>`.
+ * 2. **Desacoplamiento del Trasporte:** Este motor **no** abre puertos serie.
+ *    Recibe una interfaz abstracta `IComms*` en su constructor y expulsa los
+ *    tramas validados puros, ignorando si viajan por ESP-NOW, LoRa o UART.
+ * 3. **Arquitectura basada en Eventos:** Internamente tiene punteros a funciones
+ *    `std::function` (Callbacks). Cuando encuentra un comando válido, "avisa"
+ *    a quien se haya suscrito (`_onGpioCommand`, `_onPingRecv`).
  */
 
 // =============================================================
@@ -65,8 +77,13 @@ void ProtocolEngine::update() {
 }
 
 /**
- * @brief Core parsing logic for a received frame.
- * Validates Header, Sync, Length and CRC before dispatching.
+ * @brief Logica nuclear de parseo de un frame que ingresa desde abajo (Capa de enlace).
+ * 
+ * ¿Por qué tantas validaciones rápidas antes del CRC?
+ * Técnicas "Fail-Fast". Computar un CRC es computacionalmente costoso en un MCU
+ * de baja potencia limitante a baterías.
+ * Validamos mágicamente el Byte `sync` o el tamaño del paquete. Si fallan,
+ * descartamos instantáneamente el array para ahorrar ciclos CPU y RAM.
  */
 void ProtocolEngine::parseFrame(const std::vector<uint8_t>& frame) {
     if (frame.size() < HEADER_SIZE + 1) return; // Min: Header + CRC
@@ -94,8 +111,10 @@ void ProtocolEngine::parseFrame(const std::vector<uint8_t>& frame) {
         return;
     }
 
-    // 5. Forwarding Logic
-    // FORCE-ACCEPT Rule for Gateway (ID 1) as requested
+    // 5. Forwarding Logic (Enrutamiento Nivel Red)
+    // El Gateway (ID 1) tiene la directiva (FORCE-ACCEPT).
+    // ¿Por qué? Un Gateway muchas veces debe "escuchar" paquetes destinados
+    // al nodo servidor virtual (ID 0) para "hacerles puente" y sacarlos por la MAC puente.
     bool isForMe = (hdr->dst_id == _myId) || (hdr->dst_id == 0xFF);
     
     // Explicit Override: If I am the Gateway (ID 1) or if the message is for ID 1
@@ -112,15 +131,18 @@ void ProtocolEngine::parseFrame(const std::vector<uint8_t>& frame) {
         return; // Don't execute locally
     }
 
-   // 6. Command Dispatch
+    // 6. Command Dispatch
     Demeter::CommandType type = static_cast<Demeter::CommandType>(hdr->cmd_id);
     
-    // Extract Payload for convenience
+    // Extracción de Payload para mayor limpieza conceptual.
+    // Separamos la cabecera del cuerpo de datos, que según el tipo de comando
+    // tendrá una forma distinta que será traducida por la máquina de estados.
     std::vector<uint8_t> payload;
     if (frame.size() > HEADER_SIZE + 1) {
         payload.assign(frame.begin() + HEADER_SIZE, frame.end() - 1);
     }
 
+    // Switch gigantesco: El cerebro del parseo multiprotocolo.
     switch (type) {
         case Demeter::CommandType::PING: {
             // [Modified] No Auto-ACK. Delegated to SystemManager.
@@ -407,6 +429,14 @@ void ProtocolEngine::sendExecSequence(uint8_t targetId, const Demeter::ExecSeque
 // SECTION: 3. Low-Level Send Logic (Transport Layer)
 // =============================================================
 
+/**
+ * @brief Función interna "constructora" (Builder) del motor emisor.
+ * 
+ * Empaqueta un array plano con los datos de un comando sumándole 
+ * un Header robusto por delante y el Checker Algorítmico al final (CRC).
+ * ¿Por qué separarlo? Permite centralizar la suma de comprobación (CRC)
+ * independientemente del payload sin repetirlo por cada rutina.
+ */
 void ProtocolEngine::sendFrame(uint8_t cmdId, uint8_t targetId, const std::vector<uint8_t>& payload) {
     if (!_strategy) return;
 

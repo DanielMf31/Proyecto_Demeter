@@ -12,16 +12,24 @@
 #endif
 
 /**
- * @brief UART Communication Implementation.
+ * @class UartStrategy
+ * @brief Implementación Concreta de Comunicación Serie (UART).
  * 
- * Concrete implementation of IComms for Serial Communication (UART).
- * Supports both HardwareSerial (ESP32) and Mock Serial (Native Tests).
+ * Puentea la interfaz `IComms` a la clase nativa `HardwareSerial` del framework Arduino.
+ * Soporta Mocking si se des-comenta el macro NATIVE_ENV para tests en Linux.
+ * 
+ * @par Ejemplo de uso:
+ * @code
+ * // Instanciar sobre UART2 en ESP32
+ * UartStrategy uart2(&Serial2, 115200, 16, 17);
+ * uart2.begin();
+ * 
+ * if (uart2.available()) {
+ *     auto frame = uart2.read();
+ * }
+ * @endcode
  */
 class UartStrategy : public IComms {
-private:
-    HardwareSerial* _serial; ///< Pointer to the underlying Serial interface.
-    uint32_t _baudRate;      ///< Communication speed (bps).
-
 public:
     /**
      * @brief Construct a new Uart Strategy object.
@@ -48,20 +56,23 @@ public:
     void send(const uint8_t* data, size_t length) override;
 
     /**
-     * @brief Check if data is available in the RX buffer.
-     * @return true if > 0 bytes are available.
+     * @brief Comprueba si el Buffer FIFO del HW tiene bytes.
+     * @return true si `_serial->available() > 0`.
      */
     bool available() override;
 
     /**
-     * @brief Read all available bytes from UART.
-     * @return std::vector<uint8_t> containing received data.
+     * @brief Drena completamente el Buffer Serial RX disponible instantáneamente.
+     * @return `std::vector<uint8_t>` Vector temporal dinámico con el contenido crudo.
      */
     std::vector<uint8_t> read() override;
     
     // UartStrategy ignores RouteAdd
     void registerRoute(uint8_t id, const std::array<uint8_t, 6>& mac) override {}
+
 private:
+    HardwareSerial* _serial; ///< Pointer to the underlying Serial interface.
+    uint32_t _baudRate;      ///< Communication speed (bps).
     int8_t _rxPin; ///< Configured RX Pin.
     int8_t _txPin; ///< Configured TX Pin.
 };

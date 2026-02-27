@@ -1,0 +1,9 @@
+<map id="ProtocolEngine::sendSystemReport" name="ProtocolEngine::sendSystemReport">
+<area shape="rect" id="Node000001" title="Send System Status Report (Mode, Battery)." alt="" coords="5,23,212,63"/>
+<area shape="rect" id="Node000002" href="$classProtocolEngine.html#a756248b6415af686ad17659d13a86273" title="Desciende estamento lógico a una Trama Binaria y la escupe por COMMS. Envuelve el payload crudo antep..." alt="" coords="260,31,459,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,41,246,41,246,46,212,46"/>
+<area shape="rect" id="Node000003" href="$classProtocolEngine.html#ad93203ceed2aada77a73556411fd8043" title="Calculates a simple Modular Sum CRC (Mod 256)." alt="" coords="507,5,720,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="459,31,493,27,493,33,459,36"/>
+<area shape="rect" id="Node000004" href="$classIComms.html#ad776ff948007fd56d75719d5a6704e30" title="Transmite un tren de bytes crudos a través del medio." alt="" coords="556,55,671,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="459,50,543,58,542,63,459,55"/>
+</map>

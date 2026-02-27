@@ -1,0 +1,105 @@
+<map id="setup" name="setup">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,471,64,496"/>
+<area shape="rect" id="Node000002" href="$classNode__Actuator.html#a6a606584447dc58e571b74f82d22ecf3" title="Registra callbacks extra reactivos ante una modificación GPIO. Facade a ProtocolEngine::onSetGpioComm..." alt="" coords="112,29,344,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="34,470,41,394,55,281,78,167,92,122,110,90,131,71,155,57,157,62,134,75,114,93,97,124,83,168,60,281,46,395,40,471"/>
+<area shape="rect" id="Node000004" href="$classEspNowStrategy.html#a00645feab1ea662309827ae3d303205b" title="Inicializa WiFi en modo STA y arranca la capa ESP&#45;NOW." alt="" coords="142,104,314,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="35,470,42,403,57,306,79,211,93,173,110,147,128,133,131,137,114,150,98,175,84,212,62,307,47,404,40,471"/>
+<area shape="rect" id="Node000007" href="$classNode__Actuator.html#af54ed12f9b1d196df4c05b31f725e993" title="Inicializa los controladores hardware subyacentes." alt="" coords="147,395,309,420"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="54,468,111,437,156,421,158,426,113,442,57,473"/>
+<area shape="rect" id="Node000054" href="$classNode__Actuator.html#a3b11830b8950689b4c2216e8544d630e" title=" " alt="" coords="127,496,329,521"/>
+<area shape="poly" id="edge43_Node000001_Node000054" title=" " alt="" coords="64,484,118,492,117,497,64,490"/>
+<area shape="rect" id="Node000055" href="$classNode__Actuator.html#ae88ba29477be1d9794dc429f69b0d484" title=" " alt="" coords="130,546,326,586"/>
+<area shape="poly" id="edge44_Node000001_Node000055" title=" " alt="" coords="54,494,81,513,113,530,134,539,132,544,111,535,78,517,51,498"/>
+<area shape="rect" id="Node000056" href="$classSystemManager.html#ab408d234219409db09c350a3558d0551" title=" " alt="" coords="394,1027,633,1052"/>
+<area shape="poly" id="edge45_Node000001_Node000056" title=" " alt="" coords="63,470,122,452,197,440,237,440,276,446,313,459,346,481,360,500,371,525,380,587,380,663,374,746,368,828,366,905,374,968,382,993,394,1012,398,1017,394,1020,390,1016,377,995,368,970,361,905,363,828,369,745,374,663,375,588,365,526,356,503,342,485,311,464,275,451,237,445,198,446,123,458,65,475"/>
+<area shape="rect" id="Node000057" href="$main__node__actuador_8cpp.html#a26962c939f7d7c12e97fe018bcdbb763" title=" " alt="" coords="201,611,255,636"/>
+<area shape="poly" id="edge47_Node000001_Node000057" title=" " alt="" coords="43,495,68,545,88,573,113,596,149,612,187,619,186,624,148,617,111,600,84,576,63,548,38,497"/>
+<area shape="rect" id="Node000058" href="$classEspNowStrategy.html#ae65a1dd146e757c35c6387ca933a4f9b" title="Añade una entrada vinculante [ID &#45;&gt; MAC] en la tabla de ruteo. Seguidamente llama a esp_now_add_peer ..." alt="" coords="135,783,321,823"/>
+<area shape="poly" id="edge48_Node000001_Node000058" title=" " alt="" coords="43,495,71,561,114,646,160,714,203,771,199,774,155,717,110,649,66,563,38,497"/>
+<area shape="rect" id="Node000060" href="$classSystemManager.html#a7b39758cb49aaaca56016abd615b95f7" title=" " alt="" coords="114,1092,342,1117"/>
+<area shape="poly" id="edge50_Node000001_Node000060" title=" " alt="" coords="41,496,65,634,87,734,115,835,140,905,168,973,216,1078,212,1081,163,976,135,907,109,836,81,735,60,635,35,497"/>
+<area shape="rect" id="Node000062" href="$classGpioController.html#a922ba5c6528dd35c6ce3ef10b144bc08" title="Configura la lista de pines gestionados." alt="" coords="988,245,1159,271"/>
+<area shape="poly" id="edge52_Node000001_Node000062" title=" " alt="" coords="41,469,68,426,87,402,110,380,184,325,251,284,313,254,375,233,440,219,510,208,682,190,808,177,863,178,933,190,992,210,1042,236,1039,241,990,215,931,195,863,184,808,182,683,195,511,214,441,224,377,238,315,259,253,288,187,329,114,384,91,405,72,429,45,472"/>
+<area shape="rect" id="Node000003" href="$classSystemManager.html#a09d94e47c962cff10540c3981ff9a23f" title=" " alt="" coords="392,5,635,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="344,30,378,27,379,32,345,35"/>
+<area shape="rect" id="Node000005" href="$classEspNowStrategy.html#abfe98b791894d057bd4be20b821e82eb" title=" " alt="" coords="406,55,621,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="302,101,425,80,426,85,303,107"/>
+<area shape="rect" id="Node000006" href="$classEspNowStrategy.html#a97dcc443b41e52e68df39aa9ae20ff42" title=" " alt="" coords="407,104,619,129"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="314,114,394,114,394,119,314,119"/>
+<area shape="rect" id="Node000008" href="$classSystemManager.html#adb3f61bc410c4b54dc5d3e6b844333ff" title=" " alt="" coords="409,395,617,420"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="310,405,396,405,396,410,310,410"/>
+<area shape="rect" id="Node000009" href="$classDemeter_1_1SystemContext.html#acb6cd8bc91951b2e0edee7c5c1aa921c" title="Define la identidad lógica y física de este nodo en la red." alt="" coords="420,269,607,309"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="259,392,451,312,453,316,261,397"/>
+<area shape="rect" id="Node000012" href="$classSystemManager.html#a2ed1972442d36a8a964882eb3735f7e2" title="Initialize the system components. Sets up callbacks and initializes enabled hardware." alt="" coords="427,977,599,1003"/>
+<area shape="poly" id="edge11_Node000007_Node000012" title=" " alt="" coords="311,416,329,425,346,437,373,467,398,500,437,571,467,647,488,724,502,798,510,865,515,963,510,963,505,865,497,799,483,725,462,648,433,573,393,503,369,471,342,441,327,429,308,421"/>
+<area shape="rect" id="Node000010" href="$classDemeter_1_1SystemContext.html#aed26b153900206d9d304a41e63234c72" title=" " alt="" coords="714,269,901,309"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="607,286,700,286,700,291,607,291"/>
+<area shape="rect" id="Node000011" href="$classDemeter_1_1SystemContext.html#a268fe3d2ed1c05fddae4f6bb9a70ab57" title=" " alt="" coords="714,205,901,245"/>
+<area shape="poly" id="edge10_Node000009_Node000011" title=" " alt="" coords="605,266,701,245,702,250,607,271"/>
+<area shape="rect" id="Node000013" href="$classSensorManager.html#a4e7a1127bc571c29b3defa8ce4994fec" title="Inicializa todos los sensores registrados. Itera sobre _sensors invocando begin() de forma concurrent..." alt="" coords="724,663,891,688"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="515,976,532,923,564,847,586,806,613,766,645,729,681,697,710,683,712,688,684,702,648,732,617,769,591,809,569,849,537,925,521,978"/>
+<area shape="rect" id="Node000014" href="$classSystemManager.html#a9f7c4b36a501aa89ebc80f10ed971b1f" title=" " alt="" coords="689,712,925,737"/>
+<area shape="poly" id="edge13_Node000012_Node000014" title=" " alt="" coords="517,976,537,931,571,869,619,803,649,773,681,748,695,740,697,745,684,752,652,777,623,807,576,872,542,934,522,978"/>
+<area shape="rect" id="Node000015" href="$classSystemManager.html#a82b82fc7da7de401da0656c1b50acee5" title=" " alt="" coords="702,762,913,802"/>
+<area shape="poly" id="edge14_Node000012_Node000015" title=" " alt="" coords="521,975,545,942,581,898,628,851,681,812,694,805,696,810,684,816,631,855,585,901,549,946,525,979"/>
+<area shape="rect" id="Node000019" href="$classSystemManager.html#a338012dcf93ee630c5ad688d4db51eb8" title=" " alt="" coords="706,826,909,866"/>
+<area shape="poly" id="edge15_Node000012_Node000019" title=" " alt="" coords="528,975,592,927,636,900,682,876,701,868,703,873,684,880,638,904,595,931,531,979"/>
+<area shape="rect" id="Node000026" href="$classSystemManager.html#a02473eda1d6d15455fb33a093b652996" title="Manejador inyectado ejecutado cuando la red nos manda cambiar un Pin." alt="" coords="702,1759,913,1799"/>
+<area shape="poly" id="edge16_Node000012_Node000026" title=" " alt="" coords="601,990,620,999,637,1012,654,1040,666,1075,673,1116,676,1163,672,1267,663,1380,653,1493,649,1597,651,1643,658,1684,669,1719,685,1746,692,1753,688,1757,681,1749,664,1721,653,1685,646,1644,644,1597,647,1492,657,1379,667,1267,670,1163,667,1117,661,1076,649,1042,633,1016,617,1003,599,995"/>
+<area shape="rect" id="Node000027" href="$classSystemManager.html#ac6901de9e0c5f16db81d02c279683d00" title=" " alt="" coords="703,891,911,916"/>
+<area shape="poly" id="edge19_Node000012_Node000027" title=" " alt="" coords="544,975,607,951,682,926,721,916,723,921,683,931,609,956,546,980"/>
+<area shape="rect" id="Node000029" href="$classSystemManager.html#a0d3994943d359a34a024c92334ab0f37" title=" " alt="" coords="707,941,907,981"/>
+<area shape="poly" id="edge20_Node000012_Node000029" title=" " alt="" coords="599,979,693,969,694,975,600,984"/>
+<area shape="rect" id="Node000030" href="$classSystemManager.html#a9f92def67dc1ab8ffe5c3392b831585c" title=" " alt="" coords="686,1005,929,1031"/>
+<area shape="poly" id="edge21_Node000012_Node000030" title=" " alt="" coords="600,996,672,1002,672,1008,599,1001"/>
+<area shape="rect" id="Node000033" href="$classSystemManager.html#ab9319d4f7cc35364b6bcc4db0076d54e" title=" " alt="" coords="705,1055,909,1095"/>
+<area shape="poly" id="edge22_Node000012_Node000033" title=" " alt="" coords="598,1000,636,1012,660,1025,684,1040,708,1049,706,1054,682,1044,657,1030,634,1016,596,1005"/>
+<area shape="rect" id="Node000035" href="$classDemeter_1_1SystemContext.html#ae7c2e73ec3905e661f920286615d4537" title="Actualiza la máquina de estado principal de la aplicación." alt="" coords="980,1085,1167,1125"/>
+<area shape="poly" id="edge42_Node000012_Node000035" title=" " alt="" coords="601,995,636,1012,648,1023,655,1036,660,1061,666,1085,673,1096,684,1105,721,1123,760,1135,801,1142,842,1144,923,1139,993,1125,994,1131,923,1144,842,1149,800,1147,759,1140,719,1128,681,1110,669,1099,661,1088,655,1063,650,1038,644,1027,633,1016,598,999"/>
+<area shape="rect" id="Node000036" href="$classSystemManager.html#adf46096f6461d7081502c02f75ed354d" title=" " alt="" coords="689,1171,925,1196"/>
+<area shape="poly" id="edge24_Node000012_Node000036" title=" " alt="" coords="601,993,620,1001,636,1012,651,1029,659,1047,662,1082,665,1117,671,1133,684,1149,704,1163,701,1167,681,1153,667,1136,659,1118,656,1082,653,1048,647,1032,633,1016,617,1005,599,998"/>
+<area shape="rect" id="Node000038" href="$classSystemManager.html#a1533ecccc4a2c1a4b73960bb29dc08ce" title=" " alt="" coords="693,1221,922,1261"/>
+<area shape="poly" id="edge25_Node000012_Node000038" title=" " alt="" coords="600,992,620,1000,637,1012,655,1036,663,1061,664,1086,662,1111,660,1136,660,1160,668,1183,685,1207,688,1210,685,1214,681,1210,663,1186,655,1161,654,1135,657,1110,659,1086,658,1062,650,1039,633,1016,617,1005,598,997"/>
+<area shape="rect" id="Node000039" href="$classSystemManager.html#af088a00e5071b5896b1d2a476ca28c63" title=" " alt="" coords="700,1285,915,1325"/>
+<area shape="poly" id="edge26_Node000012_Node000039" title=" " alt="" coords="601,991,620,1000,637,1012,659,1044,668,1077,668,1110,662,1143,657,1175,656,1208,664,1239,685,1271,690,1276,687,1280,681,1274,659,1241,650,1208,651,1175,657,1142,662,1110,663,1078,655,1047,633,1016,617,1004,599,996"/>
+<area shape="rect" id="Node000040" href="$classGpioController.html#a0cf76d874bf32023d8198464c8cef68b" title="Inicializa los pines GPIO configurados. Recorre _managedPins, los configura como OUTPUT y los inicia ..." alt="" coords="1001,384,1146,409"/>
+<area shape="poly" id="edge27_Node000012_Node000040" title=" " alt="" coords="514,977,532,867,566,697,590,609,617,528,647,463,664,438,681,420,704,408,735,399,814,389,903,386,987,389,987,394,903,392,814,394,736,404,706,413,684,424,668,441,652,465,622,530,595,610,572,699,537,868,519,977"/>
+<area shape="rect" id="Node000041" href="$classDemeter_1_1SystemContext.html#a045bcc42e2c47efb0da48e2352dee01d" title=" " alt="" coords="714,1349,901,1389"/>
+<area shape="poly" id="edge29_Node000012_Node000041" title=" " alt="" coords="601,991,620,999,637,1012,653,1032,664,1053,673,1093,671,1134,662,1175,654,1215,651,1255,659,1295,670,1315,685,1335,703,1350,700,1354,681,1339,665,1318,654,1297,646,1256,649,1215,657,1174,666,1133,668,1094,659,1055,648,1035,633,1016,617,1004,598,996"/>
+<area shape="rect" id="Node000042" href="$classProtocolEngine.html#ae9dece5a3d0026bf7f6a0863855c15aa" title=" " alt="" coords="708,1413,907,1439"/>
+<area shape="poly" id="edge30_Node000012_Node000042" title=" " alt="" coords="601,991,620,999,637,1012,656,1036,668,1061,675,1085,678,1110,673,1159,661,1208,650,1256,645,1304,647,1328,654,1352,666,1375,685,1399,698,1410,694,1414,681,1403,662,1378,649,1354,642,1329,639,1304,644,1255,656,1207,668,1158,673,1110,670,1086,663,1063,651,1039,633,1016,617,1004,599,996"/>
+<area shape="rect" id="Node000043" href="$classProtocolEngine.html#a827d88fcbd538e8fbfbeebc0510c59c8" title=" " alt="" coords="689,1463,925,1488"/>
+<area shape="poly" id="edge31_Node000012_Node000043" title=" " alt="" coords="601,991,620,999,637,1012,658,1040,672,1067,679,1095,682,1123,676,1178,661,1233,647,1288,641,1343,643,1369,650,1396,664,1423,685,1450,687,1452,683,1456,681,1453,660,1426,646,1398,638,1370,635,1343,641,1287,656,1232,670,1177,677,1123,674,1096,667,1069,653,1043,633,1016,617,1004,599,996"/>
+<area shape="rect" id="Node000044" href="$classProtocolEngine.html#a3138f4b946216f07468d6065d0d69f24" title=" " alt="" coords="683,1512,932,1537"/>
+<area shape="poly" id="edge32_Node000012_Node000044" title=" " alt="" coords="601,991,620,999,637,1012,649,1031,657,1054,665,1113,665,1182,661,1258,657,1333,657,1402,665,1459,673,1482,685,1499,687,1502,683,1505,681,1502,668,1484,660,1461,652,1402,652,1333,656,1257,660,1182,660,1113,652,1055,644,1033,633,1016,617,1004,599,995"/>
+<area shape="rect" id="Node000045" href="$classProtocolEngine.html#a7723d006e8f4ec0f652d18c81f35fe30" title=" " alt="" coords="706,1561,909,1587"/>
+<area shape="poly" id="edge33_Node000012_Node000045" title=" " alt="" coords="600,990,620,999,637,1012,650,1033,659,1058,667,1123,666,1199,661,1282,656,1365,655,1441,663,1505,672,1529,685,1548,695,1558,692,1562,681,1552,667,1532,658,1506,650,1441,651,1365,656,1282,661,1199,662,1123,654,1060,645,1035,633,1016,617,1003,598,995"/>
+<area shape="rect" id="Node000046" href="$classProtocolEngine.html#ab5c047b462593df7950d3b8b761d8d45" title=" " alt="" coords="688,1611,927,1636"/>
+<area shape="poly" id="edge34_Node000012_Node000046" title=" " alt="" coords="600,990,620,999,637,1012,651,1034,661,1063,669,1133,668,1217,661,1307,655,1397,653,1480,662,1550,671,1577,685,1598,687,1600,683,1604,681,1601,666,1579,657,1551,648,1481,649,1397,656,1307,662,1216,664,1133,655,1064,646,1037,633,1016,617,1003,598,995"/>
+<area shape="rect" id="Node000047" href="$classProtocolEngine.html#a90b03a5fb7542caa38d3d9d082c87ba2" title=" " alt="" coords="688,1660,927,1685"/>
+<area shape="poly" id="edge35_Node000012_Node000047" title=" " alt="" coords="601,990,620,999,637,1012,652,1036,662,1067,668,1103,671,1143,669,1234,661,1332,654,1429,651,1520,654,1560,660,1595,670,1624,685,1647,687,1650,683,1653,681,1650,665,1626,655,1596,649,1560,646,1520,648,1429,656,1331,664,1233,666,1143,663,1103,657,1068,647,1039,633,1016,617,1003,598,995"/>
+<area shape="rect" id="Node000048" href="$classProtocolEngine.html#acbf75abd6580295caa23fab03e798ecc" title=" " alt="" coords="710,1709,905,1735"/>
+<area shape="poly" id="edge36_Node000012_Node000048" title=" " alt="" coords="601,990,620,999,637,1012,653,1038,664,1071,670,1110,673,1153,670,1251,661,1356,652,1462,649,1559,652,1602,658,1640,669,1672,685,1696,699,1708,696,1713,681,1700,664,1674,653,1641,647,1603,644,1559,647,1461,656,1356,665,1250,668,1153,665,1110,659,1072,648,1040,633,1016,617,1003,598,995"/>
+<area shape="rect" id="Node000049" href="$classProtocolEngine.html#a44d1e7eff8dc3c336b83a594ee1eb973" title=" " alt="" coords="696,333,919,359"/>
+<area shape="poly" id="edge37_Node000012_Node000049" title=" " alt="" coords="514,977,532,862,567,681,590,585,617,497,647,425,664,397,681,376,698,363,701,367,685,380,668,400,652,427,622,499,596,587,572,682,537,863,519,978"/>
+<area shape="rect" id="Node000050" href="$classProtocolEngine.html#ac4812cb83a105c7b241a2bd8af2b0802" title=" " alt="" coords="708,435,907,460"/>
+<area shape="poly" id="edge38_Node000012_Node000050" title=" " alt="" coords="512,977,516,891,523,826,536,753,557,677,587,601,627,531,652,499,681,471,694,461,697,465,684,475,656,503,632,534,591,604,562,679,541,755,528,827,521,891,517,977"/>
+<area shape="rect" id="Node000051" href="$classProtocolEngine.html#a02f25f423384530ca73ee645d91adbd2" title=" " alt="" coords="711,485,903,525"/>
+<area shape="poly" id="edge39_Node000012_Node000051" title=" " alt="" coords="513,977,521,901,530,844,545,781,567,715,596,649,633,588,681,535,697,523,700,527,684,539,638,591,600,652,572,717,550,783,536,846,526,901,518,978"/>
+<area shape="rect" id="Node000052" href="$classProtocolEngine.html#a047652881d85313093795f183140c4e3" title=" " alt="" coords="703,549,912,589"/>
+<area shape="poly" id="edge40_Node000012_Node000052" title=" " alt="" coords="514,977,525,910,553,808,575,751,603,695,638,644,681,599,689,593,692,597,684,603,642,647,607,698,580,753,558,809,530,911,519,978"/>
+<area shape="rect" id="Node000053" href="$classProtocolEngine.html#a7967ac3eeac8a9ebe7ff0bcc34a8fa41" title="Asigna el ID Lógico originador incrustado en los Headers salientes." alt="" coords="711,613,904,639"/>
+<area shape="poly" id="edge41_Node000012_Node000053" title=" " alt="" coords="514,977,528,916,557,827,580,778,607,730,641,685,681,648,697,638,700,643,684,652,645,689,612,733,584,780,562,829,533,918,519,978"/>
+<area shape="rect" id="Node000017" href="$classGpioController.html#a861d6c95be1f249f3d5b6e5603337c60" title="Ejecuta una orden de Cómputo Digital sobre el Hardware." alt="" coords="986,1444,1161,1469"/>
+<area shape="poly" id="edge17_Node000026_Node000017" title=" " alt="" coords="911,1757,930,1745,960,1716,986,1683,1007,1646,1025,1609,1050,1537,1065,1482,1070,1483,1056,1539,1030,1611,1012,1649,990,1686,964,1720,934,1749,914,1762"/>
+<area shape="rect" id="Node000018" href="$PinConfig_8h.html#a550e793a11b6bbcf91de8422193c2351" title="Helper to check if a pin is protected." alt="" coords="1215,384,1329,409"/>
+<area shape="poly" id="edge18_Node000017_Node000018" title=" " alt="" coords="1077,1443,1116,1318,1142,1229,1164,1136,1203,922,1234,712,1266,423,1271,424,1239,713,1209,923,1169,1137,1147,1230,1121,1320,1082,1444"/>
+<area shape="poly" id="edge23_Node000033_Node000035" title=" " alt="" coords="910,1084,966,1090,966,1096,909,1089"/>
+<area shape="poly" id="edge28_Node000040_Node000018" title=" " alt="" coords="1147,394,1200,394,1200,399,1147,399"/>
+<area shape="poly" id="edge46_Node000056_Node000026" title=" " alt="" coords="624,1050,637,1062,653,1087,664,1120,671,1159,674,1202,671,1299,663,1405,654,1510,651,1607,653,1650,659,1688,670,1720,685,1746,692,1753,688,1757,681,1749,665,1723,654,1690,648,1651,646,1607,649,1509,657,1404,666,1299,668,1202,665,1159,659,1121,648,1090,633,1065,620,1054"/>
+<area shape="rect" id="Node000059" href="$classEspNowStrategy.html#a77b4b711e7ea3e9c777241b493fe969a" title="Helper que inscribe un Peer al framework nativo." alt="" coords="419,1076,608,1101"/>
+<area shape="poly" id="edge49_Node000058_Node000059" title=" " alt="" coords="238,823,257,872,289,937,334,1005,362,1035,394,1061,407,1069,405,1074,390,1066,359,1039,330,1008,284,940,252,874,233,824"/>
+<area shape="rect" id="Node000061" href="$classProtocolEngine.html#af02d2d5acf5a5bafa72e5d826bead6ff" title="Send GPIO State Report (Feedback)." alt="" coords="403,1125,624,1151"/>
+<area shape="poly" id="edge51_Node000060_Node000061" title=" " alt="" coords="337,1115,391,1121,390,1126,337,1120"/>
+<area shape="poly" id="edge53_Node000062_Node000018" title=" " alt="" coords="1094,269,1243,374,1240,378,1091,273"/>
+</map>

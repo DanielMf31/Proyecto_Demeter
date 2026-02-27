@@ -1,0 +1,47 @@
+flowchart TD
+    Internet["Internet / Usuarios\n(HTTPS + WSS)"]
+    
+    subgraph GCloud["Google Cloud VM (Linux)"]
+        Nginx["Nginx (Reverse Proxy)\nSSL Termination\nPuerto 443"]
+        
+        subgraph DNet["Red Interna: demeter-net (bridge)"]
+            Frontend["demeter-frontend\n(React SPA)"]
+            API["demeter-api\n(FastAPI + AsyncIO)"]
+            Worker["demeter-math-worker\n(RQ Worker)"]
+            Sequencer["demeter-sequencer\n(Motor de Secuencias)"]
+            DB["demeter-db\n(PostgreSQL 15)"]
+            Redis["demeter-redis\n(Redis Alpine)"]
+        end
+        
+        SharedVol[("Volumen compartido\n/app/shared")]
+        ExportVol[("Volumen de exportación\n/app/exports")]
+        DBVol[("Volumen postgres_data")]
+    end
+    
+    RPi["Raspberry Pi\n(Edge Gateway)"]
+    
+    Internet --> Nginx
+    Nginx -->|"/ (React)"| Frontend
+    Nginx -->|"/api/* + /ws/*"| API
+    
+    API --> DB
+    API --> Redis
+    Worker --> DB
+    Worker --> Redis
+    Sequencer --> DB
+    Sequencer --> Redis
+    
+    API --- SharedVol
+    Worker --- SharedVol
+    Worker --- ExportVol
+    DB --- DBVol
+    
+    RPi -->|"wss:// /ws/raspberry_gateway"| API
+    
+    classDef service fill:#e3f2fd,stroke:#1565c0;
+    classDef infra fill:#f3e5f5,stroke:#6a1b9a;
+    classDef external fill:#f5f5f5,stroke:#555;
+    
+    class Frontend,API,Worker,Sequencer service;
+    class DB,Redis,Nginx,SharedVol,ExportVol,DBVol infra;
+    class Internet,RPi external;

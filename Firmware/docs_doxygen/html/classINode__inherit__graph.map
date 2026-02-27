@@ -1,0 +1,9 @@
+<map id="INode" name="INode">
+<area shape="rect" id="Node000001" title=" " alt="" coords="233,5,321,111"/>
+<area shape="rect" id="Node000002" href="$classNode__Actuator.html" title="Implementación concreta de Nodo para perfiles estrictamente Actuadores." alt="" coords="5,199,171,444"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="226,113,185,160,157,200,153,197,181,157,221,110"/>
+<area shape="rect" id="Node000003" href="$classNode__Gateway.html" title="Especialización de Hardware híbrida que funciona como Concentrador." alt="" coords="195,189,360,454"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="280,125,280,189,275,189,275,125"/>
+<area shape="rect" id="Node000004" href="$classNode__Sensor.html" title="Implementación concreta de Nodo para perfiles estrictamente de Sensor." alt="" coords="384,159,549,484"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="333,110,374,157,386,174,382,177,370,160,329,113"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="Node_Sensor::setReportingConfig" name="Node_Sensor::setReportingConfig">
+<area shape="rect" id="Node000001" title="Configura el comportamiento de reportería." alt="" coords="112,23,311,63"/>
+<area shape="rect" id="Node000002" href="$main__node__sensor_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="9,5,60,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="98,30,60,24,60,19,99,24"/>
+<area shape="rect" id="Node000003" href="$main__node__sensor_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,55,64,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="99,61,65,66,64,61,98,56"/>
+</map>

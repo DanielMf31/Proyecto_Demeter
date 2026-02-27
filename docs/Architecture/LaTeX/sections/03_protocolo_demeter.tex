@@ -1,0 +1,344 @@
+% ============================================================
+% SECCIÓN 3: Protocolo Demeter
+% ============================================================
+\chapter{Protocolo de Comunicación Demeter}
+\label{sec:protocolo}
+
+\section{Propósito y Filosofía de Diseño}
+
+El Protocolo Demeter es un protocolo de comunicación binario diseñado específicamente para
+la red de campo del sistema. Los protocolos estándar de texto (JSON, CSV) son demasiado
+pesados para microcontroladores con memoria limitada y canales de radio estrecho. Un paquete
+JSON con temperatura y humedad puede ocupar entre 40 y 80 bytes. La misma información en
+el Protocolo Demeter ocupa exactamente \textbf{10 bytes}.
+
+\begin{designnote}
+Las decisiones de diseño que guían el protocolo son: \textbf{compacidad} (cada bit cuenta),
+\textbf{determinismo} (la longitud de cada trama es conocida antes de recibirla),
+\textbf{robustez} (verificación de integridad en toda trama) y
+\textbf{extensibilidad} (hasta 254 tipos de mensaje sin modificar la estructura base).
+\end{designnote}
+
+% ─────────────────────────────────────────────────────────────
+\section{Modelos Pydantic: Bridging entre Binario y JSON}
+\label{sec:pydantic}
+
+Una aportación central de la arquitectura Demeter es que el protocolo no es exclusivamente
+binario: las mismas definiciones de mensaje coexisten en \textbf{dos representaciones},
+gestionadas mediante \textbf{modelos Pydantic} validados y tipados:
+
+\begin{enumerate}
+    \item \textbf{Representación JSON}: usada en la comunicación entre el Frontend y el
+          Backend por HTTP y WebSocket. Los campos viajan con sus nombres completos
+          (e.g. \texttt{"type"}, \texttt{"target\_id"}, \texttt{"pin"}, \texttt{"value"}).
+    \item \textbf{Representación Binaria}: usada en la comunicación de red de campo
+          (UART entre Raspberry Pi y Gateway, y ESP-NOW entre nodos). Solo los valores
+          numéricos viajan en la trama; los nombres de campo \textit{no existen en el paquete},
+          reduciéndolo a su mínima expresión.
+\end{enumerate}
+
+\subsection{Diseño de Modelos Discriminados}
+
+Cada tipo de comando del protocolo tiene su propio modelo Pydantic con un campo
+\texttt{type} que actúa como \textbf{discriminador de unión}. Esto permite que al
+deserializar un JSON, Pydantic identifique automáticamente de qué tipo de mensaje
+se trata y lo valide con el esquema apropiado:
+
+\begin{lstlisting}[style=trama, caption={Estructura conceptual de un modelo discriminado}]
+{
+  "type": "set_gpio",   <-- discriminador: identifica el subtipo exacto
+  "target_id": 3,       <-- nodo destino
+  "pin": 4,             <-- pin a controlar
+  "value": 1,           <-- 1=ON, 0=OFF
+  "duration_ms": 15000  <-- tiempo de activacion (ms)
+}
+\end{lstlisting}
+
+La clave del diseño es que el campo \texttt{type} es unívoco por subtipo. Cuando el
+Backend recibe este JSON (desde el Frontend o la API), instancia mediante
+\texttt{TypeAdapter[AnyDemeterCommand]} el modelo correcto sin lógica condicional manual.
+
+\subsection{Auto-descubrimiento y Clasificación Automática}
+
+El uso del patrón de \textbf{unión discriminada} con Pydantic permite que cualquier capa
+del sistema clasifique un mensaje desconocido sin necesidad de \textit{switch-case} explícitos:
+la librería inspecciona el campo \texttt{type} y devuelve la instancia del modelo correcto,
+ya validada y tipada. Esto tiene tres consecuencias importantes:
+
+\begin{itemize}[leftmargin=*, label=--]
+    \item \textbf{Validación zero-cost}: si un campo falta o tiene tipo incorrecto,
+          Pydantic lanza una excepción detallada antes de que el sistema procese nada.
+    \item \textbf{Serialización simétrica}: \texttt{model.model\_dump\_json()} produce el
+          JSON que el Frontend espera; \texttt{model.to\_binary()} produce la trama que
+          el ESP32 espera. La lógica de transformación reside en el modelo, no en el
+          controlador.
+    \item \textbf{Reutilización del esquema}: el mismo \texttt{Common/schemas.py} es
+          importado por el Backend (Python) y puede referenciarse para generar SDKs cliente,
+          documentación automática (OpenAPI) o tests de integración.
+\end{itemize}
+
+\subsection{Conversión Binaria: Solo los Valores}
+
+La diferencia fundamental entre JSON y binario es que en la trama física
+\textbf{los nombres de los campos no existen}. El orden y tamaño de cada byte es implícito
+al tipo de comando (definido por el \texttt{CMD\_ID} de la cabecera). Por ejemplo, para un
+\texttt{SET\_GPIO} el payload es exactamente 3 bytes: \texttt{[PIN, VALUE, FLAGS]}.
+
+La serialización binaria rellena cada byte en orden, con el tamaño y signo definidos por
+el esquema del protocolo (enteros sin signo, punt fijo para float, Little Endian).
+
+% ─────────────────────────────────────────────────────────────
+\section{Comunicación HTTP y WebSocket en el Sistema}
+\label{sec:http_ws}
+
+\subsection{Flujo de un Comando desde el Navegador}
+
+Cuando un operador interactúa con el dashboard activo, los comandos siguen un flujo
+completamente desacoplado de la red de campo:
+
+\begin{enumerate}
+    \item El \textbf{Frontend React} compone un objeto JSON conforme al esquema del modelo
+          Pydantic correspondiente (e.g. \texttt{set\_gpio}) y lo envía mediante una petición
+          \textbf{HTTP POST} a \texttt{/api/command}.
+    \item El \textbf{Backend FastAPI} recibe el JSON, lo valida automáticamente con el
+          \texttt{TypeAdapter} discriminado, y publica el comando en el canal Redis
+          \texttt{demeter:commands}. Devuelve \texttt{202 Accepted} inmediatamente.
+    \item El \textbf{WS Dispatcher} (tarea asyncio en el Backend) consume el mensaje de Redis
+          y lo retransmite por WebSocket a la Raspberry Pi, identificada como
+          \texttt{raspberry\_gateway}.
+    \item La \textbf{Raspberry Pi} recibe el JSON por WebSocket, lo convierte a trama binaria
+          mediante el mismo modelo Pydantic en Python, y lo envía por UART al Gateway ESP32.
+    \item El \textbf{Gateway ESP32} reenvía la trama binaria por ESP-NOW al nodo actuador
+          destino, que ejecuta la acción y confirma con \texttt{CMD\_ACK}.
+\end{enumerate}
+
+\subsection{Flujo de Telemetría en Tiempo Real}
+
+El camino inverso (del sensor al dashboard) funciona de forma reactiva:
+
+\begin{enumerate}
+    \item El \textbf{Nodo Sensor} emite tramas binarias por ESP-NOW en el intervalo configurado.
+    \item El \textbf{Gateway ESP32} las reenvía por UART a la Raspberry Pi.
+    \item La \textbf{Raspberry Pi} las decodifica (Protocolo Demeter en Python), construye un
+          JSON y lo publica por WebSocket hacia el Backend.
+    \item El \textbf{Backend} almacena la medición en Redis (caché 60~s) y en PostgreSQL
+          (persistencia), y hace \textit{broadcast} por WebSocket a todos los clientes
+          Frontend suscritos.
+    \item El \textbf{Frontend} recibe el push y actualiza los gráficos sin ninguna petición
+          adicional por parte del usuario.
+\end{enumerate}
+
+\begin{designnote}
+\textbf{Separación de canales}: Los comandos viajan por \textbf{HTTP POST} (fiables, con
+respuesta de estado). La telemetría viaja por \textbf{WebSocket} (baja latencia, push).
+Para la Raspberry Pi, el canal WebSocket es exclusivo y bidireccional. Para el Frontend,
+el WebSocket es de solo lectura; sus comandos siempre van por HTTP.
+\end{designnote}
+
+% ─────────────────────────────────────────────────────────────
+\section{Estructura de una Trama}
+
+Toda comunicación sigue el mismo formato de cabecera fija seguida de un payload variable:
+
+\begin{table}[H]
+    \centering
+    \caption{Campos de la cabecera Demeter}
+    \begin{tabular}{clp{8cm}}
+        \toprule
+        \textbf{Campo}  & \textbf{Tamaño} & \textbf{Descripción} \\
+        \midrule
+        SYNC    & 1 byte & Siempre \texttt{0xAA}. Marca el inicio de cualquier trama válida. \\
+        FLAGS   & 1 byte & Reservado. Actualmente \texttt{0x00}. \\
+        SRC\_ID & 1 byte & Identificador numérico del nodo emisor (1--253). \\
+        DST\_ID & 1 byte & Destino: \texttt{0x00}=servidor, \texttt{0xFF}=difusión. \\
+        CMD\_ID & 1 byte & Tipo de mensaje (ver catálogo). \\
+        LENGTH  & 1 byte & Número de bytes del payload (0--255). \\
+        PAYLOAD & N bytes & Datos específicos del tipo de mensaje, formato Little Endian. \\
+        CRC     & 1 byte & Suma módulo 256 de FLAGS hasta fin del payload. \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:cabecera_demeter}
+\end{table}
+
+\textbf{Tamaños:} mínimo 7 bytes (sin payload) · máximo teórico 262 bytes · típico 10--14 bytes.
+
+% ─────────────────────────────────────────────────────────────
+\section{Catálogo de Mensajes}
+
+\begin{table}[H]
+    \centering
+    \caption{Catálogo completo de comandos del Protocolo Demeter v2}
+    \begin{tabular}{clcp{5cm}}
+        \toprule
+        \textbf{CMD\_ID} & \textbf{Nombre} & \textbf{Payload (bytes)} & \textbf{Descripción} \\
+        \midrule
+        \texttt{0x01} & PING            & 0  & Keep-alive. Espera ACK. \\
+        \texttt{0x02} & ACK             & 0--1 & Confirmación con contexto de sesión opcional. \\
+        \texttt{0x03} & NACK            & 1  & Rechazo con código de error. \\
+        \texttt{0x04} & SYN             & 0  & Inicio del handshake (paso 1/3). \\
+        \texttt{0x05} & SYN-ACK         & 0  & Confirmación de disponibilidad (paso 2/3). \\
+        \texttt{0x0A} & ROUTE\_ADD      & 7  & Registra una nueva ruta en la tabla del Gateway. \\
+        \texttt{0x0B} & TEMP\_HUM\_REPORT & 4 & Datos de temperatura y humedad (punto fijo ×100). \\
+        \texttt{0x0C} & PIN\_REPORT     & 2  & Estado de un pin tras ejecución de un comando. \\
+        \texttt{0x0D} & SYSTEM\_REPORT  & 8  & Modo de operación y nivel de batería en mV. \\
+        \texttt{0x10} & SET\_GPIO       & 3  & Orden de cambio de estado de un pin. \\
+        \texttt{0x11} & SET\_PWM        & 3  & Señal analógica (control de velocidad/intensidad). \\
+        \texttt{0x20} & GET\_SENSORS    & 0  & Solicitud de lectura inmediata de sensores. \\
+        \texttt{0x30} & EXEC\_SEQUENCE  & Variable & Lista de pasos de actuación con temporización. \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:catalogo_comandos}
+\end{table}
+
+% ─────────────────────────────────────────────────────────────
+\section{Codificación de Datos}
+
+\subsection{Temperatura y Humedad (Punto Fijo ×100)}
+
+Los valores se multiplican por 100 y se codifican como enteros con signo de 16 bits
+en formato Little Endian:
+
+\[
+T = 24{,}57\,^{\circ}\text{C} \rightarrow 2457 = \texttt{0x0999} \rightarrow \text{bytes: } \texttt{[99\;09]}
+\]
+\[
+H = 63{,}20\,\% \rightarrow 6320 = \texttt{0x18B0} \rightarrow \text{bytes: } \texttt{[B0\;18]}
+\]
+
+\subsection{Duraciones en Secuencias (32 bits Little Endian)}
+
+Las duraciones se expresan en milisegundos como entero de 32 bits sin signo:
+\[
+2500\,\text{ms} = \texttt{0x000009C4} \rightarrow \text{bytes: } \texttt{[C4\;09\;00\;00]}
+\]
+
+% ─────────────────────────────────────────────────────────────
+\section{Ejemplos de Tramas Reales}
+
+\subsection{Telemetría de Sensor (TEMP\_HUM\_REPORT)}
+Nodo 2 envía T=24,57°C y H=63,20\% al servidor:
+
+\begin{lstlisting}[style=trama, caption={Trama TEMP\_HUM\_REPORT completa}]
+Pos: [0]   [1]   [2]   [3]   [4]   [5]   [6]   [7]   [8]   [9]
+Hex: AA     00    02    00    0B    04    99    09    B0    18   CRC
+     SYNC  FLAGS  SRC   DST   CMD   LEN  T_Lo  T_Hi  H_Lo  H_Hi
+                  (2)   (0) TH_RPT  (4)  ---- 24.57 C ----  -63.20%-
+\end{lstlisting}
+
+\subsection{Comando de Actuación (SET\_GPIO)}
+Servidor ordena al nodo 3 encender el pin 4 (bomba):
+
+\begin{lstlisting}[style=trama, caption={Trama SET\_GPIO}]
+Pos: [0]   [1]   [2]   [3]   [4]   [5]   [6]   [7]   [8]   [9]
+Hex: AA     00    00    03    10    03    04    01    00    CRC
+     SYNC  FLAGS  SRC   DST   CMD   LEN   PIN  VAL  FLAGS
+                  (0)   (3) SET_IO  (3)   (4) HIGH    (0)
+\end{lstlisting}
+
+\subsection{Inicio de Handshake (SYN)}
+Nodo sensor 2 solicita sesión con el Gateway (nodo 1):
+
+\begin{lstlisting}[style=trama, caption={Trama SYN mínima --- 7 bytes}]
+Pos: [0]   [1]   [2]   [3]   [4]   [5]   [6]
+Hex: AA     00    02    01    04    00    CRC
+     SYNC  FLAGS  SRC   DST   CMD   LEN
+                  (2)   (1)   SYN   (0)
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\section{Algoritmos de Serialización y Deserialización}
+
+\subsection{Serialización}
+
+El proceso de serialización transforma los datos de aplicación en una trama binaria
+completamente estructurada. Toma el comando o reporte, convierte sus campos al
+formato numérico requerido (punto fijo para temperatura, Little Endian para enteros),
+construye el payload en un buffer, prepende la cabecera y calcula el CRC.
+
+\subsection{Deserialización y Validación}
+
+El \textit{pipeline} de deserialización actúa como barrera de seguridad: verifica
+progresivamente el byte de inicio (SYNC), la longitud declarada, el CRC y el destino.
+Solo si todas las comprobaciones pasan se decodifica el payload y se lanza el evento
+interno asociado al tipo de mensaje.
+
+\subsection{Manejo de Errores}
+
+\begin{warningbox}
+El protocolo adopta la filosofía de \textbf{fallo silencioso}: una trama corrupta no genera
+ninguna respuesta de error. Esto evita tormentas de retroalimentación ante interferencias de
+radio. El NACK se reserva para errores de lógica de aplicación (pin no válido, modo IDLE activo).
+\end{warningbox}
+
+% ─────────────────────────────────────────────────────────────
+\section{Handshake TCP-like}
+
+Antes de operar, cada nodo negocia una sesión con el Gateway mediante un triple
+\textit{handshake}: el emisor envía SYN, espera SYN-ACK con \textit{timeout} de 2~s
+y hasta 3 reintentos, y confirma con ACK. Solo tras este acuerdo comienzan los reportes.
+
+% ─────────────────────────────────────────────────────────────
+\section{Flujo Extremo a Extremo}
+
+Una trama parte del Nodo Sensor en formato binario por ESP-NOW, llega al Gateway,
+se reenvía por UART a la Raspberry Pi, que la decodifica y publica como JSON al Backend.
+El Backend la persiste en PostgreSQL y distribuye en tiempo real a todos los clientes
+conectados por WebSocket, con reacción visual a la décima de segundo.
+
+% ─────────────────────────────────────────────────────────────
+\section{Consideraciones de Tiempo y Saturación}
+
+\subsection{Tiempos de Transmisión}
+
+\begin{table}[H]
+    \centering
+    \caption{Parámetros de tiempo de transmisión del protocolo}
+    \begin{tabular}{lc}
+        \toprule
+        \textbf{Parámetro} & \textbf{Valor} \\
+        \midrule
+        Tiempo de transmisión por trama (10B) & $\approx$ 0,5 ms \\
+        Latencia extremo a extremo (RF + serial) & 3 -- 10 ms \\
+        Intervalo de reporte del sensor (configurado) & 5.000 ms \\
+        Ocupación del canal por nodo sensor & < 0,01\% \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:tiempos}
+\end{table}
+
+\subsection{Ciclo Energético del Nodo Sensor}
+
+El nodo sensor efectúa un intenso ahorro de recursos invocando Deep Sleep del ESP32 entre
+reportes. Un nodo configurado con reportes cada 60~s puede operar durante más de un año
+con una batería de 3000 mAh.
+
+\begin{warningbox}
+Los nodos actuadores y el Gateway deben permanecer activos de forma continua y requieren
+alimentación estable. Solo el Nodo Sensor puede operar con batería durante periodos prolongados.
+\end{warningbox}
+
+\subsection{Limitaciones Conocidas}
+
+\begin{table}[H]
+    \centering
+    \caption{Limitaciones conocidas y decisiones de diseño adoptadas}
+    \begin{tabular}{p{4.5cm}p{4cm}p{5.5cm}}
+        \toprule
+        \textbf{Limitación} & \textbf{Impacto} & \textbf{Decisión de diseño} \\
+        \midrule
+        Sin confirmación de entrega en ESP-NOW &
+        Una trama puede perderse sin aviso &
+        Aceptable para telemetría; comandos críticos usan ACK de capa de aplicación. \\
+        Máx. 250 bytes por trama ESP-NOW &
+        Secuencias limitadas a $\approx$30 pasos por trama &
+        Suficiente para los casos actuales; secuencias largas se pueden particionar. \\
+        Sin cifrado nativo &
+        Tramas legibles por cualquier ESP32 cercano &
+        AES-128 en payload es mejora planificada para v3.0. \\
+        Tabla de rutas fija (20 entradas) &
+        Sin admisión dinámica sin reiniciar &
+        El comando ROUTE\_ADD permite registrar rutas en caliente. \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:limitaciones}
+\end{table}

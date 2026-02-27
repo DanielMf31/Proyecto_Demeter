@@ -1,0 +1,5 @@
+<map id="processSerialCommand" name="processSerialCommand">
+<area shape="rect" id="Node000001" title="Procesa de forma interactiva una cadena recibida por Serial (UART)." alt="" coords="104,5,280,31"/>
+<area shape="rect" id="Node000002" href="$main__gateway_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,21,57,21,57,15,90,15"/>
+</map>

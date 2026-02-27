@@ -1,0 +1,17 @@
+<map id="include/core/SystemContext.h" name="include/core/SystemContext.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="127,5,344,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,152,76,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="221,33,69,146,66,141,218,29"/>
+<area shape="rect" id="Node000003" href="$InternalTypes_8h.html" title=" " alt="" coords="175,79,296,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="238,31,238,65,233,65,233,31"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="399,152,461,177"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="253,29,405,141,402,146,249,33"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="205,107,86,150,84,145,203,102"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="101,152,183,177"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="222,106,170,146,166,141,219,102"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="268,102,386,145,385,150,266,107"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="207,152,263,177"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="238,104,238,138,233,138,233,104"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="288,152,375,177"/>
+<area shape="poly" id="edge7_Node000003_Node000007" title=" " alt="" coords="252,102,306,141,303,146,249,106"/>
+</map>

@@ -1,3 +1,10 @@
+/**
+ * @file main_node_sensor.cpp
+ * @brief Firmware de Entrada Principal (Entry Point) para un Nodo tipo Sensor.
+ * 
+ * Muestra el instanciamiento de un "Node_Sensor" con ESP-NOW y un gestor de sensores.
+ * Habilita el envío automático de reportes (Reporting Config) o por demanda (Comandos).
+ */
 #include <Arduino.h>
 #include <WiFi.h>
 #include "communications/EspNowStrategy.h"
@@ -7,7 +14,7 @@
 #include "hardware/sensors/DS18B20Sensor.h"
 #include "hardware/sensors/SoilMoistureSensor.h"
 
-// If NODE_ID is not defined via build flags, default to 2
+// Si NODE_ID no está compilado bajo build_flags, forzamos 2.
 #ifndef NODE_ID
 #define NODE_ID 2
 #endif
@@ -18,12 +25,7 @@ EspNowStrategy espNowStrategy;
 ProtocolEngine engine(&espNowStrategy);
 Node_Sensor demeterNode(NODE_ID, &engine);
 
-// Sensors
-// Note: Node_Sensor handles SensorManager internally, so we don't strictly need to declare them here 
-// unless we want to inject them.
-// Logic: demeterNode constructor creates a SensorManager.
-// We should add sensors to it.
-Demeter::Sensors::DHTSensor dhtSensor(4, 22, USE_MOCK_SENSORS); 
+Demeter::Sensors::DHTSensor dhtSensor(4, 22, USE_MOCK_SENSORS);
 
 void setup() {
     Serial.begin(115200);

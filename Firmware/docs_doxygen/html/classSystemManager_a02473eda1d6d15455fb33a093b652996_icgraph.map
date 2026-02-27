@@ -1,0 +1,20 @@
+<map id="SystemManager::handleGpioCommand" name="SystemManager::handleGpioCommand">
+<area shape="rect" id="Node000001" title="Manejador inyectado ejecutado cuando la red nos manda cambiar un Pin." alt="" coords="611,37,821,77"/>
+<area shape="rect" id="Node000002" href="$classSystemManager.html#ab408d234219409db09c350a3558d0551" title=" " alt="" coords="324,5,563,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="597,43,533,33,534,28,598,37"/>
+<area shape="rect" id="Node000004" href="$classSystemManager.html#a2ed1972442d36a8a964882eb3735f7e2" title="Initialize the system components. Sets up callbacks and initializes enabled hardware." alt="" coords="357,68,529,93"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="598,70,530,76,529,70,597,64"/>
+<area shape="rect" id="Node000003" href="$main__node__actuador_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,17,64,43"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="310,25,64,32,64,27,310,19"/>
+<area shape="rect" id="Node000005" href="$classNode__Actuator.html#af54ed12f9b1d196df4c05b31f725e993" title="Inicializa los controladores hardware subyacentes." alt="" coords="113,43,275,68"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="343,73,275,66,276,61,344,68"/>
+<area shape="rect" id="Node000006" href="$classNode__Gateway.html#ab304a9b88d40c06a9db44ea3e52c6c16" title="Arranca los administradores de sensores, pines y la máquina de estados." alt="" coords="112,92,276,117"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="344,93,276,99,276,94,343,88"/>
+<area shape="rect" id="Node000008" href="$classNode__Sensor.html#ae2f8de7388f598988e6ae30a15de3841" title="Arranca los subsistemas hardware y máquinas de estado en init." alt="" coords="119,141,269,167"/>
+<area shape="poly" id="edge8_Node000004_Node000008" title=" " alt="" coords="386,100,239,144,237,139,385,95"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="100,43,64,37,65,32,101,38"/>
+<area shape="rect" id="Node000007" href="$main__gateway_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,92,64,117"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="98,107,64,107,64,102,98,102"/>
+<area shape="rect" id="Node000009" href="$main__node__sensor_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,141,64,167"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="105,157,64,157,64,151,105,151"/>
+</map>

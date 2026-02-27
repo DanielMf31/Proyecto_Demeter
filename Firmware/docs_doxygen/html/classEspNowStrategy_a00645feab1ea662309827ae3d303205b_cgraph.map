@@ -1,0 +1,7 @@
+<map id="EspNowStrategy::begin" name="EspNowStrategy::begin">
+<area shape="rect" id="Node000001" title="Inicializa WiFi en modo STA y arranca la capa ESP&#45;NOW." alt="" coords="5,31,177,56"/>
+<area shape="rect" id="Node000002" href="$classEspNowStrategy.html#abfe98b791894d057bd4be20b821e82eb" title=" " alt="" coords="225,5,440,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="177,32,211,28,212,33,178,37"/>
+<area shape="rect" id="Node000003" href="$classEspNowStrategy.html#a97dcc443b41e52e68df39aa9ae20ff42" title=" " alt="" coords="227,55,439,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="178,49,213,53,213,58,177,55"/>
+</map>

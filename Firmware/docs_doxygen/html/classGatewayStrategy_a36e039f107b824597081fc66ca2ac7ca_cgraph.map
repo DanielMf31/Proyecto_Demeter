@@ -1,0 +1,5 @@
+<map id="GatewayStrategy::available" name="GatewayStrategy::available">
+<area shape="rect" id="Node000001" title="Or lógico entre uart&#45;&gt;available() || espNow&#45;&gt;available()." alt="" coords="5,5,208,31"/>
+<area shape="rect" id="Node000002" href="$classIComms.html#ac3c07488a81ee960491c0dd2c7dadc7b" title="Comprueba subyacente si hay datos pendientes de consumir en el buffer RX." alt="" coords="256,5,400,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="208,15,242,15,242,21,208,21"/>
+</map>

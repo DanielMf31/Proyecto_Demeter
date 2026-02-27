@@ -289,10 +289,10 @@ void test_exec_sequence(void) {
     });
 
     // Sequence with 1 step
-    // Payload: [Count=1] [PIN][VAL][D0][D1][D2][D3]
+    // Payload: [Count=1] [TGT][CMD][PIN][VAL][D0][D1][D2][D3]
     // Step: Pin 4, Val 1, Delay 1000ms (0x3E8 -> E8 03 00 00)
-    // Payload: [01] [04][01][E8][03][00][00] (Total 7 bytes)
-    std::vector<uint8_t> payload = {0x01, 0x04, 0x01, 0xE8, 0x03, 0x00, 0x00};
+    // Payload: [01] [00][00][04][01][E8][03][00][00] (Total 9 bytes)
+    std::vector<uint8_t> payload = {0x01, 0x00, 0x00, 0x04, 0x01, 0xE8, 0x03, 0x00, 0x00};
     
     std::vector<uint8_t> frame = {0xFE, (uint8_t)payload.size(), 0x00, 0x0A, 0x01, 0x30};
     frame.insert(frame.end(), payload.begin(), payload.end());

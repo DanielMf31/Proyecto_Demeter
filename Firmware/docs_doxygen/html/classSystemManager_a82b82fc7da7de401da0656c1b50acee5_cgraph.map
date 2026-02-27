@@ -1,0 +1,9 @@
+<map id="SystemManager::handleExecSequence" name="SystemManager::handleExecSequence">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,216,45"/>
+<area shape="rect" id="Node000002" href="$classSystemManager.html#a304d130e32e657dd9a9b23052e335160" title=" " alt="" coords="264,13,543,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="216,23,250,23,250,28,216,28"/>
+<area shape="rect" id="Node000003" href="$classGpioController.html#a861d6c95be1f249f3d5b6e5603337c60" title="Ejecuta una orden de Cómputo Digital sobre el Hardware." alt="" coords="591,13,765,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="543,23,577,23,577,28,543,28"/>
+<area shape="rect" id="Node000004" href="$PinConfig_8h.html#a550e793a11b6bbcf91de8422193c2351" title="Helper to check if a pin is protected." alt="" coords="813,13,928,38"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="765,23,799,23,799,28,765,28"/>
+</map>

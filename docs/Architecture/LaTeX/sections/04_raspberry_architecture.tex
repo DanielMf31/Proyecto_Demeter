@@ -1,0 +1,233 @@
+% ============================================================
+% SECCIÓN 3: Servicio de Borde — Raspberry Pi
+% ============================================================
+\chapter{Servicio de Borde: Raspberry Pi}
+\label{sec:raspberry}
+
+% ─────────────────────────────────────────────────────────────
+\section{Misión y Posición en la Arquitectura del Sistema}
+
+La Raspberry Pi ocupa el eslabón más crítico de toda la arquitectura Demeter: actúa como
+\textbf{puerta de enlace entre el mundo físico y el mundo digital}. Sin ella, no existe ningún 
+camino técnico para que la red de sensores y actuadores ESP32 ---que operan bajo un protocolo 
+binario propietario de radiofrecuencia--- se comunique con el servidor central en la nube.
+
+Su responsabilidad puede enunciarse de forma simple: \textit{escuchar la red de campo, 
+comprender sus mensajes, y retransliterar esa información al lenguaje del servidor}; y 
+a la inversa, \textit{recibir órdenes del servidor y traducirlas en señales tangibles para 
+los nodos físicos}.
+
+Esta posición intermedia, también llamada \textbf{Edge Gateway} o Capa de Borde, es 
+especialmente relevante en arquitecturas IoT industriales porque evita que la lógica de 
+protocolo de campo contamine el servidor, y que el servidor requiera acceso directo al hardware.
+
+\begin{table}[H]
+    \centering
+    \caption{Tecnologías del servicio de borde}
+    \begin{tabular}{lp{9cm}}
+        \toprule
+        \textbf{Componente} & \textbf{Tecnología y función} \\
+        \midrule
+        Lenguaje       & Python 3.9+ con modelo de concurrencia \texttt{asyncio} \\
+        UART           & \texttt{pyserial-asyncio}: acceso no bloqueante al puerto serie \\
+        Red            & WebSocket sobre TLS (\texttt{wss://}) via cable Ethernet \\
+        Despliegue     & Contenedor Docker con mapeo de dispositivo físico al host \\
+        Protocolo IoT  & Protocolo Demeter (propietario, binario, CRC-16) \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:rpi_techs}
+\end{table}
+
+
+% ─────────────────────────────────────────────────────────────
+\section{Contenedorización y Acceso a Recursos del Sistema}
+
+El servicio Python se ejecuta íntegramente dentro de un contenedor \textbf{Docker}, lo que garantiza 
+un entorno reproducible y aislado del sistema operativo subyacente de la Raspberry Pi (Raspberry Pi OS).
+
+El despliegue tiene tres características relevantes:
+
+\begin{enumerate}
+    \item \textbf{Mapeo del puerto serie}: El dispositivo físico \texttt{/dev/serial0} del host 
+          es inyectado directamente dentro del contenedor mediante la directiva de mapeo de 
+          dispositivos de Docker. Esto permite que el proceso Python en el contenedor lea y escriba 
+          en el cable UART como si estuviera en la máquina física, sin pérdida de rendimiento ni 
+          abstracción adicional.
+    
+    \item \textbf{Conectividad de red}: La Raspberry Pi utiliza exclusivamente \textbf{cable Ethernet} 
+          para la conexión a internet. Esta decisión es deliberada: elimina la latencia y la 
+          inestabilidad del Wi-Fi, especialmente relevante en entornos de invernadero con mucha 
+          interferencia de RF. El contenedor hereda la red del host de forma directa.
+    
+    \item \textbf{Variables de entorno}: La URL del servidor (\texttt{WS\_URL}), la velocidad del 
+          puerto serie (\texttt{BAUD\_RATE}), y los credenciales de la red son inyectados como 
+          variables de entorno en tiempo de ejecución, permitiendo cambiar el entorno destino 
+          (desarrollo, producción) sin recompilar la imagen.
+\end{enumerate}
+
+El Diagrama de Despliegue completo, mostrando la relación entre el host, el contenedor, el 
+servidor y los nodos ESP32, se encuentra en la Sección~\ref{fig:anx_rpi_docker} del Anexo.
+
+
+% ─────────────────────────────────────────────────────────────
+\section{El Motor de Concurrencia: asyncio}
+
+El servicio no emplea hilos del sistema operativo (\textit{threads}) para gestionar múltiples 
+operaciones en paralelo. En su lugar, adopta el modelo de \textbf{concurrencia cooperativa} de 
+Python mediante \texttt{asyncio}: un único hilo de ejecución gestiona múltiples tareas que 
+voluntariamente ceden el control cuando están esperando una operación de entrada/salida.
+
+Esto resulta especialmente eficiente para un servicio de este tipo, donde el 99\% del tiempo 
+de espera es I/O (esperar bytes del puerto serie, o esperar mensajes de la red).
+
+Las cuatro tareas concurrentes que el orquestador lanza al inicio son:
+
+\begin{table}[H]
+    \centering
+    \caption{Tareas asyncio del servicio Raspberry Pi}
+    \begin{tabular}{clp{7cm}}
+        \toprule
+        \# & \textbf{Tarea} & \textbf{Responsabilidad} \\
+        \midrule
+        1 & UART RX Loop      & Lee bytes del puerto serie de forma continua y no bloqueante. \\
+        2 & UART TX Queue     & Consume de una cola FIFO interna y escribe tramas al puerto. \\
+        3 & WebSocket Client  & Mantiene la conexión persistente con el servidor y envía telemetría. \\
+        4 & WS Message Listener & Recibe y despacha mensajes entrantes (comandos) desde el servidor. \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:rpi_tasks}
+\end{table}
+
+El flujo completo del bucle de eventos y cómo se interconectan estas cuatro tareas a través de 
+colas asíncronas puede consultarse en la Sección~\ref{fig:anx_rpi_asyncio} del Anexo.
+
+
+% ─────────────────────────────────────────────────────────────
+\section{El Módulo del Protocolo Demeter en la Raspberry Pi}
+
+La Raspberry Pi no se limita a retransmitir bytes en bruto: \textbf{comprende el Protocolo Demeter}. 
+Para ello, el servicio incorpora la misma lógica de serialización y deserialización descrita en el 
+Capítulo~1, pero implementada en Python.
+
+El módulo \textit{UART Processor} actúa como la frontera de descodificación. Cada byte recibido 
+pasa por un \textit{pipeline} de validación:
+
+\begin{enumerate}
+    \item Detección del byte de sincronía de inicio (\texttt{0xAA}).
+    \item Lectura de la cabecera: flags, nodo origen, nodo destino, tipo de comando y longitud.
+    \item Verificación del \textit{Checksum} CRC-16 sobre el conjunto completo de la trama.
+    \item Desglose del \textit{payload} según el tipo de comando reconocido.
+    \item Disparo del evento interno correspondiente hacia las capas superiores.
+\end{enumerate}
+
+Si cualquiera de estos pasos falla, la trama es descartada silenciosamente y no se propaga ningún 
+efecto, siguiendo la misma filosofía de fallo silente definida en el protocolo.
+
+La información extraída de tramas válidas se clasifica según su tipo:
+
+\begin{table}[H]
+    \centering
+    \caption{Tipos de trama reconocidos por el servicio Raspberry Pi}
+    \begin{tabular}{llp{7.5cm}}
+        \toprule
+        \textbf{Tipo}      & \textbf{Nombre}   & \textbf{Acción desencadenada} \\
+        \midrule
+        \texttt{TH\_RPT}   & Sensor Report     & Publica datos de temperatura, humedad y suelo al servidor. \\
+        \texttt{SYN}       & Handshake Step 1  & Responde con \texttt{SYN-ACK} y registra el nodo en el Device Manager. \\
+        \texttt{ACK}       & Confirmación      & Marca la sesión como establecida para el nodo origen. \\
+        \texttt{CMD\_ACK}  & Confirm. Actuador & Actualiza el estado del pin/actuador en la caché local. \\
+        \texttt{NACK}      & Error de Nodo     & Notifica al servidor que el comando fue rechazado por el nodo. \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:rpi_frames}
+\end{table}
+
+
+% ─────────────────────────────────────────────────────────────
+\section{Comunicación con el Backend: El Canal WebSocket}
+
+La Raspberry Pi se conecta al servidor central usando un \textbf{WebSocket permanente y cifrado} 
+sobre TLS (\texttt{wss://}), identificándose con el identificador reservado 
+\texttt{raspberry\_gateway}. Este identificador es reconocido por el servidor como la fuente 
+de verdad de la red de campo, y tiene privilegios especiales.
+
+Esta decisión de diseño tiene implicaciones significativas:
+
+\begin{designnote}
+\textbf{Separación de canales}: El canal WebSocket es exclusivo para comunicaciones máquina a 
+máquina (Raspberry $\leftrightarrow$ Backend). Los clientes del navegador (Frontend) usan el mismo protocolo 
+WebSocket, pero mediante un identificador diferente y únicamente en modo \textit{recepción}. 
+Los comandos desde el navegador se envían como peticiones HTTP normales; el servidor los 
+convierte en mensajes WebSocket hacia la Raspberry internamente. Esto simplifica el frontend 
+al eliminar la lógica de reconexión y autenticación de sockets en el navegador.
+\end{designnote}
+
+La conexión WebSocket es bidireccional:
+\begin{itemize}[leftmargin=*, label=--]
+    \item \textbf{Dirección ascendente (RPi → Servidor)}: La Raspberry publica eventos JSON 
+          para cada trama de telemetría recibida, confirmaciones de actuadores y nuevos nodos.
+    \item \textbf{Dirección descendente (Servidor → RPi)}: El servidor envía comandos JSON 
+          (set\_gpio, exec\_sequence, ping) que el Command Dispatcher traduce a tramas binarias.
+\end{itemize}
+
+El flujo ascendente se ilustra en la Sección~\ref{fig:anx_rpi_telemetria} del Anexo.
+El flujo descendente se ilustra en la Sección~\ref{fig:anx_rpi_comandos} del Anexo.
+
+
+% ─────────────────────────────────────────────────────────────
+\section{El Command Dispatcher: Adaptador JSON $\leftrightarrow$ Binario}
+
+El componente más delicado de la Raspberry Pi para el flujo de comandos es el 
+\textbf{Command Dispatcher}. Su rol es exactamente opuesto al del \textit{UART Processor}: 
+mientras este último convierte tramas binarias en estructuras de datos de alto nivel, 
+el Dispatcher hace el camino inverso.
+
+Cuando el servidor envía un comando JSON como:
+\begin{lstlisting}[style=trama, caption={Ejemplo de comando JSON recibido por la Raspberry Pi}]
+{
+  "type": "set_gpio",
+  "target_id": 3,
+  "pin": 4,
+  "value": 1,
+  "duration_ms": 15000
+}
+\end{lstlisting}
+
+El Dispatcher realiza los siguientes pasos:
+
+\begin{enumerate}
+    \item \textbf{Validación de esquema}: Verifica que el JSON contenga todos los campos 
+          requeridos para el tipo de comando indicado (\texttt{type}).
+    \item \textbf{Resolución de destino}: Consulta al Device Manager para verificar 
+          que el nodo \texttt{target\_id} está registrado y activo.
+    \item \textbf{Empaquetación del payload}: Serializa los parámetros del comando 
+          (\texttt{pin}, \texttt{value}, \texttt{duration\_ms}) siguiendo el formato 
+          binario del Protocolo Demeter.
+    \item \textbf{Construcción de la cabecera}: Prepende el byte de sincronía, 
+          los identificadores de origen y destino, el código de comando y la longitud.
+    \item \textbf{Cálculo del CRC-16}: Genera el checksum de todo el paquete.
+    \item \textbf{Encola en la TX Queue}: Inserta los bytes finales en la cola 
+          de transmisión del módulo UART, desde donde la tarea \textit{TX Loop} los 
+          enviará al puerto serie en la siguiente iteración del bucle de eventos.
+\end{enumerate}
+
+
+% ─────────────────────────────────────────────────────────────
+\section{Device Manager: La Caché Local de Topología}
+
+Para no depender de una consulta al servidor en cada operación, la Raspberry Pi mantiene 
+\textbf{en memoria una tabla de estado local} de todos los nodos conocidos en la red.
+
+El \textit{Device Manager} es el módulo responsable de esta caché. Registra:
+\begin{itemize}[leftmargin=*, label=--]
+    \item \textbf{Identidad del nodo}: identificador numérico y dirección MAC.
+    \item \textbf{Instante de conexión}: timestamp del último mensaje recibido (\textit{last\_seen}).
+    \item \textbf{Nivel de batería}: último valor reportado de tensión de la batería.
+    \item \textbf{Estado de pines}: último estado conocido (ON/OFF) de cada salida de actuación.
+\end{itemize}
+
+Esta información permite al Dispatcher verificar si un nodo está activo antes de enviar 
+un comando, y al \textit{UART Processor} determinar si una trama SYN proviene de un nodo 
+previamente conocido o de uno nuevo que requiere registro. La persistencia de esta tabla 
+en disco (archivo \texttt{devices.json}) garantiza que tras un reinicio del contenedor, 
+el servicio no pierde la memoria de los nodos con los que ya ha establecido sesión.

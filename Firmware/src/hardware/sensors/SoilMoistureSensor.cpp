@@ -1,3 +1,20 @@
+/**
+ * @file SoilMoistureSensor.cpp
+ * @brief Implementación del sensor capacitivo de humedad de suelo.
+ * 
+ * ============================================================================
+ * DECISIONES DE ARQUITECTURA Y DISEÑO
+ * ============================================================================
+ * 1. **Calibración Analógica Integrada:** Los sensores capacitivos devuelven un
+ *    voltaje raw del ADC del ESP32 (0-4095). Esta clase incorpora matemáticamente
+ *    los umbrales `_airValue` (seco) y `_waterValue` (mojado) para mapearlo
+ *    directamente a un porcentaje amigable [0%, 100%] mediante `map`.
+ * 2. **Doble Reporte (Debug vs Prod):** Aprovechando que `SensorReading` tiene 
+ *    doble capacidad, se escupe en `value1` el % real y en `value2` el valor "Raw" 
+ *    del ADC. Esto ayuda enormemente a calibrar el sensor vía Backend si los
+ *    umblares son incorrectos.
+ */
+
 #include "hardware/sensors/SoilMoistureSensor.h"
 #include <Arduino.h>
 #include <algorithm>

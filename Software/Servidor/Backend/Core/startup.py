@@ -9,7 +9,11 @@ logger = logging.getLogger("startup")
 
 async def create_default_admin(db: AsyncSession):
     """
-    Creates the default admin user if it doesn't already exist.
+    Arranca en el on_startup() system. Comprueba si la BD está limpia (sin admins).
+    Si está vacía, crea un superusuario "admin" predeterminado para permitir 
+    los primeros arranques del Dashboard sin tener que lanzar comandos manuales shell.
+    
+    :param db: Sesión ASYNC inyectada en el arranque de la app.py.
     """
     try:
         result = await db.execute(select(User).where(User.username == "admin"))

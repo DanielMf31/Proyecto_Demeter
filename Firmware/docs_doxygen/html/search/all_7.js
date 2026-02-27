@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['gateway_0',['gateway',['../main__gateway_8cpp.html#a8a8d535ea36955c9047cfde054e0f12b',1,'gateway():&#160;main_gateway.cpp'],['../namespaceDemeter.html#a58697db3ac5d64c2570b09cfece9b603a440cdde6c35c88ad8799575226adda15',1,'Demeter::GATEWAY']]],
+  ['gateway_5fid_1',['GATEWAY_ID',['../main__node__actuador_8cpp.html#a7c282feb151bda4e56eb652392ca717e',1,'main_node_actuador.cpp']]],
+  ['gateway_5fmac_2',['GATEWAY_MAC',['../main__node__actuador_8cpp.html#a791fecd2e7d5e9e6eb388f03a109dc15',1,'main_node_actuador.cpp']]],
+  ['gatewayid_3',['gatewayId',['../classDemeter_1_1SystemContext.html#aed26b153900206d9d304a41e63234c72',1,'Demeter::SystemContext']]],
+  ['gatewaystrategy_4',['gatewaystrategy',['../classGatewayStrategy.html',1,'GatewayStrategy'],['../main__gateway_8cpp.html#ab6dcd53edb2a523c3c79bd9e1fe3750e',1,'gatewayStrategy:&#160;main_gateway.cpp'],['../classGatewayStrategy.html#acdf29dd5796c77f3d554e98b59e95b2e',1,'GatewayStrategy::GatewayStrategy()']]],
+  ['gatewaystrategy_2ecpp_5',['GatewayStrategy.cpp',['../GatewayStrategy_8cpp.html',1,'']]],
+  ['gatewaystrategy_2eh_6',['GatewayStrategy.h',['../GatewayStrategy_8h.html',1,'']]],
+  ['general_7',['GENERAL',['../namespaceDemeter.html#ad09685709cdb5d7b064d5ce88e73bb11ab61773b9b3968a9988d765d728985862',1,'Demeter']]],
+  ['get_5fsensors_8',['GET_SENSORS',['../namespaceDemeter.html#a9900644216d6d724ceb0bdd698a92e55aaea93a2dbaed83e7ef3c368843e8fdbb',1,'Demeter']]],
+  ['getbattery_9',['getBattery',['../classDemeter_1_1SystemContext.html#a667739a0134e4f1659b4e28a2a87d7ee',1,'Demeter::SystemContext']]],
+  ['getcontext_10',['getContext',['../classSystemManager.html#adb3f61bc410c4b54dc5d3e6b844333ff',1,'SystemManager']]],
+  ['getexecutor_11',['getexecutor',['../classSystemManager.html#a2db265daf479572189bd9eb9c85d2abd',1,'SystemManager::getExecutor()'],['../classNode__Gateway.html#a126899bb061f885f544eb78e0f897628',1,'Node_Gateway::getExecutor()'],['../classNode__Actuator.html#a3b11830b8950689b4c2216e8544d630e',1,'Node_Actuator::getExecutor()']]],
+  ['getname_12',['getname',['../classDemeter_1_1ISensor.html#a6a9b9ca774a42fb236adf5c55ffb0be7',1,'Demeter::ISensor::getName()'],['../classDemeter_1_1Sensors_1_1DHTSensor.html#ab9f786fc277aaf074d5beaaebad87c8b',1,'Demeter::Sensors::DHTSensor::getName()'],['../classDemeter_1_1Sensors_1_1DS18B20Sensor.html#a866e517d7bd687b6efc40bea43876c1f',1,'Demeter::Sensors::DS18B20Sensor::getName()'],['../classDemeter_1_1Sensors_1_1SoilMoistureSensor.html#a386a7cd889601cfb45de435b55d97b97',1,'Demeter::Sensors::SoilMoistureSensor::getName()']]],
+  ['getprotocolengine_13',['getProtocolEngine',['../classSystemManager.html#a624dc6a177e08b4d574b8b652386b85c',1,'SystemManager']]],
+  ['getreportinterval_14',['getReportInterval',['../classDemeter_1_1SystemContext.html#a139fa85821f2cb6ec0d70d993a6f3fd0',1,'Demeter::SystemContext']]],
+  ['getsensormanager_15',['getsensormanager',['../classNode__Gateway.html#aa57cfd07a75259393fc3b20441cdba13',1,'Node_Gateway::getSensorManager()'],['../classNode__Sensor.html#af45d591fd4aaf321d97be504e8d02bc4',1,'Node_Sensor::getSensorManager()'],['../classSystemManager.html#aea90de0f5332fa47ca1e80e3512889a2',1,'SystemManager::getSensorManager()']]],
+  ['getsensors_16',['getSensors',['../classSensorManager.html#a17abe8219ca9baa18512b914d044c06e',1,'SensorManager']]],
+  ['getsensorscallback_17',['GetSensorsCallback',['../namespaceDemeter.html#ab09694659da0e237ae1937ab512e03ab',1,'Demeter']]],
+  ['getstate_18',['getstate',['../classSystemManager.html#ab991cdfe72e7c5033fb4f6ad08d9e457',1,'SystemManager::getState()'],['../classDemeter_1_1SystemContext.html#af5e37e6b803d0e412475ba4db681527f',1,'Demeter::SystemContext::getState()']]],
+  ['getsystemmanager_19',['getsystemmanager',['../classNode__Sensor.html#a3fbc86e84126bc783fcf7dcb62137e89',1,'Node_Sensor::getSystemManager()'],['../classNode__Gateway.html#ae8831482fadd8b506af56ea3de3f3e13',1,'Node_Gateway::getSystemManager()'],['../classNode__Actuator.html#ae88ba29477be1d9794dc429f69b0d484',1,'Node_Actuator::getSystemManager()']]],
+  ['gpiocallback_20',['GpioCallback',['../namespaceDemeter.html#a325c4874395376e26355218cb2ad5798',1,'Demeter']]],
+  ['gpiocontroller_21',['GpioController',['../classGpioController.html',1,'']]],
+  ['gpiocontroller_2ecpp_22',['GpioController.cpp',['../GpioController_8cpp.html',1,'']]],
+  ['gpiocontroller_2eh_23',['GpioController.h',['../GpioController_8h.html',1,'']]]
+];

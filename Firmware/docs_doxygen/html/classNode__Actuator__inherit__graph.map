@@ -1,0 +1,5 @@
+<map id="Node_Actuator" name="Node_Actuator">
+<area shape="rect" id="Node000001" title="Implementación concreta de Nodo para perfiles estrictamente Actuadores." alt="" coords="5,159,171,404"/>
+<area shape="rect" id="Node000002" href="$classINode.html" title=" " alt="" coords="44,5,132,111"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,125,91,158,85,158,85,125"/>
+</map>

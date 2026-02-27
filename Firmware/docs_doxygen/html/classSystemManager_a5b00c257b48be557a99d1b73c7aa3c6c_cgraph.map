@@ -1,0 +1,11 @@
+<map id="SystemManager::requestSensors" name="SystemManager::requestSensors">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,241,56"/>
+<area shape="rect" id="Node000002" href="$classProtocolEngine.html#a7cdb269359c82181f7512a24710af7b6" title="Request Sensor Data from a node." alt="" coords="289,31,521,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="242,41,275,41,275,46,242,46"/>
+<area shape="rect" id="Node000003" href="$classProtocolEngine.html#a756248b6415af686ad17659d13a86273" title="Desciende estamento lógico a una Trama Binaria y la escupe por COMMS. Envuelve el payload crudo antep..." alt="" coords="569,31,768,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="521,41,556,41,556,46,521,46"/>
+<area shape="rect" id="Node000004" href="$classProtocolEngine.html#ad93203ceed2aada77a73556411fd8043" title="Calculates a simple Modular Sum CRC (Mod 256)." alt="" coords="816,5,1029,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="768,31,802,27,803,33,769,36"/>
+<area shape="rect" id="Node000005" href="$classIComms.html#ad776ff948007fd56d75719d5a6704e30" title="Transmite un tren de bytes crudos a través del medio." alt="" coords="865,55,980,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="769,50,852,58,851,63,768,55"/>
+</map>

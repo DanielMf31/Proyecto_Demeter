@@ -1,0 +1,11 @@
+<map id="SystemManager::getState" name="SystemManager::getState">
+<area shape="rect" id="Node000001" title=" " alt="" coords="323,31,513,56"/>
+<area shape="rect" id="Node000002" href="$classNode__Actuator.html#aba4308a373cbf9ba8c6f5cdde23b7502" title="Tick regular ligado al firmware Arduino loop." alt="" coords="104,5,275,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="308,34,274,30,275,25,309,29"/>
+<area shape="rect" id="Node000004" href="$classNode__Sensor.html#a4ef0a51ec48c9f9de1cea5167672e707" title="Tarea a correr ininterrumpidamente en el loop() de Arduino." alt="" coords="109,55,269,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="309,57,270,62,269,56,308,52"/>
+<area shape="rect" id="Node000003" href="$main__node__actuador_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="90,21,57,21,57,15,90,15"/>
+<area shape="rect" id="Node000005" href="$main__node__sensor_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,55,56,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="96,70,56,70,56,65,96,65"/>
+</map>

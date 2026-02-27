@@ -1,5 +1,22 @@
 #include "communications/GatewayStrategy.h"
 
+/**
+ * @file GatewayStrategy.cpp
+ * @brief Implementación del enrutador híbrido (Multiplexor).
+ * 
+ * ============================================================================
+ * DECISIONES DE ARQUITECTURA Y DISEÑO
+ * ============================================================================
+ * 1. **Patrón Decorador / Proxy:** Al sistema central no le importa que el Gateway
+ *    tenga dos tarjetas de red (Puerto Serie y Antena WiFi). El `GatewayStrategy`
+ *    implementa `IComms` (es una estrategia), pero recibe dos `IComms` en su constructor.
+ *    Básicamente intercepta los `.send()` y decide a quién "sub-enrutarlo".
+ * 2. **Enrutamiento por ID (ID 0):** En Demeter, el ID 0 está reservado para el
+ *    "Servidor Host" (backend en Raspberry Pi). Si el frame detecta Destino=0, sale
+ *    por el cable USB/UART. Cualquier otro ID viaja por WiFi P2P (ESP-NOW) hacia
+ *    los nodos de la finca.
+ */
+
 // Constructor
 GatewayStrategy::GatewayStrategy(IComms* uart, IComms* espNow) 
     : _uart(uart), _espNow(espNow) {}
@@ -14,6 +31,11 @@ void GatewayStrategy::registerRoute(uint8_t id, const std::array<uint8_t, 6>& ma
     if (_espNow) _espNow->registerRoute(id, mac);
 }
 
+/**
+ * @brief Funcionalidad core de capa de red (Muxer).
+ * Intercepta los bytes salientes, lee el ID destino nativo del protocolo
+ * y lo bifurca a un cable serie o al aire libre según la topología lógica.
+ */
 void GatewayStrategy::send(const uint8_t* data, size_t length) {
     if (length < 6) return;
 
@@ -22,10 +44,10 @@ void GatewayStrategy::send(const uint8_t* data, size_t length) {
     uint8_t dstId = data[4];
 
     if (dstId == 0) {
-        // ID 0 is reserved for Host -> Send via UART
+        // ID 0 is reserved for Host -> Send via local hardwired UART (Pi)
         if (_uart) _uart->send(data, length);
     } else {
-        // All other valid IDs are presumably Nodes -> Send via ESP-Now
+        // All other valid IDs are presumably Nodes -> Send via ESP-Now Mesh
         if (_espNow) _espNow->send(data, length);
     }
 }

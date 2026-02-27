@@ -1,0 +1,49 @@
+<map id="isPinProtected" name="isPinProtected">
+<area shape="rect" id="Node000001" title="Helper to check if a pin is protected." alt="" coords="1419,155,1533,180"/>
+<area shape="rect" id="Node000002" href="$classGpioController.html#a861d6c95be1f249f3d5b6e5603337c60" title="Ejecuta una orden de Cómputo Digital sobre el Hardware." alt="" coords="1196,155,1371,180"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1405,170,1371,170,1371,165,1405,165"/>
+<area shape="rect" id="Node000021" href="$classGpioController.html#a0cf76d874bf32023d8198464c8cef68b" title="Inicializa los pines GPIO configurados. Recorre _managedPins, los configura como OUTPUT y los inicia ..." alt="" coords="1211,69,1356,95"/>
+<area shape="poly" id="edge22_Node000001_Node000021" title=" " alt="" coords="1433,151,1312,97,1314,92,1435,146"/>
+<area shape="rect" id="Node000022" href="$classGpioController.html#a922ba5c6528dd35c6ce3ef10b144bc08" title="Configura la lista de pines gestionados." alt="" coords="923,281,1094,307"/>
+<area shape="poly" id="edge24_Node000001_Node000022" title=" " alt="" coords="1415,186,1057,284,1056,279,1414,181"/>
+<area shape="rect" id="Node000003" href="$classSystemManager.html#a304d130e32e657dd9a9b23052e335160" title=" " alt="" coords="869,121,1148,147"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1182,158,1113,149,1114,144,1183,152"/>
+<area shape="rect" id="Node000019" href="$classSystemManager.html#a02473eda1d6d15455fb33a093b652996" title="Manejador inyectado ejecutado cuando la red nos manda cambiar un Pin." alt="" coords="611,165,821,205"/>
+<area shape="poly" id="edge18_Node000002_Node000019" title=" " alt="" coords="1182,173,822,184,821,179,1182,168"/>
+<area shape="rect" id="Node000004" href="$classSystemManager.html#a82b82fc7da7de401da0656c1b50acee5" title=" " alt="" coords="611,101,821,141"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="855,130,821,128,822,123,856,124"/>
+<area shape="rect" id="Node000012" href="$classSystemManager.html#a792ba14d029dca92c9c6fb5cd2715c23" title="Bucle Principal del Sistema (Tick OBLIGATORIO)." alt="" coords="625,240,807,265"/>
+<area shape="poly" id="edge11_Node000003_Node000012" title=" " alt="" coords="969,155,822,219,758,242,756,237,820,214,967,150"/>
+<area shape="rect" id="Node000005" href="$classSystemManager.html#a2ed1972442d36a8a964882eb3735f7e2" title="Initialize the system components. Sets up callbacks and initializes enabled hardware." alt="" coords="357,69,529,95"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="597,106,529,97,530,91,598,101"/>
+<area shape="rect" id="Node000006" href="$classNode__Actuator.html#af54ed12f9b1d196df4c05b31f725e993" title="Inicializa los controladores hardware subyacentes." alt="" coords="113,104,275,129"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="344,98,276,108,275,103,344,93"/>
+<area shape="rect" id="Node000008" href="$classNode__Gateway.html#ab304a9b88d40c06a9db44ea3e52c6c16" title="Arranca los administradores de sensores, pines y la máquina de estados." alt="" coords="112,5,276,31"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="379,68,244,33,245,28,380,63"/>
+<area shape="rect" id="Node000010" href="$classNode__Sensor.html#ae2f8de7388f598988e6ae30a15de3841" title="Arranca los subsistemas hardware y máquinas de estado en init." alt="" coords="119,55,269,80"/>
+<area shape="poly" id="edge9_Node000005_Node000010" title=" " alt="" coords="343,79,270,74,270,69,344,73"/>
+<area shape="rect" id="Node000007" href="$main__node__actuador_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,155,64,180"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="141,136,65,161,63,156,139,131"/>
+<area shape="rect" id="Node000009" href="$main__gateway_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,5,64,31"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="98,21,64,21,64,15,98,15"/>
+<area shape="rect" id="Node000011" href="$main__node__sensor_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,55,64,80"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="105,70,64,70,64,65,105,65"/>
+<area shape="rect" id="Node000013" href="$classNode__Actuator.html#aba4308a373cbf9ba8c6f5cdde23b7502" title="Tick regular ligado al firmware Arduino loop." alt="" coords="358,255,529,280"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="612,261,529,265,529,260,611,256"/>
+<area shape="rect" id="Node000015" href="$classNode__Gateway.html#af3315261cd44b048d250d8f2ed5da4da" title="Tarea regular Arduino loop() delegada hacia SystemManager." alt="" coords="357,304,530,329"/>
+<area shape="poly" id="edge14_Node000012_Node000015" title=" " alt="" coords="654,271,563,294,507,307,505,301,562,289,653,266"/>
+<area shape="rect" id="Node000017" href="$classNode__Sensor.html#a4ef0a51ec48c9f9de1cea5167672e707" title="Tarea a correr ininterrumpidamente en el loop() de Arduino." alt="" coords="363,205,523,231"/>
+<area shape="poly" id="edge16_Node000012_Node000017" title=" " alt="" coords="612,242,523,231,524,225,612,237"/>
+<area shape="rect" id="Node000014" href="$main__node__actuador_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="169,255,219,280"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="344,270,220,270,220,265,344,265"/>
+<area shape="rect" id="Node000016" href="$main__gateway_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="169,304,219,329"/>
+<area shape="poly" id="edge15_Node000015_Node000016" title=" " alt="" coords="343,319,219,319,219,314,343,314"/>
+<area shape="rect" id="Node000018" href="$main__node__sensor_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="169,205,219,231"/>
+<area shape="poly" id="edge17_Node000017_Node000018" title=" " alt="" coords="350,221,220,221,220,215,350,215"/>
+<area shape="poly" id="edge21_Node000019_Node000005" title=" " alt="" coords="631,163,610,155,471,97,474,92,612,150,633,158"/>
+<area shape="rect" id="Node000020" href="$classSystemManager.html#ab408d234219409db09c350a3558d0551" title=" " alt="" coords="324,155,563,180"/>
+<area shape="poly" id="edge19_Node000019_Node000020" title=" " alt="" coords="597,180,563,178,563,172,597,174"/>
+<area shape="poly" id="edge20_Node000020_Node000007" title=" " alt="" coords="310,170,64,170,64,165,310,165"/>
+<area shape="poly" id="edge23_Node000021_Node000005" title=" " alt="" coords="1197,85,529,85,529,79,1197,79"/>
+<area shape="poly" id="edge25_Node000022_Node000007" title=" " alt="" coords="967,314,903,339,815,368,710,397,593,419,469,430,406,430,344,425,282,415,222,398,165,375,110,344,91,328,74,307,52,261,40,215,34,181,40,180,45,214,57,259,79,304,94,324,114,340,167,370,224,393,283,409,344,420,407,425,469,425,593,414,709,392,814,363,901,334,965,309"/>
+</map>

@@ -1,0 +1,26 @@
+<map id="processSerialCommand" name="processSerialCommand">
+<area shape="rect" id="Node000001" title="Procesa de forma interactiva una cadena recibida por Serial (UART)." alt="" coords="5,80,181,105"/>
+<area shape="rect" id="Node000002" href="$main__gateway_8cpp.html#a8a8d535ea36955c9047cfde054e0f12b" title=" " alt="" coords="317,5,396,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,77,172,58,229,39,303,23,304,28,230,45,174,63,125,82"/>
+<area shape="rect" id="Node000003" href="$classNode__Gateway.html#ae8831482fadd8b506af56ea3de3f3e13" title=" " alt="" coords="229,55,484,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="181,82,215,78,216,84,182,87"/>
+<area shape="rect" id="Node000004" href="$classSystemManager.html#aa8e598f0171ace4ffa645a3ef7faf0ca" title="Initiate a Handshake with a target node." alt="" coords="229,104,484,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="182,98,216,101,215,106,181,103"/>
+<area shape="rect" id="Node000011" href="$classSystemManager.html#a17a0b2c9c8665372de26426a8bdecbba" title=" " alt="" coords="239,157,474,183"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="128,103,230,138,281,152,280,157,229,143,126,108"/>
+<area shape="rect" id="Node000005" href="$classDemeter_1_1SystemContext.html#af5e37e6b803d0e412475ba4db681527f" title=" " alt="" coords="543,10,730,50"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="442,101,483,89,507,75,531,60,548,52,550,57,533,64,510,79,485,94,443,106"/>
+<area shape="rect" id="Node000006" href="$classProtocolEngine.html#af587f89ca009b7c48b13bd43f6ad8c6e" title="Send SYN (Handshake 1/3) compatible with UART/ESP&#45;Now." alt="" coords="545,75,728,100"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="478,101,532,96,532,101,478,107"/>
+<area shape="rect" id="Node000010" href="$classDemeter_1_1SystemContext.html#ae7c2e73ec3905e661f920286615d4537" title="Actualiza la máquina de estado principal de la aplicación." alt="" coords="543,125,730,165"/>
+<area shape="poly" id="edge9_Node000004_Node000010" title=" " alt="" coords="484,127,530,131,529,137,483,132"/>
+<area shape="rect" id="Node000007" href="$classProtocolEngine.html#a756248b6415af686ad17659d13a86273" title="Desciende estamento lógico a una Trama Binaria y la escupe por COMMS. Envuelve el payload crudo antep..." alt="" coords="789,132,988,157"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="694,97,820,126,819,132,693,103"/>
+<area shape="rect" id="Node000008" href="$classProtocolEngine.html#ad93203ceed2aada77a73556411fd8043" title="Calculates a simple Modular Sum CRC (Mod 256)." alt="" coords="1036,107,1249,132"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="988,132,1022,129,1023,134,989,137"/>
+<area shape="rect" id="Node000009" href="$classIComms.html#ad776ff948007fd56d75719d5a6704e30" title="Transmite un tren de bytes crudos a través del medio." alt="" coords="1085,156,1200,181"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="989,151,1072,159,1071,165,988,157"/>
+<area shape="rect" id="Node000012" href="$classProtocolEngine.html#ad3f48d3cc49b44f5ab06f958c5b358f7" title="Send GPIO Control Command to set a pin state." alt="" coords="532,189,741,215"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="468,180,519,186,518,191,468,185"/>
+<area shape="poly" id="edge12_Node000012_Node000007" title=" " alt="" coords="693,187,819,158,820,163,694,192"/>
+</map>

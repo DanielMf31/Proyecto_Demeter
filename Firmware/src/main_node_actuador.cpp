@@ -1,10 +1,10 @@
 /**
  * @file main_node_actuador.cpp
- * @brief Firmware for Actuator Node (Window Motor Control).
- * Features:
- * - ESP-NOW Communication with Gateway
- * - Motor Relay Control (Pin 4)
- * - Removed FastLED as requested.
+ * @brief Firmware de Entrada Principal (Entry Point) para un Nodo tipo Actuador.
+ * 
+ * Funcionalidades:
+ * - Comunicación reactiva asíncrona mediante ESP-NOW con la red mesh (hacia el Gateway).
+ * - Control de Relay de Motor local acoplado al GpioController.
  */
 
 #include <Arduino.h>

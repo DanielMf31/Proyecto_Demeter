@@ -1,0 +1,40 @@
+flowchart TD
+    Host["Host: Raspberry Pi OS\n(Debian Linux)"]
+    
+    subgraph Container["Docker Container: proyecto-demeter-rpi"]
+        direction TB
+        Service["AsyncService\n(Orquestador asyncio)"]
+        UART["AsyncUART\nTX Queue / RX Callback"]
+        Proc["UARTProcessor\nDemeter Parser"]
+        Dev["DeviceManager\n(Estado local nodos)"]
+        Disp["CommandDispatcher\n(JSON a Trama Binaria)"]
+        WSC["WebSocket Client\n/ws/raspberry_gateway"]
+        
+        Service --> UART
+        Service --> WSC
+        UART --> Proc
+        Proc --> Dev
+        Proc --> WSC
+        WSC --> Disp
+        Disp --> UART
+    end
+    
+    Serial["/dev/serial0\n(UART fisico)"]
+    Internet["Internet\n(Ethernet Cable)"]
+    Backend["Backend FastAPI\n(Google Cloud VM)"]
+    ESP32["Gateway ESP32\n(Red Local Demeter)"]
+    
+    Host --> |"device mapping\n--device /dev/serial0"| Container
+    Container --> |"Env Variables\nWS_URL, BAUD_RATE"| Service
+    
+    UART -->|"TX/RX Bytes"| Serial
+    Serial -->|"Tramas Demeter"| ESP32
+    ESP32 -->|"RF ESP-NOW"| NodosRed["Nodos Sensor/Actuador"]
+    
+    WSC -->|"wss:// TLS"| Internet
+    Internet -->|"WebSocket"| Backend
+    
+    classDef external fill:#f5f5f5,stroke:#555;
+    classDef container fill:#e8f4fd,stroke:#1565c0;
+    class ESP32,Backend,NodosRed,Host,Internet,Serial external;
+    class Service,UART,Proc,Dev,Disp,WSC container;

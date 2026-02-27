@@ -1,0 +1,39 @@
+flowchart LR
+    subgraph SENSOR ["Nodo Sensor"]
+        S1[Lee periféricos\nDHT22 DS18B20]
+        S2[Convierte valores\na formato binario]
+        S3[Serializa trama\nTEMP_HUM_REPORT]
+        S4[Transmite por\nESP-NOW]
+    end
+
+    subgraph GATEWAY ["Nodo Gateway"]
+        G1[Recibe trama\npor RF]
+        G2[Valida SYNC\nLENGTH y CRC]
+        G3{Para mi?}
+        G4[Pasa a handlers\nlocales]
+        G5[Reenvía por\nUART hacia RPi]
+    end
+
+    subgraph RPI ["Raspberry Pi"]
+        R1[Lee puerto\nserial]
+        R2[Valida y deserializa\ntrama]
+        R3[Extrae temperatura\ny humedad]
+        R4[Publica a Backend\nvía WebSocket]
+    end
+
+    subgraph BACKEND ["Backend"]
+        B1[Recibe por WS]
+        B2[Persiste en\nPostgreSQL]
+        B3[Distribuye a\nFrontend]
+    end
+
+    S1 --> S2 --> S3 --> S4
+    S4 -->|RF 2.4GHz| G1
+    G1 --> G2 --> G3
+    G3 -- DST=0 servidor --> G5
+    G3 -- DST=1 yo --> G4
+    G5 -->|UART serial| R1
+    R1 --> R2 --> R3 --> R4
+    R4 -->|HTTP/WS| B1
+    B1 --> B2
+    B1 --> B3

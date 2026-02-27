@@ -9,74 +9,68 @@
 #include <cstddef>
 
 /**
- * @brief Binary Protocol Parser (V2).
- * Handles Serialization/Deserialization and CRC Validation.
+ * @class ProtocolEngine
+ * @brief Motor Central de Procesamiento del Protocolo Binario (V2).
+ * 
+ * Se encarga de la Codificación/Decodificación (Serialization), 
+ * Validación de Integridad (CRC) y Enrutamiento Funcional (Callbacks).
+ * Transforma un tren de bytes entrante en estructuras lógicas Demeter.
+ * 
+ * @par Ejemplo de uso:
+ * @code
+ * IComms* uart = new UartStrategy();
+ * ProtocolEngine engine(uart);
+ * engine.setNodeId(DEVICE_ID);
+ * 
+ * engine.onSetGpio([](const Demeter::SetGpioCmd& cmd) {
+ *     // Actuar sobre el pin
+ * });
+ * 
+ * void loop() {
+ *     engine.update(); // Mantiene procesando la cola RX
+ * }
+ * @endcode
  */
 class ProtocolEngine {
-public:
-    // Callback types are now in InternalTypes.h (Demeter namespace)
-
-private:
-    IComms* _strategy;
-    uint8_t _myId; // Node ID
-
-    // Callbacks
-    Demeter::GpioCallback _onGpioCommand;
-    Demeter::PwmCallback _onPwmCommand;
-    Demeter::SequenceCallback _onSequenceCommand;
-    Demeter::AckCallback _onAckRecv;
-    Demeter::PingCallback _onPingRecv;
-    Demeter::TempHumReportCallback _onTempHumReportRecv;
-    Demeter::PinReportCallback    _onPinReport;
-    Demeter::SystemReportCallback _onSystemReport;
-    Demeter::GetSensorsCallback   _onGetSensors;
-    Demeter::RouteAddCallback     _onRouteAdd;
-    Demeter::NackCallback         _onNack;
-    Demeter::AckCallback _onSynRecv;
-    Demeter::AckCallback _onSynAckRecv;
-
 public:
     // Protocol Constants
     static const uint8_t SYNC_BYTE = 0xFE;
 
-    // Header Structure (Packed)
+    /**
+     * @brief Estructura Empaquetada de la Cabecera (Header) del Protocolo.
+     * Garantiza un alineamiento a nivel de byte en memoria para una 
+     * serialización/deserialización directa sobre el buffer (Zero-copy approach).
+     */
     struct Header {
-        uint8_t sync;
-        uint8_t length;     // Payload Length
-        uint8_t flags;
-        uint8_t src_id;
-        uint8_t dst_id;
-        uint8_t cmd_id;
+        uint8_t sync;       ///< Byte de Sincronismo Fijo (0xFE).
+        uint8_t length;     ///< Longitud exacta del Payload (sin Header ni CRC).
+        uint8_t flags;      ///< Máscara de bits para metadatos (ej. requiere ACK).
+        uint8_t src_id;     ///< ID Lógico del Nodo Emisor.
+        uint8_t dst_id;     ///< ID Lógico del Nodo Destinatario (0 = Broadcast).
+        uint8_t cmd_id;     ///< Identificador del Comando (CommandType).
     } __attribute__((packed));
 
     static const size_t HEADER_SIZE = sizeof(Header);
 
-private:
-
-    /**
-     * @brief Calculates a simple Modular Sum CRC (Mod 256).
-     * @param data Pointer to data buffer.
-     * @param len Length of data in bytes.
-     * @return uint8_t Calculated CRC.
-     */
-    uint8_t calculateCRC(const uint8_t* data, size_t len);
-
-public:
     // =============================================================
     // SECTION: 1. Setup & Configuration (Parsing Logic)
     // =============================================================
     ProtocolEngine(IComms* strategy);
 
     /**
-     * @brief Set the Node ID.
-     * @param id The ID to use as Source within the protocol.
+     * @brief Asigna el ID Lógico originador incrustado en los Headers salientes.
+     * @param id ID único de 1 a 254.
      */
     void setNodeId(uint8_t id);
 
     /**
-     * @brief Update Loop (The "Heart" of the Parsing Stage).
-     * Reads from strategy, parses frames, and dispatches callbacks.
-     * Should be called frequently in loop().
+     * @brief Bucle Principal del Parsing (Fase Lógica).
+     * 
+     * Extrae de la interfaz `IComms` un tren de bytes, extrae cabecera, 
+     * valida CRC, deserializa el payload CBOR y desencadena el Callback 
+     * correspondiente según el `cmd_id` registrado.
+     * 
+     * @note Se debe llamar asiduamente para no rebalsar los buffers RX.
      */
     void update();
 
@@ -153,34 +147,54 @@ public:
      */
     void sendExecSequence(uint8_t targetId, const Demeter::ExecSequenceCmd& cmd);
 
-    // =============================================================
-    // SECTION: 3. Low-Level Send Logic (Transport Layer)
-    // =============================================================
-    // These methods handle the raw frame construction, CRC, and transmission.
-
-    /**
-     * @brief Send ACK (Acknowledge) response, optionally with Context.
-     */
     /**
      * @brief Send ACK (Acknowledge) response, optionally with Context.
      */
     void sendAck(uint8_t targetId, const Demeter::AckData& data);
 
 private:
+    IComms* _strategy;
+    uint8_t _myId; // Node ID
+
+    // Callbacks
+    Demeter::GpioCallback _onGpioCommand;
+    Demeter::PwmCallback _onPwmCommand;
+    Demeter::SequenceCallback _onSequenceCommand;
+    Demeter::AckCallback _onAckRecv;
+    Demeter::PingCallback _onPingRecv;
+    Demeter::TempHumReportCallback _onTempHumReportRecv;
+    Demeter::PinReportCallback    _onPinReport;
+    Demeter::SystemReportCallback _onSystemReport;
+    Demeter::GetSensorsCallback   _onGetSensors;
+    Demeter::RouteAddCallback     _onRouteAdd;
+    Demeter::NackCallback         _onNack;
+    Demeter::AckCallback _onSynRecv;
+    Demeter::AckCallback _onSynAckRecv;
+
     /**
-     * @brief Send NACK (Negative Acknowledge) response.
+     * @brief Calculates a simple Modular Sum CRC (Mod 256).
+     * @param data Pointer to data buffer.
+     * @param len Length of data in bytes.
+     * @return uint8_t Calculated CRC.
+     */
+    uint8_t calculateCRC(const uint8_t* data, size_t len);
+
+    /**
+     * @brief Emite una trama genérica de Error o Ausencia Lógica.
      */
     void sendNack(uint8_t targetId);
 
     /**
-     * @brief Core method to build and send a frame via IComms.
-     * Wraps payload with Header, Sync Byte, and CRC.
+     * @brief Desciende estamento lógico a una Trama Binaria y la escupe por COMMS.
+     * Envuelve el `payload` crudo anteponiendo el `Header` formateado 
+     * (con longitud calculada automáticamente) y posponiendo el `CRC` validado.
      */
     void sendFrame(uint8_t cmdId, uint8_t targetId, const std::vector<uint8_t>& payload);
 
     /**
-     * @brief Internal parsing logic for a received frame buffer.
-     * Validates CRC and Header before dispatching to callbacks.
+     * @brief Lógica profunda de ingesta de Streams de bytes sobre el protocolo.
+     * Trocea el frame validando el sincronismo constante, la longitud declarada
+     * y el CRC anexo. Si es válido y es para este nodo, avisa al enrutador de CBOR.
      */
     void parseFrame(const std::vector<uint8_t>& frame);
 };

@@ -1,0 +1,5 @@
+<map id="EspNowStrategy" name="EspNowStrategy">
+<area shape="rect" id="Node000001" title="Implementación de IComms especializada en el stack ESP&#45;NOW de Espressif." alt="" coords="5,219,163,504"/>
+<area shape="rect" id="Node000002" href="$classIComms.html" title="Interfaz Abstracta para la Capa de Comunicaciones Físicas." alt="" coords="21,5,147,171"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,184,87,218,81,218,81,184"/>
+</map>

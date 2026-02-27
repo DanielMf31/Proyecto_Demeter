@@ -1,61 +1,69 @@
 #pragma once
 
-/**
- * @file IComms.h
- * @brief Abstract Interface for Communication Strategies.
- * @author Proyecto Demeter Team
- * @date 2026-02-08
- */
-
 #include <stdint.h>
 #include <stddef.h>
 #include <vector>
 #include <array>
 
 /**
- * @brief Abstract Interface for Communication Layer.
- * Implements the Strategy Pattern strictly.
+ * @class IComms
+ * @brief Interfaz Abstracta para la Capa de Comunicaciones Físicas.
  * 
- * Implementations: UartStrategy, EspNowStrategy, LoraStrategy.
+ * Implementa el Patrón Estrategia (Strategy Pattern) aislando el 
+ * formato de los paquetes lógicos del medio físico subyacente.
+ * Implementaciones concretas: UartStrategy, EspNowStrategy.
+ * 
+ * @par Ejemplo de uso polimórfico:
+ * @code
+ * IComms* comms = new EspNowStrategy();
+ * comms->begin();
+ * 
+ * std::vector<uint8_t> payload = {0x01, 0xFF, 0x00};
+ * comms->send(payload.data(), payload.size());
+ * @endcode
  */
 class IComms {
 public:
     virtual ~IComms() {}
 
     /**
-     * @brief Initialize the hardware interface (e.g. Serial.begin).
+     * @brief Inicializa la interfaz hardware o protocolo de radio subyacente.
+     * Ej. `Serial.begin(...)` para UART o `esp_now_init()` para ESP-NOW.
      */
     virtual void begin() = 0;
 
     /**
-     * @brief Send raw bytes over the medium.
-     * @param data Pointer to byte buffer.
-     * @param length Number of bytes to send.
+     * @brief Transmite un tren de bytes crudos a través del medio.
+     * @param data Puntero al buffer constante de bytes a transmitir.
+     * @param length Cantidad exacta de bytes del payload.
      */
     virtual void send(const uint8_t* data, size_t length) = 0;
 
     /**
-     * @brief Check if bytes are available to read.
-     * @return true if at least one byte is in buffer.
+     * @brief Comprueba subyacente si hay datos pendientes de consumir en el buffer RX.
+     * @return true si al menos un byte se encuentra esperando en FIFO.
      */
     virtual bool available() = 0;
 
     /**
-     * @brief Read all available bytes from the buffer.
-     * Note: In a real constrained embedded system, passing vectors 
-     * by value might be expensive, but for ESP32 and this architectural
-     * pattern (where payload < 256 bytes), it's acceptable for cleanliness.
+     * @brief Extrae todos los bytes disponibles del buffer RX del hardware.
      * 
-     * Alternative: read(uint8_t* buffer, size_t maxLen)
-     * For now, following the design document's std::vector approach.
+     * @note Se devuelve por valor como `std::vector` asumiendo payloads 
+     * pequeños (< 250 bytes en ESP-NOW y BLE) y confiando en Name/Return Value 
+     * Optimization (RVO) del compilador C++14 para evitar la copia.
+     * 
+     * @return Vector continuo temporal con la trama extraída, en bruto.
      */
     virtual std::vector<uint8_t> read() = 0;
 
     /**
-     * @brief Register a route for a remote node (ESP-Now).
-     * @param id Node ID (Protocol Level).
-     * @param mac MAC Address (6 bytes).
-     * Default implementation does nothing (for UART/LoRa).
+     * @brief Vincula lógicamente un Nodo Demeter a una dirección MAC física.
+     * Únicamente utilizable en implementaciones multipunto inálambricas (ESP-NOW).
+     * 
+     * @param id ID lógico del nodo a enrutar (1 a 254).
+     * @param mac Arreglo de 6 bytes correspondientes a la MAC del destinatario.
+     * 
+     * @note Implementación por defecto no hace nada, válido para P2P (UART).
      */
     virtual void registerRoute(uint8_t id, const std::array<uint8_t, 6>& mac) {
         (void)id; (void)mac;

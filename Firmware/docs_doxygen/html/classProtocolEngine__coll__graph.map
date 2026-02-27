@@ -1,0 +1,5 @@
+<map id="ProtocolEngine" name="ProtocolEngine">
+<area shape="rect" id="Node000001" title="Motor Central de Procesamiento del Protocolo Binario (V2)." alt="" coords="5,233,201,879"/>
+<area shape="rect" id="Node000002" href="$classIComms.html" title="Interfaz Abstracta para la Capa de Comunicaciones Físicas." alt="" coords="40,5,167,171"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="106,171,106,217,101,217,101,171"/>
+</map>

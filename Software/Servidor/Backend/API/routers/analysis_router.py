@@ -1,9 +1,14 @@
 import os
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Query, Depends
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from rq import Queue
 from redis import Redis
+from datetime import datetime
+from typing import Optional, List
+from BD.models import ActivityLog, User
+from Core.auth import get_current_active_user
+from Core.database import get_db
 from Core.config import get_settings
 
 router = APIRouter()
@@ -19,7 +24,7 @@ class AnalysisRequest(BaseModel):
     experimento_id: int
 
 @router.post("/generate")
-async def generate_analysis(request: AnalysisRequest):
+async def generate_analysis(request: AnalysisRequest, current_user: User = Depends(get_current_active_user)):
     """
     Encola una tarea pesada de análisis científico en el background worker (RQ).
     Devuelve el ID de la tarea para que el cliente pueda consultar su estado.
@@ -42,7 +47,7 @@ async def generate_analysis(request: AnalysisRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/status/{task_id}")
-async def get_analysis_status(task_id: str):
+async def get_analysis_status(task_id: str, current_user: User = Depends(get_current_active_user)):
     """
     Consulta el estado de una tarea en RQ.
     Estados posibles: queued, started, finished, failed, canceled
@@ -70,7 +75,7 @@ async def get_analysis_status(task_id: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/download/{filename}")
-async def download_analysis(filename: str):
+async def download_analysis(filename: str, current_user: User = Depends(get_current_active_user)):
     """
     Descarga el archivo generado por el worker desde el volumen compartido.
     """

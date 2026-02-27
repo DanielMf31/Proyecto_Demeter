@@ -1,0 +1,13 @@
+gantt
+    title Ciclo energético del Nodo Sensor — Período de 1 hora (3 600 s)
+    dateFormat X
+    axisFormat %Ss
+
+    section Activo [ ~1.5 s total ]
+    Despertar + Init radio     :done, a1, 0, 1
+    Leer sensores DHT22        :done, a2, 1, 2
+    Serializar y transmitir    :done, a3, 2, 3
+    Recibir ACK del Gateway    :done, a4, 3, 4
+
+    section Deep Sleep [ ~3 596 s — 0.01 mA ]
+    Modo ultra bajo consumo    :crit, b1, 4, 3600

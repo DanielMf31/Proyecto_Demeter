@@ -10,19 +10,33 @@
 // System States
 // System States moved to InternalTypes.h (Demeter::SystemState)
 
-// Execution Mode
+/**
+ * @brief Modalidad de Ejecución de Comandos del Sistema.
+ * @note Actualmente soportado mayoritariamente el IMMEDIATE.
+ */
 enum class ExecutionMode {
-    IMMEDIATE, // Execute as soon as received (Default)
-    INTERACTIVE_QUEUE // Queue commands, execute on trigger
+    IMMEDIATE,         ///< Ejecutar tan pronto como el comando se decodifice e identifique (Defecto).
+    INTERACTIVE_QUEUE  ///< Encolar comandos temporalmente; ejecutar luego por un trigger programado.
 };
 
 /**
- * @brief Main logic class for the Firmware.
+ * @class SystemManager
+ * @brief Cerebro y Máquina de Estados del Firmware Demeter.
  *
- * Implements a centralized workflow controller that bridges:
- * - Protocol Engine (Input/Output)
- * - GPIO Controller (Hardware Action)
- * - State Machine (State Management)
+ * Implementa el flujo de control centralizado (Workflow Controller) cruzando las fronteras entre:
+ * - Protocol Engine (Comunicaciones e Input/Output Serializado)
+ * - GpioController / SensorManager (Hardware Físico subyacente)
+ * - Lógica Transaccional (Handshake 3-vías, Sesiones de ACK).
+ * 
+ * @par Ejemplo de uso:
+ * @code
+ * SystemManager sys(&protocolEngine);
+ * sys.enableExecutor(&gpioCtrl);
+ * sys.setup();
+ * sys.initiateHandshake(GATEWAY_ID, SessionContext::GENERAL);
+ * 
+ * void loop() { sys.update(); } // Mantener vivo
+ * @endcode
  */
 class SystemManager {
 private:
@@ -107,8 +121,14 @@ public:
     void setup();
 
     /**
-     * @brief Main System Loop.
-     * Should be called in `loop()`. Handles protocol updates and state machine.
+     * @brief Bucle Principal del Sistema (Tick OBLIGATORIO).
+     * @note Se debe invocar perennemente dentro del `loop()` de la placa.
+     * 
+     * Responsabilidades asumidas:
+     * - Avance máquina Protocol Engine.
+     * - Evaluación timeout `HANDSHAKE`.
+     * - Iteración automática de Pasos de Secuenciador (`ExecSequenceCmd`).
+     * - Procesamiento de transacciones diferidas.
      */
     void update();
 

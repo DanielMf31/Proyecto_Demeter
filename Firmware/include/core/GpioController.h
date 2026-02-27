@@ -9,31 +9,46 @@
 
 /**
  * @class GpioController
- * @brief Hardware Abstraction Layer (HAL) for GPIO Control.
+ * @brief Capa de Abstracción de Hardware (HAL) para Control GPIO.
  * 
- * Manages the physical pins of the ESP32.
- * Decouples logic from hardware specifics (Arduino API).
+ * Gestiona los pines físicos del microcontrolador (ESP32).
+ * Desacopla la lógica de negocio de la API de Arduino (digitalWrite, pinMode).
+ * 
+ * @par Ejemplo de uso:
+ * @code
+ * GpioController gpio;
+ * gpio.setPins({4, 5});
+ * gpio.init();
+ * 
+ * Demeter::SetGpioCmd cmd = {4, true, 0};
+ * gpio.execute(cmd); // Pin 4 se pone a HIGH
+ * @endcode
  */
 class GpioController {
 private:
-    std::vector<uint8_t> _managedPins;
+    std::vector<uint8_t> _managedPins; ///< Vector con los pines inicializados por este controlador.
 
 public:
     /**
-     * @brief Configure the list of managed pins.
-     * @param pins List of GPIO numbers.
+     * @brief Configura la lista de pines gestionados.
+     * @param pins Vector de números GPIO (Ej. {4, 5, 18}).
      */
     void setPins(const std::vector<uint8_t>& pins);
 
     /**
-     * @brief Initialize configured GPIO pins.
-     * Sets managed pins as OUTPUT and initializes them to LOW.
+     * @brief Inicializa los pines GPIO configurados.
+     * Recorre \p _managedPins, los configura como OUTPUT y los inicia a LOW por seguridad.
      */
     void init();
 
     /**
-     * @brief Execute a State Change Command.
-     * @param cmd Command containing target PIN and Logic Level.
+     * @brief Ejecuta una orden de Cómputo Digital sobre el Hardware.
+     * 
+     * Internamente invoca `digitalWrite` de la API de Arduino. Sólo actúa
+     * sobre el pin si se encuentra dentro de `_managedPins` o si la orden 
+     * tiene flags de "force".
+     * 
+     * @param cmd Estructura Demeter::SetGpioCmd con el target PIN y su nivel logico.
      */
     void execute(const Demeter::SetGpioCmd& cmd);
 };

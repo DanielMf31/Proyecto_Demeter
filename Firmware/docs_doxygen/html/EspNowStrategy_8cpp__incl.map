@@ -1,0 +1,31 @@
+<map id="src/communications/EspNowStrategy.cpp" name="src/communications/EspNowStrategy.cpp">
+<area shape="rect" id="Node000001" title="Implementación concreta del protocolo de radio P2P de Espressif." alt="" coords="537,5,695,45"/>
+<area shape="rect" id="Node000002" href="$EspNowStrategy_8h.html" title=" " alt="" coords="187,93,437,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="544,48,370,92,369,87,543,43"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="339,240,402,265"/>
+<area shape="poly" id="edge13_Node000001_Node000006" title=" " alt="" coords="601,47,565,95,551,123,543,147,533,170,513,194,490,211,465,225,416,243,415,238,463,220,487,207,509,190,528,167,538,145,546,120,560,92,597,44"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="408,167,499,192"/>
+<area shape="poly" id="edge14_Node000001_Node000008" title=" " alt="" coords="584,48,551,69,519,95,492,126,470,157,466,153,488,123,515,91,548,65,581,43"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="574,93,658,119"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="619,46,619,79,613,79,613,46"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="683,93,749,119"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="642,43,692,82,689,87,639,48"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="774,93,861,119"/>
+<area shape="poly" id="edge15_Node000001_Node000012" title=" " alt="" coords="665,43,776,86,774,91,663,48"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="885,93,947,119"/>
+<area shape="poly" id="edge16_Node000001_Node000013" title=" " alt="" coords="689,43,872,90,870,95,688,48"/>
+<area shape="rect" id="Node000003" href="$IComms_8h.html" title=" " alt="" coords="59,167,259,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="288,121,197,163,195,158,286,116"/>
+<area shape="poly" id="edge10_Node000002_Node000006" title=" " alt="" coords="322,117,348,166,367,225,362,227,343,168,317,120"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="5,240,61,265"/>
+<area shape="poly" id="edge9_Node000002_Node000007" title=" " alt="" coords="207,121,112,140,73,153,49,169,40,181,35,196,33,227,28,226,30,195,35,179,45,165,71,148,110,135,206,116"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="336,116,419,158,417,163,334,121"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="283,167,333,192"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="314,119,312,153,307,153,309,119"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="197,240,267,265"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="173,190,212,228,208,232,169,194"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="97,240,172,265"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="157,193,145,228,140,226,152,191"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="194,189,327,234,326,239,192,195"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="140,194,67,235,64,231,137,190"/>
+</map>

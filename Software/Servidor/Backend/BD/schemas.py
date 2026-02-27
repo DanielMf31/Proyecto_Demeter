@@ -5,6 +5,10 @@ from pydantic import BaseModel, ConfigDict
 
 # --- User Schemas ---
 class UserBase(BaseModel):
+    """
+    Esquema base para la entidad Usuario. 
+    Contiene la validación genérica de Pydantic compartida entre creaciones y respuestas.
+    """
     username: str
     role: str = "user"
     is_active: bool = True
@@ -18,6 +22,9 @@ class UserResponse(UserBase):
 
 # --- Device Schemas ---
 class DeviceBase(BaseModel):
+    """
+    Esquema base para validar y tipar objetos Device (Relés físicos).
+    """
     name: str
     device_type: str
     gpio_pin: int
@@ -35,6 +42,10 @@ class DeviceResponse(DeviceBase):
 
 # --- Sequence Step Schemas ---
 class SequenceStepBase(BaseModel):
+    """
+    Representa un paso en el tiempo que dicta una orden a un Device.
+    (Ej: `target_state` = True, `duration_seconds` = 60).
+    """
     device_id: int
     step_order: int
     target_state: bool
@@ -50,6 +61,9 @@ class SequenceStepResponse(SequenceStepBase):
 
 # --- Sequence Schemas ---
 class SequenceBase(BaseModel):
+    """
+    Esquema Maestro del contenedor de la Secuencia. Agrupa N `SequenceStepBase`.
+    """
     name: str
 
 class SequenceCreate(SequenceBase):
@@ -64,6 +78,10 @@ class SequenceResponse(SequenceBase):
 
 # --- Activity Log Schemas ---
 class ActivityLogBase(BaseModel):
+    """
+    Reglas de validación para la entrada a la bitácora de actividad.
+    Permite `device_id` y `description` nulos si la acción fue a nivel de sistema.
+    """
     action_type: str
     description: Optional[str] = None
     device_id: Optional[int] = None
@@ -79,6 +97,10 @@ class ActivityLogResponse(ActivityLogBase):
 
 # --- LIMS Schemas (Plants & Experiments) ---
 class PlantBase(BaseModel):
+    """
+    Esquema de las Plantas físicas administradas por el sistema (LIMS).
+    Garantiza que el front-end siempre envíe la metadata obligatoria (especie, siembra).
+    """
     name: str
     identificador_fisico: str
     especie_variedad: str
@@ -103,6 +125,9 @@ class PlantResponse(PlantBase):
     model_config = ConfigDict(from_attributes=True)
 
 class ExperimentBase(BaseModel):
+    """
+    Colección de plantas agrupadas conceptualmente bajo un diseño experimental.
+    """
     name: str
     description: Optional[str] = None
 

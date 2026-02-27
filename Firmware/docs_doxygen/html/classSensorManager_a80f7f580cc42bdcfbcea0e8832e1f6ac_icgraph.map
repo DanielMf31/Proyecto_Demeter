@@ -1,0 +1,27 @@
+<map id="SensorManager::readAll" name="SensorManager::readAll">
+<area shape="rect" id="Node000001" title="Lee secuencialmente todos los sensores de la colección." alt="" coords="839,95,1016,120"/>
+<area shape="rect" id="Node000002" href="$classSystemManager.html#a2f90e34d84a66db20ca8bc58c7f4faf2" title="Collects data from SensorManager and publishes it." alt="" coords="587,47,791,87"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="837,95,790,87,791,82,838,90"/>
+<area shape="rect" id="Node000006" href="$classSystemManager.html#a338012dcf93ee630c5ad688d4db51eb8" title=" " alt="" coords="587,119,790,159"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="825,124,790,128,790,123,825,118"/>
+<area shape="rect" id="Node000003" href="$classNode__Sensor.html#a3483120ea2b929d000b24340b050410b" title="Tarea Ticking que itera los sensores, recaba la info y se la envía al Protocol Engine." alt="" coords="324,5,539,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="573,48,498,33,499,28,574,43"/>
+<area shape="rect" id="Node000004" href="$classNode__Sensor.html#a4ef0a51ec48c9f9de1cea5167672e707" title="Tarea a correr ininterrumpidamente en el loop() de Arduino." alt="" coords="351,55,511,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="573,70,512,70,512,65,573,65"/>
+<area shape="rect" id="Node000005" href="$main__node__sensor_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="169,49,219,75"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="337,68,219,65,219,60,338,63"/>
+<area shape="rect" id="Node000007" href="$classSystemManager.html#a2ed1972442d36a8a964882eb3735f7e2" title="Initialize the system components. Sets up callbacks and initializes enabled hardware." alt="" coords="345,144,517,169"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="574,150,518,154,517,148,573,144"/>
+<area shape="rect" id="Node000008" href="$classNode__Actuator.html#af54ed12f9b1d196df4c05b31f725e993" title="Inicializa los controladores hardware subyacentes." alt="" coords="113,99,275,124"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="350,144,261,127,262,121,351,139"/>
+<area shape="rect" id="Node000010" href="$classNode__Gateway.html#ab304a9b88d40c06a9db44ea3e52c6c16" title="Arranca los administradores de sensores, pines y la máquina de estados." alt="" coords="112,148,276,173"/>
+<area shape="poly" id="edge9_Node000007_Node000010" title=" " alt="" coords="332,161,276,162,276,157,332,156"/>
+<area shape="rect" id="Node000012" href="$classNode__Sensor.html#ae2f8de7388f598988e6ae30a15de3841" title="Arranca los subsistemas hardware y máquinas de estado en init." alt="" coords="119,197,269,223"/>
+<area shape="poly" id="edge11_Node000007_Node000012" title=" " alt="" coords="361,175,252,200,250,195,360,170"/>
+<area shape="rect" id="Node000009" href="$main__node__actuador_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,99,64,124"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="99,114,64,114,64,109,99,109"/>
+<area shape="rect" id="Node000011" href="$main__gateway_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,148,64,173"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="98,163,64,163,64,158,98,158"/>
+<area shape="rect" id="Node000013" href="$main__node__sensor_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,197,64,223"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="105,213,64,213,64,207,105,207"/>
+</map>

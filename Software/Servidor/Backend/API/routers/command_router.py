@@ -28,7 +28,7 @@ Ventajas sobre WS desde el Frontend:
 import json
 import logging
 from datetime import datetime
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import TypeAdapter, ValidationError
 
 from Core.redis import redis_manager
@@ -40,6 +40,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "Common"))
 
 from schemas import AnyDemeterCommand
+
+from Core.auth import get_current_active_user
+from BD.models import User
 
 logger = logging.getLogger("command_router")
 
@@ -69,14 +72,22 @@ El campo **`type`** es obligatorio y actúa como discriminador:
 | `get_sensors` | Solicitar lectura de sensores |
 
 El comando se publica en Redis y es despachado a la Raspberry vía WebSocket.
+
+**Requiere autenticación**. Sólo usuarios con rol `admin` u `operator` pueden ejecutar.
     """,
     status_code=status.HTTP_202_ACCEPTED,
 )
-async def post_command(body: dict) -> dict:
+async def post_command(body: dict, current_user: User = Depends(get_current_active_user)) -> dict:
     """
     Recibe un JSON con `type` discriminador, lo valida con Pydantic
     y lo publica en Redis para que el listener lo reenvíe a la Raspberry.
     """
+    if current_user.role not in ["admin", "operator"]:
+        logger.warning(f"Intento de comando bloqueado para el usuario {current_user.username} (Rol: {current_user.role})")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Privilegios insuficientes para enviar comandos."
+        )
 
     # ── 1. Validar con el TypeAdapter discriminado ────────────────────────────
     try:

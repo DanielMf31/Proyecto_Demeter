@@ -1,0 +1,56 @@
+% ============================================================
+% SECCIÓN 1: Introducción y Visión del Proyecto
+% ============================================================
+\chapter*{Introducción y Visión del Proyecto}
+\addcontentsline{toc}{chapter}{Introducción y Visión del Proyecto}
+
+\section{Motivación y Problema a Resolver}
+
+La agricultura de precisión y la automatización del cuidado botánico representan uno de los campos
+de mayor proyección en la intersección entre la electrónica, el software y las ciencias naturales.
+En entornos como invernaderos de investigación, la falta de herramientas de monitorización continua
+obliga a los investigadores a realizar lecturas manuales, perder datos valiosos durante la noche y
+tomar decisiones de riego basadas en la intuición.
+
+\textbf{El Proyecto Demeter} nace para resolver este problema. Propone un ecosistema tecnológico
+completo que automatiza la recolección de variables ambientales mediante sensores, asegura la
+trazabilidad física de cada sujeto de prueba y facilita el análisis científico avanzado mediante
+herramientas modernas y de bajo coste.
+
+\section{Objetivos del Sistema}
+
+\subsection{Objetivo General}
+Desarrollar una plataforma IoT integral que permita monitorizar, controlar y analizar entornos de
+cultivo, proporcionando trazabilidad científica completa de las plantas y los experimentos asociados.
+
+\subsection{Objetivos Específicos}
+
+\begin{itemize}[leftmargin=*, label=--]
+    \item \textbf{Automatización IoT:} Desplegar una red de sensores de bajo coste y alta
+          fiabilidad que recolecte variables ambientales de forma continua y sin intervención humana.
+    \item \textbf{Control Remoto:} Permitir la actuación sobre los elementos físicos del entorno
+          (bombas de riego, electroválvulas, ventanas) desde cualquier punto con acceso a internet.
+    \item \textbf{Trazabilidad LIMS:} Implementar un sistema de gestión de información de
+          laboratorio que mantenga un registro estructurado de cada planta y los experimentos
+          en los que participa.
+    \item \textbf{Análisis Científico:} Dotar a los investigadores de herramientas (SDK, gráficas,
+          informes exportables) para extraer y analizar datos sin depender del equipo de soporte.
+\end{itemize}
+
+\section{Descripción General del Sistema}
+
+El sistema Demeter se articula en cuatro módulos interconectados que cubren el ciclo completo
+desde la adquisición de datos hasta su interpretación científica:
+
+\begin{enumerate}
+    \item \textbf{Capa de Campo (Firmware ESP32):} Red de microcontroladores ESP32 comunicados
+          mediante ESP-NOW. Tres roles diferenciados: sensores, actuadores y gateway.
+    \item \textbf{Capa de Borde (Servicio Raspberry Pi):} Servicio Python que recibe las tramas
+          del gateway por UART y las reenvía al servidor central.
+    \item \textbf{Capa de Servidor (Backend FastAPI):} API REST y WebSocket asíncrona que gestiona
+          la persistencia en PostgreSQL y la publicación de datos en tiempo real.
+    \item \textbf{Capa de Visualización (Frontend React):} SPA que muestra datos en vivo, permite
+          crear secuencias de riego y gestionar experimentos científicos (LIMS).
+\end{enumerate}
+
+

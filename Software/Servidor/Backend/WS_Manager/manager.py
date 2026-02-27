@@ -13,10 +13,17 @@ logger = setup_logger("ws_registry")
 
 
 class ConnectionRegistry:
+    """
+    Registro centralizado de conexiones WebSocket activas (diccionario en memoria).
+    Actúa como Singleton para que toda la aplicación de FastAPI (routers, dispatcher)
+    pueda enviar mensajes ('send', 'broadcast') usando el Client ID sin preocuparse 
+    del manejo de nivel bajo del socket.
+    """
     def __init__(self):
         self.active: Dict[str, WebSocket] = {}
 
     async def connect(self, websocket: WebSocket, client_id: str) -> None:
+        """Acepta la conexión HTTP Upgrade y la registra bajo el Client ID."""
         await websocket.accept()
         self.active[client_id] = websocket
         logger.info(f"Connected: '{client_id}' | total={len(self.active)}")

@@ -1,3 +1,11 @@
+"""
+app.py — Punto de entrada principal (Entrypoint) de la API Demeter Backend.
+
+Orquesta la inicialización de FastAPI, configuración CORS, inicialización de 
+Alembic/PostgreSQL, siembra de datos de prueba y registro de todos los 
+routers (Endpoints). También dispara los listeners en background de Redis.
+"""
+
 import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

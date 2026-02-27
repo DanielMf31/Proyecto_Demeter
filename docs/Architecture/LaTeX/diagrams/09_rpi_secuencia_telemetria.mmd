@@ -1,0 +1,36 @@
+sequenceDiagram
+    participant GW as Gateway ESP32
+    participant UART as AsyncUART
+    participant Proc as UARTProcessor
+    participant Dev as DeviceManager
+    participant WS as WebSocketClient
+    participant Back as Backend FastAPI
+
+    %% Título: Flujo de Recepción de Telemetría (Arriba - Hacia Servidor)
+
+    Note over GW, Back: Gateway envía trama RF recibida hacia la RPi por /dev/serial0
+    GW->>UART: [Binario] 0xAA ... (Trama de Telemetría)
+    
+    activate UART
+    UART->>UART: Lee cabecera, valida longitud y CRC
+    UART->>Proc: dispatch_frame(parsed_dict)
+    deactivate UART
+    
+    activate Proc
+    Proc->>Proc: parse_payload()
+    alt Es Reporte de Sensor (e.g., TH_RPT)
+        Proc->>Dev: update_node_status(node_id, last_seen, vbatt)
+        Proc-->>WS: emit('telemetry_data', json_payload)
+    else Es Confirmación de Actuador (CMD_ACK)
+        Proc->>Dev: update_actuator_state(node_id, pin, state)
+        Proc-->>WS: emit('action_result', json_payload)
+    else Es Petición de Handshake (SYN)
+        Proc->>UART: write_frame(SYN_ACK)
+        Proc->>Dev: register_new_node(node_id)
+        UART-->>GW: [Binario] SYN_ACK
+    end
+    deactivate Proc
+    
+    activate WS
+    WS->>Back: wss:// emit(evento, datos)
+    deactivate WS

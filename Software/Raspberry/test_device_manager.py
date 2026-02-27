@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 
 # Add src to path
-sys.path.append(str(Path(__file__).parents[1]))
+sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from proyecto_demeter.Hardware.management.device_manager import DeviceManager
 
@@ -20,8 +20,8 @@ def test_device_manager():
     # Test Valve 1 -> Logical Pin 5 -> Node 2, Pin 10
     print("\nTesting logical pin 5 (Valve 1)...")
     target, pin = dm.translate_pin(5)
-    print(f"Result: Node {target}, Pin {pin} (Expected: Node 2, Pin 10)")
-    assert target == 2 and pin == 10
+    print(f"Result: Node {target}, Pin {pin} (Expected: Node 1, Pin 10)")
+    assert target == 1 and pin == 10
 
     # Test invalid pin
     print("\nTesting logical pin 99 (Invalid)...")

@@ -1,0 +1,9 @@
+<map id="Demeter::Sensors::DHTSensor" name="Demeter::Sensors::DHTSensor">
+<area shape="rect" id="Node000001" title="Implementation of a DHT Sensor (V2). Supports MOCK mode for testing and REAL mode for hardware." alt="" coords="6,323,217,528"/>
+<area shape="rect" id="Node000002" href="$classDemeter_1_1ISensor.html" title="Clase Base Abstracta (Interfaz) para todo hardware de sensado." alt="" coords="5,135,132,260"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,273,95,322,90,323,80,274"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="156,165,235,230"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="186,231,157,308,152,306,181,230"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="130,5,261,85"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="198,99,198,164,193,164,193,99"/>
+</map>

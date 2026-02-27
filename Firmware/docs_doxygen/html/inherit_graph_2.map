@@ -1,0 +1,9 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$classDemeter_1_1ISensor.html" title="Clase Base Abstracta (Interfaz) para todo hardware de sensado." alt="" coords="5,63,140,88"/>
+<area shape="rect" id="Node000001" href="$classDemeter_1_1Sensors_1_1DHTSensor.html" title="Implementation of a DHT Sensor (V2). Supports MOCK mode for testing and REAL mode for hardware." alt="" coords="192,5,411,31"/>
+<area shape="poly" id="edge1_Node000000_Node000001" title=" " alt="" coords="129,56,187,41,241,28,242,33,189,46,131,62"/>
+<area shape="rect" id="Node000002" href="$classDemeter_1_1Sensors_1_1DS18B20Sensor.html" title="Driver for DS18B20 Temperature Sensor. Note: Requires DallasTemperature and OneWire libraries." alt="" coords="199,55,404,95"/>
+<area shape="poly" id="edge2_Node000000_Node000002" title=" " alt="" coords="154,73,198,73,198,78,154,78"/>
+<area shape="rect" id="Node000003" href="$classDemeter_1_1Sensors_1_1SoilMoistureSensor.html" title="Driver for Analog Capacitive Soil Moisture Sensor (v1.2)." alt="" coords="188,119,415,159"/>
+<area shape="poly" id="edge3_Node000000_Node000003" title=" " alt="" coords="133,89,230,117,228,122,132,94"/>
+</map>

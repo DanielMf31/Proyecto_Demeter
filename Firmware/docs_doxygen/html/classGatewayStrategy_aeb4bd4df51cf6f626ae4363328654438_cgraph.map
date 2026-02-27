@@ -1,0 +1,5 @@
+<map id="GatewayStrategy::registerRoute" name="GatewayStrategy::registerRoute">
+<area shape="rect" id="Node000001" title="Delega la inscripción de MACS a la estrategia ESP&#45;NOW inyectada." alt="" coords="5,5,197,45"/>
+<area shape="rect" id="Node000002" href="$classIComms.html#a48c8483a8218a2996c895287aa18ee02" title="Vincula lógicamente un Nodo Demeter a una dirección MAC física. Únicamente utilizable en implementaci..." alt="" coords="245,13,417,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="198,23,232,23,232,28,198,28"/>
+</map>

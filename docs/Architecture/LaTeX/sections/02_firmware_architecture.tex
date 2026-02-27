@@ -1,0 +1,204 @@
+% ============================================================
+% SECCIÓN 2: Arquitectura del Firmware
+% ============================================================
+\chapter{Arquitectura del Firmware}
+
+\section{Visión General}
+
+El firmware de Demeter implanta una red distribuida de microcontroladores ESP32 que operan
+en cooperación para cubrir tres funciones complementarias: recolectar datos del entorno,
+actuar sobre él y servir de puente entre el mundo físico y el sistema de información central.
+
+Cada dispositivo ejecuta exactamente uno de tres roles, definido en tiempo de compilación:
+\textbf{Nodo Sensor}, \textbf{Nodo Actuador} o \textbf{Nodo Gateway}.
+
+% ─────────────────────────────────────────────────────────────
+\section{Los Tres Tipos de Nodo}
+
+\subsection{Nodo Sensor}
+
+El Nodo Sensor es la unidad de observación del sistema. Su único propósito es medir el entorno
+y comunicar esas lecturas al resto de la red.
+
+\textbf{Capacidades:}
+\begin{itemize}[leftmargin=*, label=--]
+    \item Mide temperatura del aire, humedad relativa y humedad del suelo.
+    \item Opera en modo \textbf{Activo} (reporte periódico cada N segundos) o
+          \textbf{IDLE} (escucha pasiva a petición del Gateway).
+    \item Soporta datos simulados para desarrollo sin hardware físico.
+    \item Realiza un proceso de establecimiento de sesión (handshake) con el Gateway antes
+          de iniciar el envío de telemetría.
+    \item Entre reportes entra en modo \textbf{Deep Sleep}, consumiendo $\mu$A de corriente
+          y alargando la vida de la batería a más de un año.
+\end{itemize}
+
+\textbf{Ciclo de vida:} El nodo se enciende, configura sus periféricos y establece contacto
+con el Gateway. Una vez confirmada la sesión, alterna entre reporte y Deep Sleep.
+
+
+\subsection{Nodo Actuador}
+
+El Nodo Actuador es la unidad de acción del sistema. Recibe órdenes y las traduce en señales
+físicas que controlan los elementos del invernadero.
+
+\textbf{Capacidades:}
+\begin{itemize}[leftmargin=*, label=--]
+    \item Controla pines de salida digital conectados a relés (bombas, válvulas, motores).
+    \item Modos de seguridad: \textbf{ACTIVO} (ejecuta comandos) e \textbf{IDLE}
+          (ignora cualquier orden, cortacircuito lógico ante mantenimiento).
+    \item Implementa \textbf{retroalimentación confirmada}: tras ejecutar un comando envía
+          automáticamente un informe PIN\_REPORT de vuelta al servidor.
+    \item Soporta ejecución de \textbf{secuencias multipaso temporizadas} sin bloquear
+          el bucle principal.
+\end{itemize}
+
+
+\subsection{Nodo Gateway}
+
+El Nodo Gateway es la unidad de interconexión. No mide ni actúa, sino que es el intérprete entre
+la red de radiofrecuencia local y la Raspberry Pi.
+
+\textbf{Capacidades:}
+\begin{itemize}[leftmargin=*, label=--]
+    \item Habla simultáneamente ESP-NOW (RF) y UART (serial), actuando como convertidor
+          de medio físico sin modificar el contenido de los mensajes.
+    \item Mantiene una tabla de rutas: asocia el identificador numérico de cada nodo
+          con su dirección MAC física.
+    \item Reenvía comandos de la Raspberry Pi (formato binario por UART) al nodo destino
+          correcto en la red ESP-NOW, sin interpretarlos.
+    \item Escucha todos los mensajes de la red y los reenvía transparentemente hacia la
+          Raspberry Pi por UART.
+\end{itemize}
+
+
+% ─────────────────────────────────────────────────────────────
+\section{Arquitectura Interna en Capas}
+
+El firmware está organizado en cuatro capas claramente separadas por responsabilidad:
+
+\begin{table}[H]
+    \centering
+    \caption{Capas del firmware Demeter}
+    \begin{tabular}{clp{8cm}}
+        \toprule
+        \textbf{Nivel} & \textbf{Capa} & \textbf{Responsabilidad} \\
+        \midrule
+        4 (Alto) & Lógica de Nodo   & Identidad y comportamiento específico del rol. \\
+        3        & Orquestador      & Máquina de estados, handshake, secuenciador. \\
+        2        & Motor de Protocolo & Serialización/deserialización y enrutamiento. \\
+        1 (Bajo) & Estrategia de Transporte & Canal físico: ESP-NOW, UART o mixto. \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:capas_firmware}
+\end{table}
+
+\subsection{El Orquestador del Sistema}
+
+El orquestador es el componente más complejo del firmware. Funciona como director de orquesta
+gestionando:
+
+\begin{itemize}[leftmargin=*, label=--]
+    \item \textbf{Máquina de estados:}
+          \texttt{BOOT → IDLE → HANDSHAKE → RUNNING → ERROR}.
+          Ninguna acción se ejecuta si el estado no lo permite.
+    \item \textbf{Establecimiento de sesión} inspirado en TCP de tres pasos
+          (SYN → SYN-ACK → ACK) con timeout de 2 segundos y hasta 3 reintentos.
+    \item \textbf{Gestión de secuencias:} ejecución no bloqueante de listas ordenadas
+          de pasos con temporización individual, evaluada en cada iteración del bucle.
+    \item \textbf{Sistema de listeners (callbacks):} permite suscribirse a eventos
+          sin modificar la lógica central del orquestador.
+\end{itemize}
+
+% ─────────────────────────────────────────────────────────────
+\section{El Motor de Protocolo}
+
+El Motor de Protocolo (Capa 2) actúa como el \textbf{corazón de la comunicación} del firmware.
+Es completamente agnóstico al canal físico subyacente: el mismo motor gestiona tramas 
+tanto si provienen de ESP-NOW como de UART.
+
+\subsection{Responsabilidades del Motor}
+
+\begin{enumerate}
+    \item \textbf{Serialización}: transforma un comando de alto nivel (estructura de datos)
+          en una trama binaria válida con cabecera, payload codificado en Little Endian y CRC.
+    \item \textbf{Deserialización}: analiza una secuencia de bytes entrante, valida el
+          marcador de inicio (SYNC \texttt{0xAA}), verifica el CRC y extrae el payload
+          según el tipo de comando (\texttt{CMD\_ID}).
+    \item \textbf{Enrutamiento}: trabaja con la tabla de rutas (ID numérico $\leftrightarrow$
+          MAC física) para determinar el destinatario correcto de cada trama.
+    \item \textbf{Clasificación}: identifica el tipo de mensaje recibido y lanza el
+          evento interno correspondiente (callback listener).
+\end{enumerate}
+
+\subsection{Pipeline de Recepción}
+
+Cuando el motor recibe bytes (desde cualquier transport), sigue este pipeline de validación:
+
+\begin{enumerate}
+    \item Detección del byte de sincronía (\texttt{0xAA}).
+    \item Lectura de cabecera completa (5 bytes adicionales).
+    \item Verificación de que el destino (\texttt{DST\_ID}) coincide con este nodo o es broadcast.
+    \item Lectura del payload de longitud declarada (\texttt{LENGTH} bytes).
+    \item Cálculo y comparación del CRC. Si no coincide: \textbf{trama descartada silenciosamente}.
+    \item Dispatch al listener registrado para el \texttt{CMD\_ID} recibido.
+\end{enumerate}
+
+
+% ─────────────────────────────────────────────────────────────
+\section{Estrategias de Transporte}
+
+La Capa 1 del firmware abstrae el canal físico mediante el patrón \textbf{Estrategia}
+(\textit{Strategy Pattern}): el Motor de Protocolo (Capa 2) no sabe nada sobre el
+canal físico subyacente. Simplemente llama a \texttt{transport.send(bytes)} y
+registra \texttt{transport.on\_receive(callback)}.
+
+Existen tres implementaciones de transporte:
+
+\subsection{Transporte ESP-NOW}
+
+ESP-NOW es el protocolo propietario de Espressif para comunicación directa entre
+microcontroladores ESP32 sin necesidad de punto de acceso Wi-Fi. Es la columna vertebral
+de la \textbf{red de campo} de Demeter.
+
+Características en el contexto de Demeter:
+\begin{itemize}[leftmargin=*, label=--]
+    \item \textbf{Alcance}: hasta 200--400 metros en campo abierto con antenas externas.
+    \item \textbf{Latencia}: sub-milisegundo en condiciones normales.
+    \item \textbf{MTU}: máximo 250 bytes por trama; suficiente para cualquier trama Demeter típica.
+    \item \textbf{Sin confirmación}: ESP-NOW no garantiza entrega; la Capa de Aplicación aporta
+          el ACK mediante el protocolo Demeter.
+    \item \textbf{Direccionamiento}: por dirección MAC de 6 bytes, mapeada a un ID numérico
+          en la tabla de rutas del Gateway.
+\end{itemize}
+
+Los nodos Sensor y Actuador usan ESP-NOW como canal \textbf{exclusivo}. El Nodo Gateway
+usa ESP-NOW como canal de \textit{campo} y UART como canal de \textit{troncal}.
+
+\subsection{Transporte UART (Serial)}
+
+UART es la conexión física cableada entre el \textbf{Nodo Gateway ESP32} y la
+\textbf{Raspberry Pi}, mediante los pines TX/RX a 115200 baudios.
+
+Características en el contexto de Demeter:
+\begin{itemize}[leftmargin=*, label=--]
+    \item \textbf{Fiabilidad}: al ser cableado, prácticamente sin pérdida de tramas.
+    \item \textbf{Velocidad}: 115200 bps → capacidad de $\approx$11.500 bytes por segundo,
+          vastamente superior a la carga de telemetría esperada.
+    \item \textbf{Transparencia}: el Gateway reenvía las tramas binarias íntegras sin
+          interpretarlas, actuando como pasarela pura.
+    \item \textbf{Gestión en ambos extremos}: el ESP32 escribe/lee sobre el UART hardware;
+          la Raspberry Pi usa \texttt{pyserial-asyncio} de forma no bloqueante.
+\end{itemize}
+
+\subsection{Transporte Mixto (Gateway)}
+
+El Nodo Gateway implementa \textbf{dos transportes simultáneos}: escucha en ESP-NOW y
+retransmite los bytes recibidos por UART hacia la Raspberry, y viceversa. Esta operación
+de \textit{relay} es completamente transparente: el Motor de Protocolo de la Raspberry
+ve las tramas como si provinieran directamente de los nodos de campo.
+
+\begin{designnote}
+La modularidad de la capa de transporte permite añadir nuevos medios físicos (LoRa, BLE, CAN Bus)
+sin modificar el Motor de Protocolo ni la Lógica de Nodo. Solo se implementa la interfaz
+\texttt{TransportStrategy} y se registra en el orquestador.
+\end{designnote}

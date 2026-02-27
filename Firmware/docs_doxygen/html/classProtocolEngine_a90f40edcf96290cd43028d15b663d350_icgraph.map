@@ -1,0 +1,18 @@
+<map id="ProtocolEngine::update" name="ProtocolEngine::update">
+<area shape="rect" id="Node000001" title="Bucle Principal del Parsing (Fase Lógica)." alt="" coords="555,79,727,104"/>
+<area shape="rect" id="Node000002" href="$classSystemManager.html#a792ba14d029dca92c9c6fb5cd2715c23" title="Bucle Principal del Sistema (Tick OBLIGATORIO)." alt="" coords="325,53,507,79"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="540,83,506,79,507,74,541,77"/>
+<area shape="rect" id="Node000005" href="$classNode__Gateway.html#af3315261cd44b048d250d8f2ed5da4da" title="Tarea regular Arduino loop() delegada hacia SystemManager." alt="" coords="104,104,277,129"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="541,100,278,114,277,109,541,94"/>
+<area shape="rect" id="Node000003" href="$classNode__Actuator.html#aba4308a373cbf9ba8c6f5cdde23b7502" title="Tick regular ligado al firmware Arduino loop." alt="" coords="105,55,276,80"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="311,69,276,69,276,64,311,64"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="346,84,248,107,247,101,345,79"/>
+<area shape="rect" id="Node000007" href="$classNode__Sensor.html#a4ef0a51ec48c9f9de1cea5167672e707" title="Tarea a correr ininterrumpidamente en el loop() de Arduino." alt="" coords="111,5,271,31"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="342,53,250,33,252,28,343,48"/>
+<area shape="rect" id="Node000004" href="$main__node__actuador_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,55,56,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="91,70,56,70,56,65,91,65"/>
+<area shape="rect" id="Node000006" href="$main__gateway_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,104,56,129"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="90,119,57,119,57,114,90,114"/>
+<area shape="rect" id="Node000008" href="$main__node__sensor_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="97,21,56,21,56,15,97,15"/>
+</map>

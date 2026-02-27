@@ -1,0 +1,14 @@
+<map id="include/core/SensorManager.h" name="include/core/SensorManager.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="118,5,335,31"/>
+<area shape="rect" id="Node000002" href="$ISensor_8h.html" title="Interfaz para Sensores Modulares." alt="" coords="43,79,189,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="210,33,147,73,144,69,207,28"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="190,152,253,177"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="229,31,225,138,220,138,224,31"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="264,79,341,104"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="241,29,282,67,278,71,237,33"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,152,64,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="105,106,60,145,56,141,101,102"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="134,102,194,142,192,147,131,106"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="88,152,155,177"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="120,104,122,138,117,139,114,105"/>
+</map>

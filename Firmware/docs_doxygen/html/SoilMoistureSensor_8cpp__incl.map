@@ -1,0 +1,18 @@
+<map id="src/hardware/sensors/SoilMoistureSensor.cpp" name="src/hardware/sensors/SoilMoistureSensor.cpp">
+<area shape="rect" id="Node000001" title="Implementación del sensor capacitivo de humedad de suelo." alt="" coords="258,5,435,45"/>
+<area shape="rect" id="Node000002" href="$SoilMoistureSensor_8h.html" title=" " alt="" coords="58,93,281,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="309,48,222,90,219,85,307,43"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="305,101,389,126"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="349,46,349,87,344,87,344,46"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="413,101,499,126"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="373,44,432,90,428,94,369,48"/>
+<area shape="rect" id="Node000003" href="$ISensor_8h.html" title="Interfaz para Sensores Modulares." alt="" coords="41,181,188,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="158,135,133,172,128,168,154,132"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="187,255,253,280"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="182,132,203,180,218,240,213,242,197,182,177,135"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,255,64,280"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="104,209,60,248,56,244,100,205"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="89,255,151,280"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="118,207,121,241,115,241,113,207"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="133,204,193,245,190,249,130,209"/>
+</map>

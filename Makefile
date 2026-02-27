@@ -18,7 +18,7 @@
         rpi-up rpi-build rpi-down rpi-logs rpi-shell rpi-status \
         seed logs logs-api logs-db logs-redis logs-frontend \
         clean clean-all status ps pull \
-        tunnel-staging api-key
+        tunnel-staging api-key test-all
 
 RPI_COMPOSE = docker compose -f docker-compose.rpi.yml --env-file .env.rpi
 
@@ -45,6 +45,10 @@ help:
 	@echo "  staging-seed     Puebla la DB de staging con datos de prueba"
 	@echo "  staging-logs     Sigue los logs de staging"
 	@echo "  staging-restart  Reinicia staging sin borrar volúmenes"
+	@echo ""
+	@echo "  TESTING"
+	@echo "  -----------------------------------------------"
+	@echo "  test-all         Ejecuta las 4 suites de tests (Firmware, Backend, Frontend, Raspberry)"
 	@echo ""
 	@echo "  UTILIDADES"
 	@echo "  -----------------------------------------------"
@@ -237,3 +241,25 @@ rpi-status:
 	@echo ""
 	@echo "Variables activas:"
 	@docker exec demeter-gateway env 2>/dev/null | grep DEMETER_ | sort || echo "  (contenedor no arrancado)"
+
+# ─── TESTING UNIVERAL ─────────────────────────────────────────────────────────
+test-all:
+	@echo "======================================================"
+	@echo " Ejecutando Suite Universal de Tests DEMETER "
+	@echo "======================================================"
+	@echo ""
+	@echo "[1/4] Firmware C++ (PlatformIO)"
+	cd Firmware && pio test -e native
+	@echo ""
+	@echo "[2/4] Backend (pytest)"
+	cd Software/Servidor/Backend && pytest tests/
+	@echo ""
+	@echo "[3/4] Frontend (Vitest)"
+	cd Software/Servidor/Frontend/Demeter-React && npm run test -- --run
+	@echo ""
+	@echo "[4/4] Raspberry Gateway (pytest)"
+	cd Software/Raspberry && PYTHONPATH=src:../Common pytest tests/
+	@echo ""
+	@echo "======================================================"
+	@echo " Todos los tests han pasado exitosamente "
+	@echo "======================================================"

@@ -12,23 +12,29 @@
 
 namespace Demeter {
 
-    // System States (Moved from SystemManager.h)
+    /**
+     * @brief Estados del Ciclo de Vida del Nodo.
+     * Representan las fases o estados operacionales de un dispositivo cliente.
+     */
     enum class SystemState {
-        BOOT,
-        HANDSHAKE_SEND_SYN,
-        HANDSHAKE_WAIT_SYN_ACK,
-        HANDSHAKE_SEND_ACK,
-        IDLE,
-        RUNNING,
-        ERROR
+        BOOT,                   ///< Secuencia de inicialización tras HW Reset.
+        HANDSHAKE_SEND_SYN,     ///< Solicitud inicial de emparejamiento con Gateway.
+        HANDSHAKE_WAIT_SYN_ACK, ///< Bloqueo en espera del Acuse de Recibo Central.
+        HANDSHAKE_SEND_ACK,     ///< Establecimiento de vínculo exitoso.
+        IDLE,                   ///< Esperando evento de Timer o Excepción.
+        RUNNING,                ///< Captura, empaque o procesamiento activo.
+        ERROR                   ///< Estado de caída, posiblemente reiniciado por Watchdog.
     };
 
-    // Node Roles
+    /**
+     * @brief Rol de Despliegue Lógico.
+     * Define qué conjunto de características lógicas se orquestarán.
+     */
     enum class NodeRole {
-        SENSOR,
-        ACTUATOR,
-        GATEWAY,
-        HYBRID
+        SENSOR,   ///< Solo recolecta y envía reportes. Típicamente a batería.
+        ACTUATOR, ///< Responde a comandos (Relé/PWM) y devuelve confirmaciones.
+        GATEWAY,  ///< Actúa como sumidero (Sink) de mensajes y conversor a WiFi/Backend.
+        HYBRID    ///< Mixto actuador y sensor, típicamente enchufado a corriente.
     };
 
     /**
@@ -53,13 +59,21 @@ namespace Demeter {
     };
 
     /**
-     * @brief Internal representation of a SET_GPIO command.
-     * Used to decouple the byte-stream from the logic handler.
+     * @brief Configuración digital (ON/OFF) a aplicar sobre una salida de GPIO.
+     * 
+     * Representación lógica interna (aislada del CBOR) que el orquestador
+     * usará para demandar un cambio al Controlador Físico de Pines.
+     * 
+     * @par Ejemplo de uso:
+     * @code
+     * SetGpioCmd cmd = {4, true, 0}; // Encender Pin 4
+     * gpioCtrl.handleCommand(cmd);
+     * @endcode
      */
     struct SetGpioCmd {
-        uint8_t pin;    ///< Target GPIO Pin Number.
-        bool value;     ///< Desired State (true=HIGH, false=LOW).
-        uint8_t flags;  ///< Optional flags (e.g. force, duration).
+        uint8_t pin;    ///< Número de Pin GPIO Hardware objetivo (D4, D5, etc).
+        bool value;     ///< Estado digital: true=HIGH, false=LOW.
+        uint8_t flags;  ///< Máscara de modificación. Ej. Ignorar safety bounds.
     };
 
     /**
@@ -157,12 +171,16 @@ namespace Demeter {
     using RouteAddCallback = std::function<void(const RouteAddCmd&)>;
     using NackCallback = std::function<void(const NackData&)>;
 
-    // Session Context for Handshake (ACK Payload)
+    /**
+     * @brief Sesión o Contexto a nivel Transaccional de aplicación.
+     * Útil cuando se necesita enrutar acuses de recibo lógicos 
+     * diferenciados (ej. ACK de comando manual vs. ACK de registro automático).
+     */
     enum class SessionContext : uint8_t {
-        GENERAL = 0x00,
-        SENSOR_REPORT = 0x01,
-        COMMAND = 0x02,
-        CRITICAL_ALERT = 0x03
+        GENERAL        = 0x00, ///< Uso ordinario, sin contexto especial priorizado.
+        SENSOR_REPORT  = 0x01, ///< ACKs o seguimientos para envíos periódicos de telemetría.
+        COMMAND        = 0x02, ///< Respuestas ligadas a comandos manuales ordenados.
+        CRITICAL_ALERT = 0x03  ///< Respuesta de un fallo o lectura con severidad alta.
     };
 
 }

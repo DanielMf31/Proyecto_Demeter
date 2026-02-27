@@ -1,0 +1,9 @@
+<map id="ProtocolEngine::sendSetGpio" name="ProtocolEngine::sendSetGpio">
+<area shape="rect" id="Node000001" title="Send GPIO Control Command to set a pin state." alt="" coords="611,5,820,31"/>
+<area shape="rect" id="Node000002" href="$classSystemManager.html#a17a0b2c9c8665372de26426a8bdecbba" title=" " alt="" coords="328,5,563,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="597,21,563,21,563,15,597,15"/>
+<area shape="rect" id="Node000003" href="$main__gateway_8cpp.html#a2feb8d2d3734b534ca4a558b763dd468" title="Procesa de forma interactiva una cadena recibida por Serial (UART)." alt="" coords="104,5,280,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="314,21,280,21,280,15,314,15"/>
+<area shape="rect" id="Node000004" href="$main__gateway_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,5,56,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="90,21,57,21,57,15,90,15"/>
+</map>

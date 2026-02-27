@@ -1,0 +1,13 @@
+<map id="ProtocolEngine::update" name="ProtocolEngine::update">
+<area shape="rect" id="Node000001" title="Bucle Principal del Parsing (Fase Lógica)." alt="" coords="5,55,177,80"/>
+<area shape="rect" id="Node000002" href="$classIComms.html#ac3c07488a81ee960491c0dd2c7dadc7b" title="Comprueba subyacente si hay datos pendientes de consumir en el buffer RX." alt="" coords="255,5,399,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,52,252,31,253,36,153,57"/>
+<area shape="rect" id="Node000003" href="$classProtocolEngine.html#a7dc819e99163664a429796ff69d3188d" title="Lógica profunda de ingesta de Streams de bytes sobre el protocolo. Trocea el frame validando el sincr..." alt="" coords="225,55,429,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="178,65,212,65,212,70,178,70"/>
+<area shape="rect" id="Node000006" href="$classIComms.html#a74d93ccb65cc02fda609dfa2bf0d895e" title="Extrae todos los bytes disponibles del buffer RX del hardware." alt="" coords="271,104,384,129"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="153,77,258,100,257,105,152,83"/>
+<area shape="rect" id="Node000004" href="$classProtocolEngine.html#ad93203ceed2aada77a73556411fd8043" title="Calculates a simple Modular Sum CRC (Mod 256)." alt="" coords="477,31,691,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="429,55,463,52,464,57,430,60"/>
+<area shape="rect" id="Node000005" href="$classIComms.html#ad776ff948007fd56d75719d5a6704e30" title="Transmite un tren de bytes crudos a través del medio." alt="" coords="527,80,641,105"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="430,75,513,83,513,88,429,80"/>
+</map>
