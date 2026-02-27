@@ -5,12 +5,22 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test-cpp:
-    name: Test Firmware (C++)
+  test-all:
+    name: Universal Test Suite
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
       - name: Cache pip
         uses: actions/cache@v3
         with:
@@ -22,49 +32,30 @@ jobs:
         with:
           path: ~/.platformio
           key: ${{ runner.os }}-platformio-${{ hashFiles('**/platformio.ini') }}
-      
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
 
       - name: Install PlatformIO
         run: |
           python -m pip install --upgrade pip
           pip install platformio
 
-      - name: Run PlatformIO Native Tests
-        run: |
-          cd C++
-          pio test -e native
-
-  test-python:
-    name: Test Backend & GUI (Python)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-          cache: 'pip'
-
       - name: Install Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-tk tk-dev xvfb
-          pip install -r Python/requirements.txt
-          pip install pytest pytest-asyncio
+          # Python environment dependencies (Backend & Raspberry)
+          python -m pip install --upgrade pip
+          pip install -r Software/Servidor/Backend/requirements.txt
+          pip install -r Software/Raspberry/requirements.txt
+          pip install pytest pytest-asyncio httpx
 
-      - name: Run Pytest
-        run: |
-          export PYTHONPATH=$PYTHONPATH:$(pwd)/Python/src
-          xvfb-run -a pytest Python/tests
+          # Frontend Node environment
+          cd Software/Servidor/Frontend/Demeter-React
+          npm install
+
+      - name: Run All Tests (Makefile)
+        run: make test-all
 
   build-and-push:
     name: Build Docker Image
-    needs: [test-cpp, test-python]
+    needs: [test-all]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -76,19 +67,15 @@ jobs:
         include:
           - image: frontend
             context: .
-            dockerfile: ./docker/frontend/Dockerfile
+            dockerfile: Software/Servidor/docker/frontend/Dockerfile
             platforms: linux/amd64
           - image: backend
             context: .
-            dockerfile: ./docker/backend/Dockerfile
+            dockerfile: Software/Servidor/docker/backend/Dockerfile
             platforms: linux/amd64
-          - image: pi-core
-            context: ./Python
-            dockerfile: ./docker/core/Dockerfile
-            platforms: linux/amd64,linux/arm64
-          - image: pi-ws
-            context: ./Python
-            dockerfile: ./docker/ws/Dockerfile
+          - image: raspberry
+            context: .
+            dockerfile: Software/Raspberry/Dockerfile
             platforms: linux/amd64,linux/arm64
 
     steps:
@@ -118,6 +105,7 @@ jobs:
             type=sha
             type=raw,value=latest
             type=semver,pattern={{version}}
+            type=raw,value=0.3
 
       - name: Build and push
         uses: docker/build-push-action@v5
