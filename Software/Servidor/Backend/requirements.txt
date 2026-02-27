@@ -12,3 +12,4 @@ asyncpg
 httpx
 pytest
 pytest-asyncio
+python-multipart
