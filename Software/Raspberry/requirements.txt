@@ -1,0 +1,22 @@
+# --- Core Dependencies ---
+pydantic>=2.0
+pydantic-settings
+python-dotenv
+pyserial>=3.5
+
+# --- Testing ---
+pytest>=7.4.3
+pytest-mock
+
+# --- Async Core (Demeter V2) ---
+textual
+pyserial-asyncio
+aiosqlite
+numpy
+fastapi
+uvicorn
+websockets
+httpx
+sqlalchemy
+asyncpg
+redis
