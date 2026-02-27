@@ -1,0 +1,22 @@
+/* ═══════════════════════════════════════════════════════════════
+   base.css — Reset & Base Styles
+   ═══════════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    height: 100%;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.6;
+    transition: background var(--transition), color var(--transition);
+}

@@ -1,0 +1,7 @@
+<map id="SensorManager" name="SensorManager">
+<area shape="rect" id="Node000001" title="Agrupa y orquesta una colección heterogénea de sensores de Hardware." alt="" coords="13,336,153,481"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,193,160,273"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,273,85,320,80,320,80,273"/>
+<area shape="rect" id="Node000003" href="$classDemeter_1_1ISensor.html" title="Clase Base Abstracta (Interfaz) para todo hardware de sensado." alt="" coords="19,5,146,131"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="85,131,85,177,80,177,80,131"/>
+</map>

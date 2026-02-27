@@ -1,0 +1,15 @@
+<map id="SystemManager::handleRouteAdd" name="SystemManager::handleRouteAdd">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,42,248,67"/>
+<area shape="rect" id="Node000002" href="$classProtocolEngine.html#a87204b58e35e3b9f866e36f89a826d68" title="Register a static route in the underlying comms strategy." alt="" coords="299,5,476,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="239,39,285,34,285,39,240,45"/>
+<area shape="rect" id="Node000004" href="$classProtocolEngine.html#a953a1d439428fedd433cf719daaef05a" title="Send ACK (Acknowledge) response, optionally with Context." alt="" coords="296,70,479,95"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="245,65,283,69,282,74,245,70"/>
+<area shape="rect" id="Node000003" href="$classIComms.html#a48c8483a8218a2996c895287aa18ee02" title="Vincula lógicamente un Nodo Demeter a una dirección MAC física. Únicamente utilizable en implementaci..." alt="" coords="540,13,712,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="476,23,526,23,526,28,476,28"/>
+<area shape="rect" id="Node000005" href="$classProtocolEngine.html#a756248b6415af686ad17659d13a86273" title="Desciende estamento lógico a una Trama Binaria y la escupe por COMMS. Envuelve el payload crudo antep..." alt="" coords="527,70,725,95"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="479,80,513,80,513,85,479,85"/>
+<area shape="rect" id="Node000006" href="$classProtocolEngine.html#ad93203ceed2aada77a73556411fd8043" title="Calculates a simple Modular Sum CRC (Mod 256)." alt="" coords="773,45,987,70"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="725,70,759,67,760,72,726,75"/>
+<area shape="rect" id="Node000007" href="$classIComms.html#ad776ff948007fd56d75719d5a6704e30" title="Transmite un tren de bytes crudos a través del medio." alt="" coords="823,94,937,119"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="726,89,809,97,809,103,725,95"/>
+</map>

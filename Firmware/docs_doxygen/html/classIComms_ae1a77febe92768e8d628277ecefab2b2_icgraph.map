@@ -1,0 +1,5 @@
+<map id="IComms::begin" name="IComms::begin">
+<area shape="rect" id="Node000001" title="Inicializa la interfaz hardware o protocolo de radio subyacente. Ej. Serial.begin(...." alt="" coords="232,5,352,31"/>
+<area shape="rect" id="Node000002" href="$classGatewayStrategy.html#a1f33bc75100e9a34d029a52e0952a18c" title="Detona el arranque sucesivo de uart&#45;&gt;begin() y espNow&#45;&gt;begin()." alt="" coords="5,5,184,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="218,21,184,21,184,15,218,15"/>
+</map>

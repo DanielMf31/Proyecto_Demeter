@@ -1,0 +1,9 @@
+<map id="SystemManager::collectAndPublishSensorData" name="SystemManager::collectAndPublishSensorData">
+<area shape="rect" id="Node000001" title="Collects data from SensorManager and publishes it." alt="" coords="367,23,571,63"/>
+<area shape="rect" id="Node000002" href="$classNode__Sensor.html#a3483120ea2b929d000b24340b050410b" title="Tarea Ticking que itera los sensores, recaba la info y se la envía al Protocol Engine." alt="" coords="104,5,319,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="352,35,319,31,319,26,353,29"/>
+<area shape="rect" id="Node000003" href="$classNode__Sensor.html#a4ef0a51ec48c9f9de1cea5167672e707" title="Tarea a correr ininterrumpidamente en el loop() de Arduino." alt="" coords="131,55,291,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="353,57,292,63,291,57,353,51"/>
+<area shape="rect" id="Node000004" href="$main__node__sensor_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,55,56,80"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="117,70,56,70,56,65,117,65"/>
+</map>

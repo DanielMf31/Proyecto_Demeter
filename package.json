@@ -1,0 +1,15 @@
+{
+  "name": "proyecto-demeter-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "gen:types": "python3 scripts/generate_types.py",
+    "dev": "esbuild Software/Servidor/Frontend/Web/src/main.ts --bundle --outfile=Software/Servidor/Frontend/Web/dist/bundle.js --sourcemap --watch",
+    "build": "esbuild Software/Servidor/Frontend/Web/src/main.ts --bundle --minify --outfile=Software/Servidor/Frontend/Web/dist/bundle.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.3"
+  }
+}

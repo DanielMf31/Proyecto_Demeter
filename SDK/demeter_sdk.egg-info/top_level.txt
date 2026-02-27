@@ -1,0 +1,5 @@
+demeter_sdk
+dist
+docs
+examples
+tests

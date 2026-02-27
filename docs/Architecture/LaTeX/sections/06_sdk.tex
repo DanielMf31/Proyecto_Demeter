@@ -1,0 +1,552 @@
+% ============================================================
+% SECCIÓN 6: SDK Científico de Python — Demeter SDK
+% ============================================================
+\chapter{SDK Científico de Python — \texttt{demeter\_sdk}}
+\label{sec:sdk}
+
+% ─────────────────────────────────────────────────────────────
+\section{Propósito y Filosofía}
+
+El \textbf{Demeter SDK} es la capa de acceso programático al sistema para investigadores y
+analistas. Nacido de la necesidad de combinar los datos de telemetría del invernadero con
+algoritmos agronómicos reconocidos, el SDK resuelve el ciclo completo de análisis en
+\textit{una sola llamada}:
+
+\begin{itemize}[leftmargin=*, label=--]
+    \item Conectarse a la API del servidor con autenticación por clave.
+    \item Descargar la telemetría de un experimento con caché automática.
+    \item Limpiar y normalizar los datos (ETL).
+    \item Calcular indicadores agronómicos derivados (VPD, GDD, ET$_0$, …).
+    \item Exportar los resultados a CSV o Excel estructurado.
+    \item Generar figuras de publicación científica con un único comando.
+\end{itemize}
+
+\begin{designnote}
+\textbf{Filosofía de uso}: el investigador no necesita conocer la arquitectura interna del
+sistema, ni Redis, ni WebSocket, ni la API directamente. Basta con instanciar
+\texttt{DemeterClient}, pasar el ID del experimento y el SDK hace el resto.
+El objetivo es que un científico con conocimientos básicos de Python pueda obtener
+un informe completo en menos de diez líneas de código.
+\end{designnote}
+
+% ─────────────────────────────────────────────────────────────
+\section{Arquitectura Modular}
+
+El SDK está organizado en seis módulos con responsabilidades estrictamente separadas.
+La clase \texttt{DemeterClient} actúa como orquestador público que los une:
+
+\begin{table}[H]
+    \centering
+    \caption{Módulos del Demeter SDK}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Módulo}           & \textbf{Rol}              & \textbf{Clase / Función principal} \\
+        \midrule
+        \texttt{client.py}        & Orquestador               & \texttt{DemeterClient} \\
+        \texttt{fetcher.py}       & Obtención de datos        & \texttt{fetch\_experiment()}, \texttt{fetch\_plant()} \\
+        \texttt{transform.py}     & ETL (limpieza)            & \texttt{pipeline()}, \texttt{resample()} \\
+        \texttt{science.py}       & Cálculos agronómicos      & \texttt{enrich()}, funciones individuales \\
+        \texttt{viz.py}           & Visualización científica  & \texttt{plot\_timeseries()}, \texttt{plot\_vpd()}, … \\
+        \texttt{export.py}        & Exportación de resultados & \texttt{to\_csv()}, \texttt{to\_excel()} \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:sdk_modules}
+\end{table}
+
+% ─────────────────────────────────────────────────────────────
+\section{Instalación y Configuración}
+
+El SDK se instala como un paquete Python local desde la carpeta del proyecto:
+
+\begin{lstlisting}[style=trama, caption={Instalación del SDK en modo editable}]
+pip install -e ./SDK/
+\end{lstlisting}
+
+La autenticación se realiza mediante una \textbf{clave API} (\texttt{X-API-Key}) generada
+por el sistema. Puede pasarse directamente al constructor o mediante la variable de entorno
+\texttt{DEMETER\_API\_KEY}:
+
+\begin{lstlisting}[style=trama, caption={Inicialización del cliente}]
+from demeter_sdk import DemeterClient
+
+# Opción 1: API key explícita
+client = DemeterClient(
+    api_key   = "dk_live_XXXXXXXXXXXX",
+    base_url  = "https://demeter.tuservidor.com",
+    cache_ttl = 3600,    # Caché de 1 hora
+)
+
+# Opción 2: variable de entorno DEMETER_API_KEY
+client = DemeterClient(base_url="https://demeter.tuservidor.com")
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\section{Obtención de Datos: Módulo Fetcher}
+
+El fetcher implementa una caché transparente en formato \textbf{Apache Parquet} para
+evitar descargar los mismos datos repetidamente durante análisis iterativos. El comportamiento es:
+
+\begin{itemize}[leftmargin=*, label=--]
+    \item Si existe un fichero Parquet en \texttt{\~{}/.demeter\_cache/} con antigüedad
+          inferior al TTL configurado (defecto: 1~h), se devuelve sin llamar a la API.
+    \item Si el fichero es más antiguo o no existe, se descarga desde la API y se guarda.
+    \item \texttt{force\_refresh=True} omite la caché siempre.
+\end{itemize}
+
+\begin{lstlisting}[style=trama, caption={Descarga de datos con caché automática}]
+# Datos crudos de un experimento (últimos 30 días)
+raw = client.get_raw_data(experimento_id=1, dias=30)
+
+# Datos crudos de una planta individual (sirve el endpoint Redis)
+raw_planta = client.get_plant_data(plant_id=7)
+
+# Forzar recarga desde la API
+raw_fresh = client.get_raw_data(experimento_id=1, force_refresh=True)
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\section{Pipeline ETL: Módulo Transform}
+
+Antes de calcular cualquier indicador, los datos crudos pasan por un pipeline de limpieza
+en cuatro etapas:
+
+\begin{table}[H]
+    \centering
+    \caption{Etapas del pipeline ETL}
+    \begin{tabular}{clp{8cm}}
+        \toprule
+        \textbf{Paso} & \textbf{Función}   & \textbf{Qué hace} \\
+        \midrule
+        1 & \texttt{to\_dataframe()} & Convierte los JSON crudos a un DataFrame tipado. Parsea timestamps ISO-8601, coerce numérico de temperatura/humedad, ordena cronológicamente. \\
+        2 & \texttt{clean()}         & Elimina filas duplicadas exactas y mediciones con ambos sensores a NaN (irrecuperables). \\
+        3 & \texttt{fill\_gaps()}    & Interpolación lineal de huecos puntuales de sensor (desconexiones breves). Soporta también método \texttt{'cubic'} o \texttt{'time'}. \\
+        4 & \texttt{resample()}      & Opcional. Agrega la serie temporal a menor frecuencia (e.g. \texttt{'1h'}, \texttt{'1D'}) por nodo. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{lstlisting}[style=trama, caption={Uso del pipeline ETL}]
+# Pipeline completo con resampleado horario
+df = client.get_clean_data(
+    experimento_id=1,
+    dias=30,
+    resample_rule="1h",   # Opcional
+)
+# Resultado: DataFrame con columnas [timestamp, temperature, humidity, node_id]
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\section{Cálculos Agronómicos: Módulo Science}
+
+El módulo \texttt{science} implementa \textbf{todas las fórmulas] agronómicas} de forma
+vectorizada sobre NumPy/Pandas, sin bucles Python. Todas las funciones admiten arrays o
+\texttt{pd.Series} y devuelven \texttt{np.ndarray}.
+
+\subsection{Termodinámica del Aire Húmedo}
+
+\subsubsection{Presión de Vapor de Saturación ($e_s$)}
+
+Calculada mediante la fórmula de \textbf{Magnus-Tetens}, el estándar de la meteorología
+agrícola para el rango de temperaturas habitual en invernadero ($-10$ a $50$\,°C):
+
+\[
+e_s = 0{,}6108 \cdot e^{\displaystyle\frac{17{,}27 \cdot T}{T + 237{,}3}}
+\]
+
+\textit{Parámetros:} $T$ = temperatura de bulbo seco (°C). \textit{Resultado:} kPa.
+
+\subsubsection{Déficit de Presión de Vapor (VPD)}
+
+El VPD es el indicador más útil para el manejo del invernadero. Mide la diferencia entre
+la cantidad de agua que el aire \textit{podría} contener ($e_s$) y la que \textit{realmente}
+contiene ($e_a = e_s \cdot HR/100$):
+
+\[
+VPD = \max\left(0,\; e_s - e_a\right) \qquad \text{(kPa)}
+\]
+
+La tabla siguiente define las zonas de riesgo para cultivos de invernadero típicos:
+
+\begin{table}[H]
+    \centering
+    \caption{Zonas de riesgo del VPD para cultivos de invernadero}
+    \begin{tabular}{clp{6cm}}
+        \toprule
+        \textbf{VPD (kPa)} & \textbf{Zona}          & \textbf{Implicación agronómica} \\
+        \midrule
+        $< 0{,}4$           & Riesgo fúngico         & Exceso de humedad; condensación en hoja probable. \\
+        $0{,}4 - 1{,}0$     & Óptimo                 & Transpiración activa, absorción de nutrientes eficiente. \\
+        $1{,}0 - 1{,}5$     & Estrés moderado        & Inicio de cierre estomático; reducir temperatura. \\
+        $> 1{,}5$           & Estrés severo          & Cierre estomático; parar riego por goteo. \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:vpd_zones}
+\end{table}
+
+\subsubsection{Punto de Rocío ($T_d$)}
+
+Temperatura a la que el aire se satura si se enfría isohúmamente. Cuando la temperatura
+de una superficie (e.g. hoja) cae por debajo de $T_d$, hay condensación. Se calcula
+invirtiendo la fórmula de Magnus:
+
+\[
+T_d = \frac{237{,}3 \cdot \ln(e_a / 0{,}6108)}{17{,}27 - \ln(e_a / 0{,}6108)}
+\qquad \text{(°C)}
+\]
+
+\subsubsection{Temperatura de Bulbo Húmedo ($T_w$) — Stull 2011}
+
+Temperatura límite del enfriamiento por evaporación. Usada en sistemas de
+refrigeración evaporativa de invernadero:
+
+\[
+T_w = T \cdot \arctan\!\left(0{,}151977 \cdot \sqrt{HR + 8{,}313659}\right)
+      + \arctan(T+HR) - \arctan(HR-1{,}676331)
+      + 0{,}00391838 \cdot HR^{1{,}5} \cdot \arctan(0{,}023101 \cdot HR)
+      - 4{,}686035
+\]
+
+\subsubsection{Humedad Absoluta}
+
+Masa de vapor de agua por metro cúbico de aire, independiente de la presión:
+\[
+AH = \frac{2165 \cdot e_a}{T + 273{,}15}
+\qquad \text{(g/m}^3\text{)}
+\]
+
+\subsubsection{Entalpía Específica del Aire Húmedo — ASHRAE}
+
+Energía total (térmica + latente) del aire húmedo por kilogramo de aire seco.
+Clave para el dimensionado de sistemas de climatización y refrigeración:
+
+\[
+r = \frac{0{,}622 \cdot e_a}{P - e_a} \qquad \text{(kg agua/kg aire seco)}
+\]
+\[
+h = 1{,}006 \cdot T + r \cdot (2501 + 1{,}86 \cdot T)
+\qquad \text{(kJ/kg aire seco)}
+\]
+
+\textit{Parámetros:} $P$ = presión atmosférica (kPa, defecto 101,3~kPa = nivel del mar).
+
+\subsubsection{Índice de Calor (Rothfusz, NWS)}
+
+Temperatura \textit{percibida} por el ser humano (y por el cultivo) combinando temperatura
+y humedad. Solo significativo para $T \geq 27$\,°C:
+
+\begin{align*}
+HI = &\;-8{,}785 + 1{,}611\,T + 2{,}339\,HR - 0{,}1461\,T\cdot HR \\
+     &\; -0{,}01231\,T^2 - 0{,}01642\,HR^2 + 0{,}002212\,T^2\cdot HR \\
+     &\; +0{,}000726\,T\cdot HR^2 - 0{,}000004\,T^2\cdot HR^2
+     \qquad\text{(°C)}
+\end{align*}
+
+\subsubsection{Riesgo de Rocío en Hoja (LSD)}
+
+Índice que evalúa si la superficie de la hoja (modelada a $T_{leaf} = T_{air} - 2$\,°C)
+está por debajo de la temperatura de punto de rocío. Un valor negativo indica
+condensación activa y riesgo de enfermedades fúngicas:
+
+\[
+LSD = e_s(T_{leaf}) - e_a(T_{air}, HR)
+\qquad \text{(kPa)} \quad [\, LSD < 0 \Rightarrow \text{condensación probable}]
+\]
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Fenología y Tiempo}
+
+\subsubsection{Grados-Día de Crecimiento (GDD)}
+
+El GDD es la unidad de acumulación de calor vegetal; establece el ritmo de desarrollo
+fenológico del cultivo. Se calcula como:
+
+\[
+GDD = \max\!\left(0,\; \frac{T_{max} + T_{min}}{2} - T_{base}\right)
+\qquad \text{(°C·día)}
+\]
+
+\textit{Parámetros:} $T_{max}$ y $T_{min}$ son las temperaturas diarias extremas;
+$T_{base}$ es la temperatura umbral de crecimiento (10\,°C por defecto para la mayoría
+de hortícolas). La suma acumulada de GDD predice el estadio fenológico.
+
+\subsubsection{Horas de Frío (\textit{Chill Hours})}
+
+Recuento de horas en las que la temperatura se encuentra en el rango $(0, 7{,}2]$\,°C.
+Indicador clave para predecir la ruptura de dormancia en frutales de hoja caduca.
+
+\subsubsection{Evapotranspiración de Referencia — Hargreaves-Samani ($ET_0$)}
+
+Estima la demanda hídrica de referencia usando solo datos de temperatura, sin
+necesidad de piranómetros ni sensores de viento:
+
+\[
+ET_0 = 0{,}0023 \cdot R_a \cdot (T_{mean} + 17{,}8) \cdot \sqrt{T_{max} - T_{min}}
+\qquad \text{(mm/día)}
+\]
+
+\textit{Parámetros:} $R_a$ = radiación extraterrestre en equivalente de mm/día
+(defecto 15~mm/día, apropiado para latitud mediterránea media).
+
+\subsubsection{Días Tras la Siembra (DAP)}
+
+Número de días enteros transcurridos desde la fecha de siembra:
+
+\[
+DAP = \left\lfloor t_{sample} - t_{siembra} \right\rfloor \quad \text{(días)}
+\]
+
+Permite contextualizar cada medición en términos del ciclo de vida del cultivo.
+
+% ─────────────────────────────────────────────────────────────
+\subsection{Estadística y Detección de Anomalías}
+
+\subsubsection{Z-Score}
+
+Normalización lineal de una serie temporal. Detecta cuántas desviaciones estándar
+se aleja cada muestra de la media del periodo:
+
+\[
+z = \frac{x - \mu}{\sigma}
+\]
+
+El SDK aplica Z-Score de forma independiente a temperatura y humedad.
+Se considera outlier cualquier muestra con $|z| > 3$ (umbral configurable).
+
+\subsubsection{Índice de Riesgo Wallin (1962) — Tizón Tardío}
+
+Modelo clásico de epidemiología vegetal para estimación del riesgo de \textit{Phytophthora
+infestans} (mildiu/tizón tardío). Evalúa un periodo horario y devuelve un nivel de riesgo:
+
+\begin{table}[H]
+    \centering
+    \caption{Lógica del índice de riesgo Wallin}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Condición} & \textbf{Nivel} & \textbf{Acción recomendada} \\
+        \midrule
+        Horas con HR $\geq 90$\% $< 10$            & 0 — Sin riesgo     & Sin acción. \\
+        Horas $\geq 10$ y $10$°C $\leq T \leq 27$°C & 1 — Riesgo moderado & Revisión preventiva. \\
+        Horas $\geq 20$                              & 2 — Riesgo alto    & Tratamiento fungicida. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsubsection{Media Móvil 24h}
+
+Suavizado de la serie temporal por grupos de nodo, usando una ventana de
+24 muestras (equivalente a 24~h cuando los datos son horarios). Útil para
+eliminar el ruido de alta frecuencia y visualizar tendencias.
+
+% ─────────────────────────────────────────────────────────────
+\section{El Helper \texttt{enrich()}: Enriquecimiento en Una Llamada}
+
+La función \texttt{science.enrich()} aplica en un solo paso todos los cálculos
+sobre el DataFrame limpio y devuelve un nuevo DataFrame con las columnas derivadas:
+
+\begin{table}[H]
+    \centering
+    \caption{Columnas añadidas por \texttt{enrich()}}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Columna}         & \textbf{Unidad} & \textbf{Fórmula / Método} \\
+        \midrule
+        \texttt{vpd\_kpa}        & kPa             & Magnus-Tetens \\
+        \texttt{dew\_point\_c}   & °C              & Inversión Magnus \\
+        \texttt{wet\_bulb\_c}    & °C              & Stull 2011 \\
+        \texttt{abs\_humidity\_g\_m3} & g/m$^3$   & Ley del gas ideal \\
+        \texttt{enthalpy\_kj\_kg}& kJ/kg           & Definición ASHRAE \\
+        \texttt{heat\_index\_c}  & °C              & Rothfusz (NWS) \\
+        \texttt{lsd\_kpa}        & kPa             & Modelado hoja −2°C \\
+        \texttt{z\_score\_temp}  & adim.           & $(T - \mu)/\sigma$ \\
+        \texttt{z\_score\_hum}   & adim.           & $(HR - \mu)/\sigma$ \\
+        \texttt{temp\_ma\_24h}   & °C              & Media móvil 24 muestras \\
+        \texttt{hum\_ma\_24h}    & \%              & Media móvil 24 muestras \\
+        \texttt{is\_outlier}     & bool            & $|z_{temp}| > 3{,}0$ \\
+        \texttt{dap\_days}       & días            & Solo si \texttt{fecha\_siembra} provisto \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:enrich_columns}
+\end{table}
+
+\begin{lstlisting}[style=trama, caption={Pipeline completo con enriquecimiento}]
+# Datos limpios + todos los indicadores agronómicos
+df = client.get_enriched_data(
+    experimento_id = 1,
+    dias           = 30,
+    fecha_siembra  = "2025-09-01",   # Activa columna dap_days
+    resample_rule  = "1h",           # Opcional: resampleado horario
+)
+
+# Consultar el VPD medio de cada nodo
+print(df.groupby("node_id")["vpd_kpa"].mean())
+
+# Ver anomalías de temperatura
+outliers = df[df["is_outlier"]]
+print(f"{len(outliers)} lecturas anómalas detectadas")
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\section{Visualización Científica: Módulo Viz}
+
+Todos los gráficos están implementados con Matplotlib y Seaborn con estilo
+consistente y devuelven el objeto \texttt{Figure} para que el investigador pueda
+añadir anotaciones, cambiar el título o guardar con el DPI deseado.
+
+\begin{table}[H]
+    \centering
+    \caption{Funciones de visualización disponibles}
+    \begin{tabular}{llp{7cm}}
+        \toprule
+        \textbf{Función}          & \textbf{Tipo}          & \textbf{Descripción} \\
+        \midrule
+        \texttt{plot\_timeseries()} & Serie temporal         & Cualquier métrica frente al tiempo, coloreada por nodo, con media móvil superpuesta. \\
+        \texttt{plot\_vpd()}        & VPD con zonas          & VPD en el tiempo con bandas de color que marcan las 4 zonas de riesgo agronómico. \\
+        \texttt{plot\_boxplot()}    & Diagrama de cajas      & Distribución de cualquier métrica por nodo; ideal para comparar variabilidad entre plantas. \\
+        \texttt{plot\_heatmap()}    & Mapa de calor 2D       & Intensidad de la métrica en el tiempo (eje X) por nodo (eje Y); resampleado diario por defecto. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{lstlisting}[style=trama, caption={Generación de gráficos}]
+# Serie temporal del VPD con zonas de riesgo
+fig = client.plot.plot_vpd(df)
+fig.savefig("vpd_zonas.png", dpi=300, bbox_inches="tight")
+
+# Boxplot de temperatura por nodo
+fig2 = client.plot.plot_boxplot(df, metric="temperature")
+fig2.savefig("boxplot_temperatura.png", dpi=300)
+
+# Heatmap de humedad relativa (dia x nodo)
+fig3 = client.plot.plot_heatmap(df, metric="humidity", resample_rule="1D")
+fig3.savefig("heatmap_humidity.png", dpi=300)
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\section{Exportación Científica: Módulo Export}
+
+\subsection{CSV}
+
+El fichero CSV se escribe en codificación \textbf{UTF-8 con BOM} (\texttt{utf-8-sig})
+para asegurar la apertura correcta en Excel sin selección manual de codificación:
+
+\begin{lstlisting}[style=trama, caption={Exportación a CSV}]
+client.export.to_csv(df_enriched, "resultados/telemetria.csv")
+\end{lstlisting}
+
+\subsection{Excel Multi-hoja}
+
+El libro Excel generado tiene tres hojas estructuradas para la comunicación científica:
+
+\begin{table}[H]
+    \centering
+    \caption{Estructura del libro Excel generado}
+    \begin{tabular}{llp{7cm}}
+        \toprule
+        \textbf{Hoja}              & \textbf{Contenido} & \textbf{Utilidad} \\
+        \midrule
+        \texttt{Resumen}           & Media, mediana, desv. típica, mín., máx., P5, P95 de todas las métricas. & Vista rápida para el investigador principal y presentaciones. \\
+        \texttt{Datos\_Enriquecidos} & Todos los registros con todas las columnas derivadas (13+ columnas). & Dataset completo para análisis estadístico externo (R, SPSS). \\
+        \texttt{Datos\_Crudos}     & Solo temperatura y humedad originales (sin derivados). & Reproducibilidad: los datos tal y como llegaron del sensor. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{lstlisting}[style=trama, caption={Exportación a Excel estructurado}]
+client.export.to_excel(
+    df_enriched,
+    "resultados/informe.xlsx",
+    df_raw             = df_raw,
+    experiment_name    = "Ensayo Estrés Salino 2025",
+)
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\section{Suite Completa — Un Solo Comando}
+
+Para el flujo de análisis estándar de un experimento, el método \texttt{run\_full\_suite()}
+ejecuta automáticamente: descarga, ETL, enriquecimiento, exportación CSV + Excel y los
+cuatro tipos de gráfico, guardándolo todo en una estructura de carpetas organizada:
+
+\begin{lstlisting}[style=trama, caption={Análisis completo en una sola llamada}]
+ruta = client.run_full_suite(
+    experimento_id = 3,
+    dias           = 60,
+    output_dir     = "./resultados",
+    fecha_siembra  = "2025-10-01",
+    resample_rule  = "1h",
+)
+# Resultado:
+# resultados/Experimento_3/
+# ├── data/
+# │   ├── enriched_telemetry.csv
+# │   └── report.xlsx
+# └── plots/
+#     ├── temperature_timeseries.png
+#     ├── vpd_zones.png
+#     ├── temperature_boxplot.png
+#     └── heatmap_temperature.png
+print(f"Análisis guardado en: {ruta}")
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\section{Ejemplo de Sesión Completa con Jupyter}
+
+El siguiente extracto reproduciría una sesión típica de investigación en un Jupyter Notebook,
+desde la conexión hasta la interpretación de resultados:
+
+\begin{lstlisting}[style=trama, caption={Sesión completa en Jupyter Notebook}]
+from demeter_sdk import DemeterClient
+
+# 1. Conectar
+client = DemeterClient(api_key="dk_live_XXX",
+                       base_url="https://demeter.servidor.com")
+assert client.ping(), "Servidor no disponible"
+
+# 2. Obtener datos limpios y enriquecidos
+df = client.get_enriched_data(
+    experimento_id=2,
+    dias=30,
+    fecha_siembra="2025-09-15",
+    resample_rule="30min",
+)
+
+# 3. Consultas rápidas
+vpd_alto = df[df["vpd_kpa"] > 1.5]
+print(f"Horas con estrés severo: {len(vpd_alto)}")
+
+wallin = client.plot.plot_vpd(df)
+wallin.savefig("vpd.png", dpi=300)
+
+# 4. Calcular GDD acumulado del experimento
+from demeter_sdk.science import gdd
+df_diario = df.resample("1D", on="timestamp").agg(
+    T_max=("temperature", "max"),
+    T_min=("temperature", "min")
+).reset_index()
+df_diario["gdd"] = gdd(df_diario["T_max"], df_diario["T_min"])
+df_diario["gdd_acum"] = df_diario["gdd"].cumsum()
+print(df_diario[["timestamp", "gdd_acum"]].tail())
+
+# 5. Exportar
+client.export.to_excel(df, "informe_exp2.xlsx", experiment_name="Exp 2")
+\end{lstlisting}
+
+% ─────────────────────────────────────────────────────────────
+\section{Referencia Rápida de Parámetros}
+
+\begin{table}[H]
+    \centering
+    \caption{Parámetros principales del \texttt{DemeterClient}}
+    \begin{tabular}{llp{6.5cm}}
+        \toprule
+        \textbf{Parámetro}  & \textbf{Tipo}  & \textbf{Descripción} \\
+        \midrule
+        \texttt{api\_key}       & str    & Clave de acceso a la API (o via \texttt{DEMETER\_API\_KEY}). \\
+        \texttt{base\_url}      & str    & URL base del servidor (defecto: \texttt{localhost:8000}). \\
+        \texttt{cache\_dir}     & str    & Ruta de la caché Parquet (defecto: \texttt{\~{}/.demeter\_cache}). \\
+        \texttt{cache\_ttl}     & int    & Tiempo de vida en segundos de los ficheros Parquet (defecto: 3600). \\
+        \texttt{timeout}        & int    & Timeout por petición HTTP en segundos (defecto: 30). \\
+        \texttt{max\_retries}   & int    & Reintentos automáticos ante errores 5xx (defecto: 3). \\
+        \bottomrule
+    \end{tabular}
+\end{table}

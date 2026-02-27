@@ -1,0 +1,15 @@
+<map id="SystemManager::handleSynAckRecv" name="SystemManager::handleSynAckRecv">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,63,209,103"/>
+<area shape="rect" id="Node000002" href="$classDemeter_1_1SystemContext.html#af5e37e6b803d0e412475ba4db681527f" title=" " alt="" coords="257,5,444,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,60,251,46,252,51,193,65"/>
+<area shape="rect" id="Node000003" href="$classProtocolEngine.html#a953a1d439428fedd433cf719daaef05a" title="Send ACK (Acknowledge) response, optionally with Context." alt="" coords="259,70,442,95"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="209,80,246,80,246,85,209,85"/>
+<area shape="rect" id="Node000007" href="$classDemeter_1_1SystemContext.html#ae7c2e73ec3905e661f920286615d4537" title="Actualiza la máquina de estado principal de la aplicación." alt="" coords="257,120,444,160"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="193,100,252,114,251,119,192,105"/>
+<area shape="rect" id="Node000004" href="$classProtocolEngine.html#a756248b6415af686ad17659d13a86273" title="Desciende estamento lógico a una Trama Binaria y la escupe por COMMS. Envuelve el payload crudo antep..." alt="" coords="492,70,691,95"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="442,80,478,80,478,85,442,85"/>
+<area shape="rect" id="Node000005" href="$classProtocolEngine.html#ad93203ceed2aada77a73556411fd8043" title="Calculates a simple Modular Sum CRC (Mod 256)." alt="" coords="739,45,952,70"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="691,70,725,67,725,72,691,75"/>
+<area shape="rect" id="Node000006" href="$classIComms.html#ad776ff948007fd56d75719d5a6704e30" title="Transmite un tren de bytes crudos a través del medio." alt="" coords="788,94,903,119"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="691,89,775,97,774,103,691,95"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="GpioController::setPins" name="GpioController::setPins">
+<area shape="rect" id="Node000001" title="Configura la lista de pines gestionados." alt="" coords="5,5,176,31"/>
+<area shape="rect" id="Node000002" href="$PinConfig_8h.html#a550e793a11b6bbcf91de8422193c2351" title="Helper to check if a pin is protected." alt="" coords="224,5,339,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,15,210,15,210,21,176,21"/>
+</map>

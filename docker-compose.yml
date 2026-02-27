@@ -1,33 +1,109 @@
-services:
-  demeter-core:
-    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-danielmf31}/proyecto_demeter/pi-core:latest
-    build:
-      context: ./Python
-      dockerfile: ./docker/core/Dockerfile
-    container_name: demeter-core
-    privileged: true
-    volumes:
-      - ./Python/data:/app/data
-      - ./Python/logs:/app/logs
-    devices:
-      - "/dev/ttyS0:/dev/serial0"
-    environment:
-      - DEMETER_PORT=/dev/serial0
-      - DEMETER_LOG_FILE=/app/logs/demeter_service.log
-      - DEMETER_DB_NAME=/app/data/demeter_data.db
-    restart: always
-    ports:
-      - "8000:8000"
+# ==========================================
+# BASE DOCKER COMPOSE CONFIGURATION
+# ==========================================
+# This file defines the core services, networks, and volumes for the Demeter Platform.
+# It serves as the FOUNDATION for all environments (Dev, Staging, Prod).
+# CRITICAL: No `ports:` are exposed here for security. Services communicate via the internal `demeter-net` network.
 
-  demeter-ws:
-    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-danielmf31}/proyecto_demeter/pi-ws:latest
+services:
+  # 1. FRONTEND
+  frontend:
     build:
-      context: ./Python
-      dockerfile: ./docker/ws/Dockerfile
-    container_name: demeter-ws
-    depends_on:
-      - demeter-core
+      context: .
+      dockerfile: Software/Servidor/docker/frontend/Dockerfile
+    container_name: demeter-frontend
+    env_file:
+      - .env
+    networks:
+      - demeter-net
+
+  # 2. BACKEND API
+  api:
+    build:
+      context: .
+      dockerfile: Software/Servidor/docker/backend/Dockerfile
+    container_name: demeter-api
+    env_file:
+      - .env
+    volumes:
+      - shared_data:/app/shared
+      - export_data:/app/exports
     environment:
-      - DEMETER_WS_URL=ws://patata.monters.org/ws/pi
-      - DEMETER_CORE_URL=http://demeter-core:8000
-    restart: always
+      - REDIS_URL=redis://demeter-redis:6379/0
+      - RQ_REDIS_URL=redis://demeter-redis:6379/1
+      - DATABASE_URL=postgresql://postgres:postgres_local_pass@demeter-db:5432/demeter_db
+    depends_on:
+      - redis
+      - db
+    networks:
+      - demeter-net
+
+  math-worker:
+    build:
+      context: .
+      dockerfile: Software/Servidor/docker/backend/Dockerfile
+    container_name: demeter-math-worker
+    command: rq worker demeter_tasks --url redis://demeter-redis:6379/1
+    env_file:
+      - .env
+    volumes:
+      - shared_data:/app/shared
+      - export_data:/app/exports
+    environment:
+      - REDIS_URL=redis://demeter-redis:6379/0
+      - RQ_REDIS_URL=redis://demeter-redis:6379/1
+      - DATABASE_URL=postgresql://postgres:postgres_local_pass@demeter-db:5432/demeter_db
+    depends_on:
+      - redis
+      - db
+    networks:
+      - demeter-net
+
+  sequencer:
+    build:
+      context: .
+      dockerfile: Software/Servidor/docker/backend/Dockerfile
+    container_name: demeter-sequencer
+    command: python Secuenciador/main.py
+    env_file:
+      - .env
+    volumes:
+      - shared_data:/app/shared
+    environment:
+      - REDIS_URL=redis://demeter-redis:6379/0
+      - RQ_REDIS_URL=redis://demeter-redis:6379/1
+      - DATABASE_URL=postgresql://postgres:postgres_local_pass@demeter-db:5432/demeter_db
+    depends_on:
+      - redis
+      - db
+    networks:
+      - demeter-net
+
+  # 4. DATABASE (PostgreSQL)
+  db:
+    image: postgres:15-alpine
+    container_name: demeter-db
+    environment:
+      - POSTGRES_USER=${DEMETER_POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${DEMETER_POSTGRES_PASSWORD:-password}
+      - POSTGRES_DB=${DEMETER_POSTGRES_DB:-demeter_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - demeter-net
+
+  # 5. REDIS BROKER
+  redis:
+    image: redis:alpine
+    container_name: demeter-redis
+    networks:
+      - demeter-net
+
+networks:
+  demeter-net:
+    driver: bridge
+
+volumes:
+  shared_data:
+  postgres_data:
+  export_data:

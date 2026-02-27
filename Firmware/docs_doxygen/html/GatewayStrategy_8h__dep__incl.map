@@ -1,0 +1,7 @@
+<map id="include/communications/GatewayStrategy.h" name="include/communications/GatewayStrategy.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="91,5,273,45"/>
+<area shape="rect" id="Node000002" href="$GatewayStrategy_8cpp.html" title="Implementación del enrutador híbrido (Multiplexor)." alt="" coords="5,93,169,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,57,110,95,106,91,149,53"/>
+<area shape="rect" id="Node000003" href="$main__gateway_8cpp.html" title="Firmware de Entrada Principal (Entry Point) para el Nodo Gateway (ID 1)." alt="" coords="193,101,360,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="215,53,265,98,262,102,211,57"/>
+</map>

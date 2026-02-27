@@ -1,0 +1,48 @@
+# ==============================================================================
+# Configuración Doxygen Mínima Optimizada para Proyecto Demeter (Firmware ESP32)
+# ==============================================================================
+
+# Nombre del Proyecto
+PROJECT_NAME           = "Proyecto Demeter - Firmware"
+PROJECT_NUMBER         = "2.0.0"
+PROJECT_BRIEF          = "Sistema Mesh ESP-NOW para Nodos Agro-climáticos"
+
+# Directorios de salida de resultados y código fuente
+OUTPUT_DIRECTORY       = docs_doxygen
+INPUT                  = include src
+RECURSIVE              = YES
+
+# Formatos a generar
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+GENERATE_RTF           = NO
+GENERATE_XML           = NO
+
+# Qué entidades documentar (forzamos que extraiga todo, incluso lo privado para entender la arquitectura)
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
+
+# Adaptación para lenguaje C++ / Arduino
+OPTIMIZE_OUTPUT_FOR_C  = YES
+BUILTIN_STL_SUPPORT    = YES
+EXTRACT_ANON_NSPACES   = YES
+
+# Gráficos de Arquitectura (Requiere 'graphviz' instalado en el SO)
+HAVE_DOT               = YES
+UML_LOOK               = YES
+CALL_GRAPH             = YES
+CALLER_GRAPH           = YES
+CLASS_GRAPH            = YES
+COLLABORATION_GRAPH    = YES
+INCLUDE_GRAPH          = YES
+INCLUDED_BY_GRAPH      = YES
+DIRECTORY_GRAPH        = YES
+
+# Estética
+HTML_COLORSTYLE_HUE    = 120 # Un tono verde "Demeter"
+HTML_COLORSTYLE_SAT    = 100
+HTML_COLORSTYLE_GAMMA  = 80
+DISABLE_INDEX          = NO
+GENERATE_TREEVIEW      = YES

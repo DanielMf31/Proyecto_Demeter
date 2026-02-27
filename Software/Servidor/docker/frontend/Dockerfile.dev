@@ -1,0 +1,11 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+# The node modules might be bound via volume, but if not we should make sure npm exists.
+# We just need the node image to boot, and then the docker-compose command `npm i && npm run dev`
+# will execute within /app.
+
+EXPOSE 5173
+# Command overridden by docker-compose.override.yml
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

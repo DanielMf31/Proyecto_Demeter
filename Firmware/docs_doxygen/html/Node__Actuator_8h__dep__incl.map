@@ -1,0 +1,7 @@
+<map id="include/core/Node_Actuator.h" name="include/core/Node_Actuator.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="112,5,324,31"/>
+<area shape="rect" id="Node000002" href="$Node__Actuator_8cpp.html" title="Implementación de la Lógica del Nodo Acutador y su Máquina de Estados." alt="" coords="5,79,204,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,40,125,81,122,76,186,36"/>
+<area shape="rect" id="Node000003" href="$main__node__actuador_8cpp.html" title="Firmware de Entrada Principal (Entry Point) para un Nodo tipo Actuador." alt="" coords="228,79,435,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="250,36,314,76,311,81,247,40"/>
+</map>

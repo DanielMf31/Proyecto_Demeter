@@ -1,0 +1,20 @@
+<map id="src/hardware/sensors/DS18B20Sensor.cpp" name="src/hardware/sensors/DS18B20Sensor.cpp">
+<area shape="rect" id="Node000001" title="Implementación del driver para el termómetro de suelo DS18B20 (1&#45;Wire)." alt="" coords="311,5,471,45"/>
+<area shape="rect" id="Node000002" href="$DS18B20Sensor_8h.html" title=" " alt="" coords="69,93,269,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="343,48,231,91,229,86,341,43"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="293,101,377,126"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="380,47,352,90,348,87,376,44"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="401,101,492,126"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="405,44,434,87,429,90,401,47"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="516,101,673,126"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="436,43,556,93,554,98,434,48"/>
+<area shape="rect" id="Node000003" href="$ISensor_8h.html" title="Interfaz para Sensores Modulares." alt="" coords="41,181,188,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="158,135,133,172,128,168,154,132"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="187,255,253,280"/>
+<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="182,132,203,180,218,240,213,242,197,182,177,135"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,255,64,280"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="104,209,60,248,56,244,100,205"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="89,255,151,280"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="118,207,121,241,115,241,113,207"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="133,204,193,245,190,249,130,209"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="include/core/Node_Sensor.h" name="include/core/Node_Sensor.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="105,5,307,31"/>
+<area shape="rect" id="Node000002" href="$Node__Sensor_8cpp.html" title="Firmware lógico para el Nodo Extremo de tipo Sensor." alt="" coords="5,79,193,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="179,40,118,81,115,76,176,36"/>
+<area shape="rect" id="Node000003" href="$main__node__sensor_8cpp.html" title="Firmware de Entrada Principal (Entry Point) para un Nodo tipo Sensor." alt="" coords="217,79,411,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="236,36,298,76,295,81,233,40"/>
+</map>

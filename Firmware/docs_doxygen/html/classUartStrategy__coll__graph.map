@@ -1,0 +1,5 @@
+<map id="UartStrategy" name="UartStrategy">
+<area shape="rect" id="Node000001" title="Implementación Concreta de Comunicación Serie (UART)." alt="" coords="5,219,139,464"/>
+<area shape="rect" id="Node000002" href="$classIComms.html" title="Interfaz Abstracta para la Capa de Comunicaciones Físicas." alt="" coords="9,5,135,171"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="75,184,75,219,69,219,69,184"/>
+</map>

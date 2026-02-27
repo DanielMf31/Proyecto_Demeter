@@ -1,0 +1,92 @@
+<map id="SystemManager::setup" name="SystemManager::setup">
+<area shape="rect" id="Node000001" title="Initialize the system components. Sets up callbacks and initializes enabled hardware." alt="" coords="5,733,177,759"/>
+<area shape="rect" id="Node000002" href="$classSensorManager.html#a4e7a1127bc571c29b3defa8ce4994fec" title="Inicializa todos los sensores registrados. Itera sobre _sensors invocando begin() de forma concurrent..." alt="" coords="267,5,433,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,733,98,603,120,393,137,282,159,180,188,97,205,64,224,40,252,22,255,27,227,44,209,67,193,99,165,182,142,283,125,394,104,603,96,733"/>
+<area shape="rect" id="Node000003" href="$classSystemManager.html#a9f7c4b36a501aa89ebc80f10ed971b1f" title=" " alt="" coords="232,55,468,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="91,733,100,611,123,417,141,314,163,220,190,143,206,113,223,91,229,86,232,90,227,94,210,116,195,145,168,222,146,316,128,417,105,611,96,733"/>
+<area shape="rect" id="Node000004" href="$classSystemManager.html#a82b82fc7da7de401da0656c1b50acee5" title=" " alt="" coords="245,105,455,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="91,733,104,623,129,451,147,361,169,278,194,209,208,182,223,162,237,150,240,154,227,165,213,185,199,211,174,279,153,362,135,452,109,624,97,733"/>
+<area shape="rect" id="Node000008" href="$classSystemManager.html#a338012dcf93ee630c5ad688d4db51eb8" title=" " alt="" coords="249,270,451,310"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="90,733,93,661,99,609,109,550,126,488,149,427,182,370,223,320,235,311,238,315,227,324,186,373,154,429,131,490,115,551,104,609,98,661,95,733"/>
+<area shape="rect" id="Node000015" href="$classSystemManager.html#a02473eda1d6d15455fb33a093b652996" title="Manejador inyectado ejecutado cuando la red nos manda cambiar un Pin." alt="" coords="557,155,767,195"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="91,733,103,630,129,471,147,389,168,314,194,252,208,229,224,212,247,198,278,188,359,174,452,169,543,168,543,174,452,174,360,180,279,193,249,203,227,216,212,232,198,255,173,315,152,390,134,472,109,631,97,733"/>
+<area shape="rect" id="Node000016" href="$classSystemManager.html#ac6901de9e0c5f16db81d02c279683d00" title=" " alt="" coords="246,335,454,360"/>
+<area shape="poly" id="edge16_Node000001_Node000016" title=" " alt="" coords="90,733,95,668,114,569,130,515,154,461,184,412,224,369,232,363,235,367,227,373,189,415,158,464,135,517,119,570,101,668,96,733"/>
+<area shape="rect" id="Node000018" href="$classSystemManager.html#a0d3994943d359a34a024c92334ab0f37" title=" " alt="" coords="250,598,450,638"/>
+<area shape="poly" id="edge19_Node000001_Node000018" title=" " alt="" coords="105,731,155,690,189,667,224,648,242,640,244,645,226,652,191,672,158,694,108,735"/>
+<area shape="rect" id="Node000019" href="$classSystemManager.html#a9f92def67dc1ab8ffe5c3392b831585c" title=" " alt="" coords="229,384,471,409"/>
+<area shape="poly" id="edge20_Node000001_Node000019" title=" " alt="" coords="91,733,99,676,120,591,137,544,160,498,188,456,224,420,232,414,235,418,227,424,192,460,164,501,142,546,125,592,104,677,96,734"/>
+<area shape="rect" id="Node000022" href="$classSystemManager.html#ab9319d4f7cc35364b6bcc4db0076d54e" title=" " alt="" coords="248,483,452,523"/>
+<area shape="poly" id="edge24_Node000001_Node000022" title=" " alt="" coords="95,732,111,695,138,643,175,588,198,562,224,540,245,527,248,531,227,544,202,566,180,591,142,646,116,697,100,734"/>
+<area shape="rect" id="Node000024" href="$classDemeter_1_1SystemContext.html#ae7c2e73ec3905e661f920286615d4537" title="Actualiza la máquina de estado principal de la aplicación." alt="" coords="569,598,755,638"/>
+<area shape="poly" id="edge48_Node000001_Node000024" title=" " alt="" coords="96,732,113,700,140,658,178,616,200,598,224,584,260,570,291,562,319,560,347,562,404,573,475,583,555,594,555,599,474,589,403,578,346,567,319,565,291,567,261,575,227,588,203,602,181,620,145,661,118,702,101,734"/>
+<area shape="rect" id="Node000025" href="$classSystemManager.html#adf46096f6461d7081502c02f75ed354d" title=" " alt="" coords="232,433,468,459"/>
+<area shape="poly" id="edge28_Node000001_Node000025" title=" " alt="" coords="92,733,103,683,127,611,144,572,166,534,192,499,224,469,234,463,237,467,227,473,196,503,170,537,149,575,132,613,108,684,97,734"/>
+<area shape="rect" id="Node000027" href="$classSystemManager.html#a1533ecccc4a2c1a4b73960bb29dc08ce" title=" " alt="" coords="235,662,465,702"/>
+<area shape="poly" id="edge31_Node000001_Node000027" title=" " alt="" coords="143,731,255,703,256,708,145,736"/>
+<area shape="rect" id="Node000028" href="$classSystemManager.html#af088a00e5071b5896b1d2a476ca28c63" title=" " alt="" coords="243,726,457,766"/>
+<area shape="poly" id="edge32_Node000001_Node000028" title=" " alt="" coords="178,743,229,743,229,749,178,749"/>
+<area shape="rect" id="Node000029" href="$classGpioController.html#a0cf76d874bf32023d8198464c8cef68b" title="Inicializa los pines GPIO configurados. Recorre _managedPins, los configura como OUTPUT y los inicia ..." alt="" coords="880,216,1025,241"/>
+<area shape="poly" id="edge33_Node000001_Node000029" title=" " alt="" coords="92,733,105,637,131,492,149,416,170,348,195,292,209,271,224,256,259,243,320,233,496,224,697,222,866,224,866,229,697,227,496,229,321,239,260,248,227,260,213,275,200,295,175,350,154,418,136,493,110,638,97,733"/>
+<area shape="rect" id="Node000030" href="$classDemeter_1_1SystemContext.html#a045bcc42e2c47efb0da48e2352dee01d" title=" " alt="" coords="257,790,443,830"/>
+<area shape="poly" id="edge35_Node000001_Node000030" title=" " alt="" coords="145,756,256,784,255,789,143,761"/>
+<area shape="rect" id="Node000031" href="$classProtocolEngine.html#ae9dece5a3d0026bf7f6a0863855c15aa" title=" " alt="" coords="251,855,449,880"/>
+<area shape="poly" id="edge36_Node000001_Node000031" title=" " alt="" coords="108,757,158,798,191,821,226,840,251,848,249,853,224,844,188,825,154,802,104,761"/>
+<area shape="rect" id="Node000032" href="$classProtocolEngine.html#a827d88fcbd538e8fbfbeebc0510c59c8" title=" " alt="" coords="232,904,468,929"/>
+<area shape="poly" id="edge37_Node000001_Node000032" title=" " alt="" coords="102,757,149,822,185,859,227,890,239,897,237,901,224,895,181,864,145,826,98,760"/>
+<area shape="rect" id="Node000033" href="$classProtocolEngine.html#a3138f4b946216f07468d6065d0d69f24" title=" " alt="" coords="225,953,475,979"/>
+<area shape="poly" id="edge38_Node000001_Node000033" title=" " alt="" coords="100,758,116,795,142,845,179,897,202,920,227,940,236,945,233,950,224,944,198,924,175,900,137,848,111,797,95,760"/>
+<area shape="rect" id="Node000034" href="$classProtocolEngine.html#a7723d006e8f4ec0f652d18c81f35fe30" title=" " alt="" coords="249,1003,451,1028"/>
+<area shape="poly" id="edge39_Node000001_Node000034" title=" " alt="" coords="98,758,111,803,135,866,152,900,173,933,198,964,227,989,238,996,235,1000,224,993,194,967,169,936,148,903,130,868,106,805,93,759"/>
+<area shape="rect" id="Node000035" href="$classProtocolEngine.html#ab5c047b462593df7950d3b8b761d8d45" title=" " alt="" coords="231,1052,469,1077"/>
+<area shape="poly" id="edge40_Node000001_Node000035" title=" " alt="" coords="97,759,107,812,129,888,146,930,168,970,195,1007,227,1039,233,1043,230,1048,224,1043,191,1011,163,973,141,932,124,890,102,813,92,760"/>
+<area shape="rect" id="Node000036" href="$classProtocolEngine.html#a90b03a5fb7542caa38d3d9d082c87ba2" title=" " alt="" coords="231,1101,469,1127"/>
+<area shape="poly" id="edge41_Node000001_Node000036" title=" " alt="" coords="96,758,103,819,123,909,139,958,162,1006,191,1050,227,1088,233,1092,229,1096,224,1092,187,1053,157,1008,134,960,118,910,98,820,91,759"/>
+<area shape="rect" id="Node000037" href="$classProtocolEngine.html#acbf75abd6580295caa23fab03e798ecc" title=" " alt="" coords="253,1151,447,1176"/>
+<area shape="poly" id="edge42_Node000001_Node000037" title=" " alt="" coords="95,759,99,827,106,875,117,930,133,986,156,1042,187,1093,227,1137,241,1147,238,1152,224,1141,183,1097,151,1044,128,988,111,931,101,876,94,827,90,759"/>
+<area shape="rect" id="Node000038" href="$classProtocolEngine.html#a44d1e7eff8dc3c336b83a594ee1eb973" title=" " alt="" coords="239,1200,461,1225"/>
+<area shape="poly" id="edge43_Node000001_Node000038" title=" " alt="" coords="95,759,96,834,101,889,111,950,127,1014,150,1078,183,1136,204,1163,227,1187,232,1191,228,1195,224,1191,200,1166,179,1139,146,1080,122,1016,105,951,96,890,91,834,89,759"/>
+<area shape="rect" id="Node000039" href="$classProtocolEngine.html#ac4812cb83a105c7b241a2bd8af2b0802" title=" " alt="" coords="251,1249,449,1275"/>
+<area shape="poly" id="edge44_Node000001_Node000039" title=" " alt="" coords="97,759,111,854,138,999,156,1074,177,1143,201,1199,227,1236,240,1245,237,1250,223,1240,196,1202,172,1145,151,1075,133,1000,106,854,92,759"/>
+<area shape="rect" id="Node000040" href="$classProtocolEngine.html#a02f25f423384530ca73ee645d91adbd2" title=" " alt="" coords="254,1299,446,1339"/>
+<area shape="poly" id="edge45_Node000001_Node000040" title=" " alt="" coords="97,758,110,861,136,1020,154,1104,175,1181,200,1244,213,1268,227,1285,244,1298,240,1302,223,1289,209,1271,195,1246,170,1182,149,1105,131,1021,104,862,91,759"/>
+<area shape="rect" id="Node000041" href="$classProtocolEngine.html#a047652881d85313093795f183140c4e3" title=" " alt="" coords="245,1363,455,1403"/>
+<area shape="poly" id="edge46_Node000001_Node000041" title=" " alt="" coords="96,759,108,872,132,1051,150,1145,172,1231,198,1302,212,1329,227,1350,235,1357,232,1360,223,1353,207,1332,193,1304,167,1233,145,1146,127,1052,102,873,91,759"/>
+<area shape="rect" id="Node000042" href="$classProtocolEngine.html#a7967ac3eeac8a9ebe7ff0bcc34a8fa41" title="Asigna el ID Lógico originador incrustado en los Headers salientes." alt="" coords="253,1428,447,1453"/>
+<area shape="poly" id="edge47_Node000001_Node000042" title=" " alt="" coords="96,759,105,883,127,1082,145,1186,167,1283,194,1361,210,1391,227,1413,243,1425,239,1429,223,1417,206,1394,189,1364,162,1284,139,1187,122,1082,100,884,91,759"/>
+<area shape="rect" id="Node000005" href="$classSystemManager.html#a304d130e32e657dd9a9b23052e335160" title=" " alt="" coords="523,105,801,131"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="456,120,509,119,509,124,456,125"/>
+<area shape="rect" id="Node000006" href="$classGpioController.html#a861d6c95be1f249f3d5b6e5603337c60" title="Ejecuta una orden de Cómputo Digital sobre el Hardware." alt="" coords="865,163,1040,188"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="735,128,802,141,881,157,880,162,801,146,734,133"/>
+<area shape="rect" id="Node000007" href="$PinConfig_8h.html#a550e793a11b6bbcf91de8422193c2351" title="Helper to check if a pin is protected." alt="" coords="1146,188,1261,213"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="1040,181,1132,191,1132,196,1040,187"/>
+<area shape="rect" id="Node000009" href="$classSensorManager.html#a80f7f580cc42bdcfbcea0e8832e1f6ac" title="Lee secuencialmente todos los sensores de la colección." alt="" coords="573,271,751,296"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="451,285,559,283,559,288,451,291"/>
+<area shape="rect" id="Node000010" href="$classSystemManager.html#a4ad900176b56da31672334215a0488d1" title=" " alt="" coords="541,320,783,345"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="452,301,555,315,554,321,451,306"/>
+<area shape="rect" id="Node000011" href="$classProtocolEngine.html#afd14d7a6e415874d64665173ef9c32ce" title="Send Sensor Data Report (Temp/Hum)." alt="" coords="856,311,1049,351"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="783,329,842,329,842,335,783,335"/>
+<area shape="rect" id="Node000012" href="$classProtocolEngine.html#a756248b6415af686ad17659d13a86273" title="Desciende estamento lógico a una Trama Binaria y la escupe por COMMS. Envuelve el payload crudo antep..." alt="" coords="1104,376,1303,401"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="1041,349,1134,370,1133,376,1040,354"/>
+<area shape="rect" id="Node000013" href="$classProtocolEngine.html#ad93203ceed2aada77a73556411fd8043" title="Calculates a simple Modular Sum CRC (Mod 256)." alt="" coords="1351,351,1564,376"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="1303,376,1337,373,1337,378,1303,381"/>
+<area shape="rect" id="Node000014" href="$classIComms.html#ad776ff948007fd56d75719d5a6704e30" title="Transmite un tren de bytes crudos a través del medio." alt="" coords="1400,400,1515,425"/>
+<area shape="poly" id="edge13_Node000012_Node000014" title=" " alt="" coords="1303,395,1387,403,1386,409,1303,401"/>
+<area shape="poly" id="edge15_Node000015_Node000006" title=" " alt="" coords="768,173,852,173,852,178,768,178"/>
+<area shape="rect" id="Node000017" href="$classProtocolEngine.html#a953a1d439428fedd433cf719daaef05a" title="Send ACK (Acknowledge) response, optionally with Context." alt="" coords="571,369,753,395"/>
+<area shape="poly" id="edge17_Node000016_Node000017" title=" " alt="" coords="455,356,557,368,557,373,454,362"/>
+<area shape="poly" id="edge18_Node000017_Node000012" title=" " alt="" coords="754,380,1090,385,1090,390,753,386"/>
+<area shape="poly" id="edge23_Node000019_Node000017" title=" " alt="" coords="471,388,557,384,557,390,471,394"/>
+<area shape="rect" id="Node000020" href="$classProtocolEngine.html#a87204b58e35e3b9f866e36f89a826d68" title="Register a static route in the underlying comms strategy." alt="" coords="573,419,751,459"/>
+<area shape="poly" id="edge21_Node000019_Node000020" title=" " alt="" coords="444,407,560,423,559,428,443,412"/>
+<area shape="rect" id="Node000021" href="$classIComms.html#a48c8483a8218a2996c895287aa18ee02" title="Vincula lógicamente un Nodo Demeter a una dirección MAC física. Únicamente utilizable en implementaci..." alt="" coords="867,427,1039,452"/>
+<area shape="poly" id="edge22_Node000020_Node000021" title=" " alt="" coords="751,437,853,437,853,442,751,442"/>
+<area shape="poly" id="edge26_Node000022_Node000017" title=" " alt="" coords="451,481,473,469,488,454,496,438,504,421,521,405,557,390,559,394,524,410,509,424,501,440,493,457,476,473,453,486"/>
+<area shape="rect" id="Node000023" href="$classDemeter_1_1SystemContext.html#af5e37e6b803d0e412475ba4db681527f" title=" " alt="" coords="569,534,755,574"/>
+<area shape="poly" id="edge25_Node000022_Node000023" title=" " alt="" coords="453,517,555,534,554,539,452,522"/>
+<area shape="poly" id="edge27_Node000022_Node000024" title=" " alt="" coords="434,521,476,540,491,551,501,563,510,574,524,584,557,597,555,602,521,588,506,577,496,566,487,555,473,544,432,526"/>
+<area shape="rect" id="Node000026" href="$classProtocolEngine.html#a1b27b443d00335a6c6c21e00cf33b0c8" title="Send SYN&#45;ACK (Handshake 2/3)." alt="" coords="849,480,1056,505"/>
+<area shape="poly" id="edge29_Node000025_Node000026" title=" " alt="" coords="427,456,523,469,686,481,835,487,835,493,686,486,522,474,426,461"/>
+<area shape="poly" id="edge30_Node000026_Node000012" title=" " alt="" coords="1008,477,1055,462,1116,434,1168,406,1170,411,1118,439,1057,467,1010,482"/>
+<area shape="poly" id="edge34_Node000029_Node000007" title=" " alt="" coords="1025,218,1132,206,1133,211,1026,223"/>
+</map>

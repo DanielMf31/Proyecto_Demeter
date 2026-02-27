@@ -1,0 +1,46 @@
+<map id="Node_Sensor" name="Node_Sensor">
+<area shape="rect" id="Node000001" title="Implementación concreta de Nodo para perfiles estrictamente de Sensor." alt="" coords="493,1797,659,2063"/>
+<area shape="rect" id="Node000002" href="$classINode.html" title=" " alt="" coords="11,1379,99,1485"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="53,1499,55,1563,65,1636,75,1673,89,1709,107,1742,130,1772,169,1807,213,1836,260,1860,310,1880,408,1906,493,1920,492,1925,406,1911,308,1885,258,1865,210,1841,166,1811,126,1775,102,1745,84,1711,70,1675,60,1637,49,1563,47,1499"/>
+<area shape="rect" id="Node000003" href="$classProtocolEngine.html" title="Motor Central de Procesamiento del Protocolo Binario (V2)." alt="" coords="2037,421,2233,1067"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="2084,1068,2062,1107,1993,1199,1915,1285,1830,1365,1739,1438,1643,1506,1544,1568,1443,1624,1342,1675,1143,1761,959,1828,799,1877,675,1909,674,1904,798,1872,957,1823,1141,1756,1340,1670,1441,1619,1541,1563,1640,1502,1735,1434,1826,1361,1911,1282,1989,1196,2058,1104,2080,1066"/>
+<area shape="rect" id="Node000005" href="$classSystemManager.html" title="Cerebro y Máquina de Estados del Firmware Demeter." alt="" coords="903,1129,1108,1735"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="2039,1055,2026,1069,1977,1114,1924,1156,1867,1194,1808,1228,1686,1287,1560,1333,1436,1368,1319,1394,1213,1412,1125,1424,1124,1418,1213,1407,1318,1389,1435,1363,1558,1328,1684,1282,1806,1223,1865,1189,1920,1152,1973,1110,2022,1065,2035,1051"/>
+<area shape="rect" id="Node000004" href="$classIComms.html" title="Interfaz Abstracta para la Capa de Comunicaciones Físicas." alt="" coords="2071,193,2198,359"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="2137,359,2137,405,2132,405,2132,359"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="905,1554,672,1822,668,1819,900,1550"/>
+<area shape="rect" id="Node000006" href="$classGpioController.html" title="Capa de Abstracción de Hardware (HAL) para Control GPIO." alt="" coords="1701,691,1809,797"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="1759,797,1757,857,1748,928,1727,1001,1711,1036,1690,1068,1631,1135,1564,1194,1490,1246,1412,1290,1334,1328,1258,1359,1124,1404,1123,1399,1256,1354,1332,1323,1410,1286,1487,1241,1560,1190,1628,1131,1686,1065,1706,1034,1722,999,1742,927,1752,856,1754,797"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="1751,243,1910,309"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="1810,310,1790,344,1775,383,1759,460,1751,538,1749,612,1752,674,1746,675,1744,612,1746,538,1753,459,1769,382,1786,342,1806,307"/>
+<area shape="rect" id="Node000011" href="$classDemeter_1_1SystemContext.html" title="Contexto Centralizado del Sistema Demeter." alt="" coords="1833,521,2012,967"/>
+<area shape="poly" id="edge12_Node000011_Node000007" title=" " alt="" coords="1850,308,1866,343,1880,382,1894,442,1905,504,1900,505,1889,444,1875,383,1861,345,1845,310"/>
+<area shape="rect" id="Node000008" href="$classSensorManager.html" title="Agrupa y orquesta una colección heterogénea de sensores de Hardware." alt="" coords="22,671,162,817"/>
+<area shape="poly" id="edge23_Node000001_Node000008" title=" " alt="" coords="109,817,137,935,177,1066,254,1263,341,1458,426,1635,500,1781,496,1784,421,1637,336,1460,250,1265,172,1068,132,936,104,818"/>
+<area shape="poly" id="edge8_Node000005_Node000008" title=" " alt="" coords="96,817,102,876,116,941,140,1007,157,1037,177,1065,212,1091,277,1127,469,1214,692,1306,888,1383,886,1388,690,1311,466,1219,275,1132,209,1096,173,1069,152,1040,135,1009,111,943,97,876,91,817"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="5,236,160,316"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="86,316,93,654,88,655,81,316"/>
+<area shape="rect" id="Node000010" href="$classDemeter_1_1ISensor.html" title="Clase Base Abstracta (Interfaz) para todo hardware de sensado." alt="" coords="19,5,146,131"/>
+<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="85,131,85,220,80,220,80,131"/>
+<area shape="poly" id="edge11_Node000005_Node000011" title=" " alt="" coords="1880,968,1855,1021,1822,1068,1786,1107,1746,1143,1660,1208,1567,1262,1471,1307,1375,1344,1283,1374,1125,1413,1124,1408,1281,1369,1373,1339,1469,1302,1565,1257,1657,1203,1743,1139,1782,1103,1818,1065,1851,1018,1876,966"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="187,704,341,784"/>
+<area shape="poly" id="edge13_Node000005_Node000012" title=" " alt="" coords="268,784,274,843,289,917,315,995,333,1031,355,1065,412,1128,476,1184,546,1234,618,1277,691,1315,762,1347,888,1394,886,1399,760,1352,689,1320,616,1282,543,1238,473,1188,408,1131,351,1068,328,1034,310,997,283,918,269,844,263,784"/>
+<area shape="rect" id="Node000013" href="$structDemeter_1_1SetGpioCmd.html" title="Configuración digital (ON/OFF) a aplicar sobre una salida de GPIO." alt="" coords="184,223,344,329"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="267,329,267,687,261,687,261,329"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="365,704,520,784"/>
+<area shape="poly" id="edge15_Node000005_Node000014" title=" " alt="" coords="448,784,456,842,471,915,496,993,514,1030,534,1065,571,1114,613,1160,658,1203,705,1243,801,1313,889,1367,887,1372,798,1317,702,1247,654,1207,609,1164,567,1118,530,1068,509,1033,492,995,466,917,451,843,443,785"/>
+<area shape="rect" id="Node000015" href="$structDemeter_1_1SequenceStep.html" title="Step for the Sequencer." alt="" coords="368,223,539,329"/>
+<area shape="poly" id="edge16_Node000014_Node000015" title=" " alt="" coords="455,329,447,687,441,687,449,329"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="544,704,699,784"/>
+<area shape="poly" id="edge17_Node000005_Node000016" title=" " alt="" coords="630,784,640,841,657,913,681,990,713,1065,752,1133,798,1198,894,1314,889,1317,794,1202,748,1136,708,1068,676,992,652,914,635,842,624,785"/>
+<area shape="rect" id="Node000017" title=" " alt="" coords="723,704,879,784"/>
+<area shape="poly" id="edge18_Node000005_Node000017" title=" " alt="" coords="807,784,826,927,843,1016,865,1105,899,1201,894,1202,860,1106,838,1017,821,928,802,785"/>
+<area shape="rect" id="Node000018" title=" " alt="" coords="904,704,1107,784"/>
+<area shape="poly" id="edge19_Node000005_Node000018" title=" " alt="" coords="1008,784,1008,1113,1003,1113,1003,784"/>
+<area shape="rect" id="Node000019" title=" " alt="" coords="1131,704,1287,784"/>
+<area shape="poly" id="edge20_Node000005_Node000019" title=" " alt="" coords="1205,785,1177,927,1132,1106,1116,1156,1111,1155,1127,1105,1172,926,1200,784"/>
+<area shape="rect" id="Node000020" title=" " alt="" coords="1311,704,1497,784"/>
+<area shape="poly" id="edge21_Node000005_Node000020" title=" " alt="" coords="1399,785,1364,914,1336,992,1301,1068,1261,1135,1215,1199,1121,1314,1117,1311,1211,1196,1256,1132,1296,1065,1331,990,1359,912,1393,784"/>
+<area shape="rect" id="Node000021" title=" " alt="" coords="1521,704,1676,784"/>
+<area shape="poly" id="edge22_Node000005_Node000021" title=" " alt="" coords="1599,785,1591,844,1575,917,1549,995,1532,1033,1510,1068,1470,1120,1424,1168,1375,1213,1323,1254,1219,1324,1124,1378,1121,1373,1216,1319,1320,1249,1371,1209,1420,1164,1466,1116,1506,1065,1527,1031,1544,993,1570,916,1586,843,1593,784"/>
+</map>

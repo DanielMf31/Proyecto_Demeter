@@ -1,0 +1,24 @@
+<map id="IComms::available" name="IComms::available">
+<area shape="rect" id="Node000001" title="Comprueba subyacente si hay datos pendientes de consumir en el buffer RX." alt="" coords="805,55,949,80"/>
+<area shape="rect" id="Node000002" href="$classGatewayStrategy.html#a36e039f107b824597081fc66ca2ac7ca" title="Or lógico entre uart&#45;&gt;available() || espNow&#45;&gt;available()." alt="" coords="555,5,757,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="806,54,713,33,714,28,807,49"/>
+<area shape="rect" id="Node000003" href="$classGatewayStrategy.html#a911ea92ff929e5cc547091e08b47e977" title="Vacía el buffer de la primera interfaz que reporte datos (Prioridad: UART)." alt="" coords="571,55,741,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="791,70,742,70,742,65,791,65"/>
+<area shape="rect" id="Node000004" href="$classProtocolEngine.html#a90f40edcf96290cd43028d15b663d350" title="Bucle Principal del Parsing (Fase Lógica)." alt="" coords="570,104,742,129"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="807,86,714,107,713,101,806,80"/>
+<area shape="rect" id="Node000005" href="$classSystemManager.html#a792ba14d029dca92c9c6fb5cd2715c23" title="Bucle Principal del Sistema (Tick OBLIGATORIO)." alt="" coords="325,79,507,104"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="556,109,507,104,507,98,557,104"/>
+<area shape="rect" id="Node000008" href="$classNode__Gateway.html#af3315261cd44b048d250d8f2ed5da4da" title="Tarea regular Arduino loop() delegada hacia SystemManager." alt="" coords="104,129,277,155"/>
+<area shape="poly" id="edge11_Node000004_Node000008" title=" " alt="" coords="556,125,278,140,277,135,556,119"/>
+<area shape="rect" id="Node000006" href="$classNode__Actuator.html#aba4308a373cbf9ba8c6f5cdde23b7502" title="Tick regular ligado al firmware Arduino loop." alt="" coords="105,80,276,105"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="311,95,276,95,276,89,311,89"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="346,110,248,132,247,127,345,104"/>
+<area shape="rect" id="Node000010" href="$classNode__Sensor.html#a4ef0a51ec48c9f9de1cea5167672e707" title="Tarea a correr ininterrumpidamente en el loop() de Arduino." alt="" coords="111,31,271,56"/>
+<area shape="poly" id="edge9_Node000005_Node000010" title=" " alt="" coords="342,78,250,59,252,53,343,73"/>
+<area shape="rect" id="Node000007" href="$main__node__actuador_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,80,56,105"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="91,95,56,95,56,90,91,90"/>
+<area shape="rect" id="Node000009" href="$main__gateway_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,129,56,155"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="90,145,57,145,57,139,90,139"/>
+<area shape="rect" id="Node000011" href="$main__node__sensor_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="5,31,56,56"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="97,46,56,46,56,41,97,41"/>
+</map>

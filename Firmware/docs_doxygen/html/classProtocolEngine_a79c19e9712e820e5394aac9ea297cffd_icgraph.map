@@ -1,0 +1,5 @@
+<map id="ProtocolEngine::sendSystemReport" name="ProtocolEngine::sendSystemReport">
+<area shape="rect" id="Node000001" title="Send System Status Report (Mode, Battery)." alt="" coords="269,5,476,45"/>
+<area shape="rect" id="Node000002" href="$classSystemManager.html#a323086ef1119106506a5dfbfcdc37163" title=" " alt="" coords="5,5,221,45"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="255,28,222,28,222,23,255,23"/>
+</map>

@@ -1,0 +1,88 @@
+erDiagram
+    USERS {
+        uuid id PK
+        varchar username
+        varchar password_hash
+        varchar role
+        boolean is_active
+    }
+
+    EXPERIMENTS {
+        integer id PK
+        varchar name
+        varchar description
+        datetime created_at
+        uuid user_id FK
+        varchar api_key
+    }
+
+    PLANTS {
+        integer id PK
+        varchar name
+        integer experiment_id FK
+        integer node_id
+    }
+
+    DEVICES {
+        integer id PK
+        varchar name
+        varchar device_type
+        integer gpio_pin
+    }
+
+    SEQUENCES {
+        integer id PK
+        varchar name
+        uuid created_by FK
+        datetime created_at
+    }
+
+    SEQUENCE_STEPS {
+        integer id PK
+        integer sequence_id FK
+        integer device_id FK
+        integer step_order
+        boolean target_state
+        integer duration_seconds
+    }
+
+    ACTIVITY_LOG {
+        integer id PK
+        datetime timestamp
+        uuid user_id FK
+        integer device_id FK
+        varchar action_type
+        text description
+    }
+
+    TELEMETRY_TH {
+        integer id PK
+        datetime timestamp
+        integer node_id
+        float temperature
+        float humidity
+    }
+
+    PIN_HISTORY {
+        integer id PK
+        datetime timestamp
+        integer node_id
+        integer pin
+        boolean state
+    }
+
+    SYSTEM_HISTORY {
+        integer id PK
+        datetime timestamp
+        integer node_id
+        integer mode
+        integer battery_mv
+    }
+
+    USERS ||--o{ EXPERIMENTS : "posee"
+    USERS ||--o{ SEQUENCES : "crea"
+    USERS ||--o{ ACTIVITY_LOG : "genera"
+    EXPERIMENTS ||--o{ PLANTS : "agrupa"
+    DEVICES ||--o{ SEQUENCE_STEPS : "referencia"
+    SEQUENCES ||--o{ SEQUENCE_STEPS : "contiene"
+    DEVICES ||--o{ ACTIVITY_LOG : "afecta"

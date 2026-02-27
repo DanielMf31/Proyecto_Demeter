@@ -1,0 +1,5 @@
+<map id="GpioController::init" name="GpioController::init">
+<area shape="rect" id="Node000001" title="Inicializa los pines GPIO configurados. Recorre _managedPins, los configura como OUTPUT y los inicia ..." alt="" coords="5,5,151,31"/>
+<area shape="rect" id="Node000002" href="$PinConfig_8h.html#a550e793a11b6bbcf91de8422193c2351" title="Helper to check if a pin is protected." alt="" coords="199,5,313,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="151,15,185,15,185,21,151,21"/>
+</map>

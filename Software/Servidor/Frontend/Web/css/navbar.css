@@ -1,0 +1,206 @@
+/* ═══════════════════════════════════════════════════════════════
+   navbar.css — Fixed top navigation bar
+   ═══════════════════════════════════════════════════════════════ */
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--navbar-h);
+    z-index: 100;
+    background: var(--navbar-bg);
+    border-bottom: 1px solid var(--navbar-bd);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 16px;
+    transition: background var(--transition), border-color var(--transition);
+}
+
+/* ── Brand ───────────────────────────────────────────────────── */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex-shrink: 0;
+}
+
+.navbar-logo {
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.navbar-logo svg {
+    width: 16px;
+    height: 16px;
+    color: #fff;
+}
+
+.navbar-title {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -.3px;
+    color: var(--text-primary);
+}
+
+.navbar-version {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1px 7px;
+    color: var(--text-subtle);
+}
+
+/* ── Nav links ──────────────────────────────────────────────── */
+.navbar-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    justify-content: center;
+}
+
+.nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition), border-color var(--transition);
+    white-space: nowrap;
+}
+
+.nav-link svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
+.nav-link:hover:not(.active) {
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+}
+
+.nav-link.active {
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+    color: var(--accent);
+    font-weight: 600;
+}
+
+/* ── Navbar actions (right side) ────────────────────────────── */
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.divider-v {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+}
+
+.clock {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-subtle);
+}
+
+/* ── Autosave badge ─────────────────────────────────────────── */
+.autosave-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--autosave-tx);
+    transition: color var(--transition);
+}
+
+.autosave-badge svg {
+    width: 12px;
+    height: 12px;
+}
+
+.autosave-badge.saving {
+    color: var(--warning);
+}
+
+.autosave-badge.saved {
+    color: var(--accent);
+}
+
+/* ── History controls ───────────────────────────────────────── */
+.history-controls {
+    display: flex;
+    gap: 4px;
+}
+
+/* ── Shared icon-button ─────────────────────────────────────── */
+.btn-icon-header {
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--toggle-bd);
+    background: var(--toggle-bg);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--transition), color var(--transition), border-color var(--transition), opacity var(--transition);
+}
+
+.btn-icon-header:hover:not(:disabled) {
+    color: var(--text-primary);
+    border-color: var(--border-focus);
+}
+
+.btn-icon-header:disabled {
+    opacity: .35;
+    cursor: not-allowed;
+}
+
+.btn-icon-header svg {
+    width: 13px;
+    height: 13px;
+}
+
+/* ── Theme toggle icons ─────────────────────────────────────── */
+[data-theme="dark"] .icon-sun {
+    display: none;
+}
+
+[data-theme="dark"] .icon-moon {
+    display: block;
+}
+
+[data-theme="light"] .icon-moon {
+    display: none;
+}
+
+[data-theme="light"] .icon-sun {
+    display: block;
+}

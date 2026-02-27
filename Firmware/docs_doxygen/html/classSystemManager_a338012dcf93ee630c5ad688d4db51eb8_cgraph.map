@@ -1,0 +1,15 @@
+<map id="SystemManager::handleGetSensors" name="SystemManager::handleGetSensors">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,208,63"/>
+<area shape="rect" id="Node000002" href="$classSensorManager.html#a80f7f580cc42bdcfbcea0e8832e1f6ac" title="Lee secuencialmente todos los sensores de la colección." alt="" coords="289,5,466,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="208,31,275,25,275,30,208,37"/>
+<area shape="rect" id="Node000003" href="$classSystemManager.html#a4ad900176b56da31672334215a0488d1" title=" " alt="" coords="256,55,499,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="208,50,242,53,242,58,208,55"/>
+<area shape="rect" id="Node000004" href="$classProtocolEngine.html#afd14d7a6e415874d64665173ef9c32ce" title="Send Sensor Data Report (Temp/Hum)." alt="" coords="547,47,740,87"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="499,65,533,65,533,70,499,70"/>
+<area shape="rect" id="Node000005" href="$classProtocolEngine.html#a756248b6415af686ad17659d13a86273" title="Desciende estamento lógico a una Trama Binaria y la escupe por COMMS. Envuelve el payload crudo antep..." alt="" coords="788,55,987,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="740,65,774,65,774,70,740,70"/>
+<area shape="rect" id="Node000006" href="$classProtocolEngine.html#ad93203ceed2aada77a73556411fd8043" title="Calculates a simple Modular Sum CRC (Mod 256)." alt="" coords="1035,29,1248,55"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="987,55,1021,51,1021,57,987,60"/>
+<area shape="rect" id="Node000007" href="$classIComms.html#ad776ff948007fd56d75719d5a6704e30" title="Transmite un tren de bytes crudos a través del medio." alt="" coords="1084,79,1199,104"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="987,74,1071,82,1070,87,987,79"/>
+</map>

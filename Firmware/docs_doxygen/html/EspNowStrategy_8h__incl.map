@@ -1,0 +1,19 @@
+<map id="include/communications/EspNowStrategy.h" name="include/communications/EspNowStrategy.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="234,5,415,45"/>
+<area shape="rect" id="Node000002" href="$IComms_8h.html" title=" " alt="" coords="37,93,237,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="281,48,178,90,176,85,279,43"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="205,167,268,192"/>
+<area shape="poly" id="edge9_Node000001_Node000005" title=" " alt="" coords="316,47,253,156,248,153,311,44"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="295,167,351,192"/>
+<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="327,46,326,153,321,153,322,46"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="362,93,453,119"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="347,44,387,82,383,86,343,47"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="477,93,527,119"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="368,43,465,86,463,90,366,48"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,167,76,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="123,121,69,160,66,156,120,117"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="101,167,175,192"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="140,119,140,153,135,153,134,119"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="154,117,211,156,208,161,151,121"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="168,116,284,160,282,165,166,121"/>
+</map>

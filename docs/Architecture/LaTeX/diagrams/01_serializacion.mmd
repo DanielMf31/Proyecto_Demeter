@@ -1,0 +1,13 @@
+flowchart TD
+    A([Solicitud de envío]) --> B[Obtener Tipo de Mensaje\ny Datos de Aplicación]
+    B --> C[Convertir datos\nal formato binario del protocolo\neg: float×100 → int16 LE]
+    C --> D[Construir Payload\nen buffer de bytes]
+    D --> E[Construir Cabecera\nSYNC=0xAA, FLAGS=0x00\nSRC_ID, DST_ID, CMD_ID\nLENGTH = tamaño del payload]
+    E --> F[Concatenar Cabecera + Payload]
+    F --> G[Calcular CRC\nSuma módulo 256\ndesde FLAGS hasta fin del payload]
+    G --> H[Añadir byte CRC al final]
+    H --> I{¿Canal disponible?}
+    I -- Sí --> J[Entregar trama\na la capa de transporte]
+    I -- No --> K[Esperar ciclo\nsiguiente]
+    K --> I
+    J --> L([Transmisión completada])

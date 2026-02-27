@@ -1,0 +1,19 @@
+<map id="src/core/SystemContext.cpp" name="src/core/SystemContext.cpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="133,5,337,31"/>
+<area shape="rect" id="Node000002" href="$SystemContext_8h.html" title=" " alt="" coords="152,79,319,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="238,31,238,65,233,65,233,31"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,225,76,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="221,106,69,219,66,215,218,102"/>
+<area shape="rect" id="Node000004" href="$InternalTypes_8h.html" title=" " alt="" coords="175,152,296,177"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="238,104,238,138,233,138,233,104"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="399,225,461,251"/>
+<area shape="poly" id="edge9_Node000002_Node000006" title=" " alt="" coords="253,102,405,215,402,219,249,106"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="205,180,86,223,84,218,203,175"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="101,225,183,251"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="222,179,170,219,166,215,219,175"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="268,175,386,218,385,223,266,180"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="207,225,263,251"/>
+<area shape="poly" id="edge7_Node000004_Node000007" title=" " alt="" coords="238,178,238,212,233,212,233,178"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="288,225,375,251"/>
+<area shape="poly" id="edge8_Node000004_Node000008" title=" " alt="" coords="252,175,306,215,303,219,249,180"/>
+</map>

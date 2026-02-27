@@ -1,0 +1,237 @@
+% ===============================
+% PROYECTO DEMETER — Documentación Técnica
+% Plantilla: ESIBot · Universidad de Sevilla (adaptada)
+% Compilar en Overleaf con pdfLaTeX
+% ===============================
+\documentclass[11pt,a4paper]{report}
+\usepackage[spanish, provide=*]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{pdflscape}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins, breakable}
+\usepackage{longtable}
+\usepackage{colortbl}
+\usepackage{enumitem}
+
+% ── Geometría ────────────────────────────────────────────────
+\usepackage[
+    a4paper,
+    top=2.5cm,
+    bottom=2.5cm,
+    left=2cm,
+    right=2cm,
+    headheight=45pt,
+    headsep=15pt,
+    footskip=35pt
+]{geometry}
+
+% ── Directorio de imágenes ───────────────────────────────────
+\graphicspath{{diagrams/}}
+
+% ── Cajas de diseño sin colores ────────────────────────────────
+\newenvironment{designnote}
+  {\begin{tcolorbox}[colback=white, colframe=black,
+     title=Decisión de Diseño, fonttitle=\bfseries, breakable]}
+  {\end{tcolorbox}}
+
+\newenvironment{warningbox}
+  {\begin{tcolorbox}[colback=white, colframe=black,
+     title=Consideración Importante, fonttitle=\bfseries, breakable]}
+  {\end{tcolorbox}}
+
+% ── Encabezado páginas normales ──────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{%
+  \IfFileExists{diagrams/logo_esibot.png}{%
+    \includegraphics[width=1.5cm]{logo_esibot.png}%
+  }{\small\textbf{ESIBot}}%
+}
+\fancyhead[C]{
+    \footnotesize\textbf{Proyecto Demeter} \\
+    \scriptsize Plataforma IoT para Investigación Agrícola
+}
+\fancyhead[R]{
+    \footnotesize Daniel Montero Fernández \\
+    \scriptsize danmonfer@us.es
+}
+\fancyfoot[L]{\small Documentación Técnica}
+\fancyfoot[C]{\small Página \thepage\ de \pageref{LastPage}}
+\fancyfoot[R]{\small Febrero 2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ── Estilo primera página ────────────────────────────────────
+\fancypagestyle{firstpage}{
+    \fancyhf{}
+    \renewcommand{\headrulewidth}{0.4pt}
+    \renewcommand{\footrulewidth}{0.4pt}
+    \fancyhead[L]{\includegraphics[width=2cm]{logo_esibot.png}}
+    \fancyhead[C]{
+        \normalsize\textbf{Creado por la Asociación Universitaria ESIBot} \\
+        \small Correo: esibot@us.es
+    }
+    \fancyhead[R]{
+        \small Autor: Daniel Montero Fernández \\
+        \small Correo: danmonfer@us.es \\
+        \small Fecha: Febrero 2026
+    }
+    \fancyfoot[L]{\small Documentación Técnica - Proyecto Demeter}
+    \fancyfoot[C]{\small Página \thepage\ de \pageref{LastPage}}
+    \fancyfoot[R]{\small 11 de febrero de 2026}
+}
+
+% ── Listings ─────────────────────────────────────────────────
+\lstdefinestyle{trama}{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    breaklines=true,
+    columns=fullflexible
+}
+
+% ── Formato de secciones ─────────────────────────────────────
+\titleformat{\chapter}[display]{\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titleformat{\section}{\normalfont\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\normalfont\normalsize\bfseries}{\thesubsubsection}{1em}{}
+
+% ── Hipervínculos ────────────────────────────────────────────
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    urlcolor=blue,
+    citecolor=green!50!black,
+    pdftitle={Proyecto Demeter --- Documentación Técnica},
+    pdfauthor={Daniel Montero Fernández}
+}
+
+% ============================================================
+\begin{document}
+
+% ── Portada ──────────────────────────────────────────────────
+\thispagestyle{firstpage}
+\begin{center}
+    \vspace*{1cm}
+    
+    % Logo
+    \includegraphics[width=0.35\textwidth]{logo_esibot.png}
+    
+    \vspace{1cm}
+    
+    % Título principal
+    {\Huge \textbf{Proyecto DEMETER}}
+    
+    \vspace{0.5cm}
+    
+    % Subtítulo
+    {\Large Plataforma Integral de Monitorización y Gestión\\
+    para Investigación Agrícola}
+    
+    \vspace{0.4cm}
+    {\large \textit{IoT · Firmware ESP32 · Backend FastAPI · LIMS}}
+    
+    \vspace{1.2cm}
+    \rule{\textwidth}{1pt}
+    \vspace{0.4cm}
+    
+    {\LARGE \textbf{Documentación Técnica del Sistema}}
+    
+    \vspace{0.4cm}
+    \rule{\textwidth}{1pt}
+    
+    \vfill
+    
+    \begin{tabular}{rl}
+        \textbf{Autor:}        & Daniel Montero Fernández \\[0.3cm]
+        \textbf{Contacto:}      & danmonfer@us.es \\[0.3cm]
+        \textbf{Institución:}   & Universidad de Sevilla \\[0.3cm]
+        \textbf{Versión:}       & 1.0 \\[0.3cm]
+        \textbf{Fecha:}         & Febrero de 2026 \\[0.3cm]
+        \textbf{Estado:}        & En desarrollo activo \\
+    \end{tabular}
+    
+    \vspace{1.5cm}
+    {\small Este documento es confidencial y de uso interno del proyecto.}
+\end{center}
+
+\newpage
+
+% ── Índice ───────────────────────────────────────────────────
+\pagestyle{fancy}
+\tableofcontents
+\newpage
+
+% ============================================================
+% CAPÍTULOS PRINCIPALES
+% ============================================================
+\input{sections/01_introduccion}
+\newpage
+\input{sections/03_protocolo_demeter}
+\newpage
+\input{sections/02_firmware_architecture}
+\newpage
+\input{sections/04_raspberry_architecture}
+\newpage
+\input{sections/05_backend}
+\newpage
+\input{sections/06_sdk}
+
+% ============================================================
+% ANEXOS
+% ============================================================
+\newpage
+\appendix
+\section{Diagramas de Actividad --- Protocolo Demeter}
+\label{anx:diagramas}
+
+Los diagramas de esta sección serán incorporados próximamente.
+Están referenciados desde la Sección~\ref{sec:protocolo}.
+
+% Etiquetas de reserva para referencias del texto
+\label{fig:anx_serializacion}
+\label{fig:anx_deserializacion}
+\label{fig:anx_errores}
+\label{fig:anx_ciclo_nodos}
+\label{fig:anx_ciclo_energetico}
+\label{fig:anx_handshake}
+\label{fig:anx_flujo_e2e}
+\label{fig:anx_rpi_docker}
+\label{fig:anx_rpi_asyncio}
+\label{fig:anx_rpi_componentes}
+\label{fig:anx_rpi_telemetria}
+\label{fig:anx_rpi_comandos}
+\label{fig:anx_backend_docker}
+\label{fig:anx_redis_flow}
+
+% ────────────────────────────────────────────────────────────
+\section{Esquema de Base de Datos}
+\label{anx:bd}
+
+El siguiente diagrama presenta el esquema relacional completo de la base de datos
+PostgreSQL del proyecto, con todas las tablas, sus atributos y las relaciones entre entidades.
+
+\begin{landscape}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.05\linewidth, keepaspectratio]{16_db_schema}
+    \caption{Esquema Entidad-Relación completo de \texttt{demeter\_db} (PostgreSQL 15). Generado a partir de los modelos SQLAlchemy.}
+    \label{fig:anx_db_schema}
+\end{figure}
+\end{landscape}
+
+\end{document}

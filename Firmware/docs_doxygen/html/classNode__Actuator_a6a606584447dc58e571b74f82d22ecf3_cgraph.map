@@ -1,0 +1,5 @@
+<map id="Node_Actuator::addGpioListener" name="Node_Actuator::addGpioListener">
+<area shape="rect" id="Node000001" title="Registra callbacks extra reactivos ante una modificación GPIO. Facade a ProtocolEngine::onSetGpioComm..." alt="" coords="5,5,237,31"/>
+<area shape="rect" id="Node000002" href="$classSystemManager.html#a09d94e47c962cff10540c3981ff9a23f" title=" " alt="" coords="285,5,528,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="238,15,271,15,271,21,238,21"/>
+</map>

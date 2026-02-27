@@ -1,0 +1,9 @@
+<map id="ProtocolEngine::sendExecSequence" name="ProtocolEngine::sendExecSequence">
+<area shape="rect" id="Node000001" title="Send Execution Sequence." alt="" coords="5,23,193,63"/>
+<area shape="rect" id="Node000002" href="$classProtocolEngine.html#a756248b6415af686ad17659d13a86273" title="Desciende estamento lógico a una Trama Binaria y la escupe por COMMS. Envuelve el payload crudo antep..." alt="" coords="241,31,440,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="194,41,228,41,228,46,194,46"/>
+<area shape="rect" id="Node000003" href="$classProtocolEngine.html#ad93203ceed2aada77a73556411fd8043" title="Calculates a simple Modular Sum CRC (Mod 256)." alt="" coords="488,5,701,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="440,31,474,27,475,33,441,36"/>
+<area shape="rect" id="Node000004" href="$classIComms.html#ad776ff948007fd56d75719d5a6704e30" title="Transmite un tren de bytes crudos a través del medio." alt="" coords="537,55,652,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="441,50,524,58,523,63,440,55"/>
+</map>

@@ -1,0 +1,16 @@
+<map id="include/communications/UartStrategy.h" name="include/communications/UartStrategy.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="221,5,402,45"/>
+<area shape="rect" id="Node000002" href="$IComms_8h.html" title=" " alt="" coords="74,93,274,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="280,48,208,89,205,84,277,43"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="280,167,343,192"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="314,46,314,153,309,153,309,46"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="349,93,433,119"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="333,44,371,82,368,85,329,47"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,167,76,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="154,121,76,162,73,158,151,116"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="101,167,175,192"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="170,120,152,156,148,153,166,118"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="197,116,278,158,276,163,195,121"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="199,167,255,192"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="185,117,213,154,208,157,181,121"/>
+</map>

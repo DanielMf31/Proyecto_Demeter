@@ -1,0 +1,45 @@
+<map id="Demeter::SystemContext::getState" name="Demeter::SystemContext::getState">
+<area shape="rect" id="Node000001" title=" " alt="" coords="851,109,1037,149"/>
+<area shape="rect" id="Node000002" href="$classSystemManager.html#ab991cdfe72e7c5033fb4f6ad08d9e457" title=" " alt="" coords="580,91,771,116"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="837,121,771,115,771,110,837,116"/>
+<area shape="rect" id="Node000007" href="$classSystemManager.html#ab9319d4f7cc35364b6bcc4db0076d54e" title=" " alt="" coords="573,201,777,241"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="872,156,736,203,734,198,871,151"/>
+<area shape="rect" id="Node000015" href="$classSystemManager.html#aa8e598f0171ace4ffa645a3ef7faf0ca" title="Initiate a Handshake with a target node." alt="" coords="548,41,803,67"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="880,106,802,81,753,69,755,64,803,75,881,101"/>
+<area shape="rect" id="Node000018" href="$classSystemManager.html#a792ba14d029dca92c9c6fb5cd2715c23" title="Bucle Principal del Sistema (Tick OBLIGATORIO)." alt="" coords="585,140,766,165"/>
+<area shape="poly" id="edge20_Node000001_Node000018" title=" " alt="" coords="837,141,766,147,766,142,837,136"/>
+<area shape="rect" id="Node000003" href="$classNode__Actuator.html#aba4308a373cbf9ba8c6f5cdde23b7502" title="Tick regular ligado al firmware Arduino loop." alt="" coords="327,80,497,105"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="566,102,497,99,497,93,567,96"/>
+<area shape="rect" id="Node000005" href="$classNode__Sensor.html#a4ef0a51ec48c9f9de1cea5167672e707" title="Tarea a correr ininterrumpidamente en el loop() de Arduino." alt="" coords="332,129,492,155"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="575,121,492,133,492,128,575,115"/>
+<area shape="rect" id="Node000004" href="$main__node__actuador_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="169,5,219,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="346,78,323,70,275,44,219,26,220,21,277,40,325,65,348,73"/>
+<area shape="rect" id="Node000006" href="$main__node__sensor_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="169,129,219,155"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="318,145,220,145,220,139,318,139"/>
+<area shape="rect" id="Node000008" href="$classSystemManager.html#a2ed1972442d36a8a964882eb3735f7e2" title="Initialize the system components. Sets up callbacks and initializes enabled hardware." alt="" coords="326,228,498,253"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="560,232,498,237,498,231,560,227"/>
+<area shape="rect" id="Node000009" href="$classNode__Actuator.html#af54ed12f9b1d196df4c05b31f725e993" title="Inicializa los controladores hardware subyacentes." alt="" coords="113,179,275,204"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="341,228,250,207,252,201,343,222"/>
+<area shape="rect" id="Node000011" href="$classNode__Gateway.html#ab304a9b88d40c06a9db44ea3e52c6c16" title="Arranca los administradores de sensores, pines y la máquina de estados." alt="" coords="112,228,276,253"/>
+<area shape="poly" id="edge10_Node000008_Node000011" title=" " alt="" coords="312,243,276,243,276,238,312,238"/>
+<area shape="rect" id="Node000013" href="$classNode__Sensor.html#ae2f8de7388f598988e6ae30a15de3841" title="Arranca los subsistemas hardware y máquinas de estado en init." alt="" coords="119,277,269,303"/>
+<area shape="poly" id="edge12_Node000008_Node000013" title=" " alt="" coords="343,259,252,280,250,275,341,254"/>
+<area shape="rect" id="Node000010" href="$main__node__actuador_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,179,64,204"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="99,194,64,194,64,189,99,189"/>
+<area shape="rect" id="Node000012" href="$main__gateway_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,228,64,253"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="98,243,64,243,64,238,98,238"/>
+<area shape="rect" id="Node000014" href="$main__node__sensor_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="5,277,64,303"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="105,293,64,293,64,287,105,287"/>
+<area shape="poly" id="edge18_Node000015_Node000003" title=" " alt="" coords="575,71,498,83,497,78,574,66"/>
+<area shape="poly" id="edge15_Node000015_Node000004" title=" " alt="" coords="612,41,558,29,500,21,419,15,340,15,220,19,219,14,340,9,420,10,500,15,559,24,613,36"/>
+<area shape="poly" id="edge19_Node000015_Node000005" title=" " alt="" coords="567,73,549,80,535,89,526,99,516,109,501,119,470,132,468,127,499,114,513,105,522,95,532,85,547,76,565,68"/>
+<area shape="rect" id="Node000016" href="$main__gateway_8cpp.html#a2feb8d2d3734b534ca4a558b763dd468" title="Procesa de forma interactiva una cadena recibida por Serial (UART)." alt="" coords="324,31,500,56"/>
+<area shape="poly" id="edge16_Node000015_Node000016" title=" " alt="" coords="534,51,500,50,500,44,534,46"/>
+<area shape="rect" id="Node000017" href="$main__gateway_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title=" " alt="" coords="169,55,219,80"/>
+<area shape="poly" id="edge17_Node000016_Node000017" title=" " alt="" coords="311,57,220,67,219,62,310,52"/>
+<area shape="poly" id="edge21_Node000018_Node000003" title=" " alt="" coords="593,140,547,130,460,108,461,103,549,125,594,135"/>
+<area shape="poly" id="edge24_Node000018_Node000005" title=" " alt="" coords="571,151,492,148,492,143,571,146"/>
+<area shape="rect" id="Node000019" href="$classNode__Gateway.html#af3315261cd44b048d250d8f2ed5da4da" title="Tarea regular Arduino loop() delegada hacia SystemManager." alt="" coords="325,179,499,204"/>
+<area shape="poly" id="edge22_Node000018_Node000019" title=" " alt="" coords="575,170,499,181,499,176,575,165"/>
+<area shape="poly" id="edge23_Node000019_Node000017" title=" " alt="" coords="338,176,323,168,307,156,297,144,274,119,218,82,221,78,278,115,301,141,311,152,325,164,340,171"/>
+</map>

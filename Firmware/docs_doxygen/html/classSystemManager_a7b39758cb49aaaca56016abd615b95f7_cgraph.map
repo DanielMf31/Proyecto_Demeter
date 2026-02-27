@@ -1,0 +1,11 @@
+<map id="SystemManager::sendPinStatus" name="SystemManager::sendPinStatus">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,233,56"/>
+<area shape="rect" id="Node000002" href="$classProtocolEngine.html#af02d2d5acf5a5bafa72e5d826bead6ff" title="Send GPIO State Report (Feedback)." alt="" coords="281,31,503,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="234,41,268,41,268,46,234,46"/>
+<area shape="rect" id="Node000003" href="$classProtocolEngine.html#a756248b6415af686ad17659d13a86273" title="Desciende estamento lógico a una Trama Binaria y la escupe por COMMS. Envuelve el payload crudo antep..." alt="" coords="551,31,749,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="503,41,537,41,537,46,503,46"/>
+<area shape="rect" id="Node000004" href="$classProtocolEngine.html#ad93203ceed2aada77a73556411fd8043" title="Calculates a simple Modular Sum CRC (Mod 256)." alt="" coords="797,5,1011,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="749,31,783,27,784,33,750,36"/>
+<area shape="rect" id="Node000005" href="$classIComms.html#ad776ff948007fd56d75719d5a6704e30" title="Transmite un tren de bytes crudos a través del medio." alt="" coords="847,55,961,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="750,50,833,58,833,63,749,55"/>
+</map>

@@ -1,0 +1,9 @@
+<map id="ProtocolEngine::sendSetGpio" name="ProtocolEngine::sendSetGpio">
+<area shape="rect" id="Node000001" title="Send GPIO Control Command to set a pin state." alt="" coords="5,31,215,56"/>
+<area shape="rect" id="Node000002" href="$classProtocolEngine.html#a756248b6415af686ad17659d13a86273" title="Desciende estamento lógico a una Trama Binaria y la escupe por COMMS. Envuelve el payload crudo antep..." alt="" coords="263,31,461,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="215,41,249,41,249,46,215,46"/>
+<area shape="rect" id="Node000003" href="$classProtocolEngine.html#ad93203ceed2aada77a73556411fd8043" title="Calculates a simple Modular Sum CRC (Mod 256)." alt="" coords="509,5,723,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="461,31,495,27,496,33,462,36"/>
+<area shape="rect" id="Node000004" href="$classIComms.html#ad776ff948007fd56d75719d5a6704e30" title="Transmite un tren de bytes crudos a través del medio." alt="" coords="559,55,673,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="462,50,545,58,545,63,461,55"/>
+</map>

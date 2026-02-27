@@ -1,0 +1,5 @@
+<map id="GpioController" name="GpioController">
+<area shape="rect" id="Node000001" title="Capa de Abstracción de Hardware (HAL) para Control GPIO." alt="" coords="31,133,139,239"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,164,71"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="87,71,87,117,82,117,82,71"/>
+</map>

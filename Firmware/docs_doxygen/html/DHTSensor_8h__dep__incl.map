@@ -1,0 +1,7 @@
+<map id="include/hardware/sensors/DHTSensor.h" name="include/hardware/sensors/DHTSensor.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="91,5,279,45"/>
+<area shape="rect" id="Node000002" href="$DHTSensor_8cpp.html" title="Implementación del driver para sensores de humedad y temperatura DHT (DHT11/DHT22)." alt="" coords="5,93,165,133"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="155,56,109,95,106,91,151,52"/>
+<area shape="rect" id="Node000003" href="$main__node__sensor_8cpp.html" title="Firmware de Entrada Principal (Entry Point) para un Nodo tipo Sensor." alt="" coords="190,101,383,126"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="220,52,274,98,271,102,216,56"/>
+</map>

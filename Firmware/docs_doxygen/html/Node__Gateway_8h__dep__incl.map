@@ -1,0 +1,7 @@
+<map id="include/core/Node_Gateway.h" name="include/core/Node_Gateway.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="103,5,317,31"/>
+<area shape="rect" id="Node000002" href="$Node__Gateway_8cpp.html" title="Implementación de la Lógica del Nodo Concentrador." alt="" coords="5,79,207,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="183,41,125,81,122,76,180,36"/>
+<area shape="rect" id="Node000003" href="$main__gateway_8cpp.html" title="Firmware de Entrada Principal (Entry Point) para el Nodo Gateway (ID 1)." alt="" coords="231,79,397,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="240,36,298,76,295,81,237,41"/>
+</map>
