@@ -1,115 +1,115 @@
 \babel@toc {spanish}{}\relax 
-\contentsline {chapter}{Introducción y Visión del Proyecto}{4}{chapter*.2}%
-\contentsline {section}{\numberline {0.1}Motivación y Problema a Resolver}{4}{section.0.1}%
-\contentsline {section}{\numberline {0.2}Objetivos del Sistema}{4}{section.0.2}%
-\contentsline {subsection}{\numberline {0.2.1}Objetivo General}{4}{subsection.0.2.1}%
-\contentsline {subsection}{\numberline {0.2.2}Objetivos Específicos}{4}{subsection.0.2.2}%
-\contentsline {section}{\numberline {0.3}Descripción General del Sistema}{4}{section.0.3}%
-\contentsline {chapter}{\numberline {1}Protocolo de Comunicación Demeter}{6}{chapter.1}%
-\contentsline {section}{\numberline {1.1}Propósito y Filosofía de Diseño}{6}{section.1.1}%
-\contentsline {section}{\numberline {1.2}Modelos Pydantic: Bridging entre Binario y JSON}{6}{section.1.2}%
-\contentsline {subsection}{\numberline {1.2.1}Diseño de Modelos Discriminados}{6}{subsection.1.2.1}%
-\contentsline {subsection}{\numberline {1.2.2}Auto-descubrimiento y Clasificación Automática}{7}{subsection.1.2.2}%
-\contentsline {subsection}{\numberline {1.2.3}Conversión Binaria: Solo los Valores}{7}{subsection.1.2.3}%
-\contentsline {section}{\numberline {1.3}Comunicación HTTP y WebSocket en el Sistema}{7}{section.1.3}%
-\contentsline {subsection}{\numberline {1.3.1}Flujo de un Comando desde el Navegador}{7}{subsection.1.3.1}%
-\contentsline {subsection}{\numberline {1.3.2}Flujo de Telemetría en Tiempo Real}{8}{subsection.1.3.2}%
-\contentsline {section}{\numberline {1.4}Estructura de una Trama}{8}{section.1.4}%
-\contentsline {section}{\numberline {1.5}Catálogo de Mensajes}{9}{section.1.5}%
-\contentsline {section}{\numberline {1.6}Codificación de Datos}{9}{section.1.6}%
-\contentsline {subsection}{\numberline {1.6.1}Temperatura y Humedad (Punto Fijo ×100)}{9}{subsection.1.6.1}%
-\contentsline {subsection}{\numberline {1.6.2}Duraciones en Secuencias (32 bits Little Endian)}{9}{subsection.1.6.2}%
-\contentsline {section}{\numberline {1.7}Ejemplos de Tramas Reales}{9}{section.1.7}%
-\contentsline {subsection}{\numberline {1.7.1}Telemetría de Sensor (TEMP\_HUM\_REPORT)}{9}{subsection.1.7.1}%
-\contentsline {subsection}{\numberline {1.7.2}Comando de Actuación (SET\_GPIO)}{10}{subsection.1.7.2}%
-\contentsline {subsection}{\numberline {1.7.3}Inicio de Handshake (SYN)}{10}{subsection.1.7.3}%
-\contentsline {section}{\numberline {1.8}Algoritmos de Serialización y Deserialización}{10}{section.1.8}%
-\contentsline {subsection}{\numberline {1.8.1}Serialización}{10}{subsection.1.8.1}%
-\contentsline {subsection}{\numberline {1.8.2}Deserialización y Validación}{10}{subsection.1.8.2}%
-\contentsline {subsection}{\numberline {1.8.3}Manejo de Errores}{10}{subsection.1.8.3}%
-\contentsline {section}{\numberline {1.9}Handshake TCP-like}{11}{section.1.9}%
-\contentsline {section}{\numberline {1.10}Flujo Extremo a Extremo}{11}{section.1.10}%
-\contentsline {section}{\numberline {1.11}Consideraciones de Tiempo y Saturación}{11}{section.1.11}%
-\contentsline {subsection}{\numberline {1.11.1}Tiempos de Transmisión}{11}{subsection.1.11.1}%
-\contentsline {subsection}{\numberline {1.11.2}Ciclo Energético del Nodo Sensor}{11}{subsection.1.11.2}%
-\contentsline {subsection}{\numberline {1.11.3}Limitaciones Conocidas}{12}{subsection.1.11.3}%
-\contentsline {chapter}{\numberline {2}Arquitectura del Firmware}{13}{chapter.2}%
-\contentsline {section}{\numberline {2.1}Visión General}{13}{section.2.1}%
-\contentsline {section}{\numberline {2.2}Los Tres Tipos de Nodo}{13}{section.2.2}%
-\contentsline {subsection}{\numberline {2.2.1}Nodo Sensor}{13}{subsection.2.2.1}%
-\contentsline {subsection}{\numberline {2.2.2}Nodo Actuador}{13}{subsection.2.2.2}%
-\contentsline {subsection}{\numberline {2.2.3}Nodo Gateway}{14}{subsection.2.2.3}%
-\contentsline {section}{\numberline {2.3}Arquitectura Interna en Capas}{14}{section.2.3}%
-\contentsline {subsection}{\numberline {2.3.1}El Orquestador del Sistema}{14}{subsection.2.3.1}%
-\contentsline {section}{\numberline {2.4}El Motor de Protocolo}{15}{section.2.4}%
-\contentsline {subsection}{\numberline {2.4.1}Responsabilidades del Motor}{15}{subsection.2.4.1}%
-\contentsline {subsection}{\numberline {2.4.2}Pipeline de Recepción}{15}{subsection.2.4.2}%
-\contentsline {section}{\numberline {2.5}Estrategias de Transporte}{15}{section.2.5}%
-\contentsline {subsection}{\numberline {2.5.1}Transporte ESP-NOW}{15}{subsection.2.5.1}%
-\contentsline {subsection}{\numberline {2.5.2}Transporte UART (Serial)}{16}{subsection.2.5.2}%
-\contentsline {subsection}{\numberline {2.5.3}Transporte Mixto (Gateway)}{16}{subsection.2.5.3}%
-\contentsline {chapter}{\numberline {3}Servicio de Borde: Raspberry Pi}{17}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Misión y Posición en la Arquitectura del Sistema}{17}{section.3.1}%
-\contentsline {section}{\numberline {3.2}Contenedorización y Acceso a Recursos del Sistema}{17}{section.3.2}%
-\contentsline {section}{\numberline {3.3}El Motor de Concurrencia: asyncio}{18}{section.3.3}%
-\contentsline {section}{\numberline {3.4}El Módulo del Protocolo Demeter en la Raspberry Pi}{18}{section.3.4}%
-\contentsline {section}{\numberline {3.5}Comunicación con el Backend: El Canal WebSocket}{19}{section.3.5}%
-\contentsline {section}{\numberline {3.6}El Command Dispatcher: Adaptador JSON $\leftrightarrow $ Binario}{19}{section.3.6}%
-\contentsline {section}{\numberline {3.7}Device Manager: La Caché Local de Topología}{20}{section.3.7}%
-\contentsline {chapter}{\numberline {4}Servidor Central: Backend en Google Cloud}{21}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Visión General del Servidor}{21}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Arquitectura de Contenedores Docker}{21}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Redis: Bus de Mensajes y Caché}{22}{section.4.3}%
-\contentsline {subsection}{\numberline {4.3.1}Las Cuatro Categorías de Datos en Redis}{22}{subsection.4.3.1}%
-\contentsline {subsection}{\numberline {4.3.2}Canales Pub/Sub}{22}{subsection.4.3.2}%
-\contentsline {section}{\numberline {4.4}PostgreSQL: Persistencia y Esquema de Datos}{22}{section.4.4}%
-\contentsline {section}{\numberline {4.5}El Worker Matemático}{23}{section.4.5}%
-\contentsline {section}{\numberline {4.6}El Secuenciador}{23}{section.4.6}%
-\contentsline {section}{\numberline {4.7}El Backend FastAPI}{24}{section.4.7}%
-\contentsline {section}{\numberline {4.8}El Frontend React}{24}{section.4.8}%
-\contentsline {section}{\numberline {4.9}Documentación de la API REST}{24}{section.4.9}%
-\contentsline {subsection}{\numberline {4.9.1}Sistema (\texttt {/api/system})}{24}{subsection.4.9.1}%
-\contentsline {subsection}{\numberline {4.9.2}Autenticación (\texttt {/api/auth})}{25}{subsection.4.9.2}%
-\contentsline {subsection}{\numberline {4.9.3}Comandos (\texttt {/api/command})}{25}{subsection.4.9.3}%
-\contentsline {subsection}{\numberline {4.9.4}Descubrimiento (\texttt {/api/discovery})}{25}{subsection.4.9.4}%
-\contentsline {subsection}{\numberline {4.9.5}Historial de Telemetría (\texttt {/api/history})}{25}{subsection.4.9.5}%
-\contentsline {subsection}{\numberline {4.9.6}LIMS --- Plantas y Experimentos (\texttt {/api/lims})}{26}{subsection.4.9.6}%
-\contentsline {subsection}{\numberline {4.9.7}Análisis Científico (\texttt {/api/analysis})}{26}{subsection.4.9.7}%
-\contentsline {subsection}{\numberline {4.9.8}SDK Científico (\texttt {/api/sdk})}{26}{subsection.4.9.8}%
-\contentsline {subsection}{\numberline {4.9.9}Exportación (\texttt {/api/export})}{26}{subsection.4.9.9}%
-\contentsline {section}{\numberline {4.10}El Canal WebSocket}{26}{section.4.10}%
-\contentsline {chapter}{\numberline {5}SDK Científico de Python — \texttt {demeter\_sdk}}{28}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Propósito y Filosofía}{28}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Arquitectura Modular}{28}{section.5.2}%
-\contentsline {section}{\numberline {5.3}Instalación y Configuración}{29}{section.5.3}%
-\contentsline {section}{\numberline {5.4}Obtención de Datos: Módulo Fetcher}{29}{section.5.4}%
-\contentsline {section}{\numberline {5.5}Pipeline ETL: Módulo Transform}{29}{section.5.5}%
-\contentsline {section}{\numberline {5.6}Cálculos Agronómicos: Módulo Science}{30}{section.5.6}%
-\contentsline {subsection}{\numberline {5.6.1}Termodinámica del Aire Húmedo}{30}{subsection.5.6.1}%
-\contentsline {subsubsection}{Presión de Vapor de Saturación ($e_s$)}{30}{subsubsection*.28}%
-\contentsline {subsubsection}{Déficit de Presión de Vapor (VPD)}{30}{subsubsection*.29}%
-\contentsline {subsubsection}{Punto de Rocío ($T_d$)}{31}{subsubsection*.31}%
-\contentsline {subsubsection}{Temperatura de Bulbo Húmedo ($T_w$) — Stull 2011}{31}{subsubsection*.32}%
-\contentsline {subsubsection}{Humedad Absoluta}{31}{subsubsection*.33}%
-\contentsline {subsubsection}{Entalpía Específica del Aire Húmedo — ASHRAE}{31}{subsubsection*.34}%
-\contentsline {subsubsection}{Índice de Calor (Rothfusz, NWS)}{31}{subsubsection*.35}%
-\contentsline {subsubsection}{Riesgo de Rocío en Hoja (LSD)}{32}{subsubsection*.36}%
-\contentsline {subsection}{\numberline {5.6.2}Fenología y Tiempo}{32}{subsection.5.6.2}%
-\contentsline {subsubsection}{Grados-Día de Crecimiento (GDD)}{32}{subsubsection*.37}%
-\contentsline {subsubsection}{Horas de Frío (\textit {Chill Hours})}{32}{subsubsection*.38}%
-\contentsline {subsubsection}{Evapotranspiración de Referencia — Hargreaves-Samani ($ET_0$)}{32}{subsubsection*.39}%
-\contentsline {subsubsection}{Días Tras la Siembra (DAP)}{32}{subsubsection*.40}%
-\contentsline {subsection}{\numberline {5.6.3}Estadística y Detección de Anomalías}{33}{subsection.5.6.3}%
-\contentsline {subsubsection}{Z-Score}{33}{subsubsection*.41}%
-\contentsline {subsubsection}{Índice de Riesgo Wallin (1962) — Tizón Tardío}{33}{subsubsection*.42}%
-\contentsline {subsubsection}{Media Móvil 24h}{33}{subsubsection*.44}%
-\contentsline {section}{\numberline {5.7}El Helper \texttt {enrich()}: Enriquecimiento en Una Llamada}{33}{section.5.7}%
-\contentsline {section}{\numberline {5.8}Visualización Científica: Módulo Viz}{34}{section.5.8}%
-\contentsline {section}{\numberline {5.9}Exportación Científica: Módulo Export}{35}{section.5.9}%
-\contentsline {subsection}{\numberline {5.9.1}CSV}{35}{subsection.5.9.1}%
-\contentsline {subsection}{\numberline {5.9.2}Excel Multi-hoja}{35}{subsection.5.9.2}%
-\contentsline {section}{\numberline {5.10}Suite Completa — Un Solo Comando}{35}{section.5.10}%
-\contentsline {section}{\numberline {5.11}Ejemplo de Sesión Completa con Jupyter}{36}{section.5.11}%
-\contentsline {section}{\numberline {5.12}Referencia Rápida de Parámetros}{37}{section.5.12}%
-\contentsline {section}{\numberline {.1}Diagramas de Actividad --- Protocolo Demeter}{38}{section.Alph0.1}%
-\contentsline {section}{\numberline {.2}Esquema de Base de Datos}{38}{section.Alph0.2}%
+\contentsline {chapter}{Introducción y Visión del Proyecto}{5}{chapter*.2}%
+\contentsline {section}{\numberline {0.1}Motivación y Problema a Resolver}{5}{section.0.1}%
+\contentsline {section}{\numberline {0.2}Objetivos del Sistema}{5}{section.0.2}%
+\contentsline {subsection}{\numberline {0.2.1}Objetivo General}{5}{subsection.0.2.1}%
+\contentsline {subsection}{\numberline {0.2.2}Objetivos Específicos}{5}{subsection.0.2.2}%
+\contentsline {section}{\numberline {0.3}Descripción General del Sistema}{5}{section.0.3}%
+\contentsline {chapter}{\numberline {1}Protocolo de Comunicación Demeter}{7}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Propósito y Filosofía de Diseño}{7}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Modelos Pydantic: Bridging entre Binario y JSON}{7}{section.1.2}%
+\contentsline {subsection}{\numberline {1.2.1}Diseño de Modelos Discriminados}{7}{subsection.1.2.1}%
+\contentsline {subsection}{\numberline {1.2.2}Auto-descubrimiento y Clasificación Automática}{8}{subsection.1.2.2}%
+\contentsline {subsection}{\numberline {1.2.3}Conversión Binaria: Solo los Valores}{8}{subsection.1.2.3}%
+\contentsline {section}{\numberline {1.3}Comunicación HTTP y WebSocket en el Sistema}{8}{section.1.3}%
+\contentsline {subsection}{\numberline {1.3.1}Flujo de un Comando desde el Navegador}{8}{subsection.1.3.1}%
+\contentsline {subsection}{\numberline {1.3.2}Flujo de Telemetría en Tiempo Real}{9}{subsection.1.3.2}%
+\contentsline {section}{\numberline {1.4}Estructura de una Trama}{9}{section.1.4}%
+\contentsline {section}{\numberline {1.5}Catálogo de Mensajes}{10}{section.1.5}%
+\contentsline {section}{\numberline {1.6}Codificación de Datos}{10}{section.1.6}%
+\contentsline {subsection}{\numberline {1.6.1}Temperatura y Humedad (Punto Fijo ×100)}{10}{subsection.1.6.1}%
+\contentsline {subsection}{\numberline {1.6.2}Duraciones en Secuencias (32 bits Little Endian)}{10}{subsection.1.6.2}%
+\contentsline {section}{\numberline {1.7}Ejemplos de Tramas Reales}{10}{section.1.7}%
+\contentsline {subsection}{\numberline {1.7.1}Telemetría de Sensor (TEMP\_HUM\_REPORT)}{10}{subsection.1.7.1}%
+\contentsline {subsection}{\numberline {1.7.2}Comando de Actuación (SET\_GPIO)}{11}{subsection.1.7.2}%
+\contentsline {subsection}{\numberline {1.7.3}Inicio de Handshake (SYN)}{11}{subsection.1.7.3}%
+\contentsline {section}{\numberline {1.8}Algoritmos de Serialización y Deserialización}{11}{section.1.8}%
+\contentsline {subsection}{\numberline {1.8.1}Serialización}{11}{subsection.1.8.1}%
+\contentsline {subsection}{\numberline {1.8.2}Deserialización y Validación}{11}{subsection.1.8.2}%
+\contentsline {subsection}{\numberline {1.8.3}Manejo de Errores}{11}{subsection.1.8.3}%
+\contentsline {section}{\numberline {1.9}Handshake TCP-like}{12}{section.1.9}%
+\contentsline {section}{\numberline {1.10}Flujo Extremo a Extremo}{12}{section.1.10}%
+\contentsline {section}{\numberline {1.11}Consideraciones de Tiempo y Saturación}{12}{section.1.11}%
+\contentsline {subsection}{\numberline {1.11.1}Tiempos de Transmisión}{12}{subsection.1.11.1}%
+\contentsline {subsection}{\numberline {1.11.2}Ciclo Energético del Nodo Sensor}{12}{subsection.1.11.2}%
+\contentsline {subsection}{\numberline {1.11.3}Limitaciones Conocidas}{13}{subsection.1.11.3}%
+\contentsline {chapter}{\numberline {2}Arquitectura del Firmware}{14}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Visión General}{14}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Los Tres Tipos de Nodo}{14}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Nodo Sensor}{14}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Nodo Actuador}{14}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}Nodo Gateway}{15}{subsection.2.2.3}%
+\contentsline {section}{\numberline {2.3}Arquitectura Interna en Capas}{15}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}El Orquestador del Sistema}{15}{subsection.2.3.1}%
+\contentsline {section}{\numberline {2.4}El Motor de Protocolo}{16}{section.2.4}%
+\contentsline {subsection}{\numberline {2.4.1}Responsabilidades del Motor}{16}{subsection.2.4.1}%
+\contentsline {subsection}{\numberline {2.4.2}Pipeline de Recepción}{16}{subsection.2.4.2}%
+\contentsline {section}{\numberline {2.5}Estrategias de Transporte}{16}{section.2.5}%
+\contentsline {subsection}{\numberline {2.5.1}Transporte ESP-NOW}{16}{subsection.2.5.1}%
+\contentsline {subsection}{\numberline {2.5.2}Transporte UART (Serial)}{17}{subsection.2.5.2}%
+\contentsline {subsection}{\numberline {2.5.3}Transporte Mixto (Gateway)}{17}{subsection.2.5.3}%
+\contentsline {chapter}{\numberline {3}Servicio de Borde: Raspberry Pi}{18}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Misión y Posición en la Arquitectura del Sistema}{18}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Contenedorización y Acceso a Recursos del Sistema}{18}{section.3.2}%
+\contentsline {section}{\numberline {3.3}El Motor de Concurrencia: asyncio}{19}{section.3.3}%
+\contentsline {section}{\numberline {3.4}El Módulo del Protocolo Demeter en la Raspberry Pi}{19}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Comunicación con el Backend: El Canal WebSocket}{20}{section.3.5}%
+\contentsline {section}{\numberline {3.6}El Command Dispatcher: Adaptador JSON $\leftrightarrow $ Binario}{20}{section.3.6}%
+\contentsline {section}{\numberline {3.7}Device Manager: La Caché Local de Topología}{21}{section.3.7}%
+\contentsline {chapter}{\numberline {4}Servidor Central: Backend en Google Cloud}{22}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Visión General del Servidor}{22}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Arquitectura de Contenedores Docker}{22}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Redis: Bus de Mensajes y Caché}{23}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Las Cuatro Categorías de Datos en Redis}{23}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Canales Pub/Sub}{23}{subsection.4.3.2}%
+\contentsline {section}{\numberline {4.4}PostgreSQL: Persistencia y Esquema de Datos}{23}{section.4.4}%
+\contentsline {section}{\numberline {4.5}El Worker Matemático}{24}{section.4.5}%
+\contentsline {section}{\numberline {4.6}El Secuenciador}{24}{section.4.6}%
+\contentsline {section}{\numberline {4.7}El Backend FastAPI}{25}{section.4.7}%
+\contentsline {section}{\numberline {4.8}El Frontend React}{25}{section.4.8}%
+\contentsline {section}{\numberline {4.9}Documentación de la API REST}{25}{section.4.9}%
+\contentsline {subsection}{\numberline {4.9.1}Sistema (\texttt {/api/system})}{25}{subsection.4.9.1}%
+\contentsline {subsection}{\numberline {4.9.2}Autenticación (\texttt {/api/auth})}{26}{subsection.4.9.2}%
+\contentsline {subsection}{\numberline {4.9.3}Comandos (\texttt {/api/command})}{26}{subsection.4.9.3}%
+\contentsline {subsection}{\numberline {4.9.4}Descubrimiento (\texttt {/api/discovery})}{26}{subsection.4.9.4}%
+\contentsline {subsection}{\numberline {4.9.5}Historial de Telemetría (\texttt {/api/history})}{26}{subsection.4.9.5}%
+\contentsline {subsection}{\numberline {4.9.6}LIMS --- Plantas y Experimentos (\texttt {/api/lims})}{27}{subsection.4.9.6}%
+\contentsline {subsection}{\numberline {4.9.7}Análisis Científico (\texttt {/api/analysis})}{27}{subsection.4.9.7}%
+\contentsline {subsection}{\numberline {4.9.8}SDK Científico (\texttt {/api/sdk})}{27}{subsection.4.9.8}%
+\contentsline {subsection}{\numberline {4.9.9}Exportación (\texttt {/api/export})}{27}{subsection.4.9.9}%
+\contentsline {section}{\numberline {4.10}El Canal WebSocket}{27}{section.4.10}%
+\contentsline {chapter}{\numberline {5}SDK Científico de Python — \texttt {demeter\_sdk}}{29}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Propósito y Filosofía}{29}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Arquitectura Modular}{29}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Instalación y Configuración}{30}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Obtención de Datos: Módulo Fetcher}{30}{section.5.4}%
+\contentsline {section}{\numberline {5.5}Pipeline ETL: Módulo Transform}{30}{section.5.5}%
+\contentsline {section}{\numberline {5.6}Cálculos Agronómicos: Módulo Science}{31}{section.5.6}%
+\contentsline {subsection}{\numberline {5.6.1}Termodinámica del Aire Húmedo}{31}{subsection.5.6.1}%
+\contentsline {subsubsection}{Presión de Vapor de Saturación ($e_s$)}{31}{subsubsection*.28}%
+\contentsline {subsubsection}{Déficit de Presión de Vapor (VPD)}{31}{subsubsection*.29}%
+\contentsline {subsubsection}{Punto de Rocío ($T_d$)}{32}{subsubsection*.31}%
+\contentsline {subsubsection}{Temperatura de Bulbo Húmedo ($T_w$) — Stull 2011}{32}{subsubsection*.32}%
+\contentsline {subsubsection}{Humedad Absoluta}{32}{subsubsection*.33}%
+\contentsline {subsubsection}{Entalpía Específica del Aire Húmedo — ASHRAE}{33}{subsubsection*.34}%
+\contentsline {subsubsection}{Índice de Calor (Rothfusz, NWS)}{33}{subsubsection*.35}%
+\contentsline {subsubsection}{Riesgo de Rocío en Hoja (LSD)}{33}{subsubsection*.36}%
+\contentsline {subsection}{\numberline {5.6.2}Fenología y Tiempo}{34}{subsection.5.6.2}%
+\contentsline {subsubsection}{Grados-Día de Crecimiento (GDD)}{34}{subsubsection*.37}%
+\contentsline {subsubsection}{Horas de Frío (\textit {Chill Hours})}{34}{subsubsection*.38}%
+\contentsline {subsubsection}{Evapotranspiración de Referencia — Hargreaves-Samani ($ET_0$)}{34}{subsubsection*.39}%
+\contentsline {subsubsection}{Días Tras la Siembra (DAP)}{34}{subsubsection*.40}%
+\contentsline {subsection}{\numberline {5.6.3}Estadística y Detección de Anomalías}{35}{subsection.5.6.3}%
+\contentsline {subsubsection}{Z-Score}{35}{subsubsection*.41}%
+\contentsline {subsubsection}{Índice de Riesgo Wallin (1962) — Tizón Tardío}{35}{subsubsection*.42}%
+\contentsline {subsubsection}{Media Móvil 24h}{35}{subsubsection*.44}%
+\contentsline {section}{\numberline {5.7}El Helper \texttt {enrich()}: Enriquecimiento en Una Llamada}{35}{section.5.7}%
+\contentsline {section}{\numberline {5.8}Visualización Científica: Módulo Viz}{36}{section.5.8}%
+\contentsline {section}{\numberline {5.9}Exportación Científica: Módulo Export}{37}{section.5.9}%
+\contentsline {subsection}{\numberline {5.9.1}CSV}{37}{subsection.5.9.1}%
+\contentsline {subsection}{\numberline {5.9.2}Excel Multi-hoja}{37}{subsection.5.9.2}%
+\contentsline {section}{\numberline {5.10}Suite Completa — Un Solo Comando}{38}{section.5.10}%
+\contentsline {section}{\numberline {5.11}Ejemplo de Sesión Completa con Jupyter}{38}{section.5.11}%
+\contentsline {section}{\numberline {5.12}Referencia Rápida de Parámetros}{39}{section.5.12}%
+\contentsline {section}{\numberline {.1}Diagramas de Actividad --- Protocolo Demeter}{40}{section.Alph0.1}%
+\contentsline {section}{\numberline {.2}Esquema de Base de Datos}{40}{section.Alph0.2}%
