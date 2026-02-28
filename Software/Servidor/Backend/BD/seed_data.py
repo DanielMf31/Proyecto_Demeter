@@ -5,7 +5,7 @@ import math
 import numpy as np
 import sys
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 # Fix ModuleNotFoundError within Docker
 sys.path.insert(0, '/app/Software/Common')
@@ -94,7 +94,7 @@ async def seed_historical_data(db: AsyncSession):
     # ─── Crear 20 Plantas ─────────────────────────────────────────────────────
     logger.info("Creando 20 Plantas LIMS (4 especies × 5 variedades)...")
     plantas = []
-    fecha_base = datetime.utcnow().date() - timedelta(days=200)
+    fecha_base = datetime.now(timezone.utc).date() - timedelta(days=200)
     
     for i, spec in enumerate(SPECIES_CATALOG, start=1):
         p = Plant(
@@ -143,7 +143,7 @@ async def seed_historical_data(db: AsyncSession):
     # ─── Generar 6 meses (180 días) de telemetría ─────────────────────────────
     logger.info("Generando 6 meses (180 días) de telemetría usando NumPy...")
     num_plants = len(plantas)
-    now = datetime.utcnow().replace(minute=0, second=0, microsecond=0)
+    now = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
     start_date = now - timedelta(days=180)
     total_hours = 180 * 24  # 4320 horas
     

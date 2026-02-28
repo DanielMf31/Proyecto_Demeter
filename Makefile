@@ -249,7 +249,7 @@ test-all:
 	@echo "======================================================"
 	@echo ""
 	@echo "[1/4] Firmware C++ (PlatformIO)"
-	cd Firmware && pio test -e native
+	cd Firmware && bash -c "set -o pipefail; pio test -e native | sed '/Verbosity level can be increased/d'"
 	@echo ""
 	@echo "[2/4] Backend (pytest)"
 	cd Software/Servidor/Backend && pytest tests/

@@ -26,7 +26,7 @@ Flujo completo:
 
 import asyncio
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import TypeAdapter, ValidationError
 from Core.logger import setup_logger
 from Core.redis import redis_manager
@@ -109,7 +109,7 @@ async def handle_gateway_message(data: dict) -> None:
                     node_id=report.node_id,
                     temperature=report.temperature,
                     humidity=report.humidity,
-                    timestamp=datetime.utcnow()
+                    timestamp=datetime.now(timezone.utc)
                 )
                 session.add(db_report)
                 await session.commit()
@@ -136,7 +136,7 @@ async def handle_gateway_message(data: dict) -> None:
                     node_id=report.node_id,
                     pin=report.pin,
                     state=bool(report.state),
-                    timestamp=datetime.utcnow()
+                    timestamp=datetime.now(timezone.utc)
                 )
                 session.add(db_report)
                 await session.commit()
@@ -163,7 +163,7 @@ async def handle_gateway_message(data: dict) -> None:
                     node_id=report.node_id,
                     mode=report.mode,
                     battery_mv=report.battery_mv,
-                    timestamp=datetime.utcnow()
+                    timestamp=datetime.now(timezone.utc)
                 )
                 session.add(db_report)
                 await session.commit()
@@ -197,7 +197,7 @@ async def start_activity_batch_flusher() -> None:
                                 action_type=event.get("action_type", "unknown"),
                                 device_id=event.get("device_id"),
                                 description=event.get("description"),
-                                timestamp=datetime.fromisoformat(event["timestamp"]) if "timestamp" in event else datetime.utcnow()
+                                timestamp=datetime.fromisoformat(event["timestamp"]) if "timestamp" in event else datetime.now(timezone.utc)
                             )
                             session.add(log)
                         await session.commit()

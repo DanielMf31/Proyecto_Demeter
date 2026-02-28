@@ -27,7 +27,7 @@ Ventajas sobre WS desde el Frontend:
 
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import TypeAdapter, ValidationError
 
@@ -129,7 +129,7 @@ async def post_command(body: dict, current_user: User = Depends(get_current_acti
             "action_type": "button_press",
             "device_id": cmd.pin, # Por ahora usamos pin como device_id simplificado
             "description": f"Manual toggle Node:{cmd.target_id} Pin:{cmd.pin} -> {cmd.value}", # type: ignore[attr-defined]
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         })
 
     # ── 4. Informar al frontend si la Raspberry está conectada ───────────────
