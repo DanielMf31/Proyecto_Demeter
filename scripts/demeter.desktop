@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Demeter Control
+Comment=Reinicia contenedores y abre Edge UI
+Icon=browser
+Exec=/home/montero/Documentos/Proyectos_Personales/Proyecto_Demeter/scripts/launch_demeter.sh
+Terminal=true
+Type=Application
+Categories=Utility;Application;
+Name[es_ES]=Demeter Control
