@@ -78,7 +78,7 @@ services:
     restart: unless-stopped
     build:
       context: .
-      dockerfile: Software/Servidor/docker/frontend/Dockerfile
+      dockerfile: Software/Servidor/docker/frontend/Dockerfile.rpi
       args:
         # El navegador de la Raspberry apuntará a la API local alojada en localhost
         VITE_API_URL: http://localhost:8001/api
