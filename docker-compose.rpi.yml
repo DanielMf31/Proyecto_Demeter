@@ -69,9 +69,15 @@ services:
         reservations:
           memory: 64M
 
+    # Entrypoint de Edge Mode: usa edge_server.py (FastAPI + Uvicorn)
+    # Deja command_dispatcher.py intacto para el modo normal (rpi)
+    command: [ "python", "-m", "proyecto_demeter.Hardware.orchestration.edge_server" ]
+
   # ─── Local UI (Edge Architecture) ─────────────────────────────────────────
   # Interfaz web servida directamente desde la Raspberry.
   # Permite conectar una pantalla física a la Raspberry y ver la UI en localhost.
+  # El gateway en modo rpi-local usa edge_server.py como entrypoint,
+  # que integra FastAPI + Uvicorn sin tocar command_dispatcher.py.
   local-ui:
     image: demeter-local-ui:latest
     container_name: demeter-local-ui
