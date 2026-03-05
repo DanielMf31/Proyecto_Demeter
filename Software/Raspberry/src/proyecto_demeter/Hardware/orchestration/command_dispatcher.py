@@ -20,6 +20,10 @@ import logging
 import json
 from typing import Optional, Dict, Any
 
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
+
 from demeter_protocol import DemeterProtocolV2
 from schemas import (
     DemeterCommand, SetGpio, Ping, GetSensors, ExecSequence, SequenceStep,
@@ -59,14 +63,57 @@ class GatewayOrchestrator:
             on_open_callback=self.report_system_config
         )
 
+        # ── Local API (Edge Architecture) ──
+        self.app = FastAPI(title="Demeter Edge API")
+        self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+        self._setup_local_routes()
+
+    def _setup_local_routes(self):
+        @self.app.post("/api/auth/login")
+        async def mock_login(request: Request):
+            return {"access_token": "edge_local_token", "token_type": "bearer"}
+
+        @self.app.get("/api/devices")
+        async def get_devices():
+            return {
+                "status": "online",
+                "devices": self.device_manager.get_config()
+            }
+
+        @self.app.post("/api/command")
+        async def post_command(request: Request):
+            try:
+                data = await request.json()
+            except json.JSONDecodeError:
+                return {"error": "Invalid JSON"}
+            
+            cmd_model = self._parse_incoming_command(data)
+            if cmd_model:
+                self.logger.info(f"[Edge API] Publishing local command: {type(cmd_model).__name__}")
+                await self.uart.send_command(cmd_model)
+                return {"status": "success"}
+            return {"error": "Invalid command payload"}
+
     # ── Lifecycle ─────────────────────────────────────────────────────────────
 
     async def start(self):
         self.logger.info("Starting Gateway Orchestrator…")
         self.uart.add_listener(self.dispatch_uart_to_ws)
         uart_task = asyncio.create_task(self.uart.start())
+        
+        # Start Local API Server
+        config = uvicorn.Config(self.app, host="0.0.0.0", port=8001, log_level="info")
+        server = uvicorn.Server(config)
+        api_task = asyncio.create_task(server.serve())
+
         await self.ws_client.start()
-        await uart_task  # runs forever
+        await asyncio.gather(uart_task, api_task)
 
     async def stop(self):
         await self.ws_client.stop()

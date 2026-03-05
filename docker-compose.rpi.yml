@@ -68,3 +68,20 @@ services:
           memory: 256M
         reservations:
           memory: 64M
+
+  # ─── Local UI (Edge Architecture) ─────────────────────────────────────────
+  # Interfaz web servida directamente desde la Raspberry.
+  # Permite conectar una pantalla física a la Raspberry y ver la UI en localhost.
+  local-ui:
+    image: demeter-local-ui:latest
+    container_name: demeter-local-ui
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Software/Servidor/docker/frontend/Dockerfile
+      args:
+        # El navegador de la Raspberry apuntará a la API local alojada en localhost
+        VITE_API_URL: http://localhost:8001/api
+        VITE_WS_URL: ws://localhost:8001/ws
+    ports:
+      - "80:80" # Permite acceso via localhost desde la propia pantalla de la RPi
