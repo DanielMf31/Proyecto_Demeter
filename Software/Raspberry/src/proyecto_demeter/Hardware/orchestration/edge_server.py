@@ -66,15 +66,19 @@ async def post_command(request: Request):
     """Envía un comando directamente al bus UART de la Raspberry Pi."""
     try:
         data = await request.json()
+        logger.info(f"[Edge API] <-- Petitoria recibida: {data}")
     except Exception:
+        logger.error("[Edge API] Error al parsear JSON de la petición")
         return {"error": "Invalid JSON"}
 
     cmd_model = gateway._parse_incoming_command(data)
     if cmd_model:
-        logger.info(f"[Edge API] Local command: {type(cmd_model).__name__}")
+        logger.info(f"[Edge API] --> Comando parseado: {type(cmd_model).__name__} (Target: {cmd_model.target_id})")
         await gateway.uart.send_command(cmd_model)
+        logger.info(f"[Edge API] OK: Comando enviado al bus UART")
         return {"status": "success"}
 
+    logger.warning(f"[Edge API] FAIL: No se pudo mapear el comando JSON a la especificación Demeter: {data}")
     return {"error": "Invalid command payload"}
 
 
