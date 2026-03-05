@@ -71,7 +71,7 @@ services:
 
     # Entrypoint de Edge Mode: usa edge_server.py (FastAPI + Uvicorn)
     # Deja command_dispatcher.py intacto para el modo normal (rpi)
-    command: [ "python", "-m", "proyecto_demeter.Hardware.orchestration.edge_server" ]
+    command: [ "python", "Software/Raspberry/src/proyecto_demeter/Hardware/orchestration/edge_server.py" ]
 
   # ─── Local UI (Edge Architecture) ─────────────────────────────────────────
   # Interfaz web servida directamente desde la Raspberry.
