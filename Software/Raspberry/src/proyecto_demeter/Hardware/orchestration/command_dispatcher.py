@@ -59,9 +59,9 @@ class GatewayOrchestrator:
         self.protocol = DemeterProtocolV2()
         self.device_manager = DeviceManager()
         self.ws_client = DemeterWebsocketClient(
-        on_message_callback=self.dispatch_ws_to_uart,
-        on_open_callback=self.report_system_config
-    )
+            on_message_callback=dispatch_ws_to_uart,
+            on_open_callback=self.report_system_config
+        )
 
 # ── Global App & Gateway Instance ──
 app = FastAPI(title="Demeter Edge API")
@@ -123,32 +123,31 @@ async def stop_gateway():
 
 # ── WS → UART ─────────────────────────────────────────────────────────────
 
-    @staticmethod
-    def dispatch_ws_to_uart(raw_message: str) -> None:
-        """
-        Recibe un comando JSON desde el servidor WebSocket y lo reenvía por UART.
+async def dispatch_ws_to_uart(raw_message: str) -> None:
+    """
+    Recibe un comando JSON desde el servidor WebSocket y lo reenvía por UART.
 
-        El servidor (o frontend) debe enviar JSON con el campo `type`:
-            {"type": "set_gpio",      "target_id": 1, "pin": 4, "value": 1}
-            {"type": "exec_sequence", "target_id": 1, "steps": [...]}
-            {"type": "ping",          "target_id": 1}
+    El servidor (o frontend) debe enviar JSON con el campo `type`:
+        {"type": "set_gpio",      "target_id": 1, "pin": 4, "value": 1}
+        {"type": "exec_sequence", "target_id": 1, "steps": [...]}
+        {"type": "ping",          "target_id": 1}
 
-        Pydantic discrimina el tipo automáticamente. No hay lógica if/elif.
-        """
-        try:
-            data: Dict[str, Any] = json.loads(raw_message)
-        except json.JSONDecodeError:
-            print("dispatch_ws_to_uart: JSON inválido recibido")
-            return
+    Pydantic discrimina el tipo automáticamente. No hay lógica if/elif.
+    """
+    try:
+        data: Dict[str, Any] = json.loads(raw_message)
+    except json.JSONDecodeError:
+        gateway.logger.error("dispatch_ws_to_uart: JSON inválido recibido")
+        return
 
-        print(f"[WS RX] {data}")
+    gateway.logger.debug(f"[WS RX] {data}")
 
-        cmd_model = gateway._parse_incoming_command(data)
-        if cmd_model:
-            print(f"[Bridge WS→UART] Enviando {type(cmd_model).__name__} por UART")
-            asyncio.create_task(gateway.uart.send_command(cmd_model))
-        else:
-            print(f"[Bridge WS→UART] No se pudo mapear el comando: {data}")
+    cmd_model = gateway._parse_incoming_command(data)
+    if cmd_model:
+        gateway.logger.info(f"[Bridge WS→UART] Enviando {type(cmd_model).__name__} por UART")
+        await gateway.uart.send_command(cmd_model)
+    else:
+        gateway.logger.warning(f"[Bridge WS→UART] No se pudo mapear el comando: {data}")
 
 
     def _parse_incoming_command(self, data: Dict[str, Any]) -> Optional[DemeterCommand]:
@@ -193,30 +192,6 @@ async def stop_gateway():
             "devices": config
         }
         self.logger.info("Reporting system configuration to backend...")
-        await self.ws_client.send_json(payload)
-
-    # ── UART → WS ─────────────────────────────────────────────────────────────
-
-    async def dispatch_uart_to_ws(self, cmd: DemeterCommand) -> None:
-        """
-        Receive a parsed command from the UART bus and publish it to the server
-        WebSocket using the type string that the server's _handle_gateway_msg()
-        expects (e.g. "temp_hum_report", "pin_report", "ack", "nack").
-        """
-        msg_type = _REPORT_TYPE_MAP.get(type(cmd))
-        if msg_type is None:
-            # Silently ignore protocol-internal commands (Ping, Syn, SynAck…)
-            return
-
-        payload = {
-            "type": msg_type,
-            **cmd.model_dump(),   # flatten all fields at the top level
-        }
-
-        self.logger.debug(f"[Bridge UART→WS] {msg_type}: {payload}")
-        await self.ws_client.send_json(payload)
-
-
 if __name__ == "__main__":
     orchestrator = GatewayOrchestrator()
     try:
