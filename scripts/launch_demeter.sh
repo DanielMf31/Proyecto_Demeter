@@ -41,12 +41,24 @@ make rpi-down
 echo "🆙 Levantando Gateway y UI Local..."
 make rpi-up
 
-# 4. Abrir Interfaz
-echo "⏳ Esperando inicialización (5s)..."
-sleep 5
+# 4. Esperar a que la UI local esté lista
+echo "⏳ Esperando a que la UI local responda en http://localhost ..."
+MAX_WAIT=60
+WAITED=0
+while ! curl -s -o /dev/null -w '' http://localhost > /dev/null 2>&1; do
+    sleep 2
+    WAITED=$((WAITED + 2))
+    if [ "$WAITED" -ge "$MAX_WAIT" ]; then
+        echo "⚠️ Timeout: la UI no respondió después de ${MAX_WAIT}s. Abriendo de todos modos..."
+        break
+    fi
+    echo "   ...esperando (${WAITED}s/${MAX_WAIT}s)"
+done
+
+# 5. Abrir Interfaz
 echo "🌐 Abriendo Interfaz Local..."
 if command -v chromium-browser &> /dev/null; then
-    chromium-browser http://localhost --start-fullscreen --remote-debugging-port=9222 &
+    chromium-browser http://localhost --start-fullscreen --noerrdialogs --disable-infobars &
 else
     xdg-open http://localhost
 fi

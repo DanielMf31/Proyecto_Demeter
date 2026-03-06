@@ -73,6 +73,13 @@ services:
     # Deja command_dispatcher.py intacto para el modo normal (rpi)
     command: [ "python", "Software/Raspberry/src/proyecto_demeter/Hardware/orchestration/edge_server.py" ]
 
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8001/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
   # ─── Local UI (Edge Architecture) ─────────────────────────────────────────
   # Interfaz web servida directamente desde la Raspberry.
   # Permite conectar una pantalla física a la Raspberry y ver la UI en localhost.
@@ -82,6 +89,9 @@ services:
     image: demeter-local-ui:latest
     container_name: demeter-local-ui
     restart: unless-stopped
+    depends_on:
+      gateway:
+        condition: service_healthy
     build:
       context: .
       dockerfile: Software/Servidor/docker/frontend/Dockerfile.rpi
@@ -92,3 +102,10 @@ services:
         VITE_WS_URL: /ws
     # Red host para que nginx pueda alcanzar el edge server en localhost:8001
     network_mode: host
+
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:80"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
