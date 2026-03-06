@@ -17,9 +17,10 @@ import asyncio
 import json
 import logging
 import os
+from typing import Set
 
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
 from proyecto_demeter.Hardware.orchestration.command_dispatcher import GatewayOrchestrator
@@ -43,6 +44,9 @@ app.add_middleware(
 
 # ── Gateway Orchestrator (singleton) ──────────────────────────────────────
 gateway = GatewayOrchestrator()
+
+# ── Local WebSocket clients ──────────────────────────────────────────────
+ws_clients: Set[WebSocket] = set()
 
 # ── Routes ────────────────────────────────────────────────────────────────
 
@@ -82,6 +86,37 @@ async def post_command(request: Request):
     return {"error": "Invalid command payload"}
 
 
+@app.websocket("/ws/{client_id}")
+async def websocket_endpoint(websocket: WebSocket, client_id: str):
+    """WebSocket endpoint for local telemetry broadcast to the frontend."""
+    await websocket.accept()
+    ws_clients.add(websocket)
+    logger.info(f"[Edge WS] Client connected: {client_id} ({len(ws_clients)} total)")
+    try:
+        while True:
+            # Keep connection alive; commands come via POST /api/command
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        pass
+    finally:
+        ws_clients.discard(websocket)
+        logger.info(f"[Edge WS] Client disconnected: {client_id} ({len(ws_clients)} total)")
+
+
+async def broadcast_to_local_clients(payload: dict) -> None:
+    """Send telemetry/reports to all connected local WebSocket clients."""
+    if not ws_clients:
+        return
+    message = json.dumps(payload)
+    dead: Set[WebSocket] = set()
+    for ws in ws_clients:
+        try:
+            await ws.send_text(message)
+        except Exception:
+            dead.add(ws)
+    ws_clients.difference_update(dead)
+
+
 # ── Main Loop ──────────────────────────────────────────────────────────────
 
 async def main():
@@ -92,7 +127,16 @@ async def main():
     """
     logger.info("🌱 Demeter Edge Server iniciando (rpi-local mode)…")
 
+    # Listener that broadcasts UART telemetry to local WS clients
+    async def local_telemetry_listener(cmd) -> None:
+        from schemas import TempHumReport, PinReport, Ack, Nack
+        type_map = {TempHumReport: "telemetry", PinReport: "pin_report", Ack: "ack", Nack: "nack"}
+        msg_type = type_map.get(type(cmd))
+        if msg_type:
+            await broadcast_to_local_clients({"type": msg_type, **cmd.model_dump()})
+
     gateway.uart.add_listener(gateway.dispatch_uart_to_ws)
+    gateway.uart.add_listener(local_telemetry_listener)
     uart_task = asyncio.create_task(gateway.uart.start())
 
     config = uvicorn.Config(

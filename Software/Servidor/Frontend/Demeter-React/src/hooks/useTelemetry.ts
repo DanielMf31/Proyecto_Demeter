@@ -1,7 +1,17 @@
 import { useEffect, useState, useRef } from 'react';
 import { SensorData } from '../types';
 
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws';
+const RAW_WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws';
+
+function buildWsUrl(clientId: string): string {
+    // If already a full ws:// or wss:// URL, use as-is
+    if (RAW_WS_URL.startsWith('ws://') || RAW_WS_URL.startsWith('wss://')) {
+        return `${RAW_WS_URL}/${clientId}`;
+    }
+    // Relative path (e.g. /ws) — resolve against current host
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return `${protocol}//${window.location.host}${RAW_WS_URL}/${clientId}`;
+}
 
 export const useTelemetry = (maxRecords: number = 100) => {
     const [data, setData] = useState<SensorData[]>([]);
@@ -11,7 +21,7 @@ export const useTelemetry = (maxRecords: number = 100) => {
     useEffect(() => {
         // We generate a random client ID for the monitoring dashboard
         const clientId = `web-dashboard-${Math.random().toString(36).substring(7)}`;
-        const ws = new WebSocket(`${WS_URL}/${clientId}`);
+        const ws = new WebSocket(buildWsUrl(clientId));
         wsRef.current = ws;
 
         ws.onopen = () => {

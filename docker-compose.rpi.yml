@@ -86,9 +86,9 @@ services:
       context: .
       dockerfile: Software/Servidor/docker/frontend/Dockerfile.rpi
       args:
-        # Al usar rutas relativas, el navegador usará automáticamente la IP de la RPi
-        # Nginx configurado en el puerto 80 hace el proxy pass al 8001
+        # Rutas relativas: el navegador resuelve contra el host actual
+        # Nginx en puerto 80 hace proxy pass al edge server en 8001
         VITE_API_URL: /api
         VITE_WS_URL: /ws
-    ports:
-      - "80:80" # Permite acceso via localhost desde la propia pantalla de la RPi
+    # Red host para que nginx pueda alcanzar el edge server en localhost:8001
+    network_mode: host
