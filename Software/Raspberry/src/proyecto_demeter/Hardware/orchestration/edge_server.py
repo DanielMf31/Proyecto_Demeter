@@ -135,8 +135,14 @@ async def main():
 
     # Listener that broadcasts UART telemetry to local WS clients
     async def local_telemetry_listener(cmd) -> None:
-        from schemas import TempHumReport, PinReport, Ack, Nack
-        type_map = {TempHumReport: "telemetry", PinReport: "pin_report", Ack: "ack", Nack: "nack"}
+        from schemas import TempHumReport, SensorClusterReport, PinReport, Ack, Nack
+        type_map = {
+            TempHumReport: "telemetry",
+            SensorClusterReport: "sensor_cluster_report",
+            PinReport: "pin_report",
+            Ack: "ack",
+            Nack: "nack",
+        }
         msg_type = type_map.get(type(cmd))
         if msg_type:
             await broadcast_to_local_clients({"type": msg_type, **cmd.model_dump()})

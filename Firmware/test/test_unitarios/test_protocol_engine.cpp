@@ -466,6 +466,115 @@ void test_get_sensors_tx(void) {
 
 
 
+// -----------------------------------------------------------------------------
+// GROUP E: SENSOR CLUSTER REPORT
+// -----------------------------------------------------------------------------
+
+// SC01: TX — serialize a 2-entry cluster
+void test_sensor_cluster_report_tx(void) {
+    Demeter::SensorClusterReport report;
+    report.sourceId = 0;
+    report.entries.push_back({1, 23.45f, 65.20f});
+    report.entries.push_back({2, 18.90f, 42.50f});
+    engine->sendSensorClusterReport(1, report);
+
+    // Frame: [FE][LEN][00][01][01][0E] [02] [01 00 29 09 88 19] [02 00 5E 07 A2 10] [CRC]
+    // Header(6) + count(1) + 2*6(12) + CRC(1) = 20 bytes
+    TEST_ASSERT_GREATER_OR_EQUAL(20, mockComms->_txBuffer.size());
+    TEST_ASSERT_EQUAL(0x0E, mockComms->_txBuffer[5]); // CMD
+    TEST_ASSERT_EQUAL(0x02, mockComms->_txBuffer[6]); // Count
+    // Plant 1 ID = 1 (LE)
+    TEST_ASSERT_EQUAL(0x01, mockComms->_txBuffer[7]);
+    TEST_ASSERT_EQUAL(0x00, mockComms->_txBuffer[8]);
+}
+
+// SC02: RX — parse a 2-entry cluster
+void test_sensor_cluster_report_rx(void) {
+    Demeter::SensorClusterReport received;
+    bool called = false;
+    engine->onSensorClusterReportRecv([&](const Demeter::SensorClusterReport& report) {
+        received = report;
+        called = true;
+    });
+
+    // 2 entries:
+    // Plant 1: id=1(0x0001), temp=23.45(2345=0x0929), soil=65.20(6520=0x1978)
+    // Plant 2: id=2(0x0002), temp=18.90(1890=0x0762), soil=42.50(4250=0x109A)
+    std::vector<uint8_t> payload = {
+        0x02,                           // count
+        0x01, 0x00, 0x29, 0x09, 0x78, 0x19,  // entry 1
+        0x02, 0x00, 0x62, 0x07, 0x9A, 0x10,  // entry 2
+    };
+    std::vector<uint8_t> frame = {0xFE, (uint8_t)payload.size(), 0x00, 0x0A, 0x01, 0x0E};
+    frame.insert(frame.end(), payload.begin(), payload.end());
+
+    uint32_t sum = 0;
+    for (size_t i = 1; i < frame.size(); i++) sum += frame[i];
+    frame.push_back((uint8_t)(sum % 256));
+
+    mockComms->pushRxData(frame);
+    engine->update();
+
+    TEST_ASSERT_TRUE(called);
+    TEST_ASSERT_EQUAL(2, received.entries.size());
+    TEST_ASSERT_EQUAL(1, received.entries[0].plantId);
+    TEST_ASSERT_FLOAT_WITHIN(0.01, 23.45, received.entries[0].temperature);
+    TEST_ASSERT_FLOAT_WITHIN(0.01, 65.20, received.entries[0].soilMoisture);
+    TEST_ASSERT_EQUAL(2, received.entries[1].plantId);
+    TEST_ASSERT_FLOAT_WITHIN(0.01, 18.90, received.entries[1].temperature);
+    TEST_ASSERT_FLOAT_WITHIN(0.01, 42.50, received.entries[1].soilMoisture);
+    TEST_ASSERT_EQUAL(10, received.sourceId);
+}
+
+// SC03: TX/RX roundtrip — serialize then parse
+void test_sensor_cluster_roundtrip(void) {
+    // Send
+    Demeter::SensorClusterReport original;
+    original.sourceId = 0;
+    original.entries.push_back({100, -5.50f, 88.88f});
+    engine->sendSensorClusterReport(1, original);
+
+    // Parse the TX buffer as RX
+    Demeter::SensorClusterReport received;
+    bool called = false;
+    engine->onSensorClusterReportRecv([&](const Demeter::SensorClusterReport& report) {
+        received = report;
+        called = true;
+    });
+
+    mockComms->pushRxData(mockComms->_txBuffer);
+    mockComms->_txBuffer.clear();
+    engine->update();
+
+    TEST_ASSERT_TRUE(called);
+    TEST_ASSERT_EQUAL(1, received.entries.size());
+    TEST_ASSERT_EQUAL(100, received.entries[0].plantId);
+    TEST_ASSERT_FLOAT_WITHIN(0.01, -5.50, received.entries[0].temperature);
+    TEST_ASSERT_FLOAT_WITHIN(0.01, 88.88, received.entries[0].soilMoisture);
+}
+
+// SC04: Empty cluster should not trigger callback
+void test_sensor_cluster_empty_rejected(void) {
+    bool called = false;
+    engine->onSensorClusterReportRecv([&](const Demeter::SensorClusterReport& report) {
+        called = true;
+    });
+
+    // Count = 2 but only 1 entry (truncated)
+    std::vector<uint8_t> payload = {0x02, 0x01, 0x00, 0x29, 0x09, 0x78, 0x19};
+    std::vector<uint8_t> frame = {0xFE, (uint8_t)payload.size(), 0x00, 0x0A, 0x01, 0x0E};
+    frame.insert(frame.end(), payload.begin(), payload.end());
+
+    uint32_t sum = 0;
+    for (size_t i = 1; i < frame.size(); i++) sum += frame[i];
+    frame.push_back((uint8_t)(sum % 256));
+
+    mockComms->pushRxData(frame);
+    engine->update();
+
+    TEST_ASSERT_FALSE_MESSAGE(called, "Should reject truncated cluster payload");
+}
+
 void run_protocol_tests() {
     // Group A
     RUN_TEST(test_reject_invalid_sync);
@@ -497,4 +606,10 @@ void run_protocol_tests() {
     RUN_TEST(test_pin_report_rx);
     RUN_TEST(test_get_sensors_rx);
     RUN_TEST(test_get_sensors_tx);
+
+    // Group F: Sensor Cluster
+    RUN_TEST(test_sensor_cluster_report_tx);
+    RUN_TEST(test_sensor_cluster_report_rx);
+    RUN_TEST(test_sensor_cluster_roundtrip);
+    RUN_TEST(test_sensor_cluster_empty_rejected);
 }

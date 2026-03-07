@@ -14,9 +14,10 @@ class CmdId(IntEnum):
     ROUTE_ADD       = 0x0A
     
     # Reports
-    TEMP_HUM_REPORT = 0x0B
-    PIN_REPORT      = 0x0C
-    SYSTEM_REPORT   = 0x0D
+    TEMP_HUM_REPORT        = 0x0B
+    PIN_REPORT             = 0x0C
+    SYSTEM_REPORT          = 0x0D
+    SENSOR_CLUSTER_REPORT  = 0x0E
     
     # Commands
     SET_GPIO        = 0x10
@@ -113,6 +114,17 @@ class TempHumReport(DemeterCommand):
     timestamp: float = 0.0
     def get_cmd_id(self) -> int: return CmdId.TEMP_HUM_REPORT
 
+class SensorClusterEntry(BaseModel):
+    plant_id: int = Field(ge=0, le=65535)
+    temperature: float
+    soil_moisture: float
+
+class SensorClusterReport(DemeterCommand):
+    type: Literal["sensor_cluster_report"] = "sensor_cluster_report"
+    node_id: int = Field(..., ge=0, le=254)
+    entries: List[SensorClusterEntry] = Field(min_length=1, max_length=42)
+    def get_cmd_id(self) -> int: return CmdId.SENSOR_CLUSTER_REPORT
+
 class PinReport(DemeterCommand):
     type: Literal["pin_report"] = "pin_report"
     node_id: int = Field(..., ge=0, le=254)
@@ -152,6 +164,7 @@ AnyDemeterCommand = Annotated[
         SynAck,
         RouteAdd,
         TempHumReport,
+        SensorClusterReport,
         PinReport,
         SystemReport,
     ],

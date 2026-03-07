@@ -18,6 +18,8 @@ from schemas import (
     SynAck,
     CmdId,
     TempHumReport,
+    SensorClusterReport,
+    SensorClusterEntry,
     PinReport,
     SystemReport,
     GetSensors,
@@ -49,6 +51,7 @@ class DemeterProtocolV2:
             CmdId.SET_PWM: self._parse_set_pwm,
             CmdId.EXEC_SEQUENCE: self._parse_exec_sequence,
             CmdId.TEMP_HUM_REPORT: self._parse_temp_hum_report,
+            CmdId.SENSOR_CLUSTER_REPORT: self._parse_sensor_cluster_report,
             CmdId.PIN_REPORT: self._parse_pin_report,
             CmdId.SYSTEM_REPORT: self._parse_system_report
         }
@@ -82,6 +85,12 @@ class DemeterProtocolV2:
             payload = struct.pack('<BB', cmd.original_cmd_id, cmd.error_code)
         elif isinstance(cmd, (Syn, SynAck)):
             payload = struct.pack('<B', cmd.context)
+        elif isinstance(cmd, SensorClusterReport):
+            payload = struct.pack('<B', len(cmd.entries))
+            for e in cmd.entries:
+                t_int = int(e.temperature * 100)
+                s_int = int(e.soil_moisture * 100)
+                payload += struct.pack('<Hhh', e.plant_id, t_int, s_int)
         elif isinstance(cmd, TempHumReport):
             t_int = int(cmd.temperature * 100)
             h_int = int(cmd.humidity * 100)
@@ -209,6 +218,22 @@ class DemeterProtocolV2:
         if len(payload) < 4: return None
         t_int, h_int = struct.unpack('<hh', payload)
         return TempHumReport(target_id=dst, node_id=src, temperature=t_int/100.0, humidity=h_int/100.0)
+
+    def _parse_sensor_cluster_report(self, dst, src, payload):
+        if len(payload) < 1: return None
+        count = payload[0]
+        if len(payload) < 1 + count * 6: return None
+        entries = []
+        offset = 1
+        for _ in range(count):
+            plant_id, t_int, s_int = struct.unpack('<Hhh', payload[offset:offset+6])
+            entries.append(SensorClusterEntry(
+                plant_id=plant_id,
+                temperature=t_int / 100.0,
+                soil_moisture=s_int / 100.0,
+            ))
+            offset += 6
+        return SensorClusterReport(target_id=dst, node_id=src, entries=entries)
 
     def _parse_pin_report(self, dst, src, payload):
         if len(payload) < 2: return None

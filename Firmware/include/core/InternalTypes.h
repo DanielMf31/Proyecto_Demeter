@@ -48,9 +48,10 @@ namespace Demeter {
         SYN             = 0x04, ///< Synchronize (Handshake 1/3).
         SYN_ACK         = 0x05, ///< Synchronize-Acknowledge (Handshake 2/3).
         ROUTE_ADD       = 0x0A, ///< Register a new route in the routing table.
-        TEMP_HUM_REPORT = 0x0B, ///< Report Sensor Data (Temp/Hum). Replaces DATA_REPORT.
-        PIN_REPORT      = 0x0C, ///< Report GPIO Pin State change.
-        SYSTEM_REPORT   = 0x0D, ///< Report System State (Mode, Battery).
+        TEMP_HUM_REPORT        = 0x0B, ///< Report Sensor Data (Temp/Hum). Replaces DATA_REPORT.
+        PIN_REPORT             = 0x0C, ///< Report GPIO Pin State change.
+        SYSTEM_REPORT          = 0x0D, ///< Report System State (Mode, Battery).
+        SENSOR_CLUSTER_REPORT  = 0x0E, ///< Variable-length cluster of plant sensor readings.
         SET_GPIO        = 0x10, ///< Set Digital Output state.
         SET_PWM         = 0x11, ///< Set PWM Duty Cycle.
         EXEC_SEQUENCE   = 0x30, ///< Execute a complex sequence of actions.
@@ -119,6 +120,25 @@ namespace Demeter {
     };
 
     /**
+     * @brief Single plant sensor reading (part of a cluster).
+     */
+    struct SensorClusterEntry {
+        uint16_t plantId;
+        float temperature;  ///< DS18B20 reading (°C)
+        float soilMoisture; ///< Capacitive sensor (0-100%)
+    };
+
+    /**
+     * @brief Variable-length cluster of plant sensor readings.
+     * Sent as a single frame: [COUNT 1B] [ENTRY 6B] × N
+     * Each entry: [PLANT_ID 2B] [TEMP 2B] [SOIL 2B]
+     */
+    struct SensorClusterReport {
+        uint8_t sourceId;
+        std::vector<SensorClusterEntry> entries;
+    };
+
+    /**
      * @brief Pin Status Report.
      */
     struct PinReport {
@@ -167,6 +187,7 @@ namespace Demeter {
     using TempHumReportCallback = std::function<void(const TempHumReport&)>;
     using PinReportCallback = std::function<void(const PinReport&)>;
     using SystemReportCallback = std::function<void(const SystemReport&)>;
+    using SensorClusterReportCallback = std::function<void(const SensorClusterReport&)>;
     using GetSensorsCallback = std::function<void(const RequestData&)>;
     using RouteAddCallback = std::function<void(const RouteAddCmd&)>;
     using NackCallback = std::function<void(const NackData&)>;

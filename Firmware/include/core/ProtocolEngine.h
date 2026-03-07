@@ -81,6 +81,7 @@ public:
     void onAckRecv(Demeter::AckCallback cb);
     void onPingRecv(Demeter::PingCallback cb);
     void onTempHumReportRecv(Demeter::TempHumReportCallback cb);
+    void onSensorClusterReportRecv(Demeter::SensorClusterReportCallback cb);
     void onPinReportRecv(Demeter::PinReportCallback cb);
     void onSystemReportRecv(Demeter::SystemReportCallback cb);
     void onGetSensorsRecv(Demeter::GetSensorsCallback cb);
@@ -106,6 +107,11 @@ public:
      * @brief Send Sensor Data Report (Temp/Hum).
      */
     void sendTempHumReport(uint8_t targetId, const Demeter::TempHumReport& report);
+
+    /**
+     * @brief Send Sensor Cluster Report (variable-length plant readings).
+     */
+    void sendSensorClusterReport(uint8_t targetId, const Demeter::SensorClusterReport& report);
 
     /**
      * @brief Send GPIO State Report (Feedback).
@@ -163,6 +169,7 @@ private:
     Demeter::AckCallback _onAckRecv;
     Demeter::PingCallback _onPingRecv;
     Demeter::TempHumReportCallback _onTempHumReportRecv;
+    Demeter::SensorClusterReportCallback _onSensorClusterReport;
     Demeter::PinReportCallback    _onPinReport;
     Demeter::SystemReportCallback _onSystemReport;
     Demeter::GetSensorsCallback   _onGetSensors;

@@ -23,7 +23,7 @@ from typing import Optional, Dict, Any
 from demeter_protocol import DemeterProtocolV2
 from schemas import (
     DemeterCommand, SetGpio, Ping, GetSensors, ExecSequence, SequenceStep,
-    TempHumReport, PinReport, SystemReport, Ack, Nack, Syn, SynAck, CmdId,
+    TempHumReport, SensorClusterReport, PinReport, SystemReport, Ack, Nack, Syn, SynAck, CmdId,
 )
 from proyecto_demeter.Hardware.transport.uart_processor import UartProcessor
 from proyecto_demeter.Hardware.ws_client.client import DemeterWebsocketClient
@@ -33,11 +33,12 @@ from proyecto_demeter.Hardware.management.device_manager import DeviceManager
 # Tipos que llegan desde el UART (nodo) que se reenvían al servidor via WS.
 # Los comandos de control interno (Ping, Syn, SynAck) se ignoran silenciosamente.
 _REPORT_TYPE_MAP: Dict[type, str] = {
-    TempHumReport: "temp_hum_report",
-    PinReport:     "pin_report",
-    SystemReport:  "system_report",
-    Ack:           "ack",
-    Nack:          "nack",
+    TempHumReport:        "temp_hum_report",
+    SensorClusterReport:  "sensor_cluster_report",
+    PinReport:            "pin_report",
+    SystemReport:         "system_report",
+    Ack:                  "ack",
+    Nack:                 "nack",
 }
 
 

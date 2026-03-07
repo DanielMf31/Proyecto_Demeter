@@ -53,6 +53,10 @@ void ProtocolEngine::onTempHumReportRecv(Demeter::TempHumReportCallback cb) {
     _onTempHumReportRecv = cb;
 }
 
+void ProtocolEngine::onSensorClusterReportRecv(Demeter::SensorClusterReportCallback cb) {
+    _onSensorClusterReport = cb;
+}
+
 void ProtocolEngine::onPinReportRecv(Demeter::PinReportCallback cb) { _onPinReport = cb; }
 void ProtocolEngine::onSystemReportRecv(Demeter::SystemReportCallback cb) { _onSystemReport = cb; }
 void ProtocolEngine::onGetSensorsRecv(Demeter::GetSensorsCallback cb) { _onGetSensors = cb; }
@@ -219,6 +223,32 @@ void ProtocolEngine::parseFrame(const std::vector<uint8_t>& frame) {
             break;
         }
 
+        case Demeter::CommandType::SENSOR_CLUSTER_REPORT: {
+            // Payload: [COUNT 1B] [ENTRY 6B] × N
+            // Entry: [PLANT_ID_L][PLANT_ID_H][TEMP_L][TEMP_H][SOIL_L][SOIL_H]
+            if (payload.size() >= 1 && _onSensorClusterReport) {
+                uint8_t count = payload[0];
+                size_t expected = 1 + (count * 6);
+                if (payload.size() >= expected) {
+                    Demeter::SensorClusterReport report;
+                    report.sourceId = hdr->src_id;
+                    size_t offset = 1;
+                    for (uint8_t i = 0; i < count; i++) {
+                        Demeter::SensorClusterEntry entry;
+                        entry.plantId = (uint16_t)(payload[offset] | (payload[offset+1] << 8));
+                        int16_t t_int = (int16_t)(payload[offset+2] | (payload[offset+3] << 8));
+                        int16_t s_int = (int16_t)(payload[offset+4] | (payload[offset+5] << 8));
+                        entry.temperature = t_int / 100.0f;
+                        entry.soilMoisture = s_int / 100.0f;
+                        report.entries.push_back(entry);
+                        offset += 6;
+                    }
+                    _onSensorClusterReport(report);
+                }
+            }
+            break;
+        }
+
         case Demeter::CommandType::PIN_REPORT: {
             // Payload: [PIN][STATE]
             if (payload.size() >= 2 && _onPinReport) {
@@ -328,6 +358,28 @@ void ProtocolEngine::sendTempHumReport(uint8_t targetId, const Demeter::TempHumR
     payload.push_back((uint8_t)((h_int >> 8) & 0xFF));
 
     sendFrame((uint8_t)Demeter::CommandType::TEMP_HUM_REPORT, targetId, payload);
+}
+
+void ProtocolEngine::sendSensorClusterReport(uint8_t targetId, const Demeter::SensorClusterReport& report) {
+    std::vector<uint8_t> payload;
+    payload.reserve(1 + report.entries.size() * 6);
+    payload.push_back((uint8_t)report.entries.size());
+
+    for (const auto& entry : report.entries) {
+        // Plant ID (uint16 LE)
+        payload.push_back((uint8_t)(entry.plantId & 0xFF));
+        payload.push_back((uint8_t)((entry.plantId >> 8) & 0xFF));
+        // Temperature (int16 LE, scaled x100)
+        int16_t t_int = (int16_t)(entry.temperature * 100.0f);
+        payload.push_back((uint8_t)(t_int & 0xFF));
+        payload.push_back((uint8_t)((t_int >> 8) & 0xFF));
+        // Soil moisture (int16 LE, scaled x100)
+        int16_t s_int = (int16_t)(entry.soilMoisture * 100.0f);
+        payload.push_back((uint8_t)(s_int & 0xFF));
+        payload.push_back((uint8_t)((s_int >> 8) & 0xFF));
+    }
+
+    sendFrame((uint8_t)Demeter::CommandType::SENSOR_CLUSTER_REPORT, targetId, payload);
 }
 
 void ProtocolEngine::sendPinReport(uint8_t targetId, const Demeter::PinReport& report) {
