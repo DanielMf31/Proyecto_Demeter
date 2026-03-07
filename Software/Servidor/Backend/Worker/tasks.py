@@ -13,7 +13,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from Core.database import AsyncSessionLocal
 from Core.redis import redis_manager
-from BD.models import TelemetryTH, Plant
+from BD.models import TelemetryAmbient, Plant
 from sqlalchemy.future import select
 from Analisis_datos.calculos_agronomicos import procesar_dataframe
 from Analisis_datos.generar_graficas import procesar_graficas_generales
@@ -75,11 +75,11 @@ async def _async_export_experiment_data(experimento_id: int, ref_date_str: str, 
             if plant_node_ids:
                 from sqlalchemy import and_
                 tl_result = await session.execute(
-                    select(TelemetryTH).where(
+                    select(TelemetryAmbient).where(
                         and_(
-                            TelemetryTH.node_id.in_(plant_node_ids),
-                            TelemetryTH.timestamp >= start_date,
-                            TelemetryTH.timestamp <= ref_date
+                            TelemetryAmbient.node_id.in_(plant_node_ids),
+                            TelemetryAmbient.timestamp >= start_date,
+                            TelemetryAmbient.timestamp <= ref_date
                         )
                     )
                 )
@@ -88,8 +88,8 @@ async def _async_export_experiment_data(experimento_id: int, ref_date_str: str, 
                     raw_data.append({
                         "timestamp": rec.timestamp.isoformat(),
                         "node_id": rec.node_id,
-                        "temperature": rec.temperature,
-                        "humidity": rec.humidity
+                        "temperature": rec.air_temperature,
+                        "humidity": rec.air_humidity
                     })
     
     if not raw_data:

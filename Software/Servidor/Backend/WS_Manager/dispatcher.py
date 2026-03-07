@@ -32,15 +32,17 @@ from Core.logger import setup_logger
 from Core.redis import redis_manager
 from Core.database import AsyncSessionLocal
 from BD.models import (
-    TelemetryTH, 
-    PinHistory, 
-    SystemHistory, 
+    TelemetryAmbient,
+    TelemetrySoil,
+    PinHistory,
+    SystemHistory,
     ActivityLog
 )
 from .manager import registry
 from schemas import (
     AnyDemeterCommand,
     TempHumReport,
+    SensorClusterReport,
     PinReport,
     SystemReport,
     Ack,
@@ -100,20 +102,20 @@ async def handle_gateway_message(data: dict) -> None:
         try:
             report = TempHumReport(**data)
             logger.info(
-                f"TH report — nodo {report.node_id}: "
+                f"Ambient report — nodo {report.node_id}: "
                 f"{report.temperature}°C / {report.humidity}%"
             )
             # 1. DB Persistence
             async with AsyncSessionLocal() as session:
-                db_report = TelemetryTH(
+                db_report = TelemetryAmbient(
                     node_id=report.node_id,
-                    temperature=report.temperature,
-                    humidity=report.humidity,
+                    air_temperature=report.temperature,
+                    air_humidity=report.humidity,
                     timestamp=datetime.now(timezone.utc)
                 )
                 session.add(db_report)
                 await session.commit()
-            
+
             # 2. Redis Cache (optional but good for real-time)
             await redis_manager.save_telemetry(report.node_id, report.model_dump())
 
@@ -121,6 +123,32 @@ async def handle_gateway_message(data: dict) -> None:
             await registry.broadcast_except(GATEWAY_ID, report.model_dump())
         except Exception as exc:
             logger.error(f"temp_hum_report processing error: {exc}")
+        return
+
+    if msg_type == "sensor_cluster_report":
+        try:
+            report = SensorClusterReport(**data)
+            logger.info(
+                f"Cluster report — nodo {report.node_id}: "
+                f"{len(report.entries)} entries"
+            )
+            # 1. DB Persistence — one row per plant entry
+            async with AsyncSessionLocal() as session:
+                now = datetime.now(timezone.utc)
+                for entry in report.entries:
+                    db_row = TelemetrySoil(
+                        plant_id=entry.plant_id,
+                        soil_temperature=entry.temperature,
+                        soil_moisture=entry.soil_moisture,
+                        timestamp=now,
+                    )
+                    session.add(db_row)
+                await session.commit()
+
+            # 2. Broadcast to Frontends
+            await registry.broadcast_except(GATEWAY_ID, report.model_dump())
+        except Exception as exc:
+            logger.error(f"sensor_cluster_report processing error: {exc}")
         return
 
     if msg_type == "pin_report":

@@ -10,7 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from Core.database import AsyncSessionLocal
 from Core.redis import redis_manager
-from BD.models import TelemetryTH, Plant, Experiment
+from BD.models import TelemetryAmbient, Plant, Experiment
 from sqlalchemy.future import select
 from redis import Redis
 from rq import Queue
@@ -20,7 +20,7 @@ logger = logging.getLogger("sec_tasks")
 
 async def sync_sensor_data_to_redis():
     """
-    Sincroniza los últimos 24 horas de datos de sensores (TelemetryTH)
+    Sincroniza los últimos 24 horas de datos de sensores (TelemetryAmbient)
     desde PostgreSQL principal hacia la memoria caché rápida en Redis.
     
     Permite absorber ráfagas de lectura del Frontend sin saturar la Base de Datos.
@@ -44,10 +44,10 @@ async def sync_sensor_data_to_redis():
                 
             from sqlalchemy import and_
             tl_res = await session.execute(
-                select(TelemetryTH).where(
+                select(TelemetryAmbient).where(
                     and_(
-                        TelemetryTH.node_id.in_(node_ids),
-                        TelemetryTH.timestamp >= outdated_date
+                        TelemetryAmbient.node_id.in_(node_ids),
+                        TelemetryAmbient.timestamp >= outdated_date
                     )
                 )
             )
@@ -57,8 +57,8 @@ async def sync_sensor_data_to_redis():
                 raw_data.append({
                     "timestamp": rec.timestamp.isoformat(),
                     "node_id": rec.node_id,
-                    "temperature": rec.temperature,
-                    "humidity": rec.humidity
+                    "temperature": rec.air_temperature,
+                    "humidity": rec.air_humidity
                 })
             
             # Siempre se añade, aunque esté vacío, para limpiar data antigua
@@ -91,7 +91,7 @@ async def dummy_insert_test_data():
             t = round(20 + np.random.random() * 5, 2)
             h = round(50 + np.random.random() * 20, 2)
             
-            records.append(TelemetryTH(
+            records.append(TelemetryAmbient(
                 timestamp=now,
                 node_id=p.node_id,
                 temperature=t,

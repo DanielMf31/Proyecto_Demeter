@@ -133,6 +133,9 @@ async def main():
     """
     logger.info("🌱 Demeter Edge Server iniciando (rpi-local mode)…")
 
+    # Initialize local telemetry cache database
+    await gateway.cache.db.init_db()
+
     # Listener that broadcasts UART telemetry to local WS clients
     async def local_telemetry_listener(cmd) -> None:
         from schemas import TempHumReport, SensorClusterReport, PinReport, Ack, Nack

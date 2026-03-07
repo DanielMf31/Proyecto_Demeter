@@ -8,7 +8,7 @@ from Core.database import engine, Base
 # Import all models so they are registered in Base.metadata
 from BD.models import (
     User, Device, Sequence, SequenceStep, ActivityLog,
-    TelemetryTH, PinHistory, SystemHistory
+    TelemetryAmbient, TelemetrySoil, PinHistory, SystemHistory
 )
 
 async def init_tables():

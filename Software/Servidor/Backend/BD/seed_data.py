@@ -17,7 +17,7 @@ from sqlalchemy import delete
 
 from Core.database import AsyncSessionLocal
 from Core.auth import get_password_hash
-from BD.models import User, Experiment, Plant, TelemetryTH, ExperimentoPlantaLink
+from BD.models import User, Experiment, Plant, TelemetryAmbient, ExperimentoPlantaLink
 from Core.redis import redis_manager
 
 logger = logging.getLogger("seed_data")
@@ -86,7 +86,7 @@ async def seed_historical_data(db: AsyncSession):
 
     logger.info("Limpiando datos de prueba anteriores...")
     await db.execute(delete(ExperimentoPlantaLink))
-    await db.execute(delete(TelemetryTH))
+    await db.execute(delete(TelemetryAmbient))
     await db.execute(delete(Plant))
     await db.execute(delete(Experiment))
     await db.commit()
@@ -155,7 +155,7 @@ async def seed_historical_data(db: AsyncSession):
     
     # Diccionario para acumular telemetría por planta
     telemetry_by_plant: dict[int, list[dict]] = {p.id: [] for p in plantas}
-    records: list[TelemetryTH] = []
+    records: list[TelemetryAmbient] = []
     
     for hour in range(total_hours):
         current_time = start_date + timedelta(hours=hour)
@@ -170,11 +170,11 @@ async def seed_historical_data(db: AsyncSession):
             temp_final = round(max(10.0, min(40.0, t_base + t_noises[p_idx][hour])), 2)
             hr_final = round(max(10.0, min(100.0, hr_base + h_noises[p_idx][hour])), 2)
             
-            records.append(TelemetryTH(
+            records.append(TelemetryAmbient(
                 timestamp=current_time,
                 node_id=p.node_id,
-                temperature=temp_final,
-                humidity=hr_final
+                air_temperature=temp_final,
+                air_humidity=hr_final
             ))
             
             telemetry_by_plant[p.id].append({

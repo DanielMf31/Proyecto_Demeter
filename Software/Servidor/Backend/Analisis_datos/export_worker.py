@@ -9,7 +9,7 @@ from sqlalchemy.future import select
 # This is necessary because RQ jobs don't run inside the FastAPI process,
 # they run in a detached process, so we need to initialize DB connections
 from Core.database import AsyncSessionLocal
-from BD.models import TelemetryTH
+from BD.models import TelemetryAmbient
 
 # Import new refined analysis modules
 from Analisis_datos.calculos_agronomicos import procesar_dataframe
@@ -52,10 +52,10 @@ async def _extract_data(job_id: str):
     # 2. Fetch data from Database
     async with AsyncSessionLocal() as session:
         # Fetch records between start and end of yesterday
-        query = select(TelemetryTH).where(
-            TelemetryTH.node_id.in_(range(1, 11)),
-            TelemetryTH.timestamp >= start_of_yesterday,
-            TelemetryTH.timestamp <= end_of_yesterday
+        query = select(TelemetryAmbient).where(
+            TelemetryAmbient.node_id.in_(range(1, 11)),
+            TelemetryAmbient.timestamp >= start_of_yesterday,
+            TelemetryAmbient.timestamp <= end_of_yesterday
         )
         result = await session.execute(query)
         records = result.scalars().all()
@@ -66,8 +66,8 @@ async def _extract_data(job_id: str):
         data = [{
             "timestamp": r.timestamp,
             "node_id": r.node_id,
-            "temperature": r.temperature,
-            "humidity": r.humidity
+            "temperature": r.air_temperature,
+            "humidity": r.air_humidity
         } for r in records]
         
     # 3. Process with Pandas and Agronomic Module

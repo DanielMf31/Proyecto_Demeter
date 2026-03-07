@@ -155,18 +155,34 @@ class Plant(Base):
 # --- Telemetry Models ---
 
 
-class TelemetryTH(Base):
+class TelemetryAmbient(Base):
     """
-    Histórico crudo Series Temporales (TSDB en SQL) 
-    para reportes de Temperatura y Humedad emitidos por la telemetría.
+    Histórico crudo Series Temporales (TSDB en SQL)
+    para reportes de Temperatura y Humedad ambientales emitidos por la telemetría.
     """
-    __tablename__ = "telemetry_th"
+    __tablename__ = "telemetry_ambient"
 
     id = Column(Integer, primary_key=True, index=True)
     timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
     node_id = Column(Integer, nullable=False, index=True)
-    temperature = Column(Float, nullable=False)
-    humidity = Column(Float, nullable=False)
+    air_temperature = Column(Float, nullable=False)
+    air_humidity = Column(Float, nullable=False)
+
+
+class TelemetrySoil(Base):
+    """
+    Histórico crudo Series Temporales para reportes de telemetría de suelo
+    por planta individual (sensor cluster reports).
+    """
+    __tablename__ = "telemetry_soil"
+
+    id = Column(Integer, primary_key=True, index=True)
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
+    plant_id = Column(Integer, ForeignKey("plants.id"), nullable=False, index=True)
+    soil_temperature = Column(Float, nullable=False)
+    soil_moisture = Column(Float, nullable=False)
+
+    plant = relationship("Plant")
 
 class PinHistory(Base):
     """

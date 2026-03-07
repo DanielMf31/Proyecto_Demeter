@@ -28,6 +28,7 @@ from schemas import (
 from proyecto_demeter.Hardware.transport.uart_processor import UartProcessor
 from proyecto_demeter.Hardware.ws_client.client import DemeterWebsocketClient
 from proyecto_demeter.Hardware.management.device_manager import DeviceManager
+from proyecto_demeter.utils.telemetry_cache import TelemetryCacheManager
 
 
 # Tipos que llegan desde el UART (nodo) que se reenvían al servidor via WS.
@@ -55,9 +56,10 @@ class GatewayOrchestrator:
         self.uart = UartProcessor()
         self.protocol = DemeterProtocolV2()
         self.device_manager = DeviceManager()
+        self.cache = TelemetryCacheManager()
         self.ws_client = DemeterWebsocketClient(
             on_message_callback=self.dispatch_ws_to_uart,
-            on_open_callback=self.report_system_config
+            on_open_callback=self._on_ws_connect
         )
 
     # ── WS → UART ─────────────────────────────────────────────────────────────
@@ -132,17 +134,26 @@ class GatewayOrchestrator:
         self.logger.info("Reporting system configuration to backend...")
         await self.ws_client.send_json(payload)
 
+    async def _on_ws_connect(self) -> None:
+        """Called on WebSocket connect: report config then replay cached telemetry."""
+        await self.report_system_config()
+        await self.cache.replay_unsynced(self.ws_client)
+
     # ── UART → WS ─────────────────────────────────────────────────────────────
 
     async def dispatch_uart_to_ws(self, cmd: DemeterCommand) -> None:
         """
         Recibe un comando desde el UART y, si el tipo indica "Reporte" de estado
         (como temperatura/humedad o estado de ping), lo manda al WebSocket.
+        Also caches telemetry locally for store-and-forward resilience.
         """
         msg_type = _REPORT_TYPE_MAP.get(type(cmd))
         if msg_type is None:
             # Silently ignore protocol-internal commands (Ping, Syn, SynAck…)
             return
+
+        # Cache telemetry locally (SQLite + CSV)
+        await self.cache.cache_command(cmd)
 
         payload = {
             "type": msg_type,

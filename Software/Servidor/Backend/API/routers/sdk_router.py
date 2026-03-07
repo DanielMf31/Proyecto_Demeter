@@ -9,7 +9,7 @@ from sqlalchemy.future import select
 
 from Core.database import get_db
 from Core.auth import get_api_key_or_403
-from BD.models import Experiment, TelemetryTH
+from BD.models import Experiment, TelemetryAmbient
 from Core.redis import redis_manager
 
 logger = logging.getLogger("sdk_router")
@@ -54,10 +54,10 @@ async def get_sdk_measurements(
             
         limit_date = datetime.now(timezone.utc) - timedelta(days=dias)
         
-        query = select(TelemetryTH).where(
-            TelemetryTH.node_id.in_(nodes),
-            TelemetryTH.timestamp >= limit_date
-        ).order_by(TelemetryTH.timestamp.asc())
+        query = select(TelemetryAmbient).where(
+            TelemetryAmbient.node_id.in_(nodes),
+            TelemetryAmbient.timestamp >= limit_date
+        ).order_by(TelemetryAmbient.timestamp.asc())
         
         result = await db.execute(query)
         records = result.scalars().all()
@@ -66,8 +66,8 @@ async def get_sdk_measurements(
             {
                 "timestamp": r.timestamp.isoformat(),
                 "node_id": r.node_id,
-                "temperature": r.temperature,
-                "humidity": r.humidity
+                "temperature": r.air_temperature,
+                "humidity": r.air_humidity
             } for r in records
         ]
         return data
