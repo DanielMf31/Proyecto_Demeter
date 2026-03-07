@@ -1,4 +1,5 @@
-FROM node:22-alpine AS builder
+# ── Stage 1: Build React (always on native arch, output is static) ───────
+FROM --platform=$BUILDPLATFORM node:22-alpine AS builder
 WORKDIR /app
 
 # Enable injection of API URLs at build time
@@ -7,14 +8,12 @@ ARG VITE_WS_URL
 ENV VITE_API_URL=${VITE_API_URL}
 ENV VITE_WS_URL=${VITE_WS_URL}
 
-# Install dependencies
+# Install dependencies (cached if package*.json unchanged)
 COPY Software/Servidor/Frontend/Demeter-React/package*.json ./
-RUN npm install
+RUN npm ci
 
-# Copy sources
+# Copy sources and build
 COPY Software/Servidor/Frontend/Demeter-React ./
-
-# Build the app using Vite
 RUN npm run build
 
 # ── Stage 2: Serve with Nginx ──────────────────────────────────────────────
