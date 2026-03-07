@@ -50,6 +50,12 @@ ws_clients: Set[WebSocket] = set()
 
 # ── Routes ────────────────────────────────────────────────────────────────
 
+@app.get("/api/health")
+async def health():
+    """Healthcheck endpoint for Docker."""
+    return {"status": "ok"}
+
+
 @app.post("/api/auth/login")
 async def mock_login(request: Request):
     """Mock login para el Edge UI local. Sin autenticación real."""
