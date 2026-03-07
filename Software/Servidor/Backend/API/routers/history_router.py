@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.future import select
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import logging
 
 from Core.database import get_db
@@ -22,7 +22,7 @@ async def get_node_history(
     Fetches up to `days` (default 30) of telemetry records for a specific node_id.
     """
     try:
-        limit_date = datetime.utcnow() - timedelta(days=days)
+        limit_date = datetime.now(timezone.utc) - timedelta(days=days)
         
         query = select(TelemetryTH).where(
             TelemetryTH.node_id == node_id,

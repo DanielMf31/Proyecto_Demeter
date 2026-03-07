@@ -38,7 +38,7 @@ La clase \texttt{DemeterClient} actúa como orquestador público que los une:
 \begin{table}[H]
     \centering
     \caption{Módulos del Demeter SDK}
-    \begin{tabular}{lll}
+    \begin{tabularx}{\textwidth}{llX}
         \toprule
         \textbf{Módulo}           & \textbf{Rol}              & \textbf{Clase / Función principal} \\
         \midrule
@@ -49,7 +49,7 @@ La clase \texttt{DemeterClient} actúa como orquestador público que los une:
         \texttt{viz.py}           & Visualización científica  & \texttt{plot\_timeseries()}, \texttt{plot\_vpd()}, … \\
         \texttt{export.py}        & Exportación de resultados & \texttt{to\_csv()}, \texttt{to\_excel()} \\
         \bottomrule
-    \end{tabular}
+    \end{tabularx}
     \label{tab:sdk_modules}
 \end{table}
 
@@ -113,7 +113,7 @@ en cuatro etapas:
 \begin{table}[H]
     \centering
     \caption{Etapas del pipeline ETL}
-    \begin{tabular}{clp{8cm}}
+    \begin{tabularx}{\textwidth}{clX}
         \toprule
         \textbf{Paso} & \textbf{Función}   & \textbf{Qué hace} \\
         \midrule
@@ -122,7 +122,7 @@ en cuatro etapas:
         3 & \texttt{fill\_gaps()}    & Interpolación lineal de huecos puntuales de sensor (desconexiones breves). Soporta también método \texttt{'cubic'} o \texttt{'time'}. \\
         4 & \texttt{resample()}      & Opcional. Agrega la serie temporal a menor frecuencia (e.g. \texttt{'1h'}, \texttt{'1D'}) por nodo. \\
         \bottomrule
-    \end{tabular}
+    \end{tabularx}
 \end{table}
 
 \begin{lstlisting}[style=trama, caption={Uso del pipeline ETL}]
@@ -153,7 +153,10 @@ agrícola para el rango de temperaturas habitual en invernadero ($-10$ a $50$\,�
 e_s = 0{,}6108 \cdot e^{\displaystyle\frac{17{,}27 \cdot T}{T + 237{,}3}}
 \]
 
-\textit{Parámetros:} $T$ = temperatura de bulbo seco (°C). \textit{Resultado:} kPa.
+\begin{description}
+        \item [In:] $T$ — Temperatura de bulbo seco (°C).
+    \item [Out:] $e_s$ — Presión de vapor de saturación (kPa).
+\end{description}
 
 \subsubsection{Déficit de Presión de Vapor (VPD)}
 
@@ -162,8 +165,14 @@ la cantidad de agua que el aire \textit{podría} contener ($e_s$) y la que \text
 contiene ($e_a = e_s \cdot HR/100$):
 
 \[
-VPD = \max\left(0,\; e_s - e_a\right) \qquad \text{(kPa)}
+VPD = \max\left(0,\; e_s - e_a\right)
 \]
+
+\begin{description}
+        \item [In:] $e_s$ — Presión de vapor de saturación (kPa).
+    \item [In:] $e_a$ — Presión de vapor actual (kPa). Se calcula como $e_s \cdot HR / 100$.
+    \item [Out:] $VPD$ — Déficit de presión de vapor (kPa).
+\end{description}
 
 La tabla siguiente define las zonas de riesgo para cultivos de invernadero típicos:
 
@@ -191,28 +200,47 @@ invirtiendo la fórmula de Magnus:
 
 \[
 T_d = \frac{237{,}3 \cdot \ln(e_a / 0{,}6108)}{17{,}27 - \ln(e_a / 0{,}6108)}
-\qquad \text{(°C)}
 \]
+
+\begin{description}
+        \item [In:] $e_a$ — Presión de vapor actual (kPa).
+    \item [Out:] $T_d$ — Temperatura de punto de rocío (°C).
+\end{description}
 
 \subsubsection{Temperatura de Bulbo Húmedo ($T_w$) — Stull 2011}
 
 Temperatura límite del enfriamiento por evaporación. Usada en sistemas de
 refrigeración evaporativa de invernadero:
 
+{\small
 \[
-T_w = T \cdot \arctan\!\left(0{,}151977 \cdot \sqrt{HR + 8{,}313659}\right)
-      + \arctan(T+HR) - \arctan(HR-1{,}676331)
-      + 0{,}00391838 \cdot HR^{1{,}5} \cdot \arctan(0{,}023101 \cdot HR)
-      - 4{,}686035
+\begin{aligned}
+T_w = &\; T \cdot \arctan\!\left(0{,}151977 \cdot \sqrt{HR + 8{,}313659}\right) \\
+      &\; + \arctan(T+HR) - \arctan(HR-1{,}676331) \\
+      &\; + 0{,}00391838 \cdot HR^{1{,}5} \cdot \arctan(0{,}023101 \cdot HR) \\
+      &\; - 4{,}686035
+\end{aligned}
 \]
+}
+
+\begin{description}
+        \item [In:] $T$ — Temperatura de bulbo seco (°C).
+    \item [In:] $HR$ — Humedad relativa (\%).
+    \item [Out:] $T_w$ — Temperatura de bulbo húmedo (°C).
+\end{description}
 
 \subsubsection{Humedad Absoluta}
 
 Masa de vapor de agua por metro cúbico de aire, independiente de la presión:
 \[
 AH = \frac{2165 \cdot e_a}{T + 273{,}15}
-\qquad \text{(g/m}^3\text{)}
 \]
+
+\begin{description}
+        \item [In:] $e_a$ — Presión de vapor actual (kPa).
+    \item [In:] $T$ — Temperatura (°C).
+    \item [Out:] $AH$ — Humedad absoluta (g/m$^3$).
+\end{description}
 
 \subsubsection{Entalpía Específica del Aire Húmedo — ASHRAE}
 
@@ -220,14 +248,19 @@ Energía total (térmica + latente) del aire húmedo por kilogramo de aire seco.
 Clave para el dimensionado de sistemas de climatización y refrigeración:
 
 \[
-r = \frac{0{,}622 \cdot e_a}{P - e_a} \qquad \text{(kg agua/kg aire seco)}
+r = \frac{0{,}622 \cdot e_a}{P - e_a}
 \]
 \[
 h = 1{,}006 \cdot T + r \cdot (2501 + 1{,}86 \cdot T)
-\qquad \text{(kJ/kg aire seco)}
 \]
 
-\textit{Parámetros:} $P$ = presión atmosférica (kPa, defecto 101,3~kPa = nivel del mar).
+\begin{description}
+        \item [In:] $T$ — Temperatura de bulbo seco (°C).
+    \item [In:] $e_a$ — Presión de vapor actual (kPa).
+    \item [In:] $P$ — Presión atmosférica (kPa, defecto 101,325).
+    \item [Out:] $h$ — Entalpía específica del aire húmedo (kJ/kg aire seco).
+    \item [Out:] $r$ — Relación de mezcla o humedad específica (kg agua/kg aire seco).
+\end{description}
 
 \subsubsection{Índice de Calor (Rothfusz, NWS)}
 
@@ -238,8 +271,13 @@ y humedad. Solo significativo para $T \geq 27$\,°C:
 HI = &\;-8{,}785 + 1{,}611\,T + 2{,}339\,HR - 0{,}1461\,T\cdot HR \\
      &\; -0{,}01231\,T^2 - 0{,}01642\,HR^2 + 0{,}002212\,T^2\cdot HR \\
      &\; +0{,}000726\,T\cdot HR^2 - 0{,}000004\,T^2\cdot HR^2
-     \qquad\text{(°C)}
 \end{align*}
+
+\begin{description}
+        \item [In:] $T$ — Temperatura ambiental (°C).
+    \item [In:] $HR$ — Humedad relativa (\%).
+    \item [Out:] $HI$ — Índice de calor percibido (°C).
+\end{description}
 
 \subsubsection{Riesgo de Rocío en Hoja (LSD)}
 
@@ -249,8 +287,14 @@ condensación activa y riesgo de enfermedades fúngicas:
 
 \[
 LSD = e_s(T_{leaf}) - e_a(T_{air}, HR)
-\qquad \text{(kPa)} \quad [\, LSD < 0 \Rightarrow \text{condensación probable}]
 \]
+
+\begin{description}
+        \item [In:] $T_{leaf}$ — Temperatura de la hoja (modelada como $T_{air} - 2$, °C).
+    \item [In:] $e_s$ — Presión de vapor de saturación a $T_{leaf}$ (kPa).
+    \item [In:] $e_a$ — Presión de vapor actual del aire (kPa).
+    \item [Out:] $LSD$ — Riesgo de rocío en hoja (\textit{Leaf Surface Dew}, kPa).
+\end{description}
 
 % ─────────────────────────────────────────────────────────────
 \subsection{Fenología y Tiempo}
@@ -262,12 +306,14 @@ fenológico del cultivo. Se calcula como:
 
 \[
 GDD = \max\!\left(0,\; \frac{T_{max} + T_{min}}{2} - T_{base}\right)
-\qquad \text{(°C·día)}
 \]
 
-\textit{Parámetros:} $T_{max}$ y $T_{min}$ son las temperaturas diarias extremas;
-$T_{base}$ es la temperatura umbral de crecimiento (10\,°C por defecto para la mayoría
-de hortícolas). La suma acumulada de GDD predice el estadio fenológico.
+\begin{description}
+        \item [In:] $T_{max}$ — Temperatura máxima diaria (°C).
+    \item [In:] $T_{min}$ — Temperatura mínima diaria (°C).
+    \item [In:] $T_{base}$ — Temperatura umbral de crecimiento (°C, defecto 10).
+    \item [Out:] $GDD$ — Grados-Día de Crecimiento (°C·día).
+\end{description}
 
 \subsubsection{Horas de Frío (\textit{Chill Hours})}
 
@@ -281,19 +327,29 @@ necesidad de piranómetros ni sensores de viento:
 
 \[
 ET_0 = 0{,}0023 \cdot R_a \cdot (T_{mean} + 17{,}8) \cdot \sqrt{T_{max} - T_{min}}
-\qquad \text{(mm/día)}
 \]
 
-\textit{Parámetros:} $R_a$ = radiación extraterrestre en equivalente de mm/día
-(defecto 15~mm/día, apropiado para latitud mediterránea media).
+\begin{description}
+        \item [In:] $R_a$ — Radiación extraterrestre (equivalente mm/día, defecto 15).
+    \item [In:] $T_{mean}$ — Temperatura media diaria (°C).
+    \item [In:] $T_{max}$ — Temperatura máxima diaria (°C).
+    \item [In:] $T_{min}$ — Temperatura mínima diaria (°C).
+    \item [Out:] $ET_0$ — Evapotranspiración de referencia (mm/día).
+\end{description}
 
 \subsubsection{Días Tras la Siembra (DAP)}
 
 Número de días enteros transcurridos desde la fecha de siembra:
 
 \[
-DAP = \left\lfloor t_{sample} - t_{siembra} \right\rfloor \quad \text{(días)}
+DAP = \left\lfloor t_{sample} - t_{siembra} \right\rfloor
 \]
+
+\begin{description}
+        \item [In:] $t_{sample}$ — Fecha de la muestra (timestamp).
+    \item [In:] $t_{siembra}$ — Fecha de siembra (timestamp).
+    \item [Out:] $DAP$ — Días tras la siembra (días).
+\end{description}
 
 Permite contextualizar cada medición en términos del ciclo de vida del cultivo.
 
@@ -308,6 +364,13 @@ se aleja cada muestra de la media del periodo:
 \[
 z = \frac{x - \mu}{\sigma}
 \]
+
+\begin{description}
+        \item [In:] $x$ — Valor de la muestra.
+    \item [In:] $\mu$ — Media aritmética de la serie.
+    \item [In:] $\sigma$ — Desviación estándar de la serie.
+    \item [Out:] $z$ — Puntuación estándar (adim.).
+\end{description}
 
 El SDK aplica Z-Score de forma independiente a temperatura y humedad.
 Se considera outlier cualquier muestra con $|z| > 3$ (umbral configurable).
@@ -356,7 +419,7 @@ sobre el DataFrame limpio y devuelve un nuevo DataFrame con las columnas derivad
         \texttt{abs\_humidity\_g\_m3} & g/m$^3$   & Ley del gas ideal \\
         \texttt{enthalpy\_kj\_kg}& kJ/kg           & Definición ASHRAE \\
         \texttt{heat\_index\_c}  & °C              & Rothfusz (NWS) \\
-        \texttt{lsd\_kpa}        & kPa             & Modelado hoja −2°C \\
+        \texttt{lsd\_kpa}        & kPa             & Modelado hoja -2°C \\
         \texttt{z\_score\_temp}  & adim.           & $(T - \mu)/\sigma$ \\
         \texttt{z\_score\_hum}   & adim.           & $(HR - \mu)/\sigma$ \\
         \texttt{temp\_ma\_24h}   & °C              & Media móvil 24 muestras \\
@@ -440,7 +503,7 @@ El libro Excel generado tiene tres hojas estructuradas para la comunicación cie
 \begin{table}[H]
     \centering
     \caption{Estructura del libro Excel generado}
-    \begin{tabular}{llp{7cm}}
+    \begin{tabularx}{\textwidth}{lXX}
         \toprule
         \textbf{Hoja}              & \textbf{Contenido} & \textbf{Utilidad} \\
         \midrule
@@ -448,7 +511,7 @@ El libro Excel generado tiene tres hojas estructuradas para la comunicación cie
         \texttt{Datos\_Enriquecidos} & Todos los registros con todas las columnas derivadas (13+ columnas). & Dataset completo para análisis estadístico externo (R, SPSS). \\
         \texttt{Datos\_Crudos}     & Solo temperatura y humedad originales (sin derivados). & Reproducibilidad: los datos tal y como llegaron del sensor. \\
         \bottomrule
-    \end{tabular}
+    \end{tabularx}
 \end{table}
 
 \begin{lstlisting}[style=trama, caption={Exportación a Excel estructurado}]
@@ -537,7 +600,7 @@ client.export.to_excel(df, "informe_exp2.xlsx", experiment_name="Exp 2")
 \begin{table}[H]
     \centering
     \caption{Parámetros principales del \texttt{DemeterClient}}
-    \begin{tabular}{llp{6.5cm}}
+    \begin{tabularx}{\textwidth}{llX}
         \toprule
         \textbf{Parámetro}  & \textbf{Tipo}  & \textbf{Descripción} \\
         \midrule
@@ -548,5 +611,5 @@ client.export.to_excel(df, "informe_exp2.xlsx", experiment_name="Exp 2")
         \texttt{timeout}        & int    & Timeout por petición HTTP en segundos (defecto: 30). \\
         \texttt{max\_retries}   & int    & Reintentos automáticos ante errores 5xx (defecto: 3). \\
         \bottomrule
-    \end{tabular}
+    \end{tabularx}
 \end{table}

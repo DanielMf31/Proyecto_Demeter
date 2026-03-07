@@ -1,0 +1,167 @@
+
+# ─────────────────────────────────────────────────────────────────
+#  Protocolo Demeter – Arquitectura Docker del Backend
+#  Google Cloud VM: Nginx + FastAPI + Redis + PostgreSQL + Workers
+# ─────────────────────────────────────────────────────────────────
+
+direction: down
+
+classes: {
+  service: {
+    shape: rectangle
+    style: {
+      border-radius: 10
+      fill: "#21262d"
+      stroke: "#388bfd"
+      stroke-width: 2
+      font-color: "#e6edf3"
+      font-size: 13
+      shadow: true
+    }
+  }
+  infra: {
+    shape: rectangle
+    style: {
+      border-radius: 10
+      fill: "#1a1520"
+      stroke: "#d2a8ff"
+      stroke-width: 2
+      font-color: "#d2a8ff"
+      font-size: 13
+      shadow: true
+    }
+  }
+  db: {
+    shape: cylinder
+    style: {
+      fill: "#0f1a28"
+      stroke: "#388bfd"
+      stroke-width: 2
+      font-color: "#58a6ff"
+      font-size: 13
+    }
+  }
+  volume: {
+    shape: cylinder
+    style: {
+      fill: "#1a1520"
+      stroke: "#6e7681"
+      stroke-width: 1
+      font-color: "#6e7681"
+      font-size: 12
+    }
+  }
+  external: {
+    shape: rectangle
+    style: {
+      border-radius: 8
+      fill: "#0d1117"
+      stroke: "#484f58"
+      stroke-width: 2
+      font-color: "#8b949e"
+      font-size: 13
+    }
+  }
+  proxy: {
+    shape: rectangle
+    style: {
+      border-radius: 10
+      fill: "#1f2d1f"
+      stroke: "#3fb950"
+      stroke-width: 3
+      font-color: "#3fb950"
+      font-size: 14
+      bold: true
+      shadow: true
+    }
+  }
+}
+
+# ── Actores externos ───────────────────────────────────────────────
+
+Internet: "Internet / Usuarios\n(HTTPS + WSS)" {class: external}
+RPi: "Raspberry Pi\n(Edge Gateway)" {class: external}
+
+# ── Google Cloud VM ────────────────────────────────────────────────
+
+GCloud: "Google Cloud VM  ·  Linux" {
+  style: {
+    fill: "#161b22"
+    stroke: "#e3b341"
+    stroke-width: 3
+    border-radius: 16
+    font-color: "#e3b341"
+    font-size: 16
+    bold: true
+  }
+
+  Nginx: "Nginx\nReverse Proxy · SSL\nPuerto 443" {class: proxy}
+
+  DNet: "Red interna: demeter-net (bridge)" {
+    style: {
+      fill: "#0d1117"
+      stroke: "#484f58"
+      stroke-width: 2
+      border-radius: 12
+      font-color: "#6e7681"
+      font-size: 13
+    }
+
+    Frontend:  "demeter-frontend\n(React SPA)" {class: service}
+    API:       "demeter-api\n(FastAPI + AsyncIO)" {class: service}
+    Worker:    "demeter-math-worker\n(RQ Worker)" {class: service}
+    Sequencer: "demeter-sequencer\n(Motor de Secuencias)" {class: service}
+    DB:        "demeter-db\n(PostgreSQL 15)" {class: db}
+    Redis:     "demeter-redis\n(Redis Alpine)" {class: infra}
+  }
+
+  SharedVol: "Volumen compartido\n/app/shared" {class: volume}
+  ExportVol: "Volumen de exportación\n/app/exports" {class: volume}
+  DBVol:     "Volumen postgres_data" {class: volume}
+
+  # Nginx → servicios
+  Nginx -> DNet.Frontend: "/ (React SPA)" {
+    style.stroke: "#3fb950"
+    style.font-color: "#3fb950"
+    style.bold: true
+  }
+  Nginx -> DNet.API: "/api/*  ·  /ws/*" {
+    style.stroke: "#388bfd"
+    style.font-color: "#58a6ff"
+    style.bold: true
+  }
+
+  # API → infraestructura
+  DNet.API -> DNet.DB {style.stroke: "#388bfd"}
+  DNet.API -> DNet.Redis {style.stroke: "#d2a8ff"}
+
+  # Worker
+  DNet.Worker -> DNet.DB {style.stroke: "#388bfd"}
+  DNet.Worker -> DNet.Redis {style.stroke: "#d2a8ff"}
+
+  # Sequencer
+  DNet.Sequencer -> DNet.DB {style.stroke: "#388bfd"}
+  DNet.Sequencer -> DNet.Redis {style.stroke: "#d2a8ff"}
+
+  # Volúmenes
+  DNet.API -- SharedVol {style.stroke: "#484f58"; style.stroke-dash: 4}
+  DNet.Worker -- SharedVol {style.stroke: "#484f58"; style.stroke-dash: 4}
+  DNet.Worker -- ExportVol {style.stroke: "#484f58"; style.stroke-dash: 4}
+  DNet.DB -- DBVol {style.stroke: "#484f58"; style.stroke-dash: 4}
+}
+
+# ── Conexiones externas ────────────────────────────────────────────
+
+Internet -> GCloud.Nginx: "HTTPS · WSS" {
+  style.stroke: "#3fb950"
+  style.font-color: "#3fb950"
+  style.stroke-width: 3
+  style.bold: true
+}
+
+RPi -> GCloud.DNet.API: "wss:// /ws/raspberry_gateway" {
+  style.stroke: "#e3b341"
+  style.font-color: "#e3b341"
+  style.stroke-width: 2
+  style.bold: true
+}

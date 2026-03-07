@@ -1,0 +1,185 @@
+
+# ─────────────────────────────────────────────────────────────────
+#  Protocolo Demeter – Secuencia de Telemetría (Raspberry Pi)
+#  Flujo ascendente: Gateway → AsyncUART → UARTProcessor →
+#                    GatewayOrchestrator → Backend / EdgeServer
+# ─────────────────────────────────────────────────────────────────
+
+shape: sequence_diagram
+
+# ── Participantes ─────────────────────────────────────────────────
+
+GW: "Gateway\nESP32" {
+  style: {
+    fill: "#21262d"
+    stroke: "#d2a8ff"
+    font-color: "#d2a8ff"
+    bold: true
+  }
+}
+
+UART: "AsyncUART" {
+  style: {
+    fill: "#21262d"
+    stroke: "#e3b341"
+    font-color: "#e3b341"
+    bold: true
+  }
+}
+
+Proc: "UARTProcessor" {
+  style: {
+    fill: "#21262d"
+    stroke: "#388bfd"
+    font-color: "#58a6ff"
+    bold: true
+  }
+}
+
+GWO: "GatewayOrchestrator" {
+  style: {
+    fill: "#1f2d1f"
+    stroke: "#3fb950"
+    font-color: "#3fb950"
+    bold: true
+  }
+}
+
+Dev: "DeviceManager" {
+  style: {
+    fill: "#21262d"
+    stroke: "#388bfd"
+    font-color: "#58a6ff"
+    bold: true
+  }
+}
+
+WS: "WebSocketClient" {
+  style: {
+    fill: "#21262d"
+    stroke: "#3fb950"
+    font-color: "#3fb950"
+    bold: true
+  }
+}
+
+Edge: "EdgeServer" {
+  style: {
+    fill: "#0f1a28"
+    stroke: "#58a6ff"
+    font-color: "#58a6ff"
+    bold: true
+  }
+}
+
+Back: "Backend\nFastAPI" {
+  style: {
+    fill: "#0f2d24"
+    stroke: "#3fb950"
+    font-color: "#3fb950"
+    bold: true
+  }
+}
+
+# ── Flujo principal ───────────────────────────────────────────────
+
+GW -> UART: "0xFE ... (trama binaria de telemetría)\nvía /dev/serial0" {
+  style.stroke: "#d2a8ff"
+  style.font-color: "#d2a8ff"
+  style.bold: true
+}
+
+UART -> UART: "Lee cabecera\nValida longitud y CRC" {
+  style.stroke: "#e3b341"
+  style.font-color: "#e3b341"
+  style.stroke-dash: 4
+}
+
+UART -> Proc: "on_uart_data() → process_buffer()\nrx_queue.put(parsed_cmd)" {
+  style.stroke: "#e3b341"
+  style.font-color: "#e3b341"
+  style.bold: true
+}
+
+Proc -> Proc: "_dispatch_loop()\nconsume rx_queue" {
+  style.stroke: "#388bfd"
+  style.font-color: "#58a6ff"
+  style.stroke-dash: 4
+}
+
+# ── Rama A: Reporte de sensor ─────────────────────────────────────
+
+Proc -> GWO: "[TH_RPT] listener callback" {
+  style.stroke: "#3fb950"
+  style.font-color: "#3fb950"
+  style.bold: true
+}
+
+GWO -> Dev: "update_node_status(\n  node_id, last_seen, vbatt)" {
+  style.stroke: "#388bfd"
+  style.font-color: "#58a6ff"
+}
+
+GWO -> WS: "dispatch_uart_to_ws()\nemit('telemetry_data', json)" {
+  style.stroke: "#3fb950"
+  style.font-color: "#3fb950"
+  style.bold: true
+}
+
+GWO -> Edge: "broadcast_to_local_clients()\n(si hay clientes WS locales)" {
+  style.stroke: "#58a6ff"
+  style.font-color: "#58a6ff"
+  style.stroke-dash: 4
+}
+
+# ── Rama B: Confirmación de actuador ─────────────────────────────
+
+Proc -> GWO: "[CMD_ACK] listener callback" {
+  style.stroke: "#3fb950"
+  style.font-color: "#3fb950"
+  style.bold: true
+}
+
+GWO -> Dev: "update_actuator_state(\n  node_id, pin, state)" {
+  style.stroke: "#388bfd"
+  style.font-color: "#58a6ff"
+}
+
+GWO -> WS: "dispatch_uart_to_ws()\nemit('action_result', json)" {
+  style.stroke: "#3fb950"
+  style.font-color: "#3fb950"
+  style.bold: true
+}
+
+# ── Rama C: Handshake SYN ─────────────────────────────────────────
+
+Proc -> GWO: "[SYN] listener callback" {
+  style.stroke: "#3fb950"
+  style.font-color: "#3fb950"
+}
+
+GWO -> UART: "write_frame(SYN_ACK)" {
+  style.stroke: "#e3b341"
+  style.font-color: "#e3b341"
+  style.bold: true
+}
+
+GWO -> Dev: "register_new_node(node_id)" {
+  style.stroke: "#388bfd"
+  style.font-color: "#58a6ff"
+}
+
+UART -> GW: "[Binario] SYN_ACK" {
+  style.stroke: "#d2a8ff"
+  style.font-color: "#d2a8ff"
+  style.stroke-dash: 4
+}
+
+# ── Emisión final al Backend ──────────────────────────────────────
+
+WS -> Back: "wss:// emit(evento, datos JSON)" {
+  style.stroke: "#3fb950"
+  style.font-color: "#3fb950"
+  style.stroke-width: 3
+  style.bold: true
+}

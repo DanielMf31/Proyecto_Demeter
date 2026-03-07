@@ -1,0 +1,8 @@
+digraph "packages_Backend_Core" {
+rankdir=BT
+charset="utf-8"
+"dispatcher" [color="black", label=<dispatcher>, shape="box", style="solid"];
+"manager" [color="black", label=<manager>, shape="box", style="solid"];
+"redis" [color="black", label=<redis>, shape="box", style="solid"];
+"dispatcher" -> "manager" [arrowhead="open", arrowtail="none"];
+}

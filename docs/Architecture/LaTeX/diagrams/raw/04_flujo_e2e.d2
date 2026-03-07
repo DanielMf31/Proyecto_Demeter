@@ -1,0 +1,202 @@
+
+# ─────────────────────────────────────────────────────────────────
+#  Protocolo Demeter – Flujo End-to-End (Sensor → Backend)
+#  Diseño en vertical (top→down) para máxima legibilidad en folio.
+#  Cada subsistema es un contenedor visual independiente.
+# ─────────────────────────────────────────────────────────────────
+
+direction: down
+
+classes: {
+  step: {
+    shape: rectangle
+    style: {
+      border-radius: 10
+      fill: "#21262d"
+      stroke: "#388bfd"
+      stroke-width: 2
+      font-color: "#e6edf3"
+      font-size: 14
+      shadow: true
+    }
+  }
+
+  decision: {
+    shape: diamond
+    style: {
+      fill: "#2d1f3d"
+      stroke: "#d2a8ff"
+      stroke-width: 2
+      font-color: "#d2a8ff"
+      font-size: 13
+      bold: true
+      shadow: true
+    }
+  }
+
+  local: {
+    shape: rectangle
+    style: {
+      border-radius: 8
+      fill: "#1a1f2b"
+      stroke: "#e3b341"
+      stroke-width: 2
+      font-color: "#e3b341"
+      font-size: 13
+      shadow: true
+    }
+  }
+
+  persist: {
+    shape: cylinder
+    style: {
+      fill: "#0f1e2d"
+      stroke: "#388bfd"
+      stroke-width: 2
+      font-color: "#58a6ff"
+      font-size: 13
+      shadow: true
+    }
+  }
+
+  distribute: {
+    shape: rectangle
+    style: {
+      border-radius: 10
+      fill: "#0f2d24"
+      stroke: "#3fb950"
+      stroke-width: 2
+      font-color: "#3fb950"
+      font-size: 13
+      shadow: true
+    }
+  }
+}
+
+# ═══════════════════════════════════════════════════════════════
+#  BLOQUE 1 – Nodo Sensor (ESP32)
+# ═══════════════════════════════════════════════════════════════
+
+SENSOR: "Nodo Sensor  ·  ESP32" {
+  style: {
+    fill: "#161b22"
+    stroke: "#388bfd"
+    stroke-width: 3
+    border-radius: 16
+    font-color: "#58a6ff"
+    font-size: 16
+    bold: true
+  }
+
+  S1: "Lee periféricos\nDHT22 / DS18B20" {class: step}
+  S2: "Convierte valores\nal formato binario" {class: step}
+  S3: "Serializa trama\nTEMP_HUM_REPORT" {class: step}
+  S4: "Transmite por\nESP-NOW" {class: step}
+
+  S1 -> S2 -> S3 -> S4
+}
+
+# ═══════════════════════════════════════════════════════════════
+#  BLOQUE 2 – Nodo Gateway (ESP32)
+# ═══════════════════════════════════════════════════════════════
+
+GATEWAY: "Nodo Gateway  ·  ESP32" {
+  style: {
+    fill: "#161b22"
+    stroke: "#d2a8ff"
+    stroke-width: 3
+    border-radius: 16
+    font-color: "#d2a8ff"
+    font-size: 16
+    bold: true
+  }
+
+  G1: "Recibe trama\npor RF" {class: step}
+  G2: "Valida SYNC,\nLENGTH y CRC" {class: step}
+  G3: "¿Para mí?" {class: decision}
+  G4: "Pasa a handlers\nlocales" {class: local}
+  G5: "Reenvía por\nUART hacia RPi" {class: step}
+
+  G1 -> G2 -> G3
+  G3 -> G4: "DST == yo" {
+    style.stroke: "#e3b341"
+    style.font-color: "#e3b341"
+    style.bold: true
+  }
+  G3 -> G5: "DST == servidor" {
+    style.stroke: "#d2a8ff"
+    style.font-color: "#d2a8ff"
+    style.bold: true
+  }
+}
+
+# ═══════════════════════════════════════════════════════════════
+#  BLOQUE 3 – Raspberry Pi
+# ═══════════════════════════════════════════════════════════════
+
+RPI: "Raspberry Pi  ·  Edge Server" {
+  style: {
+    fill: "#161b22"
+    stroke: "#e3b341"
+    stroke-width: 3
+    border-radius: 16
+    font-color: "#e3b341"
+    font-size: 16
+    bold: true
+  }
+
+  R1: "Lee puerto\nserial (UART)" {class: step}
+  R2: "Valida y deserializa\nla trama" {class: step}
+  R3: "Extrae temperatura\ny humedad" {class: step}
+  R4: "Publica al Backend\nvía WebSocket" {class: step}
+
+  R1 -> R2 -> R3 -> R4
+}
+
+# ═══════════════════════════════════════════════════════════════
+#  BLOQUE 4 – Backend
+# ═══════════════════════════════════════════════════════════════
+
+BACKEND: "Backend  ·  FastAPI + PostgreSQL" {
+  style: {
+    fill: "#161b22"
+    stroke: "#3fb950"
+    stroke-width: 3
+    border-radius: 16
+    font-color: "#3fb950"
+    font-size: 16
+    bold: true
+  }
+
+  B1: "Recibe por\nWebSocket" {class: step}
+  B2: "Persiste en\nPostgreSQL" {class: persist}
+  B3: "Distribuye a\nFrontend" {class: distribute}
+
+  B1 -> B2
+  B1 -> B3
+}
+
+# ═══════════════════════════════════════════════════════════════
+#  CONEXIONES ENTRE BLOQUES
+# ═══════════════════════════════════════════════════════════════
+
+SENSOR.S4 -> GATEWAY.G1: "RF  ·  ESP-NOW  2.4 GHz" {
+  style.stroke: "#58a6ff"
+  style.font-color: "#58a6ff"
+  style.stroke-width: 3
+  style.bold: true
+}
+
+GATEWAY.G5 -> RPI.R1: "UART  ·  Serial 115200 bps" {
+  style.stroke: "#e3b341"
+  style.font-color: "#e3b341"
+  style.stroke-width: 3
+  style.bold: true
+}
+
+RPI.R4 -> BACKEND.B1: "HTTP / WebSocket" {
+  style.stroke: "#3fb950"
+  style.font-color: "#3fb950"
+  style.stroke-width: 3
+  style.bold: true
+}

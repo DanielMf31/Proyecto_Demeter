@@ -1,0 +1,6 @@
+digraph "packages_Backend_Models" {
+rankdir=BT
+charset="utf-8"
+"BD.models" [color="black", label=<BD.models>, shape="box", style="solid"];
+"BD.schemas" [color="black", label=<BD.schemas>, shape="box", style="solid"];
+}

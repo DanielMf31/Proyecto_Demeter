@@ -178,11 +178,7 @@ API principal. Las tareas que ejecuta incluyen:
           histórica y recálculo de estadísticos agregados.
 \end{itemize}
 
-El proceso de encolar una tarea sigue este patrón: el cliente llama a 
-\texttt{POST /api/analysis/generate}, el backend encola la tarea en Redis y devuelve un 
-\texttt{task\_id}. El cliente puede consultar \texttt{GET /api/analysis/status/\{task\_id\}} 
-para conocer el progreso y, una vez completada, descarga el resultado de 
-\texttt{GET /api/analysis/download/\{filename\}}.
+El proceso de encolar una tarea sigue este patrón: el cliente llama a \texttt{POST} \url{/api/analysis/generate}, el backend encola la tarea en Redis y devuelve un \texttt{task\_id}. El cliente puede consultar \texttt{GET} \url{/api/analysis/status/{task_id}} para conocer el progreso y, una vez completada, descarga el resultado de \texttt{GET} \url{/api/analysis/download/{filename}}.
 
 
 % ─────────────────────────────────────────────────────────────
@@ -256,120 +252,120 @@ los \textit{routers} y sus endpoints más relevantes.
 \subsection{Sistema (\texttt{/api/system})}
 \begin{table}[H]
     \centering
-    \begin{tabular}{llp{7.5cm}}
+    \begin{tabularx}{\textwidth}{llX}
         \toprule
         \textbf{Método} & \textbf{Ruta}   & \textbf{Descripción} \\
         \midrule
-        \texttt{GET}  & \texttt{/api/system/health} & Comprueba el estado del servidor y la conexión a Redis y PostgreSQL. Devuelve un JSON de estado. \\
+        \texttt{GET}  & \url{/api/system/health} & Comprueba el estado del servidor y la conexión a Redis y PostgreSQL. Devuelve un JSON de estado. \\
         \bottomrule
-    \end{tabular}
+    \end{tabularx}
 \end{table}
 
 \subsection{Autenticación (\texttt{/api/auth})}
 \begin{table}[H]
     \centering
-    \begin{tabular}{llp{7.5cm}}
+    \begin{tabularx}{\textwidth}{llX}
         \toprule
         \textbf{Método} & \textbf{Ruta}             & \textbf{Descripción} \\
         \midrule
-        \texttt{POST} & \texttt{/api/auth/login}    & Recibe usuario y contraseña. Devuelve un JWT Bearer Token con el rol del usuario y expiración configurable. \\
-        \texttt{POST} & \texttt{/api/auth/register} & Registra un nuevo usuario (admin). Almacena la contraseña hasheada con bcrypt. \\
-        \texttt{GET}  & \texttt{/api/auth/me}       & Devuelve el perfil del usuario activo autenticado mediante el token. \\
+        \texttt{POST} & \url{/api/auth/login}    & Recibe usuario y contraseña. Devuelve un JWT Bearer Token con el rol del usuario y expiración configurable. \\
+        \texttt{POST} & \url{/api/auth/register} & Registra un nuevo usuario (admin). Almacena la contraseña hasheada con bcrypt. \\
+        \texttt{GET}  & \url{/api/auth/me}       & Devuelve el perfil del usuario activo autenticado mediante el token. \\
         \bottomrule
-    \end{tabular}
+    \end{tabularx}
 \end{table}
 
 \subsection{Comandos (\texttt{/api/command})}
 \begin{table}[H]
     \centering
-    \begin{tabular}{llp{7.5cm}}
+    \begin{tabularx}{\textwidth}{llX}
         \toprule
         \textbf{Método} & \textbf{Ruta}          & \textbf{Descripción} \\
         \midrule
-        \texttt{POST} & \texttt{/api/command}    & Envía un comando al hardware. El campo \texttt{type} discrimina el subtipo (\texttt{set\_gpio}, \texttt{set\_pwm}, \texttt{exec\_sequence}, \texttt{ping}, \texttt{get\_sensors}). El comando es validado con Pydantic y publicado en Redis. Devuelve \texttt{202 Accepted}. \\
+        \texttt{POST} & \url{/api/command}    & Envía un comando al hardware. El campo \texttt{type} discrimina el subtipo (\texttt{set\_gpio}, \texttt{set\_pwm}, \texttt{exec\_sequence}, \texttt{ping}, \texttt{get\_sensors}). El comando es validado con Pydantic y publicado en Redis. Devuelve \texttt{202 Accepted}. \\
         \bottomrule
-    \end{tabular}
+    \end{tabularx}
 \end{table}
 
 \subsection{Descubrimiento (\texttt{/api/discovery})}
 \begin{table}[H]
     \centering
-    \begin{tabular}{llp{7.5cm}}
+    \begin{tabularx}{\textwidth}{lXX}
         \toprule
         \textbf{Método} & \textbf{Ruta}               & \textbf{Descripción} \\
         \midrule
-        \texttt{GET}  & \texttt{/api/discovery/nodes} & Lista todos los nodos activos conocidos por el sistema con su último estado. \\
-        \texttt{GET}  & \texttt{/api/discovery/nodes/\{id\}} & Estado detallado y telemetría en caché de un nodo específico. \\
+        \texttt{GET}  & \url{/api/discovery/nodes} & Lista todos los nodos activos conocidos por el sistema con su último estado. \\
+        \texttt{GET}  & \url{/api/discovery/nodes/{id}} & Estado detallado y telemetría en caché de un nodo específico. \\
         \bottomrule
-    \end{tabular}
+    \end{tabularx}
 \end{table}
 
 \subsection{Historial de Telemetría (\texttt{/api/history})}
 \begin{table}[H]
     \centering
-    \begin{tabular}{llp{7.5cm}}
+    \begin{tabularx}{\textwidth}{lXX}
         \toprule
         \textbf{Método} & \textbf{Ruta}              & \textbf{Descripción} \\
         \midrule
-        \texttt{GET}  & \texttt{/api/history/node/\{id\}} & Devuelve hasta \texttt{days} días de telemetría histórica de temperatura y humedad para el nodo indicado. Requiere autenticación JWT. \\
+        \texttt{GET}  & \url{/api/history/node/{id}} & Devuelve hasta \texttt{days} días de telemetría histórica de temperatura y humedad para el nodo indicado. Requiere autenticación JWT. \\
         \bottomrule
-    \end{tabular}
+    \end{tabularx}
 \end{table}
 
 \subsection{LIMS --- Plantas y Experimentos (\texttt{/api/lims})}
 \begin{table}[H]
     \centering
-    \begin{tabular}{llp{6.8cm}}
+    \begin{tabularx}{\textwidth}{lXX}
         \toprule
         \textbf{Método}   & \textbf{Ruta}                   & \textbf{Descripción} \\
         \midrule
-        \texttt{GET}    & \texttt{/api/lims/plantas}          & Lista todas las plantas registradas. \\
-        \texttt{POST}   & \texttt{/api/lims/plantas}          & Registra una nueva planta con metadatos botánicos completos. \\
-        \texttt{GET}    & \texttt{/api/lims/plantas/\{id\}}   & Detalle de una planta con sus experimentos asociados. \\
-        \texttt{PATCH}  & \texttt{/api/lims/plantas/\{id\}}   & Actualiza parcialmente los datos de una planta. \\
-        \texttt{GET}    & \texttt{/api/lims/plantas/\{id\}/telemetry} & Telemetría de 6 meses del nodo asignado a la planta, directo de Redis. \\
-        \texttt{GET}    & \texttt{/api/lims/experimentos}     & Lista todos los experimentos vigentes. \\
-        \texttt{POST}   & \texttt{/api/lims/experimentos/generar} & Crea un experimento y asigna plantas existentes. \\
+        \texttt{GET}    & \url{/api/lims/plantas}          & Lista todas las plantas registradas. \\
+        \texttt{POST}   & \url{/api/lims/plantas}          & Registra una nueva planta con metadatos botánicos completos. \\
+        \texttt{GET}    & \url{/api/lims/plantas/{id}}   & Detalle de una planta con sus experimentos asociados. \\
+        \texttt{PATCH}  & \url{/api/lims/plantas/{id}}   & Actualiza parcialmente los datos de una planta. \\
+        \texttt{GET}    & \url{/api/lims/plantas/{id}/telemetry} & Telemetría de 6 meses del nodo asignado a la planta, directo de Redis. \\
+        \texttt{GET}    & \url{/api/lims/experimentos}     & Lista todos los experimentos vigentes. \\
+        \texttt{POST}   & \url{/api/lims/experimentos/generar} & Crea un experimento y asigna plantas existentes. \\
         \bottomrule
-    \end{tabular}
+    \end{tabularx}
 \end{table}
 
 \subsection{Análisis Científico (\texttt{/api/analysis})}
 \begin{table}[H]
     \centering
-    \begin{tabular}{llp{6.8cm}}
+    \begin{tabularx}{\textwidth}{lXX}
         \toprule
         \textbf{Método} & \textbf{Ruta}                     & \textbf{Descripción} \\
         \midrule
-        \texttt{POST} & \texttt{/api/analysis/generate}       & Encola un análisis estadístico completo de un experimento en el Math Worker (RQ). Devuelve el \texttt{task\_id}. \\
-        \texttt{GET}  & \texttt{/api/analysis/status/\{id\}}  & Consulta el estado de la tarea encolada: \textit{queued}, \textit{started}, \textit{finished} o \textit{failed}. \\
-        \texttt{GET}  & \texttt{/api/analysis/download/\{f\}} & Descarga el archivo de análisis generado (ZIP) desde el volumen compartido. \\
+        \texttt{POST} & \url{/api/analysis/generate}       & Encola un análisis estadístico completo de un experimento en el Math Worker (RQ). Devuelve el \texttt{task\_id}. \\
+        \texttt{GET}  & \url{/api/analysis/status/{id}}  & Consulta el estado de la tarea encolada: \textit{queued}, \textit{started}, \textit{finished} o \textit{failed}. \\
+        \texttt{GET}  & \url{/api/analysis/download/{f}} & Descarga el archivo de análisis generado (ZIP) desde el volumen compartido. \\
         \bottomrule
-    \end{tabular}
+    \end{tabularx}
 \end{table}
 
 \subsection{SDK Científico (\texttt{/api/sdk})}
 \begin{table}[H]
     \centering
-    \begin{tabular}{llp{7.5cm}}
+    \begin{tabularx}{\textwidth}{lXX}
         \toprule
         \textbf{Método} & \textbf{Ruta}                     & \textbf{Descripción} \\
         \midrule
-        \texttt{GET}  & \texttt{/api/sdk/mediciones/\{exp\_id\}} & Devuelve la telemetría cruda en JSON de todas las plantas del experimento. Protegido por \texttt{X-API-Key}. Prioriza caché Redis sobre consulta directa a PostgreSQL. \\
+        \texttt{GET}  & \url{/api/sdk/mediciones/{exp_id}} & Devuelve la telemetría cruda en JSON de todas las plantas del experimento. Protegido por \texttt{X-API-Key}. Prioriza caché Redis sobre consulta directa a PostgreSQL. \\
         \bottomrule
-    \end{tabular}
+    \end{tabularx}
 \end{table}
 
 \subsection{Exportación (\texttt{/api/export})}
 \begin{table}[H]
     \centering
-    \begin{tabular}{llp{7.5cm}}
+    \begin{tabularx}{\textwidth}{lXX}
         \toprule
         \textbf{Método} & \textbf{Ruta}             & \textbf{Descripción} \\
         \midrule
-        \texttt{GET}  & \texttt{/api/export/\{formato\}} & Exporta los datos históricos en formatos CSV o XLSX para análisis externo. Se genera y devuelve como descarga directa. \\
+        \texttt{GET}  & \url{/api/export/{formato}} & Exporta los datos históricos en formatos CSV o XLSX para análisis externo. Se genera y devuelve como descarga directa. \\
         \bottomrule
-    \end{tabular}
+    \end{tabularx}
 \end{table}
 
 

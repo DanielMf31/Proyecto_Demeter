@@ -1,0 +1,6 @@
+digraph "packages_RPi_Orchestration" {
+rankdir=BT
+charset="utf-8"
+"command_dispatcher" [color="black", label=<command_dispatcher>, shape="box", style="solid"];
+"edge_server" [color="black", label=<edge_server>, shape="box", style="solid"];
+}

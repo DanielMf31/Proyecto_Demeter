@@ -1,0 +1,35 @@
+digraph "classes_Common" {
+rankdir=BT
+charset="utf-8"
+"schemas.Ack" [color="black", fontcolor="black", label=<{Ack|original_cmd_id : Optional[int]<br ALIGN="LEFT"/>type : Literal['ack']<br ALIGN="LEFT"/>|get_cmd_id(): int<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"schemas.CmdId" [color="black", fontcolor="black", label=<{CmdId|name<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"schemas.DemeterCommand" [color="black", fontcolor="black", label=<{DemeterCommand|source_id : Optional[int]<br ALIGN="LEFT"/>target_id : Optional[int]<br ALIGN="LEFT"/>|<I>get_cmd_id</I>(): int<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"demeter_protocol.DemeterProtocolV2" [color="black", fontcolor="black", label=<{DemeterProtocolV2|logger : NoneType, RootLogger<br ALIGN="LEFT"/>|create_ping(target_id: int): bytes<br ALIGN="LEFT"/>pack_frame(cmd: DemeterCommand): bytes<br ALIGN="LEFT"/>parse_frame(frame_bytes: bytes): Optional[DemeterCommand]<br ALIGN="LEFT"/>validate_json_message(json_data: Dict[str, Any]): DemeterCommand<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"schemas.ExecSequence" [color="black", fontcolor="black", label=<{ExecSequence|steps : Optional[List[SequenceStep]]<br ALIGN="LEFT"/>type : Literal['exec_sequence']<br ALIGN="LEFT"/>|get_cmd_id(): int<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"schemas.GetSensors" [color="black", fontcolor="black", label=<{GetSensors|type : Literal['get_sensors']<br ALIGN="LEFT"/>|get_cmd_id(): int<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"schemas.Nack" [color="black", fontcolor="black", label=<{Nack|error_code : Optional[int]<br ALIGN="LEFT"/>original_cmd_id : Optional[int]<br ALIGN="LEFT"/>type : Literal['nack']<br ALIGN="LEFT"/>|get_cmd_id(): int<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"schemas.PinReport" [color="black", fontcolor="black", label=<{PinReport|node_id : Optional[int]<br ALIGN="LEFT"/>pin : Optional[int]<br ALIGN="LEFT"/>state : Optional[int]<br ALIGN="LEFT"/>type : Literal['pin_report']<br ALIGN="LEFT"/>|get_cmd_id(): int<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"schemas.Ping" [color="black", fontcolor="black", label=<{Ping|type : Literal['ping']<br ALIGN="LEFT"/>|get_cmd_id(): int<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"schemas.RouteAdd" [color="black", fontcolor="black", label=<{RouteAdd|mac_address_bytes : Optional[bytes]<br ALIGN="LEFT"/>node_id_to_register : Optional[int]<br ALIGN="LEFT"/>type : Literal['route_add']<br ALIGN="LEFT"/>|get_cmd_id(): int<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"schemas.SequenceStep" [color="black", fontcolor="black", label=<{SequenceStep|cmd_id : Optional[int]<br ALIGN="LEFT"/>delay_ms : Optional[int]<br ALIGN="LEFT"/>pin : Optional[int]<br ALIGN="LEFT"/>target_id : Optional[int]<br ALIGN="LEFT"/>value : Optional[int]<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"schemas.SetGpio" [color="black", fontcolor="black", label=<{SetGpio|flags : Optional[int]<br ALIGN="LEFT"/>pin : Optional[int]<br ALIGN="LEFT"/>type : Literal['set_gpio']<br ALIGN="LEFT"/>value : Optional[int]<br ALIGN="LEFT"/>|get_cmd_id(): int<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"schemas.SetPwm" [color="black", fontcolor="black", label=<{SetPwm|pin : Optional[int]<br ALIGN="LEFT"/>type : Literal['set_pwm']<br ALIGN="LEFT"/>value : Optional[int]<br ALIGN="LEFT"/>|get_cmd_id(): int<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"configuration.Settings" [color="black", fontcolor="black", label=<{Settings|API_PREFIX : str<br ALIGN="LEFT"/>APP_NAME : str<br ALIGN="LEFT"/>BACKEND_PORT : int<br ALIGN="LEFT"/>BACKEND_URL : str<br ALIGN="LEFT"/>BASE_DIR : Path<br ALIGN="LEFT"/>DATABASE_URL<br ALIGN="LEFT"/>DATA_DIR<br ALIGN="LEFT"/>DB_NAME : str<br ALIGN="LEFT"/>DB_PATH<br ALIGN="LEFT"/>DEBUG : bool<br ALIGN="LEFT"/>ENV : str<br ALIGN="LEFT"/>HOST : str<br ALIGN="LEFT"/>LOG_DIR<br ALIGN="LEFT"/>LOG_FILE : str<br ALIGN="LEFT"/>LOG_FILE_PATH<br ALIGN="LEFT"/>LOG_LEVEL : str<br ALIGN="LEFT"/>PORT : str<br ALIGN="LEFT"/>POSTGRES_DB : str<br ALIGN="LEFT"/>POSTGRES_PASSWORD : str<br ALIGN="LEFT"/>POSTGRES_PORT : str<br ALIGN="LEFT"/>POSTGRES_SERVER : str<br ALIGN="LEFT"/>POSTGRES_USER : str<br ALIGN="LEFT"/>REDIS_URL : str<br ALIGN="LEFT"/>SOCKET_PORT : int<br ALIGN="LEFT"/>UART_BAUD : int<br ALIGN="LEFT"/>model_config : SettingsConfigDict<br ALIGN="LEFT"/>|}>, shape="record", style="solid"];
+"schemas.Syn" [color="black", fontcolor="black", label=<{Syn|context : Optional[int]<br ALIGN="LEFT"/>type : Literal['syn']<br ALIGN="LEFT"/>|get_cmd_id(): int<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"schemas.SynAck" [color="black", fontcolor="black", label=<{SynAck|context : Optional[int]<br ALIGN="LEFT"/>type : Literal['syn_ack']<br ALIGN="LEFT"/>|get_cmd_id(): int<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"schemas.SystemReport" [color="black", fontcolor="black", label=<{SystemReport|battery_mv : Optional[int]<br ALIGN="LEFT"/>mode : Optional[int]<br ALIGN="LEFT"/>node_id : Optional[int]<br ALIGN="LEFT"/>reserved : Optional[bytes]<br ALIGN="LEFT"/>type : Literal['system_report']<br ALIGN="LEFT"/>|get_cmd_id(): int<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"schemas.TempHumReport" [color="black", fontcolor="black", label=<{TempHumReport|humidity : float<br ALIGN="LEFT"/>node_id : Optional[int]<br ALIGN="LEFT"/>temperature : float<br ALIGN="LEFT"/>timestamp : float<br ALIGN="LEFT"/>type : Literal['temp_hum_report']<br ALIGN="LEFT"/>|get_cmd_id(): int<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"schemas.Ack" -> "schemas.DemeterCommand" [arrowhead="empty", arrowtail="none"];
+"schemas.ExecSequence" -> "schemas.DemeterCommand" [arrowhead="empty", arrowtail="none"];
+"schemas.GetSensors" -> "schemas.DemeterCommand" [arrowhead="empty", arrowtail="none"];
+"schemas.Nack" -> "schemas.DemeterCommand" [arrowhead="empty", arrowtail="none"];
+"schemas.PinReport" -> "schemas.DemeterCommand" [arrowhead="empty", arrowtail="none"];
+"schemas.Ping" -> "schemas.DemeterCommand" [arrowhead="empty", arrowtail="none"];
+"schemas.RouteAdd" -> "schemas.DemeterCommand" [arrowhead="empty", arrowtail="none"];
+"schemas.SetGpio" -> "schemas.DemeterCommand" [arrowhead="empty", arrowtail="none"];
+"schemas.SetPwm" -> "schemas.DemeterCommand" [arrowhead="empty", arrowtail="none"];
+"schemas.Syn" -> "schemas.DemeterCommand" [arrowhead="empty", arrowtail="none"];
+"schemas.SynAck" -> "schemas.DemeterCommand" [arrowhead="empty", arrowtail="none"];
+"schemas.SystemReport" -> "schemas.DemeterCommand" [arrowhead="empty", arrowtail="none"];
+"schemas.TempHumReport" -> "schemas.DemeterCommand" [arrowhead="empty", arrowtail="none"];
+}

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, DateTime, Text, Index, Float, Date, JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID, JSONB
@@ -55,7 +55,7 @@ class Sequence(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     creator = relationship("User", back_populates="sequences")
@@ -87,7 +87,7 @@ class ActivityLog(Base):
     __tablename__ = "activity_log"
 
     id = Column(Integer, primary_key=True, index=True)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     device_id = Column(Integer, ForeignKey("devices.id"), nullable=True)
     action_type = Column(String, nullable=False) # 'button_press', 'sequence_exec', etc.
@@ -111,7 +111,7 @@ class ExperimentoPlantaLink(Base):
     
     experiment_id = Column(Integer, ForeignKey("experiments.id", ondelete="CASCADE"), primary_key=True)
     plant_id = Column(Integer, ForeignKey("plants.id", ondelete="CASCADE"), primary_key=True)
-    linked_at = Column(DateTime, default=datetime.utcnow)
+    linked_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class Experiment(Base):
     """
@@ -123,7 +123,7 @@ class Experiment(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     description = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
     api_key = Column(String, unique=True, index=True, default=lambda: str(uuid.uuid4()))
     
@@ -163,7 +163,7 @@ class TelemetryTH(Base):
     __tablename__ = "telemetry_th"
 
     id = Column(Integer, primary_key=True, index=True)
-    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
     node_id = Column(Integer, nullable=False, index=True)
     temperature = Column(Float, nullable=False)
     humidity = Column(Float, nullable=False)
@@ -176,7 +176,7 @@ class PinHistory(Base):
     __tablename__ = "pin_history"
 
     id = Column(Integer, primary_key=True, index=True)
-    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
     node_id = Column(Integer, nullable=False, index=True)
     pin = Column(Integer, nullable=False)
     state = Column(Boolean, nullable=False)
@@ -189,7 +189,7 @@ class SystemHistory(Base):
     __tablename__ = "system_history"
 
     id = Column(Integer, primary_key=True, index=True)
-    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
     node_id = Column(Integer, nullable=False, index=True)
     mode = Column(Integer, nullable=False)
     battery_mv = Column(Integer, nullable=False)

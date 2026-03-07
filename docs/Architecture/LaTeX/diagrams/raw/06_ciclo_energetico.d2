@@ -1,0 +1,108 @@
+
+# ─────────────────────────────────────────────────────────────────
+#  Protocolo Demeter – Ciclo Energético del Nodo Sensor
+#  D2 no tiene Gantt nativo; se usa un diagrama de bloques de tiempo
+#  con contenedores proporcionales que representan la duración real.
+# ─────────────────────────────────────────────────────────────────
+
+direction: right
+
+classes: {
+  active: {
+    shape: rectangle
+    style: {
+      border-radius: 8
+      fill: "#1f6feb"
+      stroke: "#58a6ff"
+      stroke-width: 2
+      font-color: "#ffffff"
+      font-size: 13
+      bold: true
+      shadow: true
+    }
+  }
+  sleep: {
+    shape: rectangle
+    style: {
+      border-radius: 8
+      fill: "#0f1a0f"
+      stroke: "#3fb950"
+      stroke-width: 2
+      font-color: "#3fb950"
+      font-size: 13
+      bold: true
+      shadow: true
+    }
+  }
+  label: {
+    shape: text
+    style: {
+      font-color: "#8b949e"
+      font-size: 12
+      italic: true
+    }
+  }
+}
+
+# Fases activas (~1.5 s total de 3600 s)
+ACTIVO: "🔋 Fase Activa  ·  ~1.5 s" {
+  style: {
+    fill: "#161b22"
+    stroke: "#388bfd"
+    stroke-width: 3
+    border-radius: 14
+    font-color: "#58a6ff"
+    font-size: 15
+    bold: true
+  }
+
+  P1: "1. Despertar\n+ Init radio\n~0–1 s" {class: active}
+  P2: "2. Leer sensores\nDHT22 / DS18B20\n~1–2 s" {class: active}
+  P3: "3. Serializar\ny transmitir\n~2–3 s" {class: active}
+  P4: "4. Recibir ACK\ndel Gateway\n~3–4 s" {class: active}
+
+  P1 -> P2 -> P3 -> P4
+}
+
+# Fase de sleep (~3596 s)
+SLEEP: "💤 Deep Sleep  ·  ~3 596 s  ·  0.01 mA" {
+  style: {
+    fill: "#0d1117"
+    stroke: "#3fb950"
+    stroke-width: 3
+    border-radius: 14
+    font-color: "#3fb950"
+    font-size: 15
+    bold: true
+  }
+
+  DS: "Modo ultra\nbajo consumo\n(Deep Sleep)\n\nCPU, Wi-Fi, BT\napagados\nSolo RTC activo" {class: sleep}
+}
+
+# Conexión cíclica
+ACTIVO.P4 -> SLEEP.DS: "Entra a deep sleep\ntras ACK exitoso" {
+  style.stroke: "#3fb950"
+  style.font-color: "#3fb950"
+  style.stroke-width: 2
+  style.bold: true
+}
+
+SLEEP.DS -> ACTIVO.P1: "Despierta por\ntemporizador RTC\ncada 3 600 s" {
+  style.stroke: "#388bfd"
+  style.font-color: "#58a6ff"
+  style.stroke-width: 2
+  style.stroke-dash: 4
+  style.bold: true
+}
+
+# Leyenda de consumo
+consumo: "⚡ Consumo energético\n\nActivo:     ~80 mA   (~1.5 s)\nDeep Sleep: ~0.01 mA (~3596 s)\nPromedio:   ~0.04 mA/hora\nAutonomía:  semanas con batería 3000 mAh" {
+  style: {
+    fill: "#161b22"
+    stroke: "#484f58"
+    stroke-width: 1
+    border-radius: 10
+    font-color: "#8b949e"
+    font-size: 13
+  }
+}

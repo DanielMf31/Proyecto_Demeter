@@ -1,0 +1,644 @@
+# AUTO-GENERADO por make_print.py — VERSIÓN PARA IMPRESIÓN
+# Colores adaptados para fondo blanco / documento académico
+# No editar directamente; editar el archivo fuente y regenerar.
+
+
+# ─────────────────────────────────────────────────────────────────
+#  Proyecto Demeter – Diagrama de Clases: Backend
+# ─────────────────────────────────────────────────────────────────
+
+direction: right
+
+classes: {
+  model: {
+    shape: class
+    style: {
+      fill: "#dff7eb"
+      stroke: "#3fb950"
+      stroke-width: 2
+      font-color: "#1a7f37"
+      font-size: 12
+      shadow: true
+    }
+  }
+  schema: {
+    shape: class
+    style: {
+      fill: "#fff0f0"
+      stroke: "#f85149"
+      stroke-width: 2
+      font-color: "#cf222e"
+      font-size: 12
+      shadow: true
+    }
+  }
+  infra: {
+    shape: class
+    style: {
+      fill: "#ffffff"
+      stroke: "#388bfd"
+      stroke-width: 2
+      font-color: "#1a1a2e"
+      font-size: 12
+      shadow: true
+    }
+  }
+  router: {
+    shape: class
+    style: {
+      fill: "#f3e8ff"
+      stroke: "#d2a8ff"
+      stroke-width: 2
+      font-color: "#6639ba"
+      font-size: 12
+      shadow: true
+    }
+  }
+  worker: {
+    shape: class
+    style: {
+      fill: "#fffce0"
+      stroke: "#e3b341"
+      stroke-width: 2
+      font-color: "#9a6700"
+      font-size: 12
+      shadow: true
+    }
+  }
+}
+
+# ═══════════════════════════════════════════════════════════════════
+#  DATABASE MODELS (SQLAlchemy ORM)
+# ═══════════════════════════════════════════════════════════════════
+
+Models: "BD/models.py — SQLAlchemy ORM" {
+  style: {
+    fill: "#ffffff"
+    stroke: "#3fb950"
+    stroke-width: 2
+    border-radius: 14
+    font-color: "#1a7f37"
+    font-size: 15
+    bold: true
+  }
+
+  User: {
+    class: model
+    label: |md
+      # User
+      ---
+      id: UUID (PK)
+      username: String (unique)
+      password_hash: String
+      role: String
+      is_active: Boolean
+      ---
+      → sequences[]
+      → activity_logs[]
+      → experiments[]
+    |
+  }
+
+  Device: {
+    class: model
+    label: |md
+      # Device
+      ---
+      id: Integer (PK)
+      name: String
+      device_type: String
+      gpio_pin: Integer
+      ---
+      → sequence_steps[]
+      → activity_logs[]
+    |
+  }
+
+  Sequence: {
+    class: model
+    label: |md
+      # Sequence
+      ---
+      id: Integer (PK)
+      name: String
+      created_by: UUID (FK → User)
+      created_at: DateTime
+      ---
+      → creator: User
+      → steps[] (cascade)
+    |
+  }
+
+  SequenceStep: {
+    class: model
+    label: |md
+      # SequenceStep
+      ---
+      id: Integer (PK)
+      sequence_id: FK → Sequence
+      device_id: FK → Device
+      step_order: Integer
+      target_state: Boolean
+      duration_seconds: Integer
+    |
+  }
+
+  ActivityLog: {
+    class: model
+    label: |md
+      # ActivityLog
+      ---
+      id: Integer (PK)
+      timestamp: DateTime
+      user_id: FK → User (nullable)
+      device_id: FK → Device (nullable)
+      action_type: String
+      description: Text
+    |
+  }
+
+  # ── LIMS ──
+  Experiment: {
+    class: model
+    label: |md
+      # Experiment
+      ---
+      id: Integer (PK)
+      name · description: String
+      created_at: DateTime
+      user_id: FK → User
+      api_key: String (unique)
+      ---
+      → user: User
+      → plants[] (M:N)
+    |
+  }
+
+  Plant: {
+    class: model
+    label: |md
+      # Plant
+      ---
+      id: Integer (PK)
+      name: String
+      identificador_fisico: String
+      especie_variedad: String
+      fecha_siembra: Date
+      estado_vital: String
+      metadata_cientifica: JSONB
+      node_id: Integer (unique)
+      ---
+      → experiments[] (M:N)
+    |
+  }
+
+  ExperimentoPlantaLink: {
+    class: model
+    label: |md
+      # ExperimentoPlantaLink
+      ---
+      experiment_id: FK (PK)
+      plant_id: FK (PK)
+      linked_at: DateTime
+    |
+  }
+
+  # ── Telemetry ──
+  TelemetryTH: {
+    class: model
+    label: |md
+      # TelemetryTH
+      ---
+      id (PK) · timestamp (idx)
+      node_id (idx)
+      temperature: Float
+      humidity: Float
+    |
+  }
+
+  PinHistory: {
+    class: model
+    label: |md
+      # PinHistory
+      ---
+      id (PK) · timestamp (idx)
+      node_id (idx)
+      pin: Integer
+      state: Boolean
+    |
+  }
+
+  SystemHistory: {
+    class: model
+    label: |md
+      # SystemHistory
+      ---
+      id (PK) · timestamp (idx)
+      node_id (idx)
+      mode: Integer
+      battery_mv: Integer
+    |
+  }
+
+  # ── Relaciones ORM ──
+  Sequence -> User: "created_by" {style.stroke: "#3fb950"; style.stroke-dash: 4}
+  SequenceStep -> Sequence: "sequence_id" {style.stroke: "#3fb950"; style.stroke-dash: 4}
+  SequenceStep -> Device: "device_id" {style.stroke: "#3fb950"; style.stroke-dash: 4}
+  ActivityLog -> User: "user_id" {style.stroke: "#3fb950"; style.stroke-dash: 4}
+  ActivityLog -> Device: "device_id" {style.stroke: "#3fb950"; style.stroke-dash: 4}
+  Experiment -> User: "user_id" {style.stroke: "#3fb950"; style.stroke-dash: 4}
+  ExperimentoPlantaLink -> Experiment: "experiment_id" {style.stroke: "#3fb950"; style.stroke-dash: 4}
+  ExperimentoPlantaLink -> Plant: "plant_id" {style.stroke: "#3fb950"; style.stroke-dash: 4}
+}
+
+# ═══════════════════════════════════════════════════════════════════
+#  PYDANTIC SCHEMAS (BD/schemas.py)
+# ═══════════════════════════════════════════════════════════════════
+
+Schemas: "BD/schemas.py — Pydantic Validation" {
+  style: {
+    fill: "#ffffff"
+    stroke: "#f85149"
+    stroke-width: 2
+    border-radius: 14
+    font-color: "#cf222e"
+    font-size: 15
+    bold: true
+  }
+
+  UserSchemas: "User" {
+    style: {fill: "#f6f8fa"; stroke: "#484f58"; border-radius: 8; font-color: "#4a4a5a"; font-size: 12}
+    UserBase: {class: schema; label: |md
+      # UserBase
+      username · role · is_active
+    |}
+    UserCreate: {class: schema; label: |md
+      # UserCreate
+      + password: str
+    |}
+    UserResponse: {class: schema; label: |md
+      # UserResponse
+      + id: UUID
+    |}
+    UserCreate -> UserBase: {style.stroke: "#f85149"; style.stroke-dash: 4}
+    UserResponse -> UserBase: {style.stroke: "#f85149"; style.stroke-dash: 4}
+  }
+
+  DeviceSchemas: "Device" {
+    style: {fill: "#f6f8fa"; stroke: "#484f58"; border-radius: 8; font-color: "#4a4a5a"; font-size: 12}
+    DeviceBase: {class: schema; label: |md
+      # DeviceBase
+      name · device_type · gpio_pin
+    |}
+    DeviceCreate: {class: schema; label: |md
+      # DeviceCreate
+    |}
+    DeviceResponse: {class: schema; label: |md
+      # DeviceResponse
+      + id: int
+    |}
+    DeviceCreate -> DeviceBase: {style.stroke: "#f85149"; style.stroke-dash: 4}
+    DeviceResponse -> DeviceBase: {style.stroke: "#f85149"; style.stroke-dash: 4}
+  }
+
+  SequenceSchemas: "Sequence" {
+    style: {fill: "#f6f8fa"; stroke: "#484f58"; border-radius: 8; font-color: "#4a4a5a"; font-size: 12}
+    SequenceBase: {class: schema; label: |md
+      # SequenceBase
+      name: str
+    |}
+    SequenceCreate: {class: schema; label: |md
+      # SequenceCreate
+      + steps: List[SequenceStepBase]
+    |}
+    SequenceResponse: {class: schema; label: |md
+      # SequenceResponse
+      + id · created_by · created_at
+      + steps: List[SequenceStepResponse]
+    |}
+    SequenceStepBase: {class: schema; label: |md
+      # SequenceStepBase
+      device_id · step_order
+      target_state · duration_seconds
+    |}
+    SequenceStepCreate: {class: schema; label: |md
+      # SequenceStepCreate
+    |}
+    SequenceStepResponse: {class: schema; label: |md
+      # SequenceStepResponse
+      + id · sequence_id
+    |}
+    SequenceCreate -> SequenceBase: {style.stroke: "#f85149"; style.stroke-dash: 4}
+    SequenceResponse -> SequenceBase: {style.stroke: "#f85149"; style.stroke-dash: 4}
+    SequenceStepCreate -> SequenceStepBase: {style.stroke: "#f85149"; style.stroke-dash: 4}
+    SequenceStepResponse -> SequenceStepBase: {style.stroke: "#f85149"; style.stroke-dash: 4}
+  }
+
+  PlantSchemas: "Plant / Experiment (LIMS)" {
+    style: {fill: "#f6f8fa"; stroke: "#484f58"; border-radius: 8; font-color: "#4a4a5a"; font-size: 12}
+    PlantBase: {class: schema; label: |md
+      # PlantBase
+      name · identificador_fisico
+      especie_variedad · fecha_siembra
+      estado_vital · metadata_cientifica
+      node_id
+    |}
+    PlantCreate: {class: schema; label: |md
+      # PlantCreate
+    |}
+    PlantUpdate: {class: schema; label: |md
+      # PlantUpdate
+      (all Optional)
+    |}
+    PlantResponse: {class: schema; label: |md
+      # PlantResponse
+      + id: int
+    |}
+    ExperimentBase: {class: schema; label: |md
+      # ExperimentBase
+      name · description
+    |}
+    ExperimentCreate: {class: schema; label: |md
+      # ExperimentCreate
+      + plant_ids: List[int]
+    |}
+    ExperimentResponse: {class: schema; label: |md
+      # ExperimentResponse
+      + id · created_at · user_id
+      + api_key · plants[]
+    |}
+    PlantCreate -> PlantBase: {style.stroke: "#f85149"; style.stroke-dash: 4}
+    PlantResponse -> PlantBase: {style.stroke: "#f85149"; style.stroke-dash: 4}
+    ExperimentCreate -> ExperimentBase: {style.stroke: "#f85149"; style.stroke-dash: 4}
+    ExperimentResponse -> ExperimentBase: {style.stroke: "#f85149"; style.stroke-dash: 4}
+  }
+
+  ActivityLogSchemas: "ActivityLog" {
+    style: {fill: "#f6f8fa"; stroke: "#484f58"; border-radius: 8; font-color: "#4a4a5a"; font-size: 12}
+    ActivityLogBase: {class: schema; label: |md
+      # ActivityLogBase
+      action_type · description
+      device_id: Optional
+    |}
+    ActivityLogCreate: {class: schema; label: |md
+      # ActivityLogCreate
+      + user_id: UUID
+    |}
+    ActivityLogResponse: {class: schema; label: |md
+      # ActivityLogResponse
+      + id · timestamp · user_id
+    |}
+    ActivityLogCreate -> ActivityLogBase: {style.stroke: "#f85149"; style.stroke-dash: 4}
+    ActivityLogResponse -> ActivityLogBase: {style.stroke: "#f85149"; style.stroke-dash: 4}
+  }
+}
+
+# ═══════════════════════════════════════════════════════════════════
+#  CORE INFRASTRUCTURE
+# ═══════════════════════════════════════════════════════════════════
+
+Core: "Core Infrastructure" {
+  style: {
+    fill: "#ffffff"
+    stroke: "#388bfd"
+    stroke-width: 2
+    border-radius: 14
+    font-color: "#0550ae"
+    font-size: 15
+    bold: true
+  }
+
+  ConnectionRegistry: {
+    class: infra
+    label: |md
+      # ConnectionRegistry
+      **WS_Manager/manager.py**
+      ---
+      active: Dict[str, WebSocket]
+      ---
+      connect(ws, client_id)
+      disconnect(client_id)
+      is_connected(client_id) → bool
+      send(client_id, payload)
+      broadcast(payload)
+      broadcast_except(exclude, payload)
+    |
+  }
+
+  RedisManager: {
+    class: infra
+    label: |md
+      # RedisManager
+      **Core/redis.py**
+      ---
+      redis: Optional[redis.Redis]
+      ---
+      connect() · close()
+      get_client() → redis.Redis
+      set/get_device_state(device_id)
+      save/get_telemetry(sensor_id)
+      push_activity_event(event)
+      pop_activity_batch(count)
+      publish_event(type, payload)
+      subscribe_events() → AsyncGen
+    |
+  }
+
+  Dispatcher: {
+    class: infra
+    label: |md
+      # Dispatcher (functions)
+      **WS_Manager/dispatcher.py**
+      ---
+      handle_gateway_message(data)
+      start_redis_listener()
+      start_activity_batch_flusher()
+    |
+  }
+
+  Auth: {
+    class: infra
+    label: |md
+      # Auth (functions)
+      **Core/auth.py**
+      ---
+      verify_password(plain, hashed)
+      get_password_hash(password)
+      create_access_token(data)
+      get_current_user(token, db)
+      get_current_active_user(user)
+      get_api_key_or_403(exp_id, key, db)
+    |
+  }
+
+  Dispatcher -> ConnectionRegistry: "uses" {style.stroke: "#388bfd"; style.stroke-dash: 4}
+  Dispatcher -> RedisManager: "uses" {style.stroke: "#388bfd"; style.stroke-dash: 4}
+}
+
+# ═══════════════════════════════════════════════════════════════════
+#  API ROUTERS
+# ═══════════════════════════════════════════════════════════════════
+
+Routers: "API/routers/ — FastAPI Endpoints" {
+  style: {
+    fill: "#ffffff"
+    stroke: "#d2a8ff"
+    stroke-width: 2
+    border-radius: 14
+    font-color: "#6639ba"
+    font-size: 15
+    bold: true
+  }
+
+  AuthRouter: {
+    class: router
+    label: |md
+      # auth_router
+      POST /auth/register
+      POST /auth/login
+      GET /auth/me
+    |
+  }
+  CommandRouter: {
+    class: router
+    label: |md
+      # command_router
+      POST /api/command
+    |
+  }
+  WSRouter: {
+    class: router
+    label: |md
+      # ws_router
+      WS /ws/{client_id}
+    |
+  }
+  DiscoveryRouter: {
+    class: router
+    label: |md
+      # discovery_router
+      GET /api/devices
+    |
+  }
+  HistoryRouter: {
+    class: router
+    label: |md
+      # history_router
+      GET /api/history/node/{id}
+    |
+  }
+  LimsRouter: {
+    class: router
+    label: |md
+      # lims_router
+      CRUD /api/lims/plantas
+      CRUD /api/lims/experimentos
+    |
+  }
+  SdkRouter: {
+    class: router
+    label: |md
+      # sdk_router
+      GET /api/sdk/mediciones/{id}
+    |
+  }
+  AnalysisRouter: {
+    class: router
+    label: |md
+      # analysis_router
+      POST /api/analysis/generate
+      GET /api/analysis/status/{id}
+      GET /api/analysis/download/{f}
+    |
+  }
+  ExportRouter: {
+    class: router
+    label: |md
+      # export_router
+      POST /api/export/plants
+      GET /api/export/status/{id}
+      GET /api/export/download/{id}
+    |
+  }
+  SystemRouter: {
+    class: router
+    label: |md
+      # system_router
+      GET /api/system/status
+      GET /api/system/db-check
+    |
+  }
+}
+
+# ═══════════════════════════════════════════════════════════════════
+#  WORKERS & SCHEDULER
+# ═══════════════════════════════════════════════════════════════════
+
+Workers: "Worker/ & Secuenciador/ — Background Jobs" {
+  style: {
+    fill: "#ffffff"
+    stroke: "#e3b341"
+    stroke-width: 2
+    border-radius: 14
+    font-color: "#9a6700"
+    font-size: 15
+    bold: true
+  }
+
+  ETLWorker: {
+    class: worker
+    label: |md
+      # ETL Worker
+      **Worker/tasks.py** (RQ)
+      ---
+      export_experiment_data(
+        experimento_id, ref_date, days
+      ) → str (zip path)
+      ---
+      Extract → Transform → Load
+      Pandas · Excel · Graphs
+    |
+  }
+
+  Scheduler: {
+    class: worker
+    label: |md
+      # Scheduler
+      **Secuenciador/main.py**
+      APScheduler (AsyncIO)
+      ---
+      Hourly: sync_sensor_data_to_redis
+      30min: dummy_insert_test_data
+      3AM: enqueue_nightly_etl
+    |
+  }
+
+  SchedulerTasks: {
+    class: worker
+    label: |md
+      # Scheduler Tasks
+      **Secuenciador/tasks.py**
+      ---
+      sync_sensor_data_to_redis()
+      dummy_insert_test_data()
+      enqueue_nightly_etl()
+    |
+  }
+
+  Scheduler -> SchedulerTasks: "runs" {style.stroke: "#e3b341"; style.stroke-dash: 4}
+  SchedulerTasks -> Core.RedisManager: "uses" {style.stroke: "#484f58"; style.stroke-dash: 4}
+  ETLWorker -> Core.RedisManager: "uses" {style.stroke: "#484f58"; style.stroke-dash: 4}
+}
+
+# ═══════════════════════════════════════════════════════════════════
+#  CROSS-LAYER DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════
+
+Routers.WSRouter -> Core.ConnectionRegistry: "uses" {style.stroke: "#484f58"; style.stroke-dash: 4}
+Routers.WSRouter -> Core.Dispatcher: "calls" {style.stroke: "#484f58"; style.stroke-dash: 4}
+Routers.CommandRouter -> Core.RedisManager: "publish" {style.stroke: "#484f58"; style.stroke-dash: 4}
+Routers.CommandRouter -> Core.ConnectionRegistry: "send" {style.stroke: "#484f58"; style.stroke-dash: 4}
+Routers.LimsRouter -> Core.RedisManager: "cache" {style.stroke: "#484f58"; style.stroke-dash: 4}
+Routers.AuthRouter -> Core.Auth: "uses" {style.stroke: "#484f58"; style.stroke-dash: 4}
+Routers.AnalysisRouter -> Workers.ETLWorker: "enqueue" {style.stroke: "#e3b341"; style.stroke-dash: 4}
+Routers.ExportRouter -> Workers.ETLWorker: "enqueue" {style.stroke: "#e3b341"; style.stroke-dash: 4}

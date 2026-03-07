@@ -59,19 +59,6 @@ class GatewayOrchestrator:
             on_open_callback=self.report_system_config
         )
 
-    # ── Lifecycle ─────────────────────────────────────────────────────────────
-
-    async def start(self):
-        self.logger.info("Starting Gateway Orchestrator…")
-        self.uart.add_listener(self.dispatch_uart_to_ws)
-        uart_task = asyncio.create_task(self.uart.start())
-        await self.ws_client.start()
-        await uart_task  # runs forever
-
-    async def stop(self):
-        await self.ws_client.stop()
-        await self.uart.stop()
-
     # ── WS → UART ─────────────────────────────────────────────────────────────
 
     async def dispatch_ws_to_uart(self, raw_message: str) -> None:
@@ -107,7 +94,7 @@ class GatewayOrchestrator:
         """
         # ── Hardware Translation ──
         cmd_type = data.get("type")
-        
+
         if cmd_type == "set_gpio":
             logical_pin = data.get("pin")
             if isinstance(logical_pin, int):
@@ -115,11 +102,11 @@ class GatewayOrchestrator:
                 self.logger.debug(f"Translating pin {logical_pin} -> Node {target_id}, Pin {physical_pin}")
                 data["target_id"] = target_id
                 data["pin"] = physical_pin
-                
+
         elif cmd_type == "exec_sequence":
             for step in data.get("steps", []):
                 logical_pin = step.get("pin")
-                if isinstance(logical_pin, int) and logical_pin != 0: # 0 is WAIT
+                if isinstance(logical_pin, int) and logical_pin != 0:  # 0 is WAIT
                     target_id, physical_pin = self.device_manager.translate_pin(logical_pin)
                     step["target_id"] = target_id
                     step["pin"] = physical_pin
@@ -148,9 +135,8 @@ class GatewayOrchestrator:
 
     async def dispatch_uart_to_ws(self, cmd: DemeterCommand) -> None:
         """
-        Receive a parsed command from the UART bus and publish it to the server
-        WebSocket using the type string that the server's _handle_gateway_msg()
-        expects (e.g. "temp_hum_report", "pin_report", "ack", "nack").
+        Recibe un comando desde el UART y, si el tipo indica "Reporte" de estado
+        (como temperatura/humedad o estado de ping), lo manda al WebSocket.
         """
         msg_type = _REPORT_TYPE_MAP.get(type(cmd))
         if msg_type is None:
@@ -164,6 +150,20 @@ class GatewayOrchestrator:
 
         self.logger.debug(f"[Bridge UART→WS] {msg_type}: {payload}")
         await self.ws_client.send_json(payload)
+
+    # ── Lifecycle ─────────────────────────────────────────────────────────────
+
+    async def start(self) -> None:
+        """Starts the gateway: UART listeners, WS connection."""
+        self.logger.info("Starting Gateway Orchestrator…")
+        self.uart.add_listener(self.dispatch_uart_to_ws)
+        uart_task = asyncio.create_task(self.uart.start())
+        await self.ws_client.start()
+        await uart_task
+
+    async def stop(self) -> None:
+        await self.ws_client.stop()
+        await self.uart.stop()
 
 
 if __name__ == "__main__":

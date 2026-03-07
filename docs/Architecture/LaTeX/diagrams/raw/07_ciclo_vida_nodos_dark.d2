@@ -1,0 +1,189 @@
+# AUTO-GENERADO por make_print.py — VERSIÓN PARA IMPRESIÓN
+# Colores adaptados para fondo blanco / documento académico
+# No editar directamente; editar el archivo fuente y regenerar.
+
+
+# ─────────────────────────────────────────────────────────────────
+#  Protocolo Demeter – Ciclo de Vida de los Nodos ESP32
+#  Tres ramas paralelas: Sensor, Actuador, Gateway
+# ─────────────────────────────────────────────────────────────────
+
+direction: down
+
+classes: {
+  start: {
+    shape: oval
+    style: {
+      fill: "#1f6feb"
+      stroke: "#58a6ff"
+      stroke-width: 2
+      font-color: "#ffffff"
+      font-size: 14
+      bold: true
+      shadow: true
+    }
+  }
+  step: {
+    shape: rectangle
+    style: {
+      border-radius: 10
+      fill: "#ffffff"
+      stroke: "#388bfd"
+      stroke-width: 2
+      font-color: "#1a1a2e"
+      font-size: 13
+      shadow: true
+    }
+  }
+  decision: {
+    shape: diamond
+    style: {
+      fill: "#f3e8ff"
+      stroke: "#d2a8ff"
+      stroke-width: 2
+      font-color: "#6639ba"
+      font-size: 13
+      bold: true
+      shadow: true
+    }
+  }
+  running: {
+    shape: oval
+    style: {
+      fill: "#dff7eb"
+      stroke: "#3fb950"
+      stroke-width: 2
+      font-color: "#1a7f37"
+      font-size: 13
+      bold: true
+      shadow: true
+    }
+  }
+  idle: {
+    shape: oval
+    style: {
+      fill: "#fff8ec"
+      stroke: "#e3b341"
+      stroke-width: 2
+      font-color: "#9a6700"
+      font-size: 13
+      bold: true
+      shadow: true
+    }
+  }
+  loop: {
+    shape: rectangle
+    style: {
+      border-radius: 20
+      fill: "#ffffff"
+      stroke: "#484f58"
+      stroke-width: 2
+      font-color: "#4a4a5a"
+      font-size: 12
+      stroke-dash: 4
+    }
+  }
+}
+
+# ── Nodo raíz ─────────────────────────────────────────────────────
+
+INICIO: "Inicio del sistema" {class: start}
+ROL: "Tipo de Nodo\n(definido en compilación)" {class: decision}
+
+INICIO -> ROL
+
+# ══════════════════════════════════════════════════════════════════
+# RAMA SENSOR
+# ══════════════════════════════════════════════════════════════════
+
+SENSOR: "Nodo Sensor" {
+  style: {
+    fill: "#f6f8fa"
+    stroke: "#388bfd"
+    stroke-width: 3
+    border-radius: 14
+    font-color: "#0550ae"
+    font-size: 15
+    bold: true
+  }
+
+  S1: "Inicializar periféricos\nDHT22 · DS18B20 · Suelo" {class: step}
+  S2: "Registrar MAC\ndel Gateway" {class: step}
+  S3: "Handshake\ncon Gateway" {class: step}
+  S4: "¿Handshake OK?" {class: decision}
+  S5: "¿Reintentos < 3?" {class: decision}
+  S6: "Estado: IDLE\n(esperando)" {class: idle}
+  S7: "Estado: RUNNING ✓" {class: running}
+  S8: "Bucle: leer sensores\ny reportar cada 5 s" {class: loop}
+
+  S1 -> S2 -> S3 -> S4
+  S4 -> S5: "No / Timeout" {style.stroke: "#f85149"; style.font-color: "#cf222e"; style.bold: true}
+  S4 -> S7: "Sí" {style.stroke: "#3fb950"; style.font-color: "#1a7f37"; style.bold: true}
+  S5 -> S3: "Sí" {style.stroke: "#e3b341"; style.font-color: "#9a6700"; style.stroke-dash: 4}
+  S5 -> S6: "No" {style.stroke: "#f85149"; style.font-color: "#cf222e"}
+  S7 -> S8 -> S7
+}
+
+# ══════════════════════════════════════════════════════════════════
+# RAMA ACTUADOR
+# ══════════════════════════════════════════════════════════════════
+
+ACTUADOR: "Nodo Actuador" {
+  style: {
+    fill: "#f6f8fa"
+    stroke: "#e3b341"
+    stroke-width: 3
+    border-radius: 14
+    font-color: "#9a6700"
+    font-size: 15
+    bold: true
+  }
+
+  A1: "Inicializar pines\nde salida y relés" {class: step}
+  A2: "Registrar MAC\ndel Gateway" {class: step}
+  A3: "Bucle: escuchar\ncomandos SET_GPIO" {class: loop}
+  A4: "Ejecutar pin\ny enviar PIN_REPORT" {class: step}
+
+  A1 -> A2 -> A3 -> A4 -> A3
+}
+
+# ══════════════════════════════════════════════════════════════════
+# RAMA GATEWAY
+# ══════════════════════════════════════════════════════════════════
+
+GATEWAY: "Nodo Gateway" {
+  style: {
+    fill: "#f6f8fa"
+    stroke: "#d2a8ff"
+    stroke-width: 3
+    border-radius: 14
+    font-color: "#6639ba"
+    font-size: 15
+    bold: true
+  }
+
+  G1: "Inicializar\nUART + ESP-NOW" {class: step}
+  G2: "Registrar MACs\nde nodos conocidos" {class: step}
+  G3: "Bucle: escuchar\nRF y UART" {class: loop}
+  G4: "Reenviar trama\nal canal opuesto" {class: step}
+
+  G1 -> G2 -> G3 -> G4 -> G3
+}
+
+# ── Conectar bifurcación de rol ────────────────────────────────────
+
+ROL -> SENSOR: "SENSOR" {
+  style.stroke: "#388bfd"
+  style.font-color: "#0550ae"
+  style.bold: true
+}
+ROL -> ACTUADOR: "ACTUATOR" {
+  style.stroke: "#e3b341"
+  style.font-color: "#9a6700"
+  style.bold: true
+}
+ROL -> GATEWAY: "GATEWAY" {
+  style.stroke: "#d2a8ff"
+  style.font-color: "#6639ba"
+  style.bold: true
+}

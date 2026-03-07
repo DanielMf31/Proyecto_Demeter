@@ -1,0 +1,8 @@
+digraph "packages_Common" {
+rankdir=BT
+charset="utf-8"
+"configuration" [color="black", label=<configuration>, shape="box", style="solid"];
+"demeter_protocol" [color="black", label=<demeter_protocol>, shape="box", style="solid"];
+"schemas" [color="black", label=<schemas>, shape="box", style="solid"];
+"demeter_protocol" -> "schemas" [arrowhead="open", arrowtail="none"];
+}

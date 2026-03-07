@@ -1,0 +1,132 @@
+# AUTO-GENERADO por make_print.py — VERSIÓN PARA IMPRESIÓN
+# Colores adaptados para fondo blanco / documento académico
+# No editar directamente; editar el archivo fuente y regenerar.
+
+
+# ─────────────────────────────────────────────────────────────────
+#  Protocolo Demeter – Flujo de Comando vía Redis Pub/Sub
+#  Frontend → FastAPI → Redis → WS Dispatcher → Raspberry Pi
+# ─────────────────────────────────────────────────────────────────
+
+shape: sequence_diagram
+
+FE: "Frontend\nReact" {
+  style: {
+    fill: "#ffffff"
+    stroke: "#388bfd"
+    font-color: "#0550ae"
+    bold: true
+  }
+}
+
+API: "FastAPI\n(demeter-api)" {
+  style: {
+    fill: "#ffffff"
+    stroke: "#3fb950"
+    font-color: "#1a7f37"
+    bold: true
+  }
+}
+
+Redis: "Redis\n(demeter-redis)" {
+  style: {
+    fill: "#ffe9e9"
+    stroke: "#f85149"
+    font-color: "#cf222e"
+    bold: true
+  }
+}
+
+Disp: "WS Dispatcher\n(tarea asyncio)" {
+  style: {
+    fill: "#ffffff"
+    stroke: "#d2a8ff"
+    font-color: "#6639ba"
+    bold: true
+  }
+}
+
+RPi: "Raspberry Pi\nGateway" {
+  style: {
+    fill: "#f0f9ec"
+    stroke: "#e3b341"
+    font-color: "#9a6700"
+    bold: true
+  }
+}
+
+FE -> API: "POST /api/command\n{\"type\":\"set_gpio\", \"target_id\":3, \"pin\":4, \"value\":1}" {
+  style.stroke: "#388bfd"
+  style.font-color: "#0550ae"
+  style.bold: true
+}
+
+API -> API: "Validación Pydantic\n(TypeAdapter discriminado)" {
+  style.stroke: "#3fb950"
+  style.font-color: "#1a7f37"
+  style.stroke-dash: 4
+}
+
+API -> Redis: "PUBLISH demeter:commands\n(payload JSON serializado)" {
+  style.stroke: "#f85149"
+  style.font-color: "#cf222e"
+  style.bold: true
+}
+
+API -> Redis: "SETEX demeter:cache:device:4 OFF 60s" {
+  style.stroke: "#f85149"
+  style.font-color: "#cf222e"
+}
+
+API -> Redis: "LPUSH demeter:activity:batch {evento}" {
+  style.stroke: "#f85149"
+  style.font-color: "#cf222e"
+}
+
+API -> FE: "HTTP 202 Accepted\n{\"status\": \"queued\"}" {
+  style.stroke: "#3fb950"
+  style.font-color: "#1a7f37"
+  style.bold: true
+}
+
+Redis -> Disp: "Mensaje en canal demeter:commands\n(listener en background)" {
+  style.stroke: "#d2a8ff"
+  style.font-color: "#6639ba"
+  style.bold: true
+}
+
+Disp -> Disp: "Parsear JSON\nTypeAdapter.validate_python()" {
+  style.stroke: "#d2a8ff"
+  style.font-color: "#6639ba"
+  style.stroke-dash: 4
+}
+
+Disp -> RPi: "registry.send(\"raspberry_gateway\", cmd)" {
+  style.stroke: "#e3b341"
+  style.font-color: "#9a6700"
+  style.stroke-width: 3
+  style.bold: true
+}
+
+RPi -> RPi: "Serializa a trama binaria\ny envía por UART al Gateway" {
+  style.stroke: "#e3b341"
+  style.font-color: "#9a6700"
+  style.stroke-dash: 4
+}
+
+RPi -> API: "Evento telemetría o CMD_ACK\nvía /ws/raspberry_gateway" {
+  style.stroke: "#e3b341"
+  style.font-color: "#9a6700"
+  style.bold: true
+}
+
+API -> Redis: "SETEX sensor:3:telemetry {datos} 60s" {
+  style.stroke: "#f85149"
+  style.font-color: "#cf222e"
+}
+
+API -> FE: "Push WS broadcast\na clientes frontend" {
+  style.stroke: "#3fb950"
+  style.font-color: "#1a7f37"
+  style.bold: true
+}

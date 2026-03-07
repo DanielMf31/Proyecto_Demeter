@@ -37,6 +37,9 @@ services:
     build:
       context: .
       dockerfile: Software/Servidor/docker/frontend/Dockerfile # build de producción
+      args:
+        VITE_API_URL: ${VITE_API_URL:-https://patata.monters.org/api}
+        VITE_WS_URL: ${VITE_WS_URL:-wss://patata.monters.org/ws}
     ports:
       - "5175:80" # acceso directo sin túnel
     environment:

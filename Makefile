@@ -242,6 +242,15 @@ rpi-status:
 	@echo "Variables activas:"
 	@docker exec demeter-gateway env 2>/dev/null | grep DEMETER_ | sort || echo "  (contenedor no arrancado)"
 
+rpi-pio-list:
+	@echo "Listando dispositivos conectados a la Raspberry Pi..."
+	pio device list
+
+rpi-pio-monitor:
+	@echo "Abriendo monitor serie (PlatformIO)..."
+	@echo "Uso: make rpi-pio-monitor PORT=/dev/ttyUSB0"
+	pio device monitor -p $(or $(PORT),/dev/ttyS0) -b 115200
+
 # ─── TESTING UNIVERAL ─────────────────────────────────────────────────────────
 test-all:
 	@echo "======================================================"
@@ -249,7 +258,7 @@ test-all:
 	@echo "======================================================"
 	@echo ""
 	@echo "[1/4] Firmware C++ (PlatformIO)"
-	cd Firmware && pio test -e native
+	cd Firmware && bash -c "set -o pipefail; pio test -e native | sed '/Verbosity level can be increased/d'"
 	@echo ""
 	@echo "[2/4] Backend (pytest)"
 	cd Software/Servidor/Backend && pytest tests/
