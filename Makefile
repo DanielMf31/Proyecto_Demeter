@@ -16,6 +16,7 @@
         prod \
         migrate dev-migrate \
         rpi-up rpi-build rpi-pull rpi-down rpi-logs rpi-shell rpi-status \
+        fw-build fw-flash fw-monitor \
         seed logs logs-api logs-db logs-redis logs-frontend \
         clean clean-all status ps pull \
         tunnel-staging api-key test-all
@@ -71,6 +72,12 @@ help:
 	@echo "  clean            Para contenedores (mantiene datos)"
 	@echo "  clean-all        Para y borra volúmenes (pierde datos DB)"
 	@echo "  api-key          Muestra API keys de experimentos en la DB"
+	@echo ""
+	@echo "  FIRMWARE (PlatformIO, ejecutar EN la Raspberry)"
+	@echo "  -----------------------------------------------"
+	@echo "  fw-build         Compila el firmware del gateway (sin flashear)"
+	@echo "  fw-flash         Compila y flashea el gateway al ESP32 conectado"
+	@echo "  fw-monitor       Abre el monitor serie del ESP32"
 	@echo ""
 	@echo "  RASPBERRY PI (ejecutar EN la Raspberry)"
 	@echo "  -----------------------------------------------"
@@ -218,6 +225,21 @@ api-key:
 	docker exec demeter-db psql -U postgres -d demeter_db \
 		-c "SELECT id, name, api_key FROM experiments ORDER BY id;" 2>/dev/null || \
 	echo "No se pudo conectar. Asegurate de que el stack esta levantado."
+
+# ─── FIRMWARE ─────────────────────────────────────────────────────────────────
+fw-build:
+	@echo "Compilando firmware del gateway..."
+	cd Firmware && pio run -e gateway
+	@echo "Firmware compilado"
+
+fw-flash:
+	@echo "Compilando y flasheando gateway al ESP32..."
+	cd Firmware && pio run -e gateway -t upload
+	@echo "Firmware flasheado"
+
+fw-monitor:
+	@echo "Abriendo monitor serie..."
+	cd Firmware && pio device monitor -e gateway
 
 # ─── RASPBERRY PI ─────────────────────────────────────────────────────────────
 rpi-up:

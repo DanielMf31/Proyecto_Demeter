@@ -102,8 +102,7 @@ void processSerialCommand(String cmd) {
 
 void setup() {
     Serial.begin(115200);
-    delay(1000);
-    while(!Serial) delay(10); // Wait for USB
+    delay(2000); // Give USB CDC time to enumerate (non-blocking)
 
     Serial.println("=== DEMETER GATEWAY V2 (Direct Control) ===");
     Serial.println("Type commands in console:");
