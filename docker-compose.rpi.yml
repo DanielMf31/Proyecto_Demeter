@@ -66,8 +66,6 @@ services:
       resources:
         limits:
           memory: 256M
-        reservations:
-          memory: 64M
 
     # Entrypoint de Edge Mode: usa edge_server.py (FastAPI + Uvicorn)
     # Deja command_dispatcher.py intacto para el modo normal (rpi)
@@ -76,9 +74,9 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-sf", "http://localhost:8001/api/health"]
       interval: 5s
-      timeout: 3s
-      retries: 10
-      start_period: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
 
   # ─── Local UI (Edge Architecture) ─────────────────────────────────────────
   # Interfaz web servida directamente desde la Raspberry.
