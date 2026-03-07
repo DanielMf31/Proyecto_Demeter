@@ -23,8 +23,9 @@
 RPI_COMPOSE = docker compose -f docker-compose.rpi.yml --env-file .env.rpi
 
 # Imágenes remotas en GitHub Container Registry
-GHCR_GATEWAY = ghcr.io/danielmf31/demeter-gateway:latest
-GHCR_UI      = ghcr.io/danielmf31/demeter-local-ui:latest
+GHCR_REPO    = ghcr.io/danielmf31/proyecto_demeter
+GHCR_GATEWAY = $(GHCR_REPO)/gateway:latest
+GHCR_UI      = $(GHCR_REPO)/local-ui:latest
 
 STAGING_COMPOSE = docker compose -f docker-compose.yml -f docker-compose.staging.yml
 

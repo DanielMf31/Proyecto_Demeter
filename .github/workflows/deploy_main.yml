@@ -65,18 +65,30 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # ── Servidor (x86) ──
           - image: frontend
             context: .
             dockerfile: Software/Servidor/docker/frontend/Dockerfile
             platforms: linux/amd64
+            build-args: ""
           - image: backend
             context: .
             dockerfile: Software/Servidor/docker/backend/Dockerfile
             platforms: linux/amd64
-          - image: raspberry
+            build-args: ""
+          # ── Raspberry Pi (ARM64) ──
+          - image: gateway
             context: .
             dockerfile: Software/Raspberry/Dockerfile
-            platforms: linux/amd64,linux/arm64
+            platforms: linux/arm64
+            build-args: ""
+          - image: local-ui
+            context: .
+            dockerfile: Software/Servidor/docker/frontend/Dockerfile.rpi
+            platforms: linux/arm64
+            build-args: |
+              VITE_API_URL=/api
+              VITE_WS_URL=/ws
 
     steps:
       - name: Checkout
@@ -105,7 +117,7 @@ jobs:
             type=sha
             type=raw,value=latest
             type=semver,pattern={{version}}
-            type=raw,value=0.3
+            type=raw,value=0.4
 
       - name: Build and push
         uses: docker/build-push-action@v5
@@ -116,5 +128,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: ${{ matrix.build-args }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
