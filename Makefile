@@ -16,7 +16,7 @@
         prod \
         migrate dev-migrate \
         rpi-up rpi-build rpi-pull rpi-down rpi-logs rpi-shell rpi-status \
-        fw-build fw-flash fw-monitor \
+        fw-build fw-flash fw-flash-sensor fw-monitor \
         seed logs logs-api logs-db logs-redis logs-frontend \
         clean clean-all status ps pull \
         tunnel-staging api-key test-all
@@ -77,6 +77,7 @@ help:
 	@echo "  -----------------------------------------------"
 	@echo "  fw-build         Compila el firmware del gateway (sin flashear)"
 	@echo "  fw-flash         Compila y flashea el gateway al ESP32 conectado"
+	@echo "  fw-flash-sensor  Flashea el firmware de test de sensores"
 	@echo "  fw-monitor       Abre el monitor serie del ESP32"
 	@echo ""
 	@echo "  RASPBERRY PI (ejecutar EN la Raspberry)"
@@ -236,6 +237,11 @@ fw-flash:
 	@echo "Compilando y flasheando gateway al ESP32..."
 	cd Firmware && pio run -e gateway -t upload
 	@echo "Firmware flasheado"
+
+fw-flash-sensor:
+	@echo "Compilando y flasheando sensor_test al ESP32..."
+	cd Firmware && pio run -e sensor_test -t upload
+	@echo "Firmware sensor_test flasheado"
 
 fw-monitor:
 	@echo "Abriendo monitor serie..."
