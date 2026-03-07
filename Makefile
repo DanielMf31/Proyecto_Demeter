@@ -15,12 +15,16 @@
         staging staging-build staging-down staging-logs staging-seed staging-restart \
         prod \
         migrate dev-migrate \
-        rpi-up rpi-build rpi-down rpi-logs rpi-shell rpi-status \
+        rpi-up rpi-build rpi-pull rpi-down rpi-logs rpi-shell rpi-status \
         seed logs logs-api logs-db logs-redis logs-frontend \
         clean clean-all status ps pull \
         tunnel-staging api-key test-all
 
 RPI_COMPOSE = docker compose -f docker-compose.rpi.yml --env-file .env.rpi
+
+# Imágenes remotas en GitHub Container Registry
+GHCR_GATEWAY = ghcr.io/danielmf31/demeter-gateway:latest
+GHCR_UI      = ghcr.io/danielmf31/demeter-local-ui:latest
 
 STAGING_COMPOSE = docker compose -f docker-compose.yml -f docker-compose.staging.yml
 
@@ -69,8 +73,9 @@ help:
 	@echo ""
 	@echo "  RASPBERRY PI (ejecutar EN la Raspberry)"
 	@echo "  -----------------------------------------------"
-	@echo "  rpi-up           Arranca el Gateway Orchestrator en la RPi"
-	@echo "  rpi-build        Arranca con rebuild completo de la imagen"
+	@echo "  rpi-up           Arranca con imagen local (build previo o pull previo)"
+	@echo "  rpi-build        Construye la imagen localmente y arranca"
+	@echo "  rpi-pull         Descarga imagen de ghcr.io y arranca"
 	@echo "  rpi-down         Para el gateway"
 	@echo "  rpi-logs         Sigue los logs del gateway en tiempo real"
 	@echo "  rpi-shell        Abre una shell dentro del contenedor gateway"
@@ -220,9 +225,16 @@ rpi-up:
 	@echo "Gateway listo. Logs: make rpi-logs"
 
 rpi-build:
-	@echo "Rebuildeando imagen del Gateway..."
+	@echo "Construyendo imagen localmente..."
 	$(RPI_COMPOSE) up -d --build
-	@echo "Imagen reconstruida y gateway arrancado"
+	@echo "Imagen construida y gateway arrancado"
+
+rpi-pull:
+	@echo "Descargando imagenes de ghcr.io..."
+	DEMETER_GATEWAY_IMAGE=$(GHCR_GATEWAY) DEMETER_UI_IMAGE=$(GHCR_UI) $(RPI_COMPOSE) pull
+	@echo "Arrancando con imagenes remotas..."
+	DEMETER_GATEWAY_IMAGE=$(GHCR_GATEWAY) DEMETER_UI_IMAGE=$(GHCR_UI) $(RPI_COMPOSE) up -d
+	@echo "Gateway listo (imagen remota). Logs: make rpi-logs"
 
 rpi-down:
 	@echo "Parando Gateway Orchestrator..."

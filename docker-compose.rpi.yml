@@ -21,7 +21,7 @@ services:
   # ─── Gateway Orchestrator ─────────────────────────────────────────────────
   # Proceso principal: puente UART ↔ WebSocket → Backend
   gateway:
-    image: demeter-gateway:latest
+    image: ${DEMETER_GATEWAY_IMAGE:-demeter-gateway:latest}
     container_name: demeter-gateway
     restart: unless-stopped
     build:
@@ -86,7 +86,7 @@ services:
   # El gateway en modo rpi-local usa edge_server.py como entrypoint,
   # que integra FastAPI + Uvicorn sin tocar command_dispatcher.py.
   local-ui:
-    image: demeter-local-ui:latest
+    image: ${DEMETER_UI_IMAGE:-demeter-local-ui:latest}
     container_name: demeter-local-ui
     restart: unless-stopped
     depends_on:
