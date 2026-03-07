@@ -57,8 +57,11 @@ done
 
 # 5. Abrir Interfaz
 echo "🌐 Abriendo Interfaz Local..."
-if command -v chromium-browser &> /dev/null; then
-    chromium-browser http://localhost --start-fullscreen --noerrdialogs --disable-infobars &
+export DISPLAY="${DISPLAY:-:0}"
+if command -v chromium &> /dev/null; then
+    chromium http://localhost --start-fullscreen --noerrdialogs --disable-infobars --disable-gpu --no-sandbox &
+elif command -v firefox &> /dev/null; then
+    firefox http://localhost &
 else
     xdg-open http://localhost
 fi
