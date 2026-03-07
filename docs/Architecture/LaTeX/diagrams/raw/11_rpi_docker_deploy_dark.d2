@@ -1,0 +1,164 @@
+# AUTO-GENERADO por make_print.py — VERSIÓN PARA IMPRESIÓN
+# Colores adaptados para fondo blanco / documento académico
+# No editar directamente; editar el archivo fuente y regenerar.
+
+
+# ─────────────────────────────────────────────────────────────────
+#  Protocolo Demeter – Despliegue Docker en Raspberry Pi
+# ─────────────────────────────────────────────────────────────────
+
+direction: down
+
+classes: {
+  internal: {
+    shape: rectangle
+    style: {
+      border-radius: 10
+      fill: "#ffffff"
+      stroke: "#388bfd"
+      stroke-width: 2
+      font-color: "#1a1a2e"
+      font-size: 13
+      shadow: true
+    }
+  }
+  external: {
+    shape: rectangle
+    style: {
+      border-radius: 8
+      fill: "#ffffff"
+      stroke: "#484f58"
+      stroke-width: 2
+      font-color: "#4a4a5a"
+      font-size: 13
+    }
+  }
+  orchestrator: {
+    shape: rectangle
+    style: {
+      border-radius: 10
+      fill: "#dff7eb"
+      stroke: "#3fb950"
+      stroke-width: 3
+      font-color: "#1a7f37"
+      font-size: 14
+      bold: true
+      shadow: true
+    }
+  }
+  edge: {
+    shape: rectangle
+    style: {
+      border-radius: 10
+      fill: "#e6f0ff"
+      stroke: "#58a6ff"
+      stroke-width: 3
+      font-color: "#0550ae"
+      font-size: 14
+      bold: true
+      shadow: true
+    }
+  }
+  volume: {
+    shape: cylinder
+    style: {
+      fill: "#f5f0ff"
+      stroke: "#d2a8ff"
+      stroke-width: 2
+      font-color: "#6639ba"
+      font-size: 12
+    }
+  }
+}
+
+# ── Actores externos ───────────────────────────────────────────────
+
+Host: "Host: Raspberry Pi OS\n(Debian Linux)" {class: external}
+Serial: "/dev/serial0\n(UART físico)" {class: external}
+Internet: "Internet\n(Ethernet cable)" {class: external}
+Backend: "Backend FastAPI\n(Google Cloud VM)" {class: external}
+ESP32: "Gateway ESP32\n(Red Local Demeter)" {class: external}
+Nodos: "Nodos\nSensor / Actuador" {class: external}
+LocalUI: "Nginx + Chromium\n(Puerto :80)" {class: external}
+
+# ── Contenedor Docker ──────────────────────────────────────────────
+
+Container: "Docker Container: proyecto-demeter-rpi" {
+  style: {
+    fill: "#f6f8fa"
+    stroke: "#e3b341"
+    stroke-width: 3
+    border-radius: 16
+    font-color: "#9a6700"
+    font-size: 15
+    bold: true
+  }
+
+  Edge: "EdgeServer\n(FastAPI + Uvicorn :8001)" {class: edge}
+  Orch: "GatewayOrchestrator\n(Orquestador asyncio)" {class: orchestrator}
+  UART: "AsyncUART\nTX Queue / RX Callback" {class: internal}
+  Proc: "UARTProcessor\nDemeter Parser" {class: internal}
+  Dev: "DeviceManager\n(Estado local nodos)" {class: internal}
+  WSC: "WebSocket Client\n/ws/raspberry_gateway" {class: internal}
+
+  Edge -> Orch
+  Orch -> UART
+  Orch -> WSC
+  Orch -> Dev
+  UART -> Proc
+  Proc -> Orch
+  WSC -> Orch
+}
+
+# ── Conexiones host → contenedor ──────────────────────────────────
+
+Host -> Container: "device mapping\n--device /dev/serial0" {
+  style.stroke: "#484f58"
+  style.font-color: "#4a4a5a"
+  style.stroke-width: 2
+}
+
+Host -> Container.Edge: "Env Variables\nWS_URL, BAUD_RATE" {
+  style.stroke: "#e3b341"
+  style.font-color: "#9a6700"
+  style.stroke-dash: 4
+}
+
+# ── Conexión UI Local → Contenedor ─────────────────────────────────
+
+LocalUI -> Container.Edge: "HTTP / WS\nlocalhost:8001" {
+  style.stroke: "#58a6ff"
+  style.font-color: "#0550ae"
+  style.stroke-width: 2
+}
+
+# ── Conexiones UART ───────────────────────────────────────────────
+
+Container.UART -> Serial: "TX / RX Bytes" {
+  style.stroke: "#e3b341"
+  style.font-color: "#9a6700"
+  style.stroke-width: 2
+}
+Serial -> ESP32: "Tramas Demeter" {
+  style.stroke: "#388bfd"
+  style.font-color: "#0550ae"
+  style.stroke-width: 2
+}
+ESP32 -> Nodos: "RF ESP-NOW" {
+  style.stroke: "#388bfd"
+  style.font-color: "#0550ae"
+  style.stroke-dash: 4
+}
+
+# ── Conexiones WebSocket ──────────────────────────────────────────
+
+Container.WSC -> Internet: "wss:// TLS" {
+  style.stroke: "#3fb950"
+  style.font-color: "#1a7f37"
+  style.stroke-width: 2
+}
+Internet -> Backend: "WebSocket" {
+  style.stroke: "#3fb950"
+  style.font-color: "#1a7f37"
+  style.stroke-width: 2
+}

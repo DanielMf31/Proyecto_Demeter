@@ -1,0 +1,607 @@
+# AUTO-GENERADO por make_print.py — VERSIÓN PARA IMPRESIÓN
+# Colores adaptados para fondo blanco / documento académico
+# No editar directamente; editar el archivo fuente y regenerar.
+
+
+# ─────────────────────────────────────────────────────────────────
+#  Proyecto Demeter – Diagrama de Clases: Raspberry Pi + Common
+# ─────────────────────────────────────────────────────────────────
+
+direction: right
+
+classes: {
+  abc: {
+    shape: class
+    style: {
+      fill: "#f3e8ff"
+      stroke: "#d2a8ff"
+      stroke-width: 2
+      font-color: "#6639ba"
+      font-size: 13
+      shadow: true
+    }
+  }
+  concrete: {
+    shape: class
+    style: {
+      fill: "#ffffff"
+      stroke: "#388bfd"
+      stroke-width: 2
+      font-color: "#1a1a2e"
+      font-size: 13
+      shadow: true
+    }
+  }
+  orchestrator: {
+    shape: class
+    style: {
+      fill: "#dff7eb"
+      stroke: "#3fb950"
+      stroke-width: 3
+      font-color: "#1a7f37"
+      font-size: 13
+      bold: true
+      shadow: true
+    }
+  }
+  edge: {
+    shape: class
+    style: {
+      fill: "#e6f0ff"
+      stroke: "#58a6ff"
+      stroke-width: 3
+      font-color: "#0550ae"
+      font-size: 13
+      bold: true
+      shadow: true
+    }
+  }
+  pydantic: {
+    shape: class
+    style: {
+      fill: "#fff0f0"
+      stroke: "#f85149"
+      stroke-width: 2
+      font-color: "#cf222e"
+      font-size: 12
+      shadow: true
+    }
+  }
+  enum: {
+    shape: class
+    style: {
+      fill: "#fffce0"
+      stroke: "#e3b341"
+      stroke-width: 2
+      font-color: "#9a6700"
+      font-size: 12
+    }
+  }
+  config: {
+    shape: class
+    style: {
+      fill: "#ffffff"
+      stroke: "#484f58"
+      stroke-width: 2
+      font-color: "#4a4a5a"
+      font-size: 12
+    }
+  }
+}
+
+# ═══════════════════════════════════════════════════════════════════
+#  COMMON LAYER (Software/Common/)
+# ═══════════════════════════════════════════════════════════════════
+
+Common: "Common Layer (Software/Common/)" {
+  style: {
+    fill: "#ffffff"
+    stroke: "#484f58"
+    stroke-width: 2
+    border-radius: 14
+    font-color: "#4a4a5a"
+    font-size: 15
+    bold: true
+  }
+
+  CmdId: {
+    class: enum
+    shape: class
+    label: |||md
+      # «enum» CmdId
+      | Nombre | Valor |
+      |--------|-------|
+      | PING | 0x01 |
+      | ACK | 0x02 |
+      | NACK | 0x03 |
+      | SYN | 0x04 |
+      | SYN_ACK | 0x05 |
+      | SET_GPIO | 0x10 |
+      | SET_PWM | 0x11 |
+      | GET_SENSORS | 0x20 |
+      | EXEC_SEQUENCE | 0x30 |
+      | TEMP_HUM_REPORT | 0x0B |
+      | PIN_REPORT | 0x0C |
+      | SYSTEM_REPORT | 0x0D |
+    |||
+  }
+
+  DemeterCommand: {
+    class: pydantic
+    shape: class
+    label: |md
+      # «abstract» DemeterCommand
+      **BaseModel (Pydantic)**
+      ---
+      target_id: int
+      source_id: Optional[int]
+      ---
+      *get_cmd_id() → int*
+    |
+  }
+
+  # ── Comandos de Control ──
+  ControlCmds: "Comandos de Control" {
+    style: {
+      fill: "#f6f8fa"
+      stroke: "#484f58"
+      stroke-width: 1
+      border-radius: 8
+      font-color: "#4a4a5a"
+      font-size: 12
+    }
+
+    Ping: {
+      class: pydantic
+      label: |md
+        # Ping
+        type: "ping"
+      |
+    }
+    Ack: {
+      class: pydantic
+      label: |md
+        # Ack
+        type: "ack"
+        original_cmd_id: int
+      |
+    }
+    Nack: {
+      class: pydantic
+      label: |md
+        # Nack
+        type: "nack"
+        original_cmd_id: int
+        error_code: int
+      |
+    }
+    Syn: {
+      class: pydantic
+      label: |md
+        # Syn
+        type: "syn"
+        context: int
+      |
+    }
+    SynAck: {
+      class: pydantic
+      label: |md
+        # SynAck
+        type: "syn_ack"
+        context: int
+      |
+    }
+  }
+
+  # ── Comandos de Datos ──
+  DataCmds: "Comandos de Datos" {
+    style: {
+      fill: "#f6f8fa"
+      stroke: "#484f58"
+      stroke-width: 1
+      border-radius: 8
+      font-color: "#4a4a5a"
+      font-size: 12
+    }
+
+    SetGpio: {
+      class: pydantic
+      label: |md
+        # SetGpio
+        type: "set_gpio"
+        pin: int
+        value: int
+        flags: int
+      |
+    }
+    SetPwm: {
+      class: pydantic
+      label: |md
+        # SetPwm
+        type: "set_pwm"
+        pin: int · value: int
+      |
+    }
+    GetSensors: {
+      class: pydantic
+      label: |md
+        # GetSensors
+        type: "get_sensors"
+      |
+    }
+    ExecSequence: {
+      class: pydantic
+      label: |md
+        # ExecSequence
+        type: "exec_sequence"
+        steps: List[SequenceStep]
+      |
+    }
+    SequenceStep: {
+      class: pydantic
+      label: |md
+        # SequenceStep
+        target_id: int
+        cmd_id: int
+        pin: int · value: int
+        delay_ms: int
+      |
+    }
+  }
+
+  # ── Reportes (Telemetría) ──
+  Reports: "Reportes (Telemetría)" {
+    style: {
+      fill: "#f6f8fa"
+      stroke: "#484f58"
+      stroke-width: 1
+      border-radius: 8
+      font-color: "#4a4a5a"
+      font-size: 12
+    }
+
+    TempHumReport: {
+      class: pydantic
+      label: |md
+        # TempHumReport
+        type: "temp_hum_report"
+        node_id: int
+        temperature: float
+        humidity: float
+      |
+    }
+    PinReport: {
+      class: pydantic
+      label: |md
+        # PinReport
+        type: "pin_report"
+        node_id: int
+        pin: int · state: int
+      |
+    }
+    SystemReport: {
+      class: pydantic
+      label: |md
+        # SystemReport
+        type: "system_report"
+        node_id: int
+        mode: int · battery_mv: int
+      |
+    }
+  }
+
+  # ── Protocolo Binario ──
+  DemeterProtocolV2: {
+    class: concrete
+    label: |md
+      # DemeterProtocolV2
+      **demeter_protocol.py**
+      ---
+      _registry: Dict[int, Callable]
+      ---
+      pack_frame(cmd) → bytes
+      parse_frame(frame) → Optional[DemeterCommand]
+      validate_json_message(json) → DemeterCommand
+      _calculate_crc(data) → int
+    |
+  }
+
+  Settings: {
+    class: config
+    label: |md
+      # Settings
+      **BaseSettings (Pydantic)**
+      ---
+      PORT: str · UART_BAUD: int
+      BACKEND_URL · BACKEND_PORT
+      POSTGRES_* · REDIS_URL
+      HOST · SOCKET_PORT
+      LOG_LEVEL · ENV · DEBUG
+      ---
+      DATABASE_URL (property)
+    |
+  }
+
+  # ── Herencia: todos → DemeterCommand ──
+  ControlCmds.Ping -> DemeterCommand: {style.stroke: "#f85149"; style.stroke-dash: 4}
+  ControlCmds.Ack -> DemeterCommand: {style.stroke: "#f85149"; style.stroke-dash: 4}
+  ControlCmds.Nack -> DemeterCommand: {style.stroke: "#f85149"; style.stroke-dash: 4}
+  ControlCmds.Syn -> DemeterCommand: {style.stroke: "#f85149"; style.stroke-dash: 4}
+  ControlCmds.SynAck -> DemeterCommand: {style.stroke: "#f85149"; style.stroke-dash: 4}
+  DataCmds.SetGpio -> DemeterCommand: {style.stroke: "#f85149"; style.stroke-dash: 4}
+  DataCmds.SetPwm -> DemeterCommand: {style.stroke: "#f85149"; style.stroke-dash: 4}
+  DataCmds.GetSensors -> DemeterCommand: {style.stroke: "#f85149"; style.stroke-dash: 4}
+  DataCmds.ExecSequence -> DemeterCommand: {style.stroke: "#f85149"; style.stroke-dash: 4}
+  Reports.TempHumReport -> DemeterCommand: {style.stroke: "#f85149"; style.stroke-dash: 4}
+  Reports.PinReport -> DemeterCommand: {style.stroke: "#f85149"; style.stroke-dash: 4}
+  Reports.SystemReport -> DemeterCommand: {style.stroke: "#f85149"; style.stroke-dash: 4}
+
+  # ── Composición ──
+  DataCmds.ExecSequence -> DataCmds.SequenceStep: "1..*" {
+    style.stroke: "#e3b341"
+    style.font-color: "#9a6700"
+    source-arrowhead: {shape: diamond; style.filled: true}
+  }
+
+  DemeterProtocolV2 -> CmdId: "usa" {
+    style.stroke: "#484f58"
+    style.stroke-dash: 4
+  }
+  DemeterProtocolV2 -> DemeterCommand: "parse/pack" {
+    style.stroke: "#484f58"
+    style.stroke-dash: 4
+  }
+}
+
+# ═══════════════════════════════════════════════════════════════════
+#  RASPBERRY PI LAYER
+# ═══════════════════════════════════════════════════════════════════
+
+RPi: "Raspberry Pi Layer (Software/Raspberry/)" {
+  style: {
+    fill: "#f6f8fa"
+    stroke: "#e3b341"
+    stroke-width: 3
+    border-radius: 16
+    font-color: "#9a6700"
+    font-size: 16
+    bold: true
+  }
+
+  # ── Transport ──
+  Transport: "transport/" {
+    style: {
+      fill: "#ffffff"
+      stroke: "#388bfd"
+      stroke-width: 2
+      border-radius: 10
+      font-color: "#0550ae"
+      font-size: 13
+      bold: true
+    }
+
+    TransportStrategy: {
+      class: abc
+      label: |md
+        # «ABC» TransportStrategy
+        **interface.py**
+        ---
+        *connect() → bool*
+        *disconnect()*
+        *send(data: bytes) → bool*
+        *set_callback(cb)*
+        *start() · stop()*
+      |
+    }
+
+    AsyncUartTransport: {
+      class: concrete
+      label: |md
+        # AsyncUartTransport
+        **async_uart.py**
+        ---
+        port: str · baud: int
+        rx_callback: Optional[Callable]
+        reader / writer: StreamReader/Writer
+        tx_queue: asyncio.Queue
+        ---
+        connect() → bool
+        disconnect()
+        send(data) → bool
+        _read_loop() · _write_loop()
+      |
+    }
+
+    UartProcessor: {
+      class: concrete
+      label: |md
+        # UartProcessor
+        **uart_processor.py**
+        ---
+        transport: AsyncUartTransport
+        protocol: DemeterProtocolV2
+        rx_buffer: bytearray
+        rx_queue: asyncio.Queue
+        listeners: List[Callable]
+        ---
+        start() · stop()
+        add_listener(cb)
+        send_command(cmd)
+        on_uart_data(data)
+        process_buffer()
+        _dispatch_loop()
+        handle_protocol_internal(cmd)
+        send_ack/nack/syn/ping/set_gpio(...)
+      |
+    }
+
+    # ── Herencia ──
+    AsyncUartTransport -> TransportStrategy: "implements" {
+      style.stroke: "#d2a8ff"
+      style.stroke-dash: 4
+      style.font-color: "#6639ba"
+    }
+
+    # ── Composición ──
+    UartProcessor -> AsyncUartTransport: "owns" {
+      style.stroke: "#388bfd"
+      source-arrowhead: {shape: diamond; style.filled: true}
+    }
+  }
+
+  # ── Orchestration ──
+  Orchestration: "orchestration/" {
+    style: {
+      fill: "#ffffff"
+      stroke: "#3fb950"
+      stroke-width: 2
+      border-radius: 10
+      font-color: "#1a7f37"
+      font-size: 13
+      bold: true
+    }
+
+    GatewayOrchestrator: {
+      class: orchestrator
+      label: |md
+        # GatewayOrchestrator
+        **command_dispatcher.py**
+        ---
+        uart: UartProcessor
+        protocol: DemeterProtocolV2
+        device_manager: DeviceManager
+        ws_client: DemeterWebsocketClient
+        ---
+        start() · stop()
+        dispatch_ws_to_uart(raw_msg)
+        dispatch_uart_to_ws(cmd)
+        report_system_config()
+        _parse_incoming_command(data)
+      |
+    }
+
+    EdgeServer: {
+      class: edge
+      label: |md
+        # EdgeServer (FastAPI)
+        **edge_server.py · :8001**
+        ---
+        app: FastAPI
+        gateway: GatewayOrchestrator
+        ws_clients: Set[WebSocket]
+        ---
+        POST /api/auth/login
+        GET /api/devices
+        POST /api/command
+        WS /ws/{client_id}
+        broadcast_to_local_clients()
+        main()
+      |
+    }
+
+    EdgeServer -> GatewayOrchestrator: "owns" {
+      style.stroke: "#58a6ff"
+      source-arrowhead: {shape: diamond; style.filled: true}
+    }
+  }
+
+  # ── Support ──
+  Support: "ws_client/ · management/ · utils/" {
+    style: {
+      fill: "#ffffff"
+      stroke: "#484f58"
+      stroke-width: 2
+      border-radius: 10
+      font-color: "#4a4a5a"
+      font-size: 13
+    }
+
+    DemeterWebsocketClient: {
+      class: concrete
+      label: |md
+        # DemeterWebsocketClient
+        **ws_client/client.py**
+        ---
+        uri: str
+        connection: Optional[WSProtocol]
+        on_message: Callable
+        on_open: Optional[Callable]
+        running: bool
+        ---
+        start() · stop()
+        send_json(data)
+        _connect_loop()
+      |
+    }
+
+    DeviceManager: {
+      class: concrete
+      label: |md
+        # DeviceManager
+        **management/device_manager.py**
+        ---
+        config_path: str
+        mappings: Dict[str, Any]
+        ---
+        load_config() → bool
+        get_config() → Dict
+        get_physical_mapping(type, id)
+        translate_pin(logical_pin)
+      |
+    }
+
+    DatabaseManager: {
+      class: concrete
+      label: |md
+        # DatabaseManager
+        **utils/database.py** (aiosqlite)
+        ---
+        db_path: str
+        ---
+        init_db()
+        save_reading(node, temp, hum)
+        get_stats(node, hours) → dict
+        get_recent_readings(limit) → list
+      |
+    }
+  }
+
+  # ── Composición del Orquestador ──
+  Orchestration.GatewayOrchestrator -> Transport.UartProcessor: "owns" {
+    style.stroke: "#3fb950"
+    source-arrowhead: {shape: diamond; style.filled: true}
+  }
+  Orchestration.GatewayOrchestrator -> Support.DemeterWebsocketClient: "owns" {
+    style.stroke: "#3fb950"
+    source-arrowhead: {shape: diamond; style.filled: true}
+  }
+  Orchestration.GatewayOrchestrator -> Support.DeviceManager: "owns" {
+    style.stroke: "#3fb950"
+    source-arrowhead: {shape: diamond; style.filled: true}
+  }
+}
+
+# ═══════════════════════════════════════════════════════════════════
+#  CROSS-LAYER DEPENDENCIES
+# ═══════════════════════════════════════════════════════════════════
+
+RPi.Transport.UartProcessor -> Common.DemeterProtocolV2: "uses" {
+  style.stroke: "#484f58"
+  style.stroke-dash: 4
+  style.font-color: "#4a4a5a"
+}
+RPi.Orchestration.GatewayOrchestrator -> Common.DemeterProtocolV2: "uses" {
+  style.stroke: "#484f58"
+  style.stroke-dash: 4
+  style.font-color: "#4a4a5a"
+}
+RPi.Orchestration.GatewayOrchestrator -> Common.DemeterCommand: "dispatches" {
+  style.stroke: "#3fb950"
+  style.stroke-dash: 4
+  style.font-color: "#1a7f37"
+}
+RPi.Support.DemeterWebsocketClient -> Common.Settings: "reads config" {
+  style.stroke: "#484f58"
+  style.stroke-dash: 4
+  style.font-color: "#4a4a5a"
+}

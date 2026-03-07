@@ -1,0 +1,166 @@
+# AUTO-GENERADO por make_print.py — VERSIÓN PARA IMPRESIÓN
+# Colores adaptados para fondo blanco / documento académico
+# No editar directamente; editar el archivo fuente y regenerar.
+
+
+# ─────────────────────────────────────────────────────────────────
+#  Protocolo Demeter – Flujo de Serialización de Tramas
+#  Estilo: Dark premium con colores vibrantes (inspirado en netsim)
+# ─────────────────────────────────────────────────────────────────
+
+direction: down
+
+vars: {
+  d2-config: {
+    dark-theme-id: 200
+    theme-overrides: {
+      # Paleta de fondo
+      B1: "#0d1117"
+      B2: "#161b22"
+      B3: "#21262d"
+      B4: "#30363d"
+      B5: "#484f58"
+      B6: "#6e7681"
+
+      # Paleta de texto
+      AA2: "#e6edf3"
+      AA4: "#8b949e"
+      AA5: "#6e7681"
+
+      # Paleta de acento
+      AB4: "#388bfd"
+      AB5: "#1f6feb"
+    }
+  }
+}
+
+# ── Estilos globales ──────────────────────────────────────────────
+classes: {
+  step: {
+    shape: rectangle
+    style: {
+      border-radius: 10
+      fill: "#ffffff"
+      stroke: "#388bfd"
+      stroke-width: 2
+      font-color: "#1a1a2e"
+      font-size: 14
+      shadow: true
+      bold: false
+    }
+  }
+
+  start-end: {
+    shape: oval
+    style: {
+      fill: "#1f6feb"
+      stroke: "#58a6ff"
+      stroke-width: 2
+      font-color: "#ffffff"
+      font-size: 14
+      bold: true
+      shadow: true
+    }
+  }
+
+  decision: {
+    shape: diamond
+    style: {
+      fill: "#f3e8ff"
+      stroke: "#d2a8ff"
+      stroke-width: 2
+      font-color: "#6639ba"
+      font-size: 13
+      bold: true
+      shadow: true
+    }
+  }
+
+  wait: {
+    shape: rectangle
+    style: {
+      border-radius: 8
+      fill: "#eef4ff"
+      stroke: "#e3b341"
+      stroke-width: 2
+      font-color: "#9a6700"
+      font-size: 13
+      shadow: true
+    }
+  }
+
+  success: {
+    shape: oval
+    style: {
+      fill: "#dff7eb"
+      stroke: "#3fb950"
+      stroke-width: 2
+      font-color: "#1a7f37"
+      font-size: 14
+      bold: true
+      shadow: true
+    }
+  }
+}
+
+# ── Nodos ─────────────────────────────────────────────────────────
+
+A: "Solicitud de envío" {class: start-end}
+
+B: "Obtener Tipo de Mensaje\ny Datos de Aplicación" {class: step}
+
+C: "Convertir datos al formato\nbinario del protocolo\neg: float×100 → int16 LE" {class: step}
+
+D: "Construir Payload\nen buffer de bytes" {class: step}
+
+E: "Construir Cabecera\nSYNC=0xAA · FLAGS=0x00\nSRC_ID · DST_ID · CMD_ID\nLENGTH = tamaño del payload" {class: step}
+
+F: "Concatenar\nCabecera + Payload" {class: step}
+
+G: "Calcular CRC\nSuma módulo 256\ndesde FLAGS hasta fin del payload" {class: step}
+
+H: "Añadir byte CRC\nal final de la trama" {class: step}
+
+canal: "¿Canal disponible?" {class: decision}
+
+J: "Entregar trama\na la capa de transporte" {class: step}
+
+K: "Esperar ciclo\nsiguiente" {class: wait}
+
+L: "Transmisión completada" {class: success}
+
+# ── Conexiones ────────────────────────────────────────────────────
+
+A -> B
+B -> C
+C -> D
+D -> E: "" {
+  style.stroke: "#388bfd"
+  style.stroke-width: 2
+}
+E -> F
+F -> G
+G -> H
+H -> canal
+
+canal -> J: "Sí" {
+  style.stroke: "#3fb950"
+  style.stroke-width: 2
+  style.font-color: "#1a7f37"
+  style.bold: true
+}
+
+canal -> K: "No" {
+  style.stroke: "#e3b341"
+  style.stroke-width: 2
+  style.font-color: "#9a6700"
+  style.bold: true
+}
+
+K -> canal: "" {
+  style.stroke: "#e3b341"
+  style.stroke-width: 1
+  style.stroke-dash: 4
+}
+
+J -> L

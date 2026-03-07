@@ -111,5 +111,6 @@
 \contentsline {section}{\numberline {5.10}Suite Completa — Un Solo Comando}{38}{section.5.10}%
 \contentsline {section}{\numberline {5.11}Ejemplo de Sesión Completa con Jupyter}{38}{section.5.11}%
 \contentsline {section}{\numberline {5.12}Referencia Rápida de Parámetros}{39}{section.5.12}%
-\contentsline {section}{\numberline {.1}Diagramas de Actividad --- Protocolo Demeter}{40}{section.Alph0.1}%
-\contentsline {section}{\numberline {.2}Esquema de Base de Datos}{40}{section.Alph0.2}%
+\contentsline {chapter}{\numberline {A}Diagramas del Protocolo Binario Demeter}{40}{appendix.A}%
+\contentsline {chapter}{\numberline {B}Arquitectura del Servicio Raspberry Pi}{50}{appendix.B}%
+\contentsline {chapter}{\numberline {C}Arquitectura del Backend}{56}{appendix.C}%

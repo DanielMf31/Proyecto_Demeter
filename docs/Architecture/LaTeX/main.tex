@@ -1,9 +1,10 @@
 % ===============================
 % PROYECTO DEMETER — Documentación Técnica
 % Plantilla: ESIBot · Universidad de Sevilla (adaptada)
-% Compilar en Overleaf con pdfLaTeX
+% Compilar en Overleaf con pdfLaTeX + paquete svg (requiere Inkscape)
 % ===============================
-\documentclass[11pt,a4paper]{report}
+\documentclass[11pt,a4paper,openany]{report}
+% SVGs pre-convertidos a PDF con cairosvg → se usan con \includegraphics
 \usepackage[spanish, provide=*]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -203,41 +204,205 @@
 % ============================================================
 \newpage
 \appendix
-\section{Diagramas de Actividad --- Protocolo Demeter}
-\label{anx:diagramas}
-
-Los diagramas de esta sección serán incorporados próximamente.
-Están referenciados desde la Sección~\ref{sec:protocolo}.
-
-% Etiquetas de reserva para referencias del texto
-\label{fig:anx_serializacion}
-\label{fig:anx_deserializacion}
-\label{fig:anx_errores}
-\label{fig:anx_ciclo_nodos}
-\label{fig:anx_ciclo_energetico}
-\label{fig:anx_handshake}
-\label{fig:anx_flujo_e2e}
-\label{fig:anx_rpi_docker}
-\label{fig:anx_rpi_asyncio}
-\label{fig:anx_rpi_componentes}
-\label{fig:anx_rpi_telemetria}
-\label{fig:anx_rpi_comandos}
-\label{fig:anx_backend_docker}
-\label{fig:anx_redis_flow}
 
 % ────────────────────────────────────────────────────────────
-\section{Esquema de Base de Datos}
-\label{anx:bd}
+\chapter{Diagramas del Protocolo Binario Demeter}
+\label{anx:protocolo}
 
-El siguiente diagrama presenta el esquema relacional completo de la base de datos
-PostgreSQL del proyecto, con todas las tablas, sus atributos y las relaciones entre entidades.
+Esta sección recoge los diagramas de flujo completos del protocolo de comunicación
+binario implementado entre los nodos ESP32 y el Gateway.
 
+% --- 01 Serialización (617x2150 — muy alto → escalar por height) ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.88\textheight]{diagrams/01_serializacion_light}
+    \caption{Flujo de serialización de una trama binaria Demeter.}
+    \label{fig:anx_serializacion}
+\end{figure}
+
+\newpage
+
+% --- 02 Deserialización (1458x3125 — enorme → dividir en 2 páginas) ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.88\textheight, trim=0bp 1562bp 0bp 0bp, clip]{diagrams/02_deserializacion_light}
+    \caption{Flujo de deserialización y validación de una trama recibida (parte superior).}
+    \label{fig:anx_deserializacion_top}
+\end{figure}
+
+\newpage
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.88\textheight, trim=0bp 0bp 0bp 1562bp, clip]{diagrams/02_deserializacion_light}
+    \caption{Flujo de deserialización y validación de una trama recibida (parte inferior).}
+    \label{fig:anx_deserializacion_bottom}
+\end{figure}
+
+\newpage
+
+% --- 03 Handshake (817x1745 — alto → escalar por height) ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.88\textheight]{diagrams/03_handshake_light}
+    \caption{Diagrama de secuencia del handshake SYN\,/\,SYN-ACK\,/\,ACK con reintentos.}
+    \label{fig:anx_handshake}
+\end{figure}
+
+\newpage
+
+% --- 04 Flujo E2E (672x3107 — extremo → dividir en 2 páginas) ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.88\textheight, trim=0bp 1553bp 0bp 0bp, clip]{diagrams/04_flujo_e2e_light}
+    \caption{Flujo end-to-end: Nodo Sensor \textrightarrow\ Gateway \textrightarrow\ Raspberry Pi \textrightarrow\ Backend (parte superior).}
+    \label{fig:anx_flujo_e2e_top}
+\end{figure}
+
+\newpage
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.88\textheight, trim=0bp 0bp 0bp 1553bp, clip]{diagrams/04_flujo_e2e_light}
+    \caption{Flujo end-to-end: Nodo Sensor \textrightarrow\ Gateway \textrightarrow\ Raspberry Pi \textrightarrow\ Backend (parte inferior).}
+    \label{fig:anx_flujo_e2e_bottom}
+\end{figure}
+
+\newpage
+
+% --- 05 Manejo de Errores (1620x2048 — grande cuadrado → landscape + height) ---
 \begin{landscape}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1.05\linewidth, keepaspectratio]{16_db_schema}
-    \caption{Esquema Entidad-Relación completo de \texttt{demeter\_db} (PostgreSQL 15). Generado a partir de los modelos SQLAlchemy.}
-    \label{fig:anx_db_schema}
+    \includegraphics[height=0.85\textheight]{diagrams/05_manejo_errores_light}
+    \caption{Árbol de decisión para el manejo de errores en la recepción de tramas.}
+    \label{fig:anx_errores}
+\end{figure}
+\end{landscape}
+
+\newpage
+
+% --- 06 Ciclo Energético (2058x642 — muy ancho → landscape) ---
+\begin{landscape}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\linewidth]{diagrams/06_ciclo_energetico_light}
+    \caption{Ciclo energético del nodo sensor: fase activa ($\sim$1,5\,s) y Deep Sleep ($\sim$3596\,s).}
+    \label{fig:anx_ciclo_energetico}
+\end{figure}
+\end{landscape}
+
+\newpage
+
+% --- 07 Ciclo de Vida de Nodos (1289x1743 — landscape OK) ---
+\begin{landscape}
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.85\textheight]{diagrams/07_ciclo_vida_nodos_light}
+    \caption{Ciclo de vida de los nodos ESP32 según su rol: Sensor, Actuador o Gateway.}
+    \label{fig:anx_ciclo_nodos}
+\end{figure}
+\end{landscape}
+
+% ────────────────────────────────────────────────────────────
+\chapter{Arquitectura del Servicio Raspberry Pi}
+\label{anx:raspberry}
+
+Este anexo detalla la arquitectura del servicio Python ejecutado en la Raspberry Pi,
+que actúa como pasarela de borde (\textit{edge gateway}) entre la red de nodos ESP32
+y el servidor central. El servicio se ejecuta en un contenedor Docker con acceso
+directo al puerto serie GPIO (\texttt{/dev/serial0}) y gestiona cuatro tareas
+AsyncIO concurrentes: transporte UART, cliente WebSocket, servidor HTTP local
+(FastAPI en el puerto 8001) y el despachador de comandos.
+Los diagramas de este anexo cubren la arquitectura de componentes, los flujos
+de telemetría y comandos, el despliegue Docker y las tareas asíncronas.
+
+\newpage
+
+% --- 08 Componentes RPi (1049x1356 — casi cuadrado → página completa) ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.88\textheight]{diagrams/08_rpi_componentes_light}
+    \caption{Arquitectura de componentes del servicio Python en la Raspberry Pi (capa de borde).}
+    \label{fig:anx_rpi_componentes}
+\end{figure}
+
+\newpage
+
+% --- 09 Secuencia Telemetría (1704x1533 — ancho → landscape) ---
+\begin{landscape}
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.85\textheight]{diagrams/09_rpi_secuencia_telemetria_light}
+    \caption{Diagrama de secuencia: flujo ascendente de telemetría desde el Gateway hasta el Backend.}
+    \label{fig:anx_rpi_telemetria}
+\end{figure}
+\end{landscape}
+
+\newpage
+
+% --- 10 Flujo Comandos (1858x1381 — ancho → landscape) ---
+\begin{landscape}
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.85\textheight]{diagrams/10_rpi_flujo_comandos_light}
+    \caption{Diagrama de secuencia: flujo descendente de comandos desde el Backend hasta el Gateway ESP32.}
+    \label{fig:anx_rpi_comandos}
+\end{figure}
+\end{landscape}
+
+\newpage
+
+% --- 11 Docker Deploy RPi (811x2071 — muy alto → height) ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.88\textheight]{diagrams/11_rpi_docker_deploy_light}
+    \caption{Despliegue del servicio Raspberry Pi en contenedor Docker con sus conexiones externas.}
+    \label{fig:anx_rpi_docker}
+\end{figure}
+
+\newpage
+
+% --- 12 AsyncIO Tasks (1300x1345 — cuadrado → landscape para aprovechar) ---
+\begin{landscape}
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.85\textheight]{diagrams/12_rpi_asyncio_tasks_light}
+    \caption{Diagrama de las cuatro tareas AsyncIO concurrentes del servicio Raspberry Pi.}
+    \label{fig:anx_rpi_asyncio}
+\end{figure}
+\end{landscape}
+
+% ────────────────────────────────────────────────────────────
+\chapter{Arquitectura del Backend}
+\label{anx:backend}
+
+Este anexo presenta los diagramas de la arquitectura del servidor central desplegado
+en Google Cloud Platform. El backend se compone de seis contenedores Docker
+(API FastAPI, frontend Nginx, PostgreSQL, Redis, math-worker RQ y secuenciador)
+interconectados a través de la red privada \texttt{demeter-net}.
+La comunicación con la Raspberry Pi se realiza mediante WebSocket y el despacho
+de comandos utiliza el patrón Redis Pub/Sub descrito en el Capítulo~\ref{sec:backend}.
+
+\newpage
+
+% --- 13 Docker Backend (1117x1723 — alto con elk → página completa) ---
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.88\textheight]{diagrams/13_backend_docker_arch_light}
+    \caption{Arquitectura de contenedores Docker del Backend en Google Cloud VM.}
+    \label{fig:anx_backend_docker}
+\end{figure}
+
+\newpage
+
+% --- 14 Redis Flow (1896x1709 — ancho → landscape) ---
+\begin{landscape}
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.85\textheight]{diagrams/14_backend_redis_flow_light}
+    \caption{Flujo de un comando de usuario a través del sistema Redis Pub/Sub hasta la Raspberry Pi.}
+    \label{fig:anx_redis_flow}
 \end{figure}
 \end{landscape}
 

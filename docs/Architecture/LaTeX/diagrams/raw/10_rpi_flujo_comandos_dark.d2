@@ -1,0 +1,133 @@
+# AUTO-GENERADO por make_print.py — VERSIÓN PARA IMPRESIÓN
+# Colores adaptados para fondo blanco / documento académico
+# No editar directamente; editar el archivo fuente y regenerar.
+
+
+# ─────────────────────────────────────────────────────────────────
+#  Protocolo Demeter – Flujo Descendente de Comandos
+#  Backend → WebSocketClient → GatewayOrchestrator → UART → Gateway
+#  EdgeServer → GatewayOrchestrator → UART → Gateway (vía local)
+# ─────────────────────────────────────────────────────────────────
+
+shape: sequence_diagram
+
+Back: "Backend\nFastAPI" {
+  style: {
+    fill: "#dff7eb"
+    stroke: "#3fb950"
+    font-color: "#1a7f37"
+    bold: true
+  }
+}
+
+WS: "WebSocketClient" {
+  style: {
+    fill: "#ffffff"
+    stroke: "#3fb950"
+    font-color: "#1a7f37"
+    bold: true
+  }
+}
+
+Edge: "EdgeServer\n(FastAPI :8001)" {
+  style: {
+    fill: "#e6f0ff"
+    stroke: "#58a6ff"
+    font-color: "#0550ae"
+    bold: true
+  }
+}
+
+GWO: "GatewayOrchestrator" {
+  style: {
+    fill: "#dff7eb"
+    stroke: "#3fb950"
+    font-color: "#1a7f37"
+    bold: true
+  }
+}
+
+UART: "AsyncUART" {
+  style: {
+    fill: "#ffffff"
+    stroke: "#e3b341"
+    font-color: "#9a6700"
+    bold: true
+  }
+}
+
+GW: "Gateway\nESP32" {
+  style: {
+    fill: "#ffffff"
+    stroke: "#388bfd"
+    font-color: "#0550ae"
+    bold: true
+  }
+}
+
+# ── Vía 1: Comando desde Backend (remoto) ─────────────────────────
+
+Back -> WS: "ws.send({\"action\": \"control_actuator\",\n\"node_id\": 1, \"pin\": 4, \"value\": 1})" {
+  style.stroke: "#3fb950"
+  style.font-color: "#1a7f37"
+  style.bold: true
+}
+
+WS -> WS: "on_message()" {
+  style.stroke: "#3fb950"
+  style.font-color: "#1a7f37"
+  style.stroke-dash: 4
+}
+
+WS -> GWO: "dispatch_ws_to_uart(raw_message)" {
+  style.stroke: "#d2a8ff"
+  style.font-color: "#6639ba"
+  style.bold: true
+}
+
+# ── Vía 2: Comando desde UI local ─────────────────────────────────
+
+Edge -> GWO: "POST /api/command\n_parse_incoming_command(data)" {
+  style.stroke: "#58a6ff"
+  style.font-color: "#0550ae"
+  style.bold: true
+}
+
+# ── Procesamiento común ───────────────────────────────────────────
+
+GWO -> GWO: "_parse_incoming_command()\nDeviceManager.translate_pin()" {
+  style.stroke: "#3fb950"
+  style.font-color: "#1a7f37"
+  style.stroke-dash: 4
+}
+
+GWO -> WS: "[Payload inválido / Nodo inexistente]\nemit('error', {'msg': 'Bad Command'})" {
+  style.stroke: "#f85149"
+  style.font-color: "#cf222e"
+  style.stroke-dash: 4
+}
+
+GWO -> UART: "[Comando válido]\nuart.send(protocol.pack_frame(cmd))" {
+  style.stroke: "#e3b341"
+  style.font-color: "#9a6700"
+  style.bold: true
+}
+
+UART -> UART: "serialize_payload()\nprepend_header(length, src, dst)\ncalculate_crc()" {
+  style.stroke: "#e3b341"
+  style.font-color: "#9a6700"
+  style.stroke-dash: 4
+}
+
+UART -> GW: "[Binario] 0xFE LEN FLAGS SRC DST CMD ..." {
+  style.stroke: "#388bfd"
+  style.font-color: "#0550ae"
+  style.stroke-width: 3
+  style.bold: true
+}
+
+GW -> GW: "Actuador ejecuta el comando\nenvía CMD_ACK si éxito\no NACK si fallo" {
+  style.stroke: "#6e7681"
+  style.font-color: "#4a4a5a"
+  style.stroke-dash: 4
+}

@@ -1,0 +1,181 @@
+
+# ─────────────────────────────────────────────────────────────────
+#  Protocolo Demeter – Schema de la Base de Datos (ER Diagram)
+#  Basado en el modelo real de PostgreSQL del proyecto
+# ─────────────────────────────────────────────────────────────────
+
+direction: down
+
+classes: {
+  table: {
+    shape: sql_table
+    style: {
+      fill: "#21262d"
+      stroke: "#388bfd"
+      stroke-width: 2
+      font-color: "#e6edf3"
+      font-size: 13
+    }
+  }
+  table_infra: {
+    shape: sql_table
+    style: {
+      fill: "#1a1520"
+      stroke: "#d2a8ff"
+      stroke-width: 2
+      font-color: "#e6edf3"
+      font-size: 13
+    }
+  }
+  table_log: {
+    shape: sql_table
+    style: {
+      fill: "#2d1f0f"
+      stroke: "#e3b341"
+      stroke-width: 2
+      font-color: "#e6edf3"
+      font-size: 13
+    }
+  }
+  table_telemetry: {
+    shape: sql_table
+    style: {
+      fill: "#0f2d24"
+      stroke: "#3fb950"
+      stroke-width: 2
+      font-color: "#e6edf3"
+      font-size: 13
+    }
+  }
+}
+
+USERS: {
+  class: table
+  shape: sql_table
+  id: "uuid  PK" {constraint: primary_key}
+  username: "varchar"
+  password_hash: "varchar"
+  role: "varchar"
+  is_active: "boolean"
+}
+
+EXPERIMENTS: {
+  class: table_infra
+  shape: sql_table
+  id: "integer  PK" {constraint: primary_key}
+  name: "varchar"
+  description: "varchar"
+  created_at: "datetime"
+  user_id: "uuid  FK → USERS" {constraint: foreign_key}
+  api_key: "varchar"
+}
+
+PLANTS: {
+  class: table
+  shape: sql_table
+  id: "integer  PK" {constraint: primary_key}
+  name: "varchar"
+  experiment_id: "integer  FK → EXPERIMENTS" {constraint: foreign_key}
+  node_id: "integer"
+}
+
+DEVICES: {
+  class: table
+  shape: sql_table
+  id: "integer  PK" {constraint: primary_key}
+  name: "varchar"
+  device_type: "varchar"
+  gpio_pin: "integer"
+}
+
+SEQUENCES: {
+  class: table_infra
+  shape: sql_table
+  id: "integer  PK" {constraint: primary_key}
+  name: "varchar"
+  created_by: "uuid  FK → USERS" {constraint: foreign_key}
+  created_at: "datetime"
+}
+
+SEQUENCE_STEPS: {
+  class: table_infra
+  shape: sql_table
+  id: "integer  PK" {constraint: primary_key}
+  sequence_id: "integer  FK → SEQUENCES" {constraint: foreign_key}
+  device_id: "integer  FK → DEVICES" {constraint: foreign_key}
+  step_order: "integer"
+  target_state: "boolean"
+  duration_seconds: "integer"
+}
+
+ACTIVITY_LOG: {
+  class: table_log
+  shape: sql_table
+  id: "integer  PK" {constraint: primary_key}
+  timestamp: "datetime"
+  user_id: "uuid  FK → USERS" {constraint: foreign_key}
+  device_id: "integer  FK → DEVICES" {constraint: foreign_key}
+  action_type: "varchar"
+  description: "text"
+}
+
+TELEMETRY_TH: {
+  class: table_telemetry
+  shape: sql_table
+  id: "integer  PK" {constraint: primary_key}
+  timestamp: "datetime"
+  node_id: "integer"
+  temperature: "float"
+  humidity: "float"
+}
+
+PIN_HISTORY: {
+  class: table_telemetry
+  shape: sql_table
+  id: "integer  PK" {constraint: primary_key}
+  timestamp: "datetime"
+  node_id: "integer"
+  pin: "integer"
+  state: "boolean"
+}
+
+SYSTEM_HISTORY: {
+  class: table_telemetry
+  shape: sql_table
+  id: "integer  PK" {constraint: primary_key}
+  timestamp: "datetime"
+  node_id: "integer"
+  mode: "integer"
+  battery_mv: "integer"
+}
+
+# ── Relaciones ─────────────────────────────────────────────────────
+
+USERS -> EXPERIMENTS: "1..N  posee" {
+  style.stroke: "#d2a8ff"
+  style.font-color: "#d2a8ff"
+}
+USERS -> SEQUENCES: "1..N  crea" {
+  style.stroke: "#d2a8ff"
+  style.font-color: "#d2a8ff"
+}
+USERS -> ACTIVITY_LOG: "1..N  genera" {
+  style.stroke: "#e3b341"
+  style.font-color: "#e3b341"
+}
+EXPERIMENTS -> PLANTS: "1..N  agrupa" {
+  style.stroke: "#388bfd"
+  style.font-color: "#58a6ff"
+}
+SEQUENCES -> SEQUENCE_STEPS: "1..N  contiene" {
+  style.stroke: "#d2a8ff"
+  style.font-color: "#d2a8ff"
+}
+DEVICES -> SEQUENCE_STEPS: "1..N  referencia" {
+  style.stroke: "#388bfd"
+  style.font-color: "#58a6ff"
+}
+DEVICES -> ACTIVITY_LOG: "1..N  afecta" {
+  style.stroke: "#e3b341"
+  style.font-color: "#e3b341"
+}

@@ -1,0 +1,192 @@
+
+# ─────────────────────────────────────────────────────────────────
+#  Protocolo Demeter – Flujo de Deserialización y Validación
+# ─────────────────────────────────────────────────────────────────
+
+direction: down
+
+classes: {
+  step: {
+    shape: rectangle
+    style: {
+      border-radius: 10
+      fill: "#21262d"
+      stroke: "#388bfd"
+      stroke-width: 2
+      font-color: "#e6edf3"
+      font-size: 14
+      shadow: true
+    }
+  }
+
+  start-end: {
+    shape: oval
+    style: {
+      fill: "#1f6feb"
+      stroke: "#58a6ff"
+      stroke-width: 2
+      font-color: "#ffffff"
+      font-size: 14
+      bold: true
+      shadow: true
+    }
+  }
+
+  decision: {
+    shape: diamond
+    style: {
+      fill: "#2d1f3d"
+      stroke: "#d2a8ff"
+      stroke-width: 2
+      font-color: "#d2a8ff"
+      font-size: 13
+      bold: true
+      shadow: true
+    }
+  }
+
+  discard: {
+    shape: oval
+    style: {
+      fill: "#2d0f0f"
+      stroke: "#f85149"
+      stroke-width: 2
+      font-color: "#f85149"
+      font-size: 13
+      bold: true
+      shadow: true
+    }
+  }
+
+  success: {
+    shape: oval
+    style: {
+      fill: "#0f2d24"
+      stroke: "#3fb950"
+      stroke-width: 2
+      font-color: "#3fb950"
+      font-size: 14
+      bold: true
+      shadow: true
+    }
+  }
+
+  forward: {
+    shape: rectangle
+    style: {
+      border-radius: 8
+      fill: "#1a1f0f"
+      stroke: "#e3b341"
+      stroke-width: 2
+      font-color: "#e3b341"
+      font-size: 13
+      shadow: true
+    }
+  }
+}
+
+# ── Nodos ─────────────────────────────────────────────────────────
+
+A:  "Datos disponibles\nen el canal" {class: start-end}
+B:  "Leer buffer completo" {class: step}
+C:  "¿Tamaño ≥ 7 bytes?\n(mínimo válido)" {class: decision}
+Z1: "DESCARTAR\nTrama demasiado corta" {class: discard}
+D:  "¿Byte 0 == 0xAA?\n(Byte de sincronización)" {class: decision}
+Z2: "DESCARTAR\nSin byte SYNC" {class: discard}
+E:  "Leer LENGTH\ndel byte 5" {class: step}
+F:  "¿Tamaño del buffer\n== 6 + LENGTH + 1?" {class: decision}
+Z3: "DESCARTAR\nLongitud incoherente" {class: discard}
+G:  "Calcular CRC esperado\nSuma módulo 256\nbytes 1 hasta 5+LENGTH" {class: step}
+H:  "¿CRC calculado\n== CRC recibido?" {class: decision}
+Z4: "DESCARTAR\nCRC inválido: datos corruptos" {class: discard}
+I:  "Leer DST_ID\ndel byte 3" {class: step}
+J:  "¿DST_ID == Mi ID\no DST_ID == 0xFF?" {class: decision}
+K:  "¿Soy Gateway?" {class: decision}
+L:  "Reenviar trama íntegra\npor canal alternativo" {class: forward}
+Z5: "IGNORAR\nNo es para este nodo" {class: discard}
+M:  "Leer CMD_ID\ndel byte 4" {class: step}
+N:  "Extraer payload\nbytes 6 a 5+LENGTH" {class: step}
+O:  "Decodificar payload\nformato específico del CMD_ID" {class: step}
+P:  "Invocar handler correspondiente\ncon los datos decodificados" {class: step}
+Q:  "Procesamiento completado" {class: success}
+
+# ── Conexiones ────────────────────────────────────────────────────
+
+A -> B
+B -> C
+
+C -> Z1: "No" {
+  style.stroke: "#f85149"
+  style.font-color: "#f85149"
+  style.bold: true
+}
+C -> D: "Sí" {
+  style.stroke: "#3fb950"
+  style.font-color: "#3fb950"
+  style.bold: true
+}
+
+D -> Z2: "No" {
+  style.stroke: "#f85149"
+  style.font-color: "#f85149"
+  style.bold: true
+}
+D -> E: "Sí" {
+  style.stroke: "#3fb950"
+  style.font-color: "#3fb950"
+  style.bold: true
+}
+
+E -> F
+
+F -> Z3: "No" {
+  style.stroke: "#f85149"
+  style.font-color: "#f85149"
+  style.bold: true
+}
+F -> G: "Sí" {
+  style.stroke: "#3fb950"
+  style.font-color: "#3fb950"
+  style.bold: true
+}
+
+G -> H
+
+H -> Z4: "No" {
+  style.stroke: "#f85149"
+  style.font-color: "#f85149"
+  style.bold: true
+}
+H -> I: "Sí" {
+  style.stroke: "#3fb950"
+  style.font-color: "#3fb950"
+  style.bold: true
+}
+
+I -> J
+
+J -> K: "No" {
+  style.stroke: "#e3b341"
+  style.font-color: "#e3b341"
+  style.bold: true
+}
+J -> M: "Sí" {
+  style.stroke: "#3fb950"
+  style.font-color: "#3fb950"
+  style.bold: true
+}
+
+K -> L: "Sí" {
+  style.stroke: "#e3b341"
+  style.font-color: "#e3b341"
+  style.bold: true
+}
+K -> Z5: "No" {
+  style.stroke: "#f85149"
+  style.font-color: "#f85149"
+  style.bold: true
+}
+
+L -> Q
+
+M -> N -> O -> P -> Q

@@ -1,0 +1,166 @@
+
+# ─────────────────────────────────────────────────────────────────
+#  Protocolo Demeter – Arquitectura de Componentes (Capa de Borde)
+#  Servicio Python en Raspberry Pi
+# ─────────────────────────────────────────────────────────────────
+
+direction: down
+
+classes: {
+  internal: {
+    shape: rectangle
+    style: {
+      border-radius: 10
+      fill: "#21262d"
+      stroke: "#388bfd"
+      stroke-width: 2
+      font-color: "#e6edf3"
+      font-size: 13
+      shadow: true
+    }
+  }
+  external: {
+    shape: rectangle
+    style: {
+      border-radius: 10
+      fill: "#0d1117"
+      stroke: "#484f58"
+      stroke-width: 2
+      font-color: "#8b949e"
+      font-size: 13
+      shadow: true
+    }
+  }
+  orchestrator: {
+    shape: rectangle
+    style: {
+      border-radius: 10
+      fill: "#1f2d1f"
+      stroke: "#3fb950"
+      stroke-width: 3
+      font-color: "#3fb950"
+      font-size: 14
+      bold: true
+      shadow: true
+    }
+  }
+  edge: {
+    shape: rectangle
+    style: {
+      border-radius: 10
+      fill: "#0f1a28"
+      stroke: "#58a6ff"
+      stroke-width: 3
+      font-color: "#58a6ff"
+      font-size: 14
+      bold: true
+      shadow: true
+    }
+  }
+}
+
+# ── Actores externos ───────────────────────────────────────────────
+
+ESP32: "Gateway ESP32\n(Red Local Demeter)" {class: external}
+Backend: "Backend Central\n(FastAPI · PostgreSQL)" {class: external}
+LocalUI: "UI Local\n(Nginx :80 · Chromium)" {class: external}
+
+# ── Capa de Borde (Raspberry Pi) ──────────────────────────────────
+
+RPi: "Capa de Borde — Servicio Python en Raspberry Pi" {
+  style: {
+    fill: "#161b22"
+    stroke: "#e3b341"
+    stroke-width: 3
+    border-radius: 16
+    font-color: "#e3b341"
+    font-size: 16
+    bold: true
+  }
+
+  EdgeServer: "EdgeServer (FastAPI)\nedge_server.py · :8001" {class: edge}
+  Orchestrator: "GatewayOrchestrator\ncommand_dispatcher.py" {class: orchestrator}
+  UART: "AsyncUART\nasync_uart.py" {class: internal}
+  Processor: "UARTProcessor\nuart_processor.py" {class: internal}
+  DevManager: "DeviceManager\n(Tabla de Estado Local)" {class: internal}
+  WSClient: "WebSocketClient\nws_client.py" {class: internal}
+
+  # ── Flujo ascendente: datos desde UART hacia el orquestador ──
+  UART -> Processor: "Tramas binarias" {
+    style.stroke: "#388bfd"
+    style.font-color: "#58a6ff"
+    style.bold: true
+  }
+  Processor -> UART: "Comandos binarios" {
+    style.stroke: "#388bfd"
+    style.font-color: "#58a6ff"
+    style.stroke-dash: 4
+  }
+  Processor -> Orchestrator: "listener callback\n(telemetría · eventos)" {
+    style.stroke: "#3fb950"
+    style.font-color: "#3fb950"
+    style.bold: true
+  }
+
+  # ── Flujo desde el orquestador hacia los demás componentes ──
+  Orchestrator -> DevManager: "Actualiza estado" {
+    style.stroke: "#e3b341"
+    style.font-color: "#e3b341"
+  }
+  Orchestrator -> WSClient: "dispatch_uart_to_ws()\nPublica eventos" {
+    style.stroke: "#3fb950"
+    style.font-color: "#3fb950"
+    style.bold: true
+  }
+
+  # ── Flujo descendente: órdenes del backend ──
+  WSClient -> Orchestrator: "dispatch_ws_to_uart()\nRecibe órdenes" {
+    style.stroke: "#d2a8ff"
+    style.font-color: "#d2a8ff"
+    style.bold: true
+  }
+  Orchestrator -> Processor: "send()\nSolicita envío" {
+    style.stroke: "#d2a8ff"
+    style.font-color: "#d2a8ff"
+  }
+
+  # ── EdgeServer wraps Orchestrator ──
+  EdgeServer -> Orchestrator: "POST /api/command\nComandos locales" {
+    style.stroke: "#58a6ff"
+    style.font-color: "#58a6ff"
+    style.bold: true
+  }
+}
+
+# ── Conexiones externas ────────────────────────────────────────────
+
+ESP32 -> RPi.UART: "/dev/serial0\n(UART)" {
+  style.stroke: "#484f58"
+  style.font-color: "#6e7681"
+  style.stroke-width: 3
+}
+RPi.UART -> ESP32: "/dev/serial0\n(UART)" {
+  style.stroke: "#484f58"
+  style.font-color: "#6e7681"
+  style.stroke-dash: 4
+  style.stroke-width: 2
+}
+
+RPi.WSClient -> Backend: "wss:// · JSON" {
+  style.stroke: "#3fb950"
+  style.font-color: "#3fb950"
+  style.stroke-width: 3
+  style.bold: true
+}
+Backend -> RPi.WSClient: "wss:// · JSON" {
+  style.stroke: "#3fb950"
+  style.font-color: "#3fb950"
+  style.stroke-dash: 4
+  style.stroke-width: 2
+}
+
+LocalUI -> RPi.EdgeServer: "HTTP / WS\nlocalhost:8001" {
+  style.stroke: "#58a6ff"
+  style.font-color: "#58a6ff"
+  style.stroke-width: 2
+}

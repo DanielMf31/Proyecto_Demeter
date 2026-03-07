@@ -1,0 +1,149 @@
+
+# ─────────────────────────────────────────────────────────────────
+#  Protocolo Demeter – Manejo de Errores en la Recepción de Tramas
+# ─────────────────────────────────────────────────────────────────
+
+direction: down
+
+classes: {
+  step: {
+    shape: rectangle
+    style: {
+      border-radius: 10
+      fill: "#21262d"
+      stroke: "#388bfd"
+      stroke-width: 2
+      font-color: "#e6edf3"
+      font-size: 14
+      shadow: true
+    }
+  }
+  start: {
+    shape: oval
+    style: {
+      fill: "#1f6feb"
+      stroke: "#58a6ff"
+      stroke-width: 2
+      font-color: "#ffffff"
+      font-size: 14
+      bold: true
+      shadow: true
+    }
+  }
+  decision: {
+    shape: diamond
+    style: {
+      fill: "#2d1f3d"
+      stroke: "#d2a8ff"
+      stroke-width: 2
+      font-color: "#d2a8ff"
+      font-size: 13
+      bold: true
+      shadow: true
+    }
+  }
+  discard: {
+    shape: oval
+    style: {
+      fill: "#2d0f0f"
+      stroke: "#f85149"
+      stroke-width: 2
+      font-color: "#f85149"
+      font-size: 13
+      bold: true
+      shadow: true
+    }
+  }
+  nack: {
+    shape: oval
+    style: {
+      fill: "#2d1f0f"
+      stroke: "#e3b341"
+      stroke-width: 2
+      font-color: "#e3b341"
+      font-size: 13
+      bold: true
+      shadow: true
+    }
+  }
+  ignore: {
+    shape: oval
+    style: {
+      fill: "#1a1a1a"
+      stroke: "#6e7681"
+      stroke-width: 2
+      font-color: "#6e7681"
+      font-size: 13
+      shadow: true
+    }
+  }
+  forward: {
+    shape: rectangle
+    style: {
+      border-radius: 8
+      fill: "#1a1f0f"
+      stroke: "#e3b341"
+      stroke-width: 2
+      font-color: "#e3b341"
+      font-size: 13
+      shadow: true
+    }
+  }
+  run: {
+    shape: oval
+    style: {
+      fill: "#0f2d24"
+      stroke: "#3fb950"
+      stroke-width: 2
+      font-color: "#3fb950"
+      font-size: 14
+      bold: true
+      shadow: true
+    }
+  }
+}
+
+A: "Trama recibida" {class: start}
+
+B: "¿SYNC válido?\n(byte 0 == 0xAA)" {class: decision}
+D1: "DESCARTAR\nsin notificar" {class: discard}
+
+C: "¿LENGTH coherente?\n(size == 6 + LENGTH + 1)" {class: decision}
+D2: "DESCARTAR\nsin notificar" {class: discard}
+
+E: "¿CRC correcto?\n(suma módulo 256)" {class: decision}
+D3: "DESCARTAR\nRegistrar CRC Error en log" {class: discard}
+
+F: "¿DST_ID correcto?\n(Mi ID o 0xFF)" {class: decision}
+
+GW: "¿Soy Gateway?" {class: decision}
+H: "Reenviar íntegra\nal canal alternativo" {class: forward}
+D4: "IGNORAR" {class: ignore}
+
+I: "¿CMD_ID conocido?" {class: decision}
+D5: "DESCARTAR\nRegistrar Unknown CMD" {class: discard}
+
+J: "¿Payload tiene\ntamaño esperado?" {class: decision}
+K: "Enviar NACK\nal emisor" {class: nack}
+
+L: "¿Nodo en\nestado válido?" {class: decision}
+M: "IGNORAR\n(estado ERROR o BOOT)" {class: ignore}
+N: "Ejecutar handler\ncorrespondiente" {class: run}
+
+A -> B
+B -> D1: "No" {style.stroke: "#f85149"; style.font-color: "#f85149"; style.bold: true}
+B -> C: "Sí" {style.stroke: "#3fb950"; style.font-color: "#3fb950"; style.bold: true}
+C -> D2: "No" {style.stroke: "#f85149"; style.font-color: "#f85149"; style.bold: true}
+C -> E: "Sí" {style.stroke: "#3fb950"; style.font-color: "#3fb950"; style.bold: true}
+E -> D3: "No" {style.stroke: "#f85149"; style.font-color: "#f85149"; style.bold: true}
+E -> F: "Sí" {style.stroke: "#3fb950"; style.font-color: "#3fb950"; style.bold: true}
+F -> GW: "No soy yo" {style.stroke: "#e3b341"; style.font-color: "#e3b341"; style.bold: true}
+F -> I: "Sí" {style.stroke: "#3fb950"; style.font-color: "#3fb950"; style.bold: true}
+GW -> H: "Sí" {style.stroke: "#e3b341"; style.font-color: "#e3b341"; style.bold: true}
+GW -> D4: "No" {style.stroke: "#6e7681"; style.font-color: "#6e7681"}
+I -> D5: "No" {style.stroke: "#f85149"; style.font-color: "#f85149"; style.bold: true}
+I -> J: "Sí" {style.stroke: "#3fb950"; style.font-color: "#3fb950"; style.bold: true}
+J -> K: "No" {style.stroke: "#e3b341"; style.font-color: "#e3b341"; style.bold: true}
+J -> L: "Sí" {style.stroke: "#3fb950"; style.font-color: "#3fb950"; style.bold: true}
+L -> M: "ERROR o BOOT" {style.stroke: "#6e7681"; style.font-color: "#6e7681"}
+L -> N: "IDLE o RUNNING" {style.stroke: "#3fb950"; style.font-color: "#3fb950"; style.bold: true}

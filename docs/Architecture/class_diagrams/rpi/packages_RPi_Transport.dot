@@ -1,0 +1,8 @@
+digraph "packages_RPi_Transport" {
+rankdir=BT
+charset="utf-8"
+"async_uart" [color="black", label=<async_uart>, shape="box", style="solid"];
+"interface" [color="black", label=<interface>, shape="box", style="solid"];
+"uart_processor" [color="black", label=<uart_processor>, shape="box", style="solid"];
+"async_uart" -> "interface" [arrowhead="open", arrowtail="none"];
+}

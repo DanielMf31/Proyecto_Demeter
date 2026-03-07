@@ -184,27 +184,51 @@
 \@writefile{lol}{\contentsline {lstlisting}{\numberline {5.10}{\ignorespaces Sesión completa en Jupyter Notebook}}{38}{lstlisting.5.10}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {5.12}Referencia Rápida de Parámetros}{39}{section.5.12}\protected@file@percent }
 \@writefile{lot}{\contentsline {table}{\numberline {5.8}{\ignorespaces Parámetros principales del \texttt  {DemeterClient}}}{39}{table.caption.48}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {.1}Diagramas de Actividad --- Protocolo Demeter}{40}{section.Alph0.1}\protected@file@percent }
-\newlabel{anx:diagramas}{{.1}{40}{Diagramas de Actividad --- Protocolo Demeter}{section.Alph0.1}{}}
-\newlabel{fig:anx_serializacion}{{.1}{40}{Diagramas de Actividad --- Protocolo Demeter}{section.Alph0.1}{}}
-\newlabel{fig:anx_deserializacion}{{.1}{40}{Diagramas de Actividad --- Protocolo Demeter}{section.Alph0.1}{}}
-\newlabel{fig:anx_errores}{{.1}{40}{Diagramas de Actividad --- Protocolo Demeter}{section.Alph0.1}{}}
-\newlabel{fig:anx_ciclo_nodos}{{.1}{40}{Diagramas de Actividad --- Protocolo Demeter}{section.Alph0.1}{}}
-\newlabel{fig:anx_ciclo_energetico}{{.1}{40}{Diagramas de Actividad --- Protocolo Demeter}{section.Alph0.1}{}}
-\newlabel{fig:anx_handshake}{{.1}{40}{Diagramas de Actividad --- Protocolo Demeter}{section.Alph0.1}{}}
-\newlabel{fig:anx_flujo_e2e}{{.1}{40}{Diagramas de Actividad --- Protocolo Demeter}{section.Alph0.1}{}}
-\newlabel{fig:anx_rpi_docker}{{.1}{40}{Diagramas de Actividad --- Protocolo Demeter}{section.Alph0.1}{}}
-\newlabel{fig:anx_rpi_asyncio}{{.1}{40}{Diagramas de Actividad --- Protocolo Demeter}{section.Alph0.1}{}}
-\newlabel{fig:anx_rpi_componentes}{{.1}{40}{Diagramas de Actividad --- Protocolo Demeter}{section.Alph0.1}{}}
-\newlabel{fig:anx_rpi_telemetria}{{.1}{40}{Diagramas de Actividad --- Protocolo Demeter}{section.Alph0.1}{}}
-\newlabel{fig:anx_rpi_comandos}{{.1}{40}{Diagramas de Actividad --- Protocolo Demeter}{section.Alph0.1}{}}
-\newlabel{fig:anx_backend_docker}{{.1}{40}{Diagramas de Actividad --- Protocolo Demeter}{section.Alph0.1}{}}
-\newlabel{fig:anx_redis_flow}{{.1}{40}{Diagramas de Actividad --- Protocolo Demeter}{section.Alph0.1}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {.2}Esquema de Base de Datos}{40}{section.Alph0.2}\protected@file@percent }
-\newlabel{anx:bd}{{.2}{40}{Esquema de Base de Datos}{section.Alph0.2}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Esquema Entidad-Relación completo de \texttt  {demeter\_db} (PostgreSQL 15). Generado a partir de los modelos SQLAlchemy.}}{42}{figure.caption.49}\protected@file@percent }
-\newlabel{fig:anx_db_schema}{{1}{42}{Esquema Entidad-Relación completo de \texttt {demeter\_db} (PostgreSQL 15). Generado a partir de los modelos SQLAlchemy}{figure.caption.49}{}}
-\newlabel{LastPage}{{.2}{42}{Esquema de Base de Datos}{page.42}{}}
-\gdef\lastpage@lastpage{42}
-\gdef\lastpage@lastpageHy{42}
-\gdef \@abspage@last{42}
+\@writefile{toc}{\contentsline {chapter}{\numberline {A}Diagramas del Protocolo Binario Demeter}{40}{appendix.A}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\newlabel{anx:protocolo}{{A}{40}{Diagramas del Protocolo Binario Demeter}{appendix.A}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {A.1}{\ignorespaces Flujo de serialización de una trama binaria Demeter.}}{41}{figure.caption.49}\protected@file@percent }
+\newlabel{fig:anx_serializacion}{{A.1}{41}{Flujo de serialización de una trama binaria Demeter}{figure.caption.49}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {A.2}{\ignorespaces Flujo de deserialización y validación de una trama recibida (parte superior).}}{42}{figure.caption.50}\protected@file@percent }
+\newlabel{fig:anx_deserializacion_top}{{A.2}{42}{Flujo de deserialización y validación de una trama recibida (parte superior)}{figure.caption.50}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {A.3}{\ignorespaces Flujo de deserialización y validación de una trama recibida (parte inferior).}}{43}{figure.caption.51}\protected@file@percent }
+\newlabel{fig:anx_deserializacion_bottom}{{A.3}{43}{Flujo de deserialización y validación de una trama recibida (parte inferior)}{figure.caption.51}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {A.4}{\ignorespaces Diagrama de secuencia del handshake SYN\,/\,SYN-ACK\,/\,ACK con reintentos.}}{44}{figure.caption.52}\protected@file@percent }
+\newlabel{fig:anx_handshake}{{A.4}{44}{Diagrama de secuencia del handshake SYN\,/\,SYN-ACK\,/\,ACK con reintentos}{figure.caption.52}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {A.5}{\ignorespaces Flujo end-to-end: Nodo Sensor \textrightarrow \ Gateway \textrightarrow \ Raspberry Pi \textrightarrow \ Backend (parte superior).}}{45}{figure.caption.53}\protected@file@percent }
+\newlabel{fig:anx_flujo_e2e_top}{{A.5}{45}{Flujo end-to-end: Nodo Sensor \textrightarrow \ Gateway \textrightarrow \ Raspberry Pi \textrightarrow \ Backend (parte superior)}{figure.caption.53}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {A.6}{\ignorespaces Flujo end-to-end: Nodo Sensor \textrightarrow \ Gateway \textrightarrow \ Raspberry Pi \textrightarrow \ Backend (parte inferior).}}{46}{figure.caption.54}\protected@file@percent }
+\newlabel{fig:anx_flujo_e2e_bottom}{{A.6}{46}{Flujo end-to-end: Nodo Sensor \textrightarrow \ Gateway \textrightarrow \ Raspberry Pi \textrightarrow \ Backend (parte inferior)}{figure.caption.54}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {A.7}{\ignorespaces Árbol de decisión para el manejo de errores en la recepción de tramas.}}{47}{figure.caption.55}\protected@file@percent }
+\newlabel{fig:anx_errores}{{A.7}{47}{Árbol de decisión para el manejo de errores en la recepción de tramas}{figure.caption.55}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {A.8}{\ignorespaces Ciclo energético del nodo sensor: fase activa ($\sim $1,5\,s) y Deep Sleep ($\sim $3596\,s).}}{48}{figure.caption.56}\protected@file@percent }
+\newlabel{fig:anx_ciclo_energetico}{{A.8}{48}{Ciclo energético del nodo sensor: fase activa ($\sim $1,5\,s) y Deep Sleep ($\sim $3596\,s)}{figure.caption.56}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {A.9}{\ignorespaces Ciclo de vida de los nodos ESP32 según su rol: Sensor, Actuador o Gateway.}}{49}{figure.caption.57}\protected@file@percent }
+\newlabel{fig:anx_ciclo_nodos}{{A.9}{49}{Ciclo de vida de los nodos ESP32 según su rol: Sensor, Actuador o Gateway}{figure.caption.57}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {B}Arquitectura del Servicio Raspberry Pi}{50}{appendix.B}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\newlabel{anx:raspberry}{{B}{50}{Arquitectura del Servicio Raspberry Pi}{appendix.B}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {B.1}{\ignorespaces Arquitectura de componentes del servicio Python en la Raspberry Pi (capa de borde).}}{51}{figure.caption.58}\protected@file@percent }
+\newlabel{fig:anx_rpi_componentes}{{B.1}{51}{Arquitectura de componentes del servicio Python en la Raspberry Pi (capa de borde)}{figure.caption.58}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {B.2}{\ignorespaces Diagrama de secuencia: flujo ascendente de telemetría desde el Gateway hasta el Backend.}}{52}{figure.caption.59}\protected@file@percent }
+\newlabel{fig:anx_rpi_telemetria}{{B.2}{52}{Diagrama de secuencia: flujo ascendente de telemetría desde el Gateway hasta el Backend}{figure.caption.59}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {B.3}{\ignorespaces Diagrama de secuencia: flujo descendente de comandos desde el Backend hasta el Gateway ESP32.}}{53}{figure.caption.60}\protected@file@percent }
+\newlabel{fig:anx_rpi_comandos}{{B.3}{53}{Diagrama de secuencia: flujo descendente de comandos desde el Backend hasta el Gateway ESP32}{figure.caption.60}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {B.4}{\ignorespaces Despliegue del servicio Raspberry Pi en contenedor Docker con sus conexiones externas.}}{54}{figure.caption.61}\protected@file@percent }
+\newlabel{fig:anx_rpi_docker}{{B.4}{54}{Despliegue del servicio Raspberry Pi en contenedor Docker con sus conexiones externas}{figure.caption.61}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {B.5}{\ignorespaces Diagrama de las cuatro tareas AsyncIO concurrentes del servicio Raspberry Pi.}}{55}{figure.caption.62}\protected@file@percent }
+\newlabel{fig:anx_rpi_asyncio}{{B.5}{55}{Diagrama de las cuatro tareas AsyncIO concurrentes del servicio Raspberry Pi}{figure.caption.62}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {C}Arquitectura del Backend}{56}{appendix.C}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\newlabel{anx:backend}{{C}{56}{Arquitectura del Backend}{appendix.C}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {C.1}{\ignorespaces Arquitectura de contenedores Docker del Backend en Google Cloud VM.}}{57}{figure.caption.63}\protected@file@percent }
+\newlabel{fig:anx_backend_docker}{{C.1}{57}{Arquitectura de contenedores Docker del Backend en Google Cloud VM}{figure.caption.63}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {C.2}{\ignorespaces Flujo de un comando de usuario a través del sistema Redis Pub/Sub hasta la Raspberry Pi.}}{58}{figure.caption.64}\protected@file@percent }
+\newlabel{fig:anx_redis_flow}{{C.2}{58}{Flujo de un comando de usuario a través del sistema Redis Pub/Sub hasta la Raspberry Pi}{figure.caption.64}{}}
+\newlabel{LastPage}{{C}{58}{Arquitectura del Backend}{page.58}{}}
+\gdef\lastpage@lastpage{58}
+\gdef\lastpage@lastpageHy{58}
+\gdef \@abspage@last{58}

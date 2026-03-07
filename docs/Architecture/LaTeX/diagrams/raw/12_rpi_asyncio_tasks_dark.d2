@@ -1,0 +1,172 @@
+# AUTO-GENERADO por make_print.py — VERSIÓN PARA IMPRESIÓN
+# Colores adaptados para fondo blanco / documento académico
+# No editar directamente; editar el archivo fuente y regenerar.
+
+
+# ─────────────────────────────────────────────────────────────────
+#  Protocolo Demeter – Tareas AsyncIO del Servicio Raspberry Pi
+#  Las 5 tareas corren concurrentemente sin hilos adicionales
+# ─────────────────────────────────────────────────────────────────
+
+direction: down
+
+classes: {
+  init: {
+    shape: oval
+    style: {
+      fill: "#1f6feb"
+      stroke: "#58a6ff"
+      stroke-width: 2
+      font-color: "#ffffff"
+      font-size: 14
+      bold: true
+      shadow: true
+    }
+  }
+  task: {
+    shape: rectangle
+    style: {
+      border-radius: 10
+      fill: "#ffffff"
+      stroke: "#388bfd"
+      stroke-width: 2
+      font-color: "#1a1a2e"
+      font-size: 13
+      shadow: true
+    }
+  }
+  queue: {
+    shape: queue
+    style: {
+      fill: "#f5f0ff"
+      stroke: "#d2a8ff"
+      stroke-width: 2
+      font-color: "#6639ba"
+      font-size: 12
+    }
+  }
+  component: {
+    shape: rectangle
+    style: {
+      border-radius: 8
+      fill: "#dff7eb"
+      stroke: "#3fb950"
+      stroke-width: 2
+      font-color: "#1a7f37"
+      font-size: 13
+      shadow: true
+    }
+  }
+  device: {
+    shape: rectangle
+    style: {
+      border-radius: 8
+      fill: "#ffffff"
+      stroke: "#e3b341"
+      stroke-width: 2
+      font-color: "#9a6700"
+      font-size: 13
+    }
+  }
+  note: {
+    shape: rectangle
+    style: {
+      border-radius: 6
+      fill: "#fffce0"
+      stroke: "#e3b341"
+      stroke-width: 1
+      font-color: "#9a6700"
+      font-size: 12
+      stroke-dash: 4
+    }
+  }
+}
+
+# ── Inicialización ─────────────────────────────────────────────────
+
+Start: "asyncio.run()\nInicio del proceso" {class: init}
+Loop: "asyncio event loop\n(Bucle de eventos)" {class: task}
+
+Start -> Loop
+
+# ── Cinco tareas concurrentes ─────────────────────────────────────
+
+TASKS: "Tareas concurrentes (asyncio.gather)" {
+  style: {
+    fill: "#f6f8fa"
+    stroke: "#388bfd"
+    stroke-width: 3
+    border-radius: 14
+    font-color: "#0550ae"
+    font-size: 15
+    bold: true
+  }
+
+  T1: "Tarea 1\nUART RX Loop\n_read_loop()" {class: task}
+  T2: "Tarea 2\nUART TX Loop\n_write_loop()" {class: task}
+  T3: "Tarea 3\nDispatch Loop\n_dispatch_loop()" {class: task}
+  T4: "Tarea 4\nWebSocket Client\n_connect_loop()" {class: task}
+  T5: "Tarea 5\nUvicorn Server\nserver.serve()" {class: task}
+}
+
+Loop -> TASKS.T1
+Loop -> TASKS.T2
+Loop -> TASKS.T3
+Loop -> TASKS.T4
+Loop -> TASKS.T5
+
+# ── Flujo de datos ascendente (RX → Backend) ──────────────────────
+
+RXQ: "rx_queue\nasyncio.Queue" {class: queue}
+CB: "Listener Callbacks\nGatewayOrchestrator" {class: component}
+
+TASKS.T1 -> RXQ: "bytes recibidos\non_uart_data() → process_buffer()" {
+  style.stroke: "#388bfd"
+  style.font-color: "#0550ae"
+}
+RXQ -> TASKS.T3: "consume rx_queue" {
+  style.stroke: "#3fb950"
+  style.font-color: "#1a7f37"
+}
+TASKS.T3 -> CB: "llama listeners\n(telemetría, ACK, SYN)" {
+  style.stroke: "#3fb950"
+  style.font-color: "#1a7f37"
+  style.bold: true
+}
+CB -> TASKS.T4: "dispatch_uart_to_ws()\nevento JSON al Backend" {
+  style.stroke: "#3fb950"
+  style.font-color: "#1a7f37"
+  style.bold: true
+}
+
+# ── Flujo de datos descendente (Backend → TX) ─────────────────────
+
+TXQ: "tx_queue\nasyncio.Queue" {class: queue}
+DR: "/dev/serial0\n(UART físico)" {class: device}
+
+TASKS.T4 -> CB: "dispatch_ws_to_uart()\ncomando JSON" {
+  style.stroke: "#d2a8ff"
+  style.font-color: "#6639ba"
+}
+TASKS.T5 -> CB: "POST /api/command\ncomando local" {
+  style.stroke: "#58a6ff"
+  style.font-color: "#0550ae"
+}
+CB -> TXQ: "pack_frame() → tx_queue" {
+  style.stroke: "#e3b341"
+  style.font-color: "#9a6700"
+}
+TXQ -> TASKS.T2: "frame serializado" {
+  style.stroke: "#e3b341"
+  style.font-color: "#9a6700"
+  style.bold: true
+}
+TASKS.T2 -> DR: "bytes escritos" {
+  style.stroke: "#e3b341"
+  style.font-color: "#9a6700"
+  style.stroke-width: 3
+}
+
+# ── Nota explicativa ───────────────────────────────────────────────
+
+nota: "Las 5 tareas corren CONCURRENTEMENTE\nSin hilos adicionales (single thread)\nCooperative multitasking con await" {class: note}

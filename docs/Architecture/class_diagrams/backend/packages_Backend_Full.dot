@@ -1,0 +1,12 @@
+digraph "packages_Backend_Full" {
+rankdir=BT
+charset="utf-8"
+"BD.models" [color="black", label=<BD.models>, shape="box", style="solid"];
+"BD.schemas" [color="black", label=<BD.schemas>, shape="box", style="solid"];
+"Core.redis" [color="black", label=<Core.redis>, shape="box", style="solid"];
+"WS_Manager.dispatcher" [color="black", label=<WS_Manager.dispatcher>, shape="box", style="solid"];
+"WS_Manager.manager" [color="black", label=<WS_Manager.manager>, shape="box", style="solid"];
+"WS_Manager.dispatcher" -> "BD.models" [arrowhead="open", arrowtail="none"];
+"WS_Manager.dispatcher" -> "Core.redis" [arrowhead="open", arrowtail="none"];
+"WS_Manager.dispatcher" -> "WS_Manager.manager" [arrowhead="open", arrowtail="none"];
+}

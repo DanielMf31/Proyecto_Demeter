@@ -1,0 +1,7 @@
+digraph "classes_RPi_Support" {
+rankdir=BT
+charset="utf-8"
+"proyecto_demeter.utils.database.DatabaseManager" [color="black", fontcolor="black", label=<{DatabaseManager|db_path : str<br ALIGN="LEFT"/>logger : NoneType, RootLogger<br ALIGN="LEFT"/>|get_recent_readings(limit: int): list<br ALIGN="LEFT"/>get_stats(node_id: int, hours: int): dict<br ALIGN="LEFT"/>init_db()<br ALIGN="LEFT"/>save_reading(node_id: int, temperature: float, humidity: float, timestamp: datetime)<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"client.DemeterWebsocketClient" [color="black", fontcolor="black", label=<{DemeterWebsocketClient|connection : NoneType<br ALIGN="LEFT"/>logger : NoneType, RootLogger<br ALIGN="LEFT"/>on_message : Callable[[str], Awaitable[None]]<br ALIGN="LEFT"/>on_open : Optional[Callable[[], Awaitable[None]]]<br ALIGN="LEFT"/>running : bool<br ALIGN="LEFT"/>uri<br ALIGN="LEFT"/>|send_json(data: dict)<br ALIGN="LEFT"/>start()<br ALIGN="LEFT"/>stop()<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+"device_manager.DeviceManager" [color="black", fontcolor="black", label=<{DeviceManager|config_path : Optional[str]<br ALIGN="LEFT"/>logger : NoneType, RootLogger<br ALIGN="LEFT"/>mappings : Dict[str, Any], dict<br ALIGN="LEFT"/>|get_config(): Dict[str, Any]<br ALIGN="LEFT"/>get_physical_mapping(device_type: str, logical_id: str): Optional[Tuple[int, int]]<br ALIGN="LEFT"/>load_config(): bool<br ALIGN="LEFT"/>translate_pin(logical_pin: int): Tuple[int, int]<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+}

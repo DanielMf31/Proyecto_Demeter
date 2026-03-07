@@ -1,0 +1,7 @@
+digraph "packages_RPi_Support" {
+rankdir=BT
+charset="utf-8"
+"client" [color="black", label=<client>, shape="box", style="solid"];
+"device_manager" [color="black", label=<device_manager>, shape="box", style="solid"];
+"proyecto_demeter.utils.database" [color="black", label=<proyecto_demeter.utils.database>, shape="box", style="solid"];
+}

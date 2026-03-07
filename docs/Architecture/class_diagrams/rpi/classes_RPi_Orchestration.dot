@@ -1,0 +1,5 @@
+digraph "classes_RPi_Orchestration" {
+rankdir=BT
+charset="utf-8"
+"command_dispatcher.GatewayOrchestrator" [color="black", fontcolor="black", label=<{GatewayOrchestrator|device_manager : DeviceManager<br ALIGN="LEFT"/>logger : NoneType, RootLogger<br ALIGN="LEFT"/>protocol : DemeterProtocolV2<br ALIGN="LEFT"/>uart : UartProcessor<br ALIGN="LEFT"/>ws_client : DemeterWebsocketClient<br ALIGN="LEFT"/>|dispatch_uart_to_ws(cmd: DemeterCommand): None<br ALIGN="LEFT"/>dispatch_ws_to_uart(raw_message: str): None<br ALIGN="LEFT"/>report_system_config(): None<br ALIGN="LEFT"/>start(): None<br ALIGN="LEFT"/>stop(): None<br ALIGN="LEFT"/>}>, shape="record", style="solid"];
+}
