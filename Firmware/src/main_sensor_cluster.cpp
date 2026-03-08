@@ -26,8 +26,8 @@
 const uint8_t MY_NODE_ID = 2;
 const uint8_t GATEWAY_ID = 1;
 
-// Gateway MAC — REPLACE WITH YOUR GATEWAY'S REAL MAC
-const uint8_t GATEWAY_MAC[] = {0x20, 0x6E, 0xF1, 0x85, 0x58, 0xD0};
+// Gateway MAC (from `pio device list`: SER=9C:13:9E:A8:6F:CC on /dev/ttyACM0)
+const uint8_t GATEWAY_MAC[] = {0x9C, 0x13, 0x9E, 0xA8, 0x6F, 0xCC};
 
 // Report interval
 static constexpr unsigned long REPORT_INTERVAL_MS = 5000;
