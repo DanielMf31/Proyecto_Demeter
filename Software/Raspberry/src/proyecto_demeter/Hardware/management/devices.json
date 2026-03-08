@@ -2,44 +2,44 @@
     "devices": {
         "pump": {
             "1": {
-                "target_id": 1,
+                "target_id": 3,
                 "physical_pin": 4,
                 "label": "Bomba 1"
             },
             "2": {
-                "target_id": 1,
+                "target_id": 3,
                 "physical_pin": 5,
                 "label": "Bomba 2"
             },
             "3": {
-                "target_id": 1,
+                "target_id": 3,
                 "physical_pin": 6,
                 "label": "Bomba 3"
             },
             "4": {
-                "target_id": 1,
+                "target_id": 3,
                 "physical_pin": 7,
                 "label": "Bomba 4"
             }
         },
         "valve": {
             "1": {
-                "target_id": 1,
+                "target_id": 3,
                 "physical_pin": 10,
                 "label": "Válvula 1"
             },
             "2": {
-                "target_id": 1,
+                "target_id": 3,
                 "physical_pin": 11,
                 "label": "Válvula 2"
             },
             "3": {
-                "target_id": 1,
+                "target_id": 3,
                 "physical_pin": 12,
                 "label": "Válvula 3"
             },
             "4": {
-                "target_id": 1,
+                "target_id": 3,
                 "physical_pin": 13,
                 "label": "Válvula 4"
             }

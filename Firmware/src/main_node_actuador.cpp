@@ -27,8 +27,8 @@ const uint8_t GATEWAY_ID = 1;
 // MAC from Gateway Log: 9C:13:9E:A8:6F:CC
 const uint8_t GATEWAY_MAC[] = {0x9C, 0x13, 0x9E, 0xA8, 0x6F, 0xCC}; 
 
-// Hardware Pins
-const uint8_t PIN_MOTOR_RELAY = 4;
+// Hardware Pins (4 LEDs for testing)
+const uint8_t LED_PINS[] = {4, 5, 6, 7};
 
 // Modes for local control (simplification)
 enum ActuatorMode {
@@ -62,7 +62,7 @@ void setup() {
 
     // Initialize Node
     if (node.getExecutor()) {
-        std::vector<uint8_t> pins = {PIN_MOTOR_RELAY};
+        std::vector<uint8_t> pins(std::begin(LED_PINS), std::end(LED_PINS));
         node.getExecutor()->setPins(pins);
     }
     node.begin();
