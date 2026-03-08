@@ -65,6 +65,7 @@ private:
     std::vector<Demeter::GpioCallback> _gpioListeners;
     std::vector<Demeter::SequenceCallback> _sequenceListeners;
     std::vector<Demeter::TempHumReportCallback> _sensorListeners;
+    std::vector<Demeter::SensorClusterReportCallback> _clusterListeners;
     std::vector<Demeter::PinReportCallback> _pinListeners;
     std::vector<Demeter::SystemReportCallback> _systemListeners;
     std::vector<Demeter::AckCallback> _ackListeners;
@@ -77,6 +78,7 @@ private:
     
     // Data Handlers (Standardized)
     void handleTempHumReport(const Demeter::TempHumReport& report);
+    void handleSensorClusterReport(const Demeter::SensorClusterReport& report);
     void handlePinReport(const Demeter::PinReport& report);
     void handleSystemReport(const Demeter::SystemReport& report);
     void handleGetSensors(const Demeter::RequestData& req);
@@ -171,6 +173,7 @@ public:
     void addGpioListener(Demeter::GpioCallback cb);
     void addSequenceListener(Demeter::SequenceCallback cb);
     void addSensorDataListener(Demeter::TempHumReportCallback cb);
+    void addSensorClusterReportListener(Demeter::SensorClusterReportCallback cb);
     void addPinReportListener(Demeter::PinReportCallback cb);
     void addSystemReportListener(Demeter::SystemReportCallback cb);
     void addAckListener(Demeter::AckCallback cb);

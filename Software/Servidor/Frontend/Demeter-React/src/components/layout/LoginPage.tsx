@@ -123,6 +123,36 @@ export const LoginPage: React.FC = () => {
                             </Button>
                         </div>
                     </form>
+
+                    {import.meta.env.DEV && (
+                        <div className="mt-4 pt-4 border-t border-slate-800">
+                            <Button
+                                type="button"
+                                onClick={() => {
+                                    setUsername('admin');
+                                    setPassword('admin');
+                                    const formData = new URLSearchParams();
+                                    formData.append('username', 'admin');
+                                    formData.append('password', 'admin');
+                                    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+                                    setIsLoading(true);
+                                    fetch(`${API_URL}/auth/login`, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                        body: formData.toString(),
+                                    })
+                                        .then(res => res.json())
+                                        .then(data => { login(data.access_token); })
+                                        .catch(() => setError('Dev login failed'))
+                                        .finally(() => setIsLoading(false));
+                                }}
+                                disabled={isLoading}
+                                className="w-full flex justify-center py-2 px-4 border border-amber-800/50 rounded-lg shadow-sm text-xs font-medium text-amber-400 bg-amber-950/30 hover:bg-amber-950/50 transition-colors disabled:opacity-50"
+                            >
+                                Dev: Auto-login (admin)
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

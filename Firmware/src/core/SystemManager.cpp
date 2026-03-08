@@ -98,7 +98,11 @@ void SystemManager::setup() {
         _engine->onSystemReportRecv([this](const Demeter::SystemReport& report) {
             this->handleSystemReport(report);
         });
-        
+
+        _engine->onSensorClusterReportRecv([this](const Demeter::SensorClusterReport& report) {
+            this->handleSensorClusterReport(report);
+        });
+
         // Requests
         _engine->onGetSensorsRecv([this](const Demeter::RequestData& req) {
              this->handleGetSensors(req);
@@ -136,6 +140,10 @@ void SystemManager::addSequenceListener(Demeter::SequenceCallback cb) {
 
 void SystemManager::addSensorDataListener(Demeter::TempHumReportCallback cb) {
     _sensorListeners.push_back(cb);
+}
+
+void SystemManager::addSensorClusterReportListener(Demeter::SensorClusterReportCallback cb) {
+    _clusterListeners.push_back(cb);
 }
 
 void SystemManager::addPinReportListener(Demeter::PinReportCallback cb) {
@@ -352,6 +360,10 @@ void SystemManager::executeSequenceStep(size_t index) {
 void SystemManager::handleTempHumReport(const Demeter::TempHumReport& report) {
     // Notify Listeners
     for(const auto& cb : _sensorListeners) cb(report);
+}
+
+void SystemManager::handleSensorClusterReport(const Demeter::SensorClusterReport& report) {
+    for(const auto& cb : _clusterListeners) cb(report);
 }
 
 void SystemManager::handlePinReport(const Demeter::PinReport& report) {

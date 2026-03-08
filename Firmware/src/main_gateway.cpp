@@ -142,7 +142,17 @@ void setup() {
     gateway.getSystemManager()->addPinReportListener([](const Demeter::PinReport& report) {
         Serial.printf(">> [STATUS] Node %d Pin %d is %s\n", report.sourceId, report.pin, report.state ? "ON" : "OFF");
     });
-    
+
+    // Sensor Cluster Report Listener — forward to UART (→ Raspberry Pi)
+    gateway.getSystemManager()->addSensorClusterReportListener([](const Demeter::SensorClusterReport& report) {
+        Serial.printf(">> [CLUSTER] Node %d: %d entries\n", report.sourceId, (int)report.entries.size());
+        for (const auto& e : report.entries) {
+            Serial.printf("   Plant %d: %.2f C, %.0f%% soil\n", e.plantId, e.temperature, e.soilMoisture);
+        }
+        // Re-send to host (RPi) via UART — target_id=0 routes to UART in GatewayStrategy
+        engine.sendSensorClusterReport(0, report);
+    });
+
     Serial.println("[Setup] Ready.");
 }
 
