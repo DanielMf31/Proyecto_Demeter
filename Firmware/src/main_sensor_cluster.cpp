@@ -129,8 +129,9 @@ void setup() {
 
         report.entries.push_back(entry);
 
-        Serial.printf("[Plant %d] Temp: %.2f C | Soil: %.0f%%\n",
-            PLANTS[i].plantId, entry.temperature, entry.soilMoisture);
+        Serial.printf("[Plant %d] Temp: %.2f C | Soil: %.0f%% | Raw ADC: %.0f\n",
+            PLANTS[i].plantId, entry.temperature, entry.soilMoisture,
+            soilOk ? soilReading.value2 : -1.0f);
     }
 
     // ── Send report ─────────────────────────────────────────────────────
@@ -150,6 +151,8 @@ void setup() {
 
     // ── Enter deep sleep ────────────────────────────────────────────────
     delay(500); // let ESP-NOW finish transmitting
+    Serial.println(">> 5s window before deep sleep (flash new code now if needed)...");
+    delay(5000);
     Serial.printf(">> Entering deep sleep for %llu s...\n\n", SLEEP_DURATION_S);
     Serial.flush();
     esp_deep_sleep(SLEEP_DURATION_US);
