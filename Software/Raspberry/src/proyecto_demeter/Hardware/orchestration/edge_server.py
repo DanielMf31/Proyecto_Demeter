@@ -163,13 +163,13 @@ async def main():
     server = uvicorn.Server(config)
     api_task = asyncio.create_task(server.serve())
 
-    # El WS client conecta al servidor remoto si DEMETER_WS_URL está configurado
-    ws_url = os.getenv("DEMETER_WS_URL", "")
-    if ws_url:
-        logger.info(f"Connecting to remote WS: {ws_url}")
+    # El WS client conecta al servidor remoto si DEMETER_BACKEND_URL está configurado
+    backend_url = os.getenv("DEMETER_BACKEND_URL", "")
+    if backend_url:
+        logger.info(f"Connecting to remote backend: {backend_url}")
         await asyncio.gather(uart_task, api_task, gateway.ws_client.start())
     else:
-        logger.info("No DEMETER_WS_URL configured — running in pure local mode (no remote WS)")
+        logger.info("No DEMETER_BACKEND_URL configured — running in pure local mode (no remote WS)")
         await asyncio.gather(uart_task, api_task)
 
 
