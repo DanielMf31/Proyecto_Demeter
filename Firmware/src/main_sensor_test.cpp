@@ -31,8 +31,8 @@ const uint8_t GATEWAY_MAC[] = {0x9C, 0x13, 0x9E, 0xA8, 0x6F, 0xCC};
 static constexpr uint8_t SENSOR_POWER_PIN = 15;
 
 // Soil calibration
-static constexpr int SOIL_AIR_VALUE   = 650;
-static constexpr int SOIL_WATER_VALUE = 300;
+static constexpr int SOIL_AIR_VALUE   = 2200;
+static constexpr int SOIL_WATER_VALUE = 800;
 
 // Report interval
 static constexpr unsigned long REPORT_INTERVAL_MS = 2000;
