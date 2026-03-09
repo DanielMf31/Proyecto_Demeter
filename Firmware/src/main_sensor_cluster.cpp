@@ -4,9 +4,9 @@
  *        capacitive sensors, sends SENSOR_CLUSTER_REPORT via ESP-NOW
  *        to the gateway (Node 1), then returns to deep sleep.
  *
- * Pin assignment (alternating soil/temp per plant):
- *   Plant 1: Capacitive → GPIO 4, DS18B20 → GPIO 5
- *   Plant 2: Capacitive → GPIO 6, DS18B20 → GPIO 7
+ * Pin assignment:
+ *   Plant 1: DS18B20 → GPIO 5, Capacitive → GPIO 8
+ *   Plant 2: DS18B20 → GPIO 7, Capacitive → GPIO 9
  *
  * The number of active plants is auto-detected: if a DS18B20 fails init,
  * that plant pair is skipped. This allows testing with 1-2 sensors.
@@ -51,8 +51,8 @@ struct PlantConfig {
 };
 
 static constexpr PlantConfig PLANTS[] = {
-    {1, 5, 4},   // Plant 1: DS18B20 on GPIO5, Capacitive on GPIO4
-    {2, 7, 6},   // Plant 2: DS18B20 on GPIO7, Capacitive on GPIO6
+    {1, 5, 8},   // Plant 1: DS18B20 on GPIO5, Capacitive on GPIO8
+    {2, 7, 9},   // Plant 2: DS18B20 on GPIO7, Capacitive on GPIO9
 };
 static constexpr size_t MAX_PLANTS = sizeof(PLANTS) / sizeof(PLANTS[0]);
 
@@ -68,7 +68,7 @@ static const char* wakeupReason() {
 
 void setup() {
     Serial.begin(115200);
-    delay(2000); // wait for USB CDC
+    delay(10000); // 10s boot window for flashing new code
 
     Serial.println("\n========================================");
     Serial.println("  DEMETER - Sensor Cluster Node");
