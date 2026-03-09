@@ -1,14 +1,19 @@
 /**
  * @file main_sensor_cluster.cpp
- * @brief Test firmware: reads DS18B20 + capacitive sensors, packs into
- *        SENSOR_CLUSTER_REPORT and sends via ESP-NOW to gateway (Node 1).
+ * @brief Deep-sleep sensor cluster: wakes every 60 s, reads DS18B20 +
+ *        capacitive sensors, sends SENSOR_CLUSTER_REPORT via ESP-NOW
+ *        to the gateway (Node 1), then returns to deep sleep.
  *
- * Pin assignment (alternating temp/soil per plant):
- *   Plant 1: DS18B20 → GPIO 4, Capacitive → GPIO 5
- *   Plant 2: DS18B20 → GPIO 6, Capacitive → GPIO 7
+ * Pin assignment:
+ *   Plant 1: DS18B20 → GPIO 5, Capacitive → GPIO 1
+ *   Plant 2: DS18B20 → GPIO 7, Capacitive → GPIO 2
  *
  * The number of active plants is auto-detected: if a DS18B20 fails init,
  * that plant pair is skipped. This allows testing with 1-2 sensors.
+ *
+ * Deep-sleep behaviour:
+ *   - On wake (or first boot) setup() runs the full cycle: init → read → send → sleep.
+ *   - loop() is a fallback that triggers sleep in case setup() didn't reach it.
  *
  * Usage:
  *   pio run -e sensor_cluster -t upload && pio device monitor
@@ -16,6 +21,7 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
+#include <esp_sleep.h>
 #include "communications/EspNowStrategy.h"
 #include "core/ProtocolEngine.h"
 #include "core/InternalTypes.h"
@@ -26,15 +32,16 @@
 const uint8_t MY_NODE_ID = 2;
 const uint8_t GATEWAY_ID = 1;
 
-// Gateway MAC — REPLACE WITH YOUR GATEWAY'S REAL MAC
-const uint8_t GATEWAY_MAC[] = {0x20, 0x6E, 0xF1, 0x85, 0x58, 0xD0};
+// Gateway MAC (from `pio device list`: SER=9C:13:9E:A8:6F:CC on /dev/ttyACM0)
+const uint8_t GATEWAY_MAC[] = {0x9C, 0x13, 0x9E, 0xA8, 0x6F, 0xCC};
 
-// Report interval
-static constexpr unsigned long REPORT_INTERVAL_MS = 5000;
+// Deep-sleep duration in seconds
+static constexpr uint64_t SLEEP_DURATION_S = 5;
+static constexpr uint64_t SLEEP_DURATION_US = SLEEP_DURATION_S * 1000000ULL;
 
 // ── Soil calibration (adjust for your sensors) ─────────────────────────
-static constexpr int SOIL_AIR_VALUE   = 3000;
-static constexpr int SOIL_WATER_VALUE = 1000;
+static constexpr int SOIL_AIR_VALUE   = 650;
+static constexpr int SOIL_WATER_VALUE = 300;
 
 // ── Plant definitions ──────────────────────────────────────────────────
 struct PlantConfig {
@@ -44,42 +51,51 @@ struct PlantConfig {
 };
 
 static constexpr PlantConfig PLANTS[] = {
-    {1, 4, 5},   // Plant 1: DS18B20 on GPIO4, Capacitive on GPIO5
-    {2, 6, 7},   // Plant 2: DS18B20 on GPIO6, Capacitive on GPIO7
+    {1, 5, 1},   // Plant 1: DS18B20 on GPIO5, Capacitive on GPIO1
+    {2, 7, 2},   // Plant 2: DS18B20 on GPIO7, Capacitive on GPIO2
 };
 static constexpr size_t MAX_PLANTS = sizeof(PLANTS) / sizeof(PLANTS[0]);
 
-// ── Sensor instances ──────────────────────────────────────────────────
-Demeter::Sensors::DS18B20Sensor* tempSensors[MAX_PLANTS];
-Demeter::Sensors::SoilMoistureSensor* soilSensors[MAX_PLANTS];
-bool plantActive[MAX_PLANTS];
-
-// ── Communication ─────────────────────────────────────────────────────
-EspNowStrategy espNow;
-ProtocolEngine engine(&espNow);
-
-unsigned long lastReport = 0;
+// ── Helper: wakeup reason string ────────────────────────────────────────
+static const char* wakeupReason() {
+    switch (esp_sleep_get_wakeup_cause()) {
+        case ESP_SLEEP_WAKEUP_TIMER: return "TIMER";
+        case ESP_SLEEP_WAKEUP_EXT0:  return "EXT0";
+        case ESP_SLEEP_WAKEUP_EXT1:  return "EXT1";
+        default:                     return "POWER_ON / RESET";
+    }
+}
 
 void setup() {
     Serial.begin(115200);
-    delay(2000);
+    delay(10000); // 10s boot window for flashing new code
 
     Serial.println("\n========================================");
     Serial.println("  DEMETER - Sensor Cluster Node");
     Serial.printf("  Node ID: %d | Plants: %d\n", MY_NODE_ID, MAX_PLANTS);
+    Serial.printf("  WAKE UP reason: %s\n", wakeupReason());
     Serial.println("========================================\n");
 
-    // Init ESP-NOW
-    WiFi.mode(WIFI_STA);
-    espNow.begin();
-    engine.setNodeId(MY_NODE_ID);
+    // ── 1. Init & read sensors BEFORE WiFi (ADC may be affected by radio) ─
+    Demeter::Sensors::DS18B20Sensor* tempSensors[MAX_PLANTS];
+    Demeter::Sensors::SoilMoistureSensor* soilSensors[MAX_PLANTS];
+    bool plantActive[MAX_PLANTS];
 
-    // Register gateway route
-    std::array<uint8_t, 6> gwMac;
-    std::copy(std::begin(GATEWAY_MAC), std::end(GATEWAY_MAC), gwMac.begin());
-    espNow.registerRoute(GATEWAY_ID, gwMac);
+    // Raw ADC debug: 10 readings per pin, 200ms apart
+    Serial.println("[DEBUG] ADC readings (10x, 200ms apart):");
+    for (size_t i = 0; i < MAX_PLANTS; i++) {
+        pinMode(PLANTS[i].soilPin, INPUT);
+    }
+    for (int sample = 0; sample < 10; sample++) {
+        Serial.printf("  [%d] ", sample);
+        for (size_t i = 0; i < MAX_PLANTS; i++) {
+            int raw = analogRead(PLANTS[i].soilPin);
+            Serial.printf("GPIO%d=%d  ", PLANTS[i].soilPin, raw);
+        }
+        Serial.println();
+        delay(200);
+    }
 
-    // Init sensors per plant
     uint8_t activePlants = 0;
     for (size_t i = 0; i < MAX_PLANTS; i++) {
         tempSensors[i] = new Demeter::Sensors::DS18B20Sensor(PLANTS[i].tempPin);
@@ -97,17 +113,9 @@ void setup() {
         if (plantActive[i]) activePlants++;
     }
 
-    Serial.printf("\n%d/%d plants active. Reporting every %lus.\n\n",
-        activePlants, MAX_PLANTS, REPORT_INTERVAL_MS / 1000);
-}
+    Serial.printf("\n%d/%d plants active.\n\n", activePlants, MAX_PLANTS);
 
-void loop() {
-    engine.update();
-
-    if (millis() - lastReport < REPORT_INTERVAL_MS) return;
-    lastReport = millis();
-
-    // Build cluster report with only active plants
+    // ── Read sensors (still before WiFi) ─────────────────────────────────
     Demeter::SensorClusterReport report;
     report.sourceId = MY_NODE_ID;
 
@@ -125,15 +133,46 @@ void loop() {
 
         report.entries.push_back(entry);
 
-        Serial.printf("[Plant %d] Temp: %.2f C | Soil: %.0f%%\n",
-            PLANTS[i].plantId, entry.temperature, entry.soilMoisture);
+        Serial.printf("[Plant %d] Temp: %.2f C | Soil: %.0f%% | Raw ADC: %.0f\n",
+            PLANTS[i].plantId, entry.temperature, entry.soilMoisture,
+            soilOk ? soilReading.value2 : -1.0f);
     }
+
+    // ── 2. Init ESP-NOW and send ─────────────────────────────────────────
+    WiFi.mode(WIFI_STA);
+    EspNowStrategy espNow;
+    ProtocolEngine engine(&espNow);
+    espNow.begin();
+    engine.setNodeId(MY_NODE_ID);
+
+    std::array<uint8_t, 6> gwMac;
+    std::copy(std::begin(GATEWAY_MAC), std::end(GATEWAY_MAC), gwMac.begin());
+    espNow.registerRoute(GATEWAY_ID, gwMac);
 
     if (!report.entries.empty()) {
         engine.sendSensorClusterReport(GATEWAY_ID, report);
-        Serial.printf(">> Sent SENSOR_CLUSTER_REPORT (%d entries) to Gateway\n\n",
+        Serial.printf(">> Sent SENSOR_CLUSTER_REPORT (%d entries) to Gateway\n",
             (int)report.entries.size());
     } else {
-        Serial.println(">> No active sensors, skipping report.\n");
+        Serial.println(">> No active sensors, skipping report.");
     }
+
+    // ── Cleanup heap-allocated sensors ──────────────────────────────────
+    for (size_t i = 0; i < MAX_PLANTS; i++) {
+        delete tempSensors[i];
+        delete soilSensors[i];
+    }
+
+    // ── Enter deep sleep ────────────────────────────────────────────────
+    delay(500); // let ESP-NOW finish transmitting
+    Serial.println(">> 3s before deep sleep...");
+    delay(3000);
+    Serial.printf(">> Entering deep sleep for %llu s...\n\n", SLEEP_DURATION_S);
+    Serial.flush();
+    esp_deep_sleep(SLEEP_DURATION_US);
+}
+
+void loop() {
+    // Fallback: should never reach here; deep sleep resets into setup().
+    delay(1000);
 }

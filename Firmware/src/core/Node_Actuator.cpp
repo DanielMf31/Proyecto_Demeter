@@ -63,8 +63,12 @@ void Node_Actuator::begin() {
 
     // 2. Initialize SystemManager
     _systemManager->setup();
-    
-    Serial.println("[Node_Actuator] Initialized.");
+
+    // 3. Skip handshake — go straight to RUNNING so we can receive commands
+    //    immediately. In local/edge mode there is no server to handshake with.
+    ctx.setState(Demeter::SystemState::RUNNING);
+
+    Serial.println("[Node_Actuator] Initialized (RUNNING, no handshake).");
 }
 
 /**
@@ -91,25 +95,13 @@ void Node_Actuator::update() {
         case Demeter::SystemState::BOOT:
         case Demeter::SystemState::IDLE:
         case Demeter::SystemState::ERROR:
-            // ¿Por qué el intervalo asíncrono en lugar de un delay?
-            // Si usamos delay(5000), "congelamos" el micro. Durante esos 5s,
-            // si el router o vecino intenta responder el ACK, el buffer UART/ESP-NOW
-            // se llena y lo perdemos. Por tanto "millis()" es clave.
-            static unsigned long lastConnectAttempt = 0;
-            if (millis() - lastConnectAttempt > 5000) {
-                 Serial.println("[Node_Actuator] State is IDLE/BOOT. Initiating Handshake with Server (0)...");
-                 
-                 // Un actuador no emite; escucha comandos. Request context de Control General.
-                 Demeter::AckData context = {0, (uint8_t)Demeter::SessionContext::GENERAL};
-                 _systemManager->initiateHandshake(0, context); // Target Server (0)
-                 lastConnectAttempt = millis();
-            }
+            // No auto-handshake: in local/edge mode there is no server.
+            // The node stays in RUNNING (set in begin()) and listens for commands.
             break;
 
         case Demeter::SystemState::HANDSHAKE_SEND_SYN:
         case Demeter::SystemState::HANDSHAKE_WAIT_SYN_ACK:
         case Demeter::SystemState::HANDSHAKE_SEND_ACK:
-            // Flujos intermedios automatizados por SystemManager. Ignoramos aquí.
             break;
 
         case Demeter::SystemState::RUNNING:
