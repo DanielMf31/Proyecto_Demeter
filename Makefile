@@ -131,8 +131,9 @@ dev-seed: dev-migrate
 
 # ─── STAGING ──────────────────────────────────────────────────────────────────
 staging:
-	@echo "Arrancando entorno de staging..."
+	@echo "Arrancando entorno de staging (GHCR images)..."
 	@cp .env.staging .env
+	$(STAGING_COMPOSE) pull
 	$(STAGING_COMPOSE) up -d
 	@echo "Staging listo:"
 	@echo "  -> https://patata.monters.org (si el tunel esta activo)"
@@ -140,9 +141,9 @@ staging:
 	@echo "  -> http://localhost:8001/api/docs (Swagger)"
 
 staging-build:
-	@echo "Rebuildeando staging completo..."
+	@echo "Rebuildeando staging completo (build local)..."
 	@cp .env.staging .env
-	$(STAGING_COMPOSE) up -d --build
+	DEMETER_FRONTEND_IMAGE="" DEMETER_BACKEND_IMAGE="" $(STAGING_COMPOSE) up -d --build
 
 staging-down:
 	@echo "Parando staging..."
