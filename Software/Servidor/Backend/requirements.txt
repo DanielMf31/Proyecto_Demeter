@@ -11,6 +11,10 @@ aiosqlite
 asyncpg
 httpx
 numpy
+pandas
+matplotlib
+seaborn
+apscheduler
 pytest
 pytest-asyncio
 python-multipart
