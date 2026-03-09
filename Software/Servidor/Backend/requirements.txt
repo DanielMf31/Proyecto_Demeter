@@ -10,6 +10,7 @@ rq
 aiosqlite
 asyncpg
 httpx
+numpy
 pytest
 pytest-asyncio
 python-multipart
