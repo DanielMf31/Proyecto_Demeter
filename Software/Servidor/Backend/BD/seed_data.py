@@ -89,6 +89,10 @@ async def seed_historical_data(db: AsyncSession):
     await db.execute(delete(TelemetryAmbient))
     await db.execute(delete(Plant))
     await db.execute(delete(Experiment))
+    # Reset autoincrement sequences so IDs start from 1
+    from sqlalchemy import text
+    await db.execute(text("ALTER SEQUENCE plants_id_seq RESTART WITH 1"))
+    await db.execute(text("ALTER SEQUENCE experiments_id_seq RESTART WITH 1"))
     await db.commit()
 
     # ─── Crear 20 Plantas ─────────────────────────────────────────────────────
