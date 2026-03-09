@@ -5,8 +5,8 @@
  *        to the gateway (Node 1), then returns to deep sleep.
  *
  * Pin assignment:
- *   Plant 1: DS18B20 → GPIO 5, Capacitive → GPIO 8
- *   Plant 2: DS18B20 → GPIO 7, Capacitive → GPIO 9
+ *   Plant 1: DS18B20 → GPIO 5, Capacitive → GPIO 1
+ *   Plant 2: DS18B20 → GPIO 7, Capacitive → GPIO 2
  *
  * The number of active plants is auto-detected: if a DS18B20 fails init,
  * that plant pair is skipped. This allows testing with 1-2 sensors.
@@ -51,8 +51,8 @@ struct PlantConfig {
 };
 
 static constexpr PlantConfig PLANTS[] = {
-    {1, 5, 8},   // Plant 1: DS18B20 on GPIO5, Capacitive on GPIO8
-    {2, 7, 9},   // Plant 2: DS18B20 on GPIO7, Capacitive on GPIO9
+    {1, 5, 1},   // Plant 1: DS18B20 on GPIO5, Capacitive on GPIO1
+    {2, 7, 2},   // Plant 2: DS18B20 on GPIO7, Capacitive on GPIO2
 };
 static constexpr size_t MAX_PLANTS = sizeof(PLANTS) / sizeof(PLANTS[0]);
 
