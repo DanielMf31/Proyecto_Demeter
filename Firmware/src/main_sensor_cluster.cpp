@@ -36,7 +36,7 @@ const uint8_t GATEWAY_ID = 1;
 const uint8_t GATEWAY_MAC[] = {0x9C, 0x13, 0x9E, 0xA8, 0x6F, 0xCC};
 
 // Deep-sleep duration in seconds
-static constexpr uint64_t SLEEP_DURATION_S = 60;
+static constexpr uint64_t SLEEP_DURATION_S = 5;
 static constexpr uint64_t SLEEP_DURATION_US = SLEEP_DURATION_S * 1000000ULL;
 
 // ── Soil calibration (adjust for your sensors) ─────────────────────────
@@ -81,15 +81,19 @@ void setup() {
     Demeter::Sensors::SoilMoistureSensor* soilSensors[MAX_PLANTS];
     bool plantActive[MAX_PLANTS];
 
-    // Raw ADC debug: read pins before any WiFi init, wait 20s for ADC to settle
-    Serial.println("[DEBUG] Raw ADC BEFORE WiFi init (waiting 60s for ADC to settle)...");
+    // Raw ADC debug: 10 readings per pin, 200ms apart
+    Serial.println("[DEBUG] ADC readings (10x, 200ms apart):");
     for (size_t i = 0; i < MAX_PLANTS; i++) {
         pinMode(PLANTS[i].soilPin, INPUT);
     }
-    delay(60000);
-    for (size_t i = 0; i < MAX_PLANTS; i++) {
-        int raw = analogRead(PLANTS[i].soilPin);
-        Serial.printf("  GPIO %d: raw=%d\n", PLANTS[i].soilPin, raw);
+    for (int sample = 0; sample < 10; sample++) {
+        Serial.printf("  [%d] ", sample);
+        for (size_t i = 0; i < MAX_PLANTS; i++) {
+            int raw = analogRead(PLANTS[i].soilPin);
+            Serial.printf("GPIO%d=%d  ", PLANTS[i].soilPin, raw);
+        }
+        Serial.println();
+        delay(200);
     }
 
     uint8_t activePlants = 0;
@@ -161,8 +165,8 @@ void setup() {
 
     // ── Enter deep sleep ────────────────────────────────────────────────
     delay(500); // let ESP-NOW finish transmitting
-    Serial.println(">> 5s window before deep sleep (flash new code now if needed)...");
-    delay(5000);
+    Serial.println(">> 3s before deep sleep...");
+    delay(3000);
     Serial.printf(">> Entering deep sleep for %llu s...\n\n", SLEEP_DURATION_S);
     Serial.flush();
     esp_deep_sleep(SLEEP_DURATION_US);
