@@ -76,21 +76,18 @@ void setup() {
     Serial.printf("  WAKE UP reason: %s\n", wakeupReason());
     Serial.println("========================================\n");
 
-    // ── Init ESP-NOW ────────────────────────────────────────────────────
-    WiFi.mode(WIFI_STA);
-    EspNowStrategy espNow;
-    ProtocolEngine engine(&espNow);
-    espNow.begin();
-    engine.setNodeId(MY_NODE_ID);
-
-    std::array<uint8_t, 6> gwMac;
-    std::copy(std::begin(GATEWAY_MAC), std::end(GATEWAY_MAC), gwMac.begin());
-    espNow.registerRoute(GATEWAY_ID, gwMac);
-
-    // ── Init sensors per plant ──────────────────────────────────────────
+    // ── 1. Init & read sensors BEFORE WiFi (ADC may be affected by radio) ─
     Demeter::Sensors::DS18B20Sensor* tempSensors[MAX_PLANTS];
     Demeter::Sensors::SoilMoistureSensor* soilSensors[MAX_PLANTS];
     bool plantActive[MAX_PLANTS];
+
+    // Raw ADC debug: read pins before any WiFi init
+    Serial.println("[DEBUG] Raw ADC BEFORE WiFi init:");
+    for (size_t i = 0; i < MAX_PLANTS; i++) {
+        pinMode(PLANTS[i].soilPin, INPUT);
+        int raw = analogRead(PLANTS[i].soilPin);
+        Serial.printf("  GPIO %d: raw=%d\n", PLANTS[i].soilPin, raw);
+    }
 
     uint8_t activePlants = 0;
     for (size_t i = 0; i < MAX_PLANTS; i++) {
@@ -111,7 +108,7 @@ void setup() {
 
     Serial.printf("\n%d/%d plants active.\n\n", activePlants, MAX_PLANTS);
 
-    // ── Read sensors + build report ─────────────────────────────────────
+    // ── Read sensors (still before WiFi) ─────────────────────────────────
     Demeter::SensorClusterReport report;
     report.sourceId = MY_NODE_ID;
 
@@ -134,7 +131,17 @@ void setup() {
             soilOk ? soilReading.value2 : -1.0f);
     }
 
-    // ── Send report ─────────────────────────────────────────────────────
+    // ── 2. Init ESP-NOW and send ─────────────────────────────────────────
+    WiFi.mode(WIFI_STA);
+    EspNowStrategy espNow;
+    ProtocolEngine engine(&espNow);
+    espNow.begin();
+    engine.setNodeId(MY_NODE_ID);
+
+    std::array<uint8_t, 6> gwMac;
+    std::copy(std::begin(GATEWAY_MAC), std::end(GATEWAY_MAC), gwMac.begin());
+    espNow.registerRoute(GATEWAY_ID, gwMac);
+
     if (!report.entries.empty()) {
         engine.sendSensorClusterReport(GATEWAY_ID, report);
         Serial.printf(">> Sent SENSOR_CLUSTER_REPORT (%d entries) to Gateway\n",
