@@ -124,7 +124,7 @@ export const LoginPage: React.FC = () => {
                         </div>
                     </form>
 
-                    {import.meta.env.DEV && (
+                    {(import.meta.env.DEV || import.meta.env.VITE_DEV_LOGIN === 'true') && (
                         <div className="mt-4 pt-4 border-t border-slate-800">
                             <Button
                                 type="button"

@@ -2,7 +2,7 @@
  * @file main_sensor_test.cpp
  * @brief Test firmware: 2 plants, GPIO-powered soil sensors, WiFi + ESP-NOW.
  *
- * No deep sleep — continuous 2s readings for debugging.
+ * No deep sleep — continuous 5s readings for debugging.
  *
  * Wiring:
  *   Plant 1: DS18B20 → GPIO 4, Capacitive AOUT → GPIO 5
@@ -35,7 +35,7 @@ static constexpr int SOIL_AIR_VALUE   = 2200;
 static constexpr int SOIL_WATER_VALUE = 800;
 
 // Report interval
-static constexpr unsigned long REPORT_INTERVAL_MS = 2000;
+static constexpr unsigned long REPORT_INTERVAL_MS = 5000;
 
 // ── Plant definitions ──────────────────────────────────────────────────
 struct PlantConfig {
@@ -116,7 +116,7 @@ void setup() {
         if (plantActive[i]) activePlants++;
     }
 
-    Serial.printf("\n%d/%d plants active. Reading every 2s...\n\n", activePlants, MAX_PLANTS);
+    Serial.printf("\n%d/%d plants active. Reading every 5s...\n\n", activePlants, MAX_PLANTS);
 }
 
 void loop() {

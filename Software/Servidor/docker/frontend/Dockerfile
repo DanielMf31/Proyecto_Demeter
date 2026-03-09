@@ -5,8 +5,10 @@ WORKDIR /app
 # Enable injection of API URLs at build time
 ARG VITE_API_URL
 ARG VITE_WS_URL
+ARG VITE_DEV_LOGIN
 ENV VITE_API_URL=${VITE_API_URL}
 ENV VITE_WS_URL=${VITE_WS_URL}
+ENV VITE_DEV_LOGIN=${VITE_DEV_LOGIN}
 
 # Install dependencies (cached if package*.json unchanged)
 COPY Software/Servidor/Frontend/Demeter-React/package*.json ./
