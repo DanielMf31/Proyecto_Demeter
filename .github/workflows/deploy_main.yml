@@ -70,7 +70,10 @@ jobs:
             context: .
             dockerfile: Software/Servidor/docker/frontend/Dockerfile
             platforms: linux/amd64
-            build-args: ""
+            build-args: |
+              VITE_API_URL=https://patata.monters.org/api
+              VITE_WS_URL=wss://patata.monters.org/ws
+              VITE_DEV_LOGIN=true
           - image: backend
             context: .
             dockerfile: Software/Servidor/docker/backend/Dockerfile

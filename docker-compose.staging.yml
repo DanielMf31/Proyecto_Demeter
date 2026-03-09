@@ -35,7 +35,8 @@ services:
       - api
 
   # ─── Frontend ─────────────────────────────────────────────────────────────
-  # Usa imagen GHCR por defecto; para build local dejar DEMETER_FRONTEND_IMAGE vacía
+  # La imagen GHCR ya incluye VITE_* de staging (buildeadas en CI).
+  # Para build local con args custom: make staging-build
   frontend:
     image: ${DEMETER_FRONTEND_IMAGE:-ghcr.io/danielmf31/proyecto_demeter/frontend:latest}
     restart: unless-stopped
