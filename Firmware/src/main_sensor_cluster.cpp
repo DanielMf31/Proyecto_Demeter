@@ -40,8 +40,8 @@ static constexpr uint64_t SLEEP_DURATION_S = 60;
 static constexpr uint64_t SLEEP_DURATION_US = SLEEP_DURATION_S * 1000000ULL;
 
 // ── Soil calibration (adjust for your sensors) ─────────────────────────
-static constexpr int SOIL_AIR_VALUE   = 3000;
-static constexpr int SOIL_WATER_VALUE = 1000;
+static constexpr int SOIL_AIR_VALUE   = 650;
+static constexpr int SOIL_WATER_VALUE = 300;
 
 // ── Plant definitions ──────────────────────────────────────────────────
 struct PlantConfig {
