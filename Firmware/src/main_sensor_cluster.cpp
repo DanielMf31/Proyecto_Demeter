@@ -81,10 +81,13 @@ void setup() {
     Demeter::Sensors::SoilMoistureSensor* soilSensors[MAX_PLANTS];
     bool plantActive[MAX_PLANTS];
 
-    // Raw ADC debug: read pins before any WiFi init
-    Serial.println("[DEBUG] Raw ADC BEFORE WiFi init:");
+    // Raw ADC debug: read pins before any WiFi init, wait 20s for ADC to settle
+    Serial.println("[DEBUG] Raw ADC BEFORE WiFi init (waiting 20s for ADC to settle)...");
     for (size_t i = 0; i < MAX_PLANTS; i++) {
         pinMode(PLANTS[i].soilPin, INPUT);
+    }
+    delay(20000);
+    for (size_t i = 0; i < MAX_PLANTS; i++) {
         int raw = analogRead(PLANTS[i].soilPin);
         Serial.printf("  GPIO %d: raw=%d\n", PLANTS[i].soilPin, raw);
     }
