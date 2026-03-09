@@ -2,14 +2,19 @@ import { CommandPayload, CommandResponse, DiscoveryResponse, Plant, ExperimentLI
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
+function authHeaders(extra: Record<string, string> = {}): Record<string, string> {
+    const headers: Record<string, string> = { ...extra };
+    const token = localStorage.getItem('demeter_token');
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return headers;
+}
+
 export const apiService = {
     async postCommand(cmd: CommandPayload): Promise<CommandResponse | null> {
         try {
             const response = await fetch(`${API_BASE}/command`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: authHeaders({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify(cmd),
             });
 
@@ -27,7 +32,7 @@ export const apiService = {
 
     async fetchDevices(): Promise<DiscoveryResponse | null> {
         try {
-            const response = await fetch(`${API_BASE}/devices`);
+            const response = await fetch(`${API_BASE}/devices`, { headers: authHeaders() });
             if (!response.ok) {
                 throw new Error(`Error fetching devices: ${response.status}`);
             }
@@ -70,17 +75,8 @@ export const apiService = {
 
     async fetchNodeHistory(nodeId: number, days: number = 30): Promise<any[] | null> {
         try {
-            const token = localStorage.getItem('demeter_token');
-            const headers: Record<string, string> = {};
-
-            // Si el token existe (el usuario hizo login), se adjunta
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
-            }
-
             const response = await fetch(`${API_BASE}/history/node/${nodeId}?days=${days}`, {
-                method: 'GET',
-                headers: headers
+                headers: authHeaders(),
             });
 
             if (!response.ok) throw new Error("Failed to fetch node history");
