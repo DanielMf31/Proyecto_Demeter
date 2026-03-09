@@ -38,7 +38,7 @@ async def get_sdk_measurements(
                 data_list = json.loads(cached_data)
                 
                 # Filtrar en memoria por días si es menor a los 6 meses de caché
-                limit_date = datetime.now(timezone.utc) - timedelta(days=dias)
+                limit_date = datetime.utcnow() - timedelta(days=dias)
                 filtered_data = [
                     d for d in data_list 
                     # asume que el json cacheado tiene 'timestamp' iso string
@@ -52,7 +52,7 @@ async def get_sdk_measurements(
         if not nodes:
             return []
             
-        limit_date = datetime.now(timezone.utc) - timedelta(days=dias)
+        limit_date = datetime.utcnow() - timedelta(days=dias)
         
         query = select(TelemetryAmbient).where(
             TelemetryAmbient.node_id.in_(nodes),

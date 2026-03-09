@@ -29,7 +29,7 @@ async def _extract_data(job_id: str):
     os.makedirs(cache_dir, exist_ok=True)
     
     # Check CACHE for "Yesterday"
-    now = datetime.now(timezone.utc)
+    now = datetime.utcnow()
     yesterday = now.date() - timedelta(days=1)
     # The cache assumes we always requested "yesterday" from 00:00 to 23:59.
     cached_zip_name = f"Exportacion_Agronomica_{yesterday.isoformat()}.zip"

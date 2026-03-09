@@ -111,7 +111,7 @@ async def handle_gateway_message(data: dict) -> None:
                     node_id=report.node_id,
                     air_temperature=report.temperature,
                     air_humidity=report.humidity,
-                    timestamp=datetime.now(timezone.utc)
+                    timestamp=datetime.utcnow()
                 )
                 session.add(db_report)
                 await session.commit()
@@ -134,7 +134,7 @@ async def handle_gateway_message(data: dict) -> None:
             )
             # 1. DB Persistence — one row per plant entry
             async with AsyncSessionLocal() as session:
-                now = datetime.now(timezone.utc)
+                now = datetime.utcnow()
                 for entry in report.entries:
                     db_row = TelemetrySoil(
                         plant_id=entry.plant_id,
@@ -164,7 +164,7 @@ async def handle_gateway_message(data: dict) -> None:
                     node_id=report.node_id,
                     pin=report.pin,
                     state=bool(report.state),
-                    timestamp=datetime.now(timezone.utc)
+                    timestamp=datetime.utcnow()
                 )
                 session.add(db_report)
                 await session.commit()
@@ -191,7 +191,7 @@ async def handle_gateway_message(data: dict) -> None:
                     node_id=report.node_id,
                     mode=report.mode,
                     battery_mv=report.battery_mv,
-                    timestamp=datetime.now(timezone.utc)
+                    timestamp=datetime.utcnow()
                 )
                 session.add(db_report)
                 await session.commit()
@@ -225,7 +225,7 @@ async def start_activity_batch_flusher() -> None:
                                 action_type=event.get("action_type", "unknown"),
                                 device_id=event.get("device_id"),
                                 description=event.get("description"),
-                                timestamp=datetime.fromisoformat(event["timestamp"]) if "timestamp" in event else datetime.now(timezone.utc)
+                                timestamp=datetime.fromisoformat(event["timestamp"]) if "timestamp" in event else datetime.utcnow()
                             )
                             session.add(log)
                         await session.commit()

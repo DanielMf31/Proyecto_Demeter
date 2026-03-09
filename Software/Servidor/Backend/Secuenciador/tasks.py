@@ -30,7 +30,7 @@ async def sync_sensor_data_to_redis():
     """
     logger.info("Secuenciador: Iniciando Sync PostgreSQL -> Redis (Últimas 24h)...")
     await redis_manager.connect()
-    outdated_date = datetime.now(timezone.utc) - timedelta(days=1)
+    outdated_date = datetime.utcnow() - timedelta(days=1)
     
     async with AsyncSessionLocal() as session:
         result = await session.execute(select(Experiment))
@@ -79,7 +79,7 @@ async def dummy_insert_test_data():
     Debería deshabilitarse o eliminarse en el despliegue a Producción (PROD).
     """
     logger.info("Secuenciador: Job Dummy (TEST_DATA) insertando registros aleatorios actuales...")
-    now = datetime.now(timezone.utc)
+    now = datetime.utcnow()
     
     async with AsyncSessionLocal() as session:
         result = await session.execute(select(Plant))
@@ -125,7 +125,7 @@ async def enqueue_nightly_etl():
         result = await session.execute(select(Experiment))
         experiments = result.scalars().all()
         
-        now_str = datetime.now(timezone.utc).isoformat()
+        now_str = datetime.utcnow().isoformat()
         for exp in experiments:
             job_id = f"nightly_{exp.id}_{now_str[:10]}"
             try:
