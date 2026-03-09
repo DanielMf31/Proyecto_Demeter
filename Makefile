@@ -16,7 +16,9 @@
         prod \
         migrate dev-migrate \
         rpi-up rpi-build rpi-pull rpi-down rpi-logs rpi-shell rpi-status \
-        fw-build fw-flash fw-flash-sensor fw-monitor \
+        fw-build fw-build-gateway fw-build-sensor fw-build-actuador \
+        fw-flash fw-flash-gateway fw-flash-sensor fw-flash-actuador fw-flash-sensor-test \
+        fw-monitor fw-monitor-gateway fw-monitor-sensor fw-monitor-actuador \
         seed logs logs-api logs-db logs-redis logs-frontend \
         clean clean-all status ps pull \
         tunnel-staging api-key test-all
@@ -75,10 +77,17 @@ help:
 	@echo ""
 	@echo "  FIRMWARE (PlatformIO, ejecutar EN la Raspberry)"
 	@echo "  -----------------------------------------------"
-	@echo "  fw-build         Compila el firmware del gateway (sin flashear)"
-	@echo "  fw-flash         Compila y flashea el gateway al ESP32 conectado"
-	@echo "  fw-flash-sensor  Flashea el firmware de test de sensores"
-	@echo "  fw-monitor       Abre el monitor serie del ESP32"
+	@echo "  fw-build            Compila los 3 firmwares"
+	@echo "  fw-build-gateway    Compila solo gateway"
+	@echo "  fw-build-sensor     Compila solo sensor cluster"
+	@echo "  fw-build-actuador   Compila solo actuador"
+	@echo "  fw-flash            Flashea los 3 nodos"
+	@echo "  fw-flash-gateway    Flashea gateway (ttyACM0)"
+	@echo "  fw-flash-sensor     Flashea sensor cluster (ttyACM3)"
+	@echo "  fw-flash-actuador   Flashea actuador (ttyACM2)"
+	@echo "  fw-monitor          Monitor serie gateway (ttyACM0)"
+	@echo "  fw-monitor-sensor   Monitor serie sensor (ttyACM3)"
+	@echo "  fw-monitor-actuador Monitor serie actuador (ttyACM2)"
 	@echo ""
 	@echo "  RASPBERRY PI (ejecutar EN la Raspberry)"
 	@echo "  -----------------------------------------------"
@@ -228,24 +237,61 @@ api-key:
 	echo "No se pudo conectar. Asegurate de que el stack esta levantado."
 
 # ─── FIRMWARE ─────────────────────────────────────────────────────────────────
+# Dispositivos:
+#   /dev/ttyACM0 → Gateway   (9C:13:9E:A8:6F:CC) Node 1
+#   /dev/ttyACM2 → Actuador  (9C:13:9E:AC:50:C4) Node 3
+#   /dev/ttyACM3 → Sensor    (20:6E:F1:85:58:D0) Node 2
+
 fw-build:
-	@echo "Compilando firmware del gateway..."
+	@echo "Compilando todos los firmwares..."
+	cd Firmware && pio run -e gateway -e sensor_cluster -e actuador
+	@echo "Firmwares compilados"
+
+fw-build-gateway:
 	cd Firmware && pio run -e gateway
-	@echo "Firmware compilado"
+
+fw-build-sensor:
+	cd Firmware && pio run -e sensor_cluster
+
+fw-build-actuador:
+	cd Firmware && pio run -e actuador
 
 fw-flash:
-	@echo "Compilando y flasheando gateway al ESP32..."
+	@echo "Flasheando los 3 nodos..."
 	cd Firmware && pio run -e gateway -t upload
-	@echo "Firmware flasheado"
+	cd Firmware && pio run -e sensor_cluster -t upload
+	cd Firmware && pio run -e actuador -t upload
+	@echo "Los 3 nodos flasheados"
+
+fw-flash-gateway:
+	@echo "Flasheando gateway (ttyACM0)..."
+	cd Firmware && pio run -e gateway -t upload
 
 fw-flash-sensor:
-	@echo "Compilando y flasheando sensor_test al ESP32..."
+	@echo "Flasheando sensor cluster (ttyACM3)..."
+	cd Firmware && pio run -e sensor_cluster -t upload
+
+fw-flash-actuador:
+	@echo "Flasheando actuador (ttyACM2)..."
+	cd Firmware && pio run -e actuador -t upload
+
+fw-flash-sensor-test:
+	@echo "Flasheando sensor_test al ESP32..."
 	cd Firmware && pio run -e sensor_test -t upload
-	@echo "Firmware sensor_test flasheado"
 
 fw-monitor:
-	@echo "Abriendo monitor serie..."
-	cd Firmware && pio device monitor -e gateway
+	@echo "Monitor serie del gateway (ttyACM0)..."
+	cd Firmware && pio device monitor -p /dev/ttyACM0 -b 115200
+
+fw-monitor-gateway: fw-monitor
+
+fw-monitor-sensor:
+	@echo "Monitor serie del sensor cluster (ttyACM3)..."
+	cd Firmware && pio device monitor -p /dev/ttyACM3 -b 115200
+
+fw-monitor-actuador:
+	@echo "Monitor serie del actuador (ttyACM2)..."
+	cd Firmware && pio device monitor -p /dev/ttyACM2 -b 115200
 
 # ─── RASPBERRY PI ─────────────────────────────────────────────────────────────
 rpi-up:
