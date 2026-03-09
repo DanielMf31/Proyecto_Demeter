@@ -7,6 +7,9 @@
 #   make staging       ← arranca todo + túnel Cloudflare
 #   make staging-down  ← para todo
 #
+# Imágenes: por defecto usa GHCR (pre-built en CI). Para build local:
+#   DEMETER_FRONTEND_IMAGE="" DEMETER_BACKEND_IMAGE="" make staging-build
+#
 # Acceso (una vez levantado):
 #   https://patata.monters.org   → Frontend
 #   https://patata.monters.org/api/docs → Swagger API
@@ -32,11 +35,13 @@ services:
       - api
 
   # ─── Frontend ─────────────────────────────────────────────────────────────
+  # Usa imagen GHCR por defecto; para build local dejar DEMETER_FRONTEND_IMAGE vacía
   frontend:
+    image: ${DEMETER_FRONTEND_IMAGE:-ghcr.io/danielmf31/proyecto_demeter/frontend:latest}
     restart: unless-stopped
     build:
       context: .
-      dockerfile: Software/Servidor/docker/frontend/Dockerfile # build de producción
+      dockerfile: Software/Servidor/docker/frontend/Dockerfile
       args:
         VITE_API_URL: ${VITE_API_URL:-https://patata.monters.org/api}
         VITE_WS_URL: ${VITE_WS_URL:-wss://patata.monters.org/ws}
@@ -48,7 +53,9 @@ services:
       - VITE_WS_URL=wss://patata.monters.org/ws
 
   # ─── API ──────────────────────────────────────────────────────────────────
+  # Usa imagen GHCR por defecto; para build local dejar DEMETER_BACKEND_IMAGE vacía
   api:
+    image: ${DEMETER_BACKEND_IMAGE:-ghcr.io/danielmf31/proyecto_demeter/backend:latest}
     restart: unless-stopped
     ports:
       - "8001:8000" # acceso directo sin túnel
@@ -60,10 +67,13 @@ services:
       - RQ_REDIS_URL=redis://demeter-redis:6379/1
 
   # ─── Workers ──────────────────────────────────────────────────────────────
+  # Comparten la misma imagen de backend
   math-worker:
+    image: ${DEMETER_BACKEND_IMAGE:-ghcr.io/danielmf31/proyecto_demeter/backend:latest}
     restart: unless-stopped
 
   sequencer:
+    image: ${DEMETER_BACKEND_IMAGE:-ghcr.io/danielmf31/proyecto_demeter/backend:latest}
     restart: unless-stopped
 
   # ─── Base de datos ────────────────────────────────────────────────────────
