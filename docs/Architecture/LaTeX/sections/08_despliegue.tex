@@ -1,0 +1,469 @@
+% ============================================================
+% SECCIÓN 8: Despliegue y Operacionalización del Sistema
+% ============================================================
+\chapter{Despliegue y Operación}
+\label{sec:despliegue}
+
+% ─────────────────────────────────────────────────────────────
+\section{Visión General del Despliegue}
+
+El sistema Demeter se despliega en \textbf{cuatro entornos diferenciados}, cada uno
+adaptado a un propósito distinto del ciclo de vida del proyecto. Los cuatro comparten
+las mismas imágenes Docker (compiladas una sola vez por la pipeline de
+\texttt{ghcr.io}); lo que cambia entre entornos son los \textit{overrides} de
+configuración, los volúmenes y la forma de exposición al exterior.
+
+\begin{table}[H]
+    \centering
+    \caption{Entornos de despliegue del sistema Demeter}
+    \begin{tabularx}{\textwidth}{lXll}
+        \toprule
+        \textbf{Entorno} & \textbf{Propósito}                                                   & \textbf{Exposición}              & \textbf{Comando} \\
+        \midrule
+        Local (dev)      & Desarrollo con hot-reload, base de datos volátil.                    & \texttt{localhost:5173 / :8000}  & \texttt{make dev} \\
+        Staging          & Pre-producción accesible vía dominio real, sin abrir puertos.        & Cloudflare Tunnel a \texttt{patata.monters.org} & \texttt{make staging} \\
+        Producción (GCP) & Servicio público estable con Traefik como proxy inverso.            & \texttt{patata.monters.org}      & \texttt{make prod} (manual SSH) \\
+        Raspberry Pi     & Pasarela de borde junto a los nodos ESP32; opcionalmente UI local.  & Red local + WSS al backend       & \texttt{make rpi-pull} \\
+        \bottomrule
+    \end{tabularx}
+    \label{tab:envs}
+\end{table}
+
+\begin{designnote}
+\textbf{Una imagen, varios entornos.} Las imágenes Docker se construyen una sola vez
+en CI (push a \texttt{main}) y se publican en \texttt{ghcr.io}. Cada entorno hace
+\texttt{pull} de la misma imagen y aplica un \texttt{docker-compose override} que
+cambia variables de entorno, puertos y políticas de \texttt{restart}. Esto garantiza
+que \textit{lo probado en staging es bit a bit lo desplegado en producción}.
+\end{designnote}
+
+La arquitectura desplegada en GCP se ilustra en la
+Sección~\ref{fig:anx_backend_docker} del Anexo, y el equivalente en Raspberry Pi en
+la Sección~\ref{fig:anx_rpi_docker}.
+
+% ─────────────────────────────────────────────────────────────
+\section{Despliegue del Firmware ESP32}
+\label{sec:despliegue_firmware}
+
+El firmware se construye y se sube a los nodos ESP32 mediante \textbf{PlatformIO}. La
+configuración de los entornos vive en \texttt{Firmware/platformio.ini} y se ejecuta
+desde la propia Raspberry Pi (que actúa como \textit{flashing host} con sus tres
+puertos USB conectados a los ESP32 vía CDC).
+
+\subsection{Catálogo de entornos}
+
+\begin{table}[H]
+    \centering
+    \caption{Entornos de PlatformIO relevantes para v1.0}
+    \begin{tabularx}{\textwidth}{lllX}
+        \toprule
+        \textbf{Env}                & \textbf{Rol}              & \textbf{Puerto USB}     & \textbf{Notas} \\
+        \midrule
+        \texttt{gateway}            & Gateway (Node 1)          & \texttt{/dev/ttyACM0}    & Receptor ESP-NOW + UART al host. \\
+        \texttt{sensor\_cluster}    & Sensor cluster (Node 2)   & \texttt{/dev/ttyACM3}    & Sensor con N plantas, ESP-NOW puro. \\
+        \texttt{actuador}           & Actuador (Node 3)         & \texttt{/dev/ttyACM2}    & Activación de relé de bomba. \\
+        \texttt{sensor\_deepsleep}  & Sensor con Deep Sleep     & \texttt{/dev/ttyACM2}    & Variante de bajo consumo (validada en banco). \\
+        \texttt{native}             & Tests unitarios PC        & ---                      & Banco de tests Unity (Sección~\ref{sec:testing_unit}). \\
+        \texttt{get\_mac}           & Utilidad                  & \texttt{/dev/ttyACM1}    & Imprime la MAC del chip por serie. \\
+        \bottomrule
+    \end{tabularx}
+    \label{tab:pio_envs}
+\end{table}
+
+El \texttt{platformio.ini} declara cuatro entornos adicionales (\texttt{sensor},
+\texttt{sensor\_node\_3}, \texttt{sensor\_test}, \texttt{integration}) usados durante
+el desarrollo y los tests; no forman parte del despliegue v1.0.
+
+\subsection{Procedimiento de flasheo}
+
+El flasheo es \textbf{USB local sobre la Raspberry Pi}. La identificación física de
+los puertos se realiza con \texttt{pio device list} y se contrasta con las MACs
+documentadas en \texttt{docs/flash\_instructions.md}.
+
+\begin{lstlisting}[style=trama, caption={Flasheo de los tres nodos desde la Raspberry Pi}]
+# 1. Identificar puertos disponibles
+pio device list
+
+# 2. Flashear los tres nodos (atajos del Makefile)
+make fw-flash-gateway     # /dev/ttyACM0
+make fw-flash-sensor      # /dev/ttyACM3
+make fw-flash-actuador    # /dev/ttyACM2
+
+# 3. Equivalente sin Makefile
+cd Firmware
+pio run -e gateway        -t upload --upload-port /dev/ttyACM0
+pio run -e sensor_cluster -t upload --upload-port /dev/ttyACM3
+pio run -e actuador       -t upload --upload-port /dev/ttyACM2
+\end{lstlisting}
+
+\subsection{Verificación post-flasheo}
+
+Tras el flasheo, cada nodo debe emitir una traza identificable por el monitor serie:
+
+\begin{lstlisting}[style=trama, caption={Verificación serie del gateway}]
+make fw-monitor-gateway
+# Salida esperada:
+#   === DEMETER GATEWAY V2 (Direct Control) ===
+#   [Setup] Ready.
+#   >> [CLUSTER] Node 2: 4 entries
+#       Plant 1: 22.50 C, 45% soil
+\end{lstlisting}
+
+\begin{warningbox}
+\textbf{OTA no implementado en v1.0.} Las actualizaciones de firmware requieren
+acceso físico a los puertos USB de la Raspberry Pi. Esta es una limitación
+deliberada: implementar \textit{Over-The-Air} sobre ESP-NOW exige reservar
+particiones, gestionar autenticación y manejar \textit{rollback} en caso de fallo,
+trabajo que no se justifica para un sistema doméstico de un solo despliegue. Si en
+una versión futura se distribuyera a múltiples invernaderos, OTA se convierte en un
+requisito.
+\end{warningbox}
+
+% ─────────────────────────────────────────────────────────────
+\section{Despliegue de la Raspberry Pi}
+\label{sec:despliegue_rpi}
+
+La Raspberry Pi cumple dos funciones simultáneas: \textbf{pasarela de borde}
+(\textit{edge gateway}) entre los ESP32 y el backend, y opcionalmente
+\textbf{servidor de UI local} para usuarios sin acceso a internet pero con pantalla
+conectada al dispositivo.
+
+\subsection{Provisioning del sistema}
+
+Sobre una Raspberry Pi OS recién instalada, los pasos para preparar el host son:
+
+\begin{lstlisting}[style=trama, caption={Provisioning de la Raspberry Pi}]
+# 1. Instalar Docker y plugin compose
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER && newgrp docker
+
+# 2. Liberar el UART GPIO: deshabilitar consola serie del kernel
+sudo raspi-config nonint do_serial 1   # console=disabled, hw=enabled
+# Equivalente manual:
+# - Editar /boot/firmware/cmdline.txt y eliminar 'console=serial0,115200'
+# - Asegurar 'enable_uart=1' en /boot/firmware/config.txt
+sudo reboot
+
+# 3. Verificar que /dev/serial0 existe y el usuario pertenece a 'dialout'
+ls -l /dev/serial0
+groups | grep dialout || sudo usermod -aG dialout $USER
+
+# 4. Clonar repositorio
+git clone https://github.com/<usuario>/Proyecto_Demeter.git
+cd Proyecto_Demeter
+cp .env.rpi.example .env.rpi   # ajustar DEMETER_BACKEND_URL si fuera distinto
+\end{lstlisting}
+
+\subsection{Arranque de los servicios}
+
+El despliegue en RPi se gestiona con \texttt{docker-compose.rpi.yml}, que define dos
+servicios: \texttt{gateway} (FastAPI + bridge UART$\leftrightarrow$WS) y
+\texttt{local-ui} (Nginx sirviendo la SPA React). Ambos corren en \texttt{network\_mode:
+host} para evitar la sobrecarga del NAT de Docker en hardware ARM modesto.
+
+\begin{lstlisting}[style=trama, caption={Arranque del stack en la Raspberry Pi}]
+# Imagen pre-compilada (multi-arch arm64) desde GHCR (recomendado)
+make rpi-pull
+
+# O construir localmente si se han hecho cambios sin pasar por CI
+make rpi-build
+
+# Operación cotidiana
+make rpi-logs        # logs en vivo
+make rpi-status      # estado de contenedores y env vars activas
+make rpi-shell       # entrar al contenedor 'demeter-gateway'
+\end{lstlisting}
+
+\subsection{Variables de entorno relevantes}
+
+\begin{table}[H]
+    \centering
+    \caption{Variables de entorno consumidas por el contenedor \texttt{gateway}}
+    \begin{tabularx}{\textwidth}{lXl}
+        \toprule
+        \textbf{Variable}              & \textbf{Función}                                       & \textbf{Default} \\
+        \midrule
+        \texttt{DEMETER\_BACKEND\_URL} & Host del backend (sin esquema).                        & \texttt{patata.monters.org} \\
+        \texttt{DEMETER\_BACKEND\_PORT}& Puerto WSS hacia el backend.                          & \texttt{443} \\
+        \texttt{DEMETER\_PORT}         & Path del dispositivo serie dentro del contenedor.     & \texttt{/dev/ttyS0} \\
+        \texttt{DEMETER\_UART\_BAUD}   & Velocidad UART (debe coincidir con firmware Gateway). & \texttt{115200} \\
+        \texttt{DEMETER\_LOG\_LEVEL}   & Verbosidad (\texttt{DEBUG}, \texttt{INFO}, \dots).    & \texttt{INFO} \\
+        \texttt{HOST\_SERIAL\_PORT}    & Mapeo del dispositivo del host (\texttt{/dev/serial0}). & \texttt{/dev/serial0} \\
+        \bottomrule
+    \end{tabularx}
+    \label{tab:env_rpi}
+\end{table}
+
+\subsection{Healthchecks y reinicio}
+
+A diferencia del backend (Sección~\ref{sec:despliegue_backend}), los servicios de la
+Raspberry Pi \textbf{sí incluyen healthchecks} en
+\texttt{docker-compose.rpi.yml}: el \texttt{gateway} expone
+\texttt{http://localhost:8001/api/health} y el \texttt{local-ui} responde en el puerto
+80. La política de restart es \texttt{unless-stopped}, suficiente para reanudar tras
+cortes de luz frecuentes en entornos no controlados.
+
+% ─────────────────────────────────────────────────────────────
+\section{Despliegue del Backend en GCP}
+\label{sec:despliegue_backend}
+
+El backend se despliega como un \textbf{stack Docker Compose} sobre una máquina
+virtual de Google Cloud Platform. La VM no se aprovisiona automáticamente: se
+asume creada manualmente con Ubuntu LTS y Docker instalado, y con el dominio
+\texttt{patata.monters.org} apuntando a su IP pública.
+
+\subsection{Composición del stack}
+
+El stack en producción combina dos archivos Compose:
+
+\begin{itemize}[leftmargin=*, label=--]
+    \item \texttt{docker-compose.yml} (base): define los seis servicios
+          (\texttt{frontend}, \texttt{api}, \texttt{math-worker}, \texttt{sequencer},
+          \texttt{db}, \texttt{redis}) descritos en el Capítulo~\ref{sec:backend}.
+    \item \texttt{docker-compose.prod.yml} (override): aplica \texttt{restart:
+          always} a todos los servicios y añade \texttt{labels} de Traefik para
+          enrutar \texttt{patata.monters.org} y sus paths \texttt{/api/} y
+          \texttt{/ws/}.
+\end{itemize}
+
+\subsection{Procedimiento de despliegue}
+
+El target \texttt{prod} del Makefile no orquesta el despliegue automáticamente:
+imprime el procedimiento manual a seguir por SSH. Esta decisión es deliberada para
+evitar despliegues accidentales contra producción desde un portátil de desarrollo.
+
+\begin{lstlisting}[style=trama, caption={Procedimiento de despliegue en producción}]
+# 1. Conexión al servidor
+ssh danielmf31@patata.monters.org
+
+# 2. En el servidor: actualizar código y configuración
+cd ~/Proyecto_Demeter
+git pull origin main
+cp .env.prod .env
+
+# 3. Levantar stack con override de prod
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+
+# 4. Migraciones (idempotente)
+docker exec demeter-api sh -c "cd /app/Software/Servidor/Backend && alembic upgrade head"
+
+# 5. Seed inicial (solo en el primer despliegue)
+docker exec demeter-api python -m BD.seed_data
+\end{lstlisting}
+
+\subsection{Reverse proxy y TLS}
+
+\textbf{Traefik} actúa como proxy inverso único frente al stack. Termina TLS para
+\texttt{patata.monters.org} (certificado gestionado por Let's Encrypt vía Traefik
+ACME) y enruta:
+
+\begin{itemize}[leftmargin=*, label=--]
+    \item \texttt{patata.monters.org/} $\rightarrow$ \texttt{demeter-frontend:80}
+    \item \texttt{patata.monters.org/api/...} $\rightarrow$ \texttt{demeter-api:8000}
+    \item \texttt{patata.monters.org/ws/...} $\rightarrow$ \texttt{demeter-api:8000} (WebSocket)
+\end{itemize}
+
+Traefik no se incluye en \texttt{docker-compose.prod.yml}: se asume desplegado a
+nivel de la VM, escuchando en \texttt{:80} y \texttt{:443} y conectado a la misma red
+Docker que el stack Demeter mediante una red externa compartida.
+
+\subsection{Variante staging con Cloudflare Tunnel}
+
+Para validar cambios contra el dominio público sin abrir puertos en el portátil de
+desarrollo, \texttt{docker-compose.staging.yml} añade un servicio
+\texttt{cloudflared} que crea un túnel Cloudflare Zero Trust:
+
+\begin{lstlisting}[style=trama, caption={Variante staging con túnel Cloudflare}]
+# .env.staging debe definir CLOUDFLARE_TUNNEL_TOKEN obtenido en
+# dash.cloudflare.com -> Zero Trust -> Tunnels.
+make staging
+
+# Acceso:
+#   https://patata.monters.org      (vía túnel)
+#   http://localhost:5175           (acceso directo sin túnel)
+#   http://localhost:8001/api/docs  (Swagger directo)
+\end{lstlisting}
+
+Este modo es útil para demostraciones desde el portátil sin tocar la VM de
+producción y para sesiones de QA en las que se quiere ejercitar el sistema con un
+certificado TLS real sin comprometer datos productivos.
+
+\subsection{Migraciones}
+
+Las migraciones de PostgreSQL se gestionan con \textbf{Alembic}. El target
+\texttt{make migrate} ejecuta \texttt{alembic upgrade head} dentro del contenedor
+\texttt{demeter-api}. Las migraciones \textbf{inversas (downgrade) no están soportadas
+oficialmente}: ante un fallo de migración se recomienda restaurar desde backup en
+lugar de revertir esquema.
+
+% ─────────────────────────────────────────────────────────────
+\section{Pipeline de Integración y Entrega Continua (CI/CD)}
+\label{sec:despliegue_cicd}
+
+El proyecto cuenta con dos workflows de GitHub Actions ya operativos en
+\texttt{.github/workflows/}, uno para validación continua y otro para construcción y
+publicación de imágenes Docker.
+
+\subsection{Workflow de validación: \texttt{ci\_develop.yml}}
+
+Disparado en \texttt{push} y \texttt{pull\_request} contra la rama \texttt{develop}.
+Su único job, \texttt{test-all}, prepara un entorno con Python 3.12 y Node 20,
+instala las dependencias de las cuatro suites del proyecto y ejecuta el target
+\texttt{make test-all} (Capítulo~\ref{sec:testing}). Aplica caché para \texttt{pip}
+y \texttt{\textasciitilde/.platformio} para acelerar las ejecuciones sucesivas.
+
+\subsection{Workflow de entrega: \texttt{deploy\_main.yml}}
+
+Disparado en \texttt{push} a la rama \texttt{main}. Ejecuta primero
+\texttt{test-all} como gate y, si pasa, lanza el job \texttt{build-and-push} con una
+estrategia de matriz que construye \textbf{cuatro imágenes Docker multi-arquitectura}:
+
+\begin{table}[H]
+    \centering
+    \caption{Imágenes Docker publicadas por la pipeline}
+    \begin{tabularx}{\textwidth}{lllX}
+        \toprule
+        \textbf{Imagen}    & \textbf{Plataforma} & \textbf{Dockerfile}                                          & \textbf{Build args} \\
+        \midrule
+        \texttt{frontend}  & \texttt{linux/amd64} & \texttt{Software/Servidor/docker/frontend/Dockerfile}        & \texttt{VITE\_API\_URL}, \texttt{VITE\_WS\_URL}, \texttt{VITE\_DEV\_LOGIN} \\
+        \texttt{backend}   & \texttt{linux/amd64} & \texttt{Software/Servidor/docker/backend/Dockerfile}         & --- \\
+        \texttt{gateway}   & \texttt{linux/arm64} & \texttt{Software/Raspberry/Dockerfile}                       & --- \\
+        \texttt{local-ui}  & \texttt{linux/arm64} & \texttt{Software/Servidor/docker/frontend/Dockerfile.rpi}    & \texttt{VITE\_API\_URL=/api}, \texttt{VITE\_WS\_URL=/ws} \\
+        \bottomrule
+    \end{tabularx}
+    \label{tab:ghcr_images}
+\end{table}
+
+Cada imagen se etiqueta con cinco patrones simultáneos: nombre de rama, hash corto
+de commit, \texttt{latest}, versión semver (si el commit lleva tag) y la etiqueta
+fija \texttt{0.4} (versión de la pipeline). Las imágenes ARM64 se construyen sobre
+runners x86 mediante \texttt{QEMU}, evitando depender de runners self-hosted en
+Raspberry Pi.
+
+\begin{warningbox}
+\textbf{Lo que el CI no hace.} La pipeline construye imágenes pero
+\textbf{no despliega automáticamente}: el \texttt{pull} desde \texttt{ghcr.io} y el
+arranque del stack se realiza manualmente desde la VM o la Raspberry Pi. La razón
+es operativa: en un sistema con cinco macetas reales, una promoción automática a
+producción durante un experimento en curso puede invalidar los datos del
+investigador. Esta es una decisión deliberada, no una deuda técnica.
+
+Tampoco se construye firmware en CI ni se ejecuta análisis de secretos
+(\texttt{gitleaks}); ambas tareas están planificadas para versiones futuras.
+\end{warningbox}
+
+% ─────────────────────────────────────────────────────────────
+\section{Operaciones Post-Despliegue}
+\label{sec:despliegue_ops}
+
+Una vez el sistema está corriendo, las operaciones recurrentes (logs, backups,
+diagnóstico) se realizan vía Makefile o vía \texttt{docker compose} directamente.
+
+\subsection{Logs}
+
+\begin{lstlisting}[style=trama, caption={Atajos de logs por servicio}]
+make logs           # Todos los servicios del stack activo (tail 50)
+make logs-api       # Solo API FastAPI
+make logs-db        # Solo PostgreSQL
+make logs-redis     # Solo Redis
+make logs-frontend  # Solo Nginx (frontend)
+make rpi-logs       # Stack Raspberry Pi (gateway + local-ui)
+\end{lstlisting}
+
+\textbf{No hay centralización de logs} (Loki, ELK, Cloud Logging). Para un sistema
+de cinco macetas y un solo administrador, \texttt{docker logs} con
+\texttt{logrotate} sobre el daemon es suficiente. Si en el futuro se desplegaran
+múltiples invernaderos, se introduciría una capa de agregación.
+
+\subsection{Backups de PostgreSQL}
+
+\textbf{No hay backups automatizados} en v1.0 (deuda declarada del proyecto). El
+procedimiento manual recomendado es:
+
+\begin{lstlisting}[style=trama, caption={Backup manual semanal de la base de datos}]
+# Backup
+docker exec demeter-db pg_dump -U postgres demeter_db \
+    | gzip > backup-$(date +%Y%m%d).sql.gz
+
+# Restore (en una VM nueva o tras desastre)
+gunzip -c backup-YYYYMMDD.sql.gz \
+    | docker exec -i demeter-db psql -U postgres demeter_db
+\end{lstlisting}
+
+Para v1.0 se planifica una entrada \texttt{cron} semanal que escriba a un USB
+externo conectado a la Raspberry Pi (Semana 4 del plan de release).
+
+\subsection{Diagnóstico y troubleshooting}
+
+Los problemas operativos recurrentes del proyecto están documentados en archivos
+dedicados dentro de \texttt{docs/}:
+
+\begin{table}[H]
+    \centering
+    \caption{Documentos de troubleshooting por capa}
+    \begin{tabularx}{\textwidth}{lX}
+        \toprule
+        \textbf{Documento}                         & \textbf{Cubre} \\
+        \midrule
+        \texttt{Backend\_Problemas\_y\_Soluciones.md}    & Errores comunes del API y la DB. \\
+        \texttt{Firmware\_Problemas\_y\_Soluciones.md}   & Errores de flasheo, ESP-NOW y handshake. \\
+        \texttt{Raspberry\_Problemas\_y\_Soluciones.md}  & UART, permisos serie, conexión WSS. \\
+        \texttt{Error\_Redis\_Connection.md}             & Conexión de la API a Redis. \\
+        \texttt{Error\_Frontend\_WS\_UART.md}            & Errores WS y UART vistos desde el frontend. \\
+        \texttt{Guia\_Monitorizacion\_TUI.md}            & Monitorización ad hoc de PostgreSQL/Redis desde CLI. \\
+        \bottomrule
+    \end{tabularx}
+    \label{tab:troubleshooting_docs}
+\end{table}
+
+% ─────────────────────────────────────────────────────────────
+\section{Actualización y Rollback}
+
+\subsection{Actualización}
+
+\textbf{Staging:} \texttt{make staging-down \&\& git pull \&\& make staging}
+(arranca tirando de las imágenes \texttt{:latest} de \texttt{ghcr.io} ya
+construidas por CI).
+
+\textbf{Producción:} ssh a la VM, \texttt{git pull origin main}, repetir el comando
+\texttt{docker compose ... up -d --build}. Se asume ventana de mantenimiento
+acordada; el sistema no es \textit{zero-downtime}.
+
+\textbf{Raspberry Pi:} \texttt{make rpi-pull} hace \texttt{pull} de la imagen
+ARM64 más reciente y reinicia el stack. Tiempo típico de corte: 5--15 segundos.
+
+\subsection{Rollback}
+
+Las imágenes en \texttt{ghcr.io} están etiquetadas con el hash de commit, el nombre
+de la rama, el tag semver y la etiqueta fija \texttt{0.4}. Para volver a una
+versión anterior basta con apuntar el override al tag deseado:
+
+\begin{lstlisting}[style=trama, caption={Rollback a una versión anterior}]
+# Identificar el tag al que volver (e.g. sha-abc1234 o un semver previo)
+DEMETER_BACKEND_IMAGE=ghcr.io/danielmf31/proyecto_demeter/backend:sha-abc1234 \
+DEMETER_FRONTEND_IMAGE=ghcr.io/danielmf31/proyecto_demeter/frontend:sha-abc1234 \
+make staging
+\end{lstlisting}
+
+\begin{warningbox}
+\textbf{Migraciones no reversibles.} Si entre la versión actual y la versión a la
+que se quiere volver hay una migración Alembic destructiva (e.g.\ una columna
+borrada), el rollback de la imagen no basta: hay que restaurar también la base de
+datos desde el backup más reciente. Por esa razón se recomienda hacer
+\texttt{pg\_dump} antes de cualquier despliegue de producción que incluya
+migraciones.
+\end{warningbox}
+
+% ─────────────────────────────────────────────────────────────
+\section{Resumen}
+
+El despliegue v1.0 del sistema Demeter sostiene cuatro entornos
+(\textit{dev}, \textit{staging}, \textit{producción}, \textit{Raspberry Pi}) sobre
+una única familia de imágenes construidas por CI y publicadas en
+\texttt{ghcr.io}. La operación se gobierna desde un \textbf{Makefile con
+$\sim$50 targets} que cubren desde el flasheo del firmware hasta la promoción
+manual a producción. Las decisiones de scope explícitas
+(sin OTA, sin auto-deploy, sin observabilidad centralizada, sin backups
+automáticos) corresponden a la realidad de un sistema doméstico con un
+administrador único; cada una está documentada como tal y pasa a deuda formal si en
+una futura versión se ampliara el alcance del despliegue.

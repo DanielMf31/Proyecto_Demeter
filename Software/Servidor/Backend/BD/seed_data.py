@@ -17,7 +17,7 @@ from sqlalchemy import delete
 
 from Core.database import AsyncSessionLocal
 from Core.auth import get_password_hash
-from BD.models import User, Experiment, Plant, TelemetryAmbient, ExperimentoPlantaLink
+from BD.models import User, Experiment, Plant, TelemetryAmbient, ExperimentoPlantaLink, PlantSensorMap
 from Core.redis import redis_manager
 
 logger = logging.getLogger("seed_data")
@@ -85,6 +85,7 @@ async def seed_historical_data(db: AsyncSession):
         logger.info("Usuario 'admin' creado.")
 
     logger.info("Limpiando datos de prueba anteriores...")
+    await db.execute(delete(PlantSensorMap))
     await db.execute(delete(ExperimentoPlantaLink))
     await db.execute(delete(TelemetryAmbient))
     await db.execute(delete(Plant))
@@ -93,6 +94,7 @@ async def seed_historical_data(db: AsyncSession):
     from sqlalchemy import text
     await db.execute(text("ALTER SEQUENCE plants_id_seq RESTART WITH 1"))
     await db.execute(text("ALTER SEQUENCE experiments_id_seq RESTART WITH 1"))
+    await db.execute(text("ALTER SEQUENCE plant_sensor_map_id_seq RESTART WITH 1"))
     await db.commit()
 
     # ─── Crear 20 Plantas ─────────────────────────────────────────────────────
@@ -119,6 +121,17 @@ async def seed_historical_data(db: AsyncSession):
         )
         db.add(p)
         plantas.append(p)
+    await db.flush()
+
+    # ─── Crear mapeos planta-sensor por defecto ──────────────────────────────
+    logger.info("Creando mapeos sensor→planta por defecto (1 planta/slot por nodo)...")
+    for p in plantas:
+        mapping = PlantSensorMap(
+            node_id=p.node_id,
+            sensor_slot=0,
+            plant_id=p.id,
+        )
+        db.add(mapping)
     await db.flush()
 
     # ─── Crear 3 Experimentos ─────────────────────────────────────────────────

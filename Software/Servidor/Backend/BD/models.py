@@ -148,9 +148,29 @@ class Plant(Base):
     estado_vital = Column(String, default="Activa", nullable=False) # e.g., Activa, Cosechada, Muerta
     metadata_cientifica = Column(JSON().with_variant(JSONB, "postgresql"), nullable=False, default={})
     
-    node_id = Column(Integer, unique=True, nullable=False) 
-    
+    node_id = Column(Integer, unique=True, nullable=False)
+
     experiments = relationship("Experiment", secondary="experimento_planta_link", back_populates="plants")
+
+
+class PlantSensorMap(Base):
+    """
+    Mapea un slot de sensor físico en un nodo ESP32 a una planta lógica en la DB.
+    (node_id, sensor_slot) → plant_id
+    """
+    __tablename__ = "plant_sensor_map"
+
+    id = Column(Integer, primary_key=True, index=True)
+    node_id = Column(Integer, nullable=False, index=True)
+    sensor_slot = Column(Integer, nullable=False)
+    plant_id = Column(Integer, ForeignKey("plants.id"), nullable=False)
+
+    plant = relationship("Plant")
+
+    __table_args__ = (
+        Index('uq_node_slot', 'node_id', 'sensor_slot', unique=True),
+    )
+
 
 # --- Telemetry Models ---
 

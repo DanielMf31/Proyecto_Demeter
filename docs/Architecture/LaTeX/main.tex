@@ -179,8 +179,12 @@
 
 \newpage
 
-% ── Índice ───────────────────────────────────────────────────
+% ── Resumen Ejecutivo ────────────────────────────────────────
 \pagestyle{fancy}
+\input{sections/00_resumen_ejecutivo}
+\newpage
+
+% ── Índice ───────────────────────────────────────────────────
 \tableofcontents
 \newpage
 
@@ -198,6 +202,12 @@
 \input{sections/05_backend}
 \newpage
 \input{sections/06_sdk}
+\newpage
+\input{sections/07_testing}
+\newpage
+\input{sections/08_despliegue}
+\newpage
+\input{sections/09_conclusiones}
 
 % ============================================================
 % ANEXOS
@@ -403,6 +413,18 @@ de comandos utiliza el patrón Redis Pub/Sub descrito en el Capítulo~\ref{sec:b
     \includegraphics[height=0.85\textheight]{diagrams/14_backend_redis_flow_light}
     \caption{Flujo de un comando de usuario a través del sistema Redis Pub/Sub hasta la Raspberry Pi.}
     \label{fig:anx_redis_flow}
+\end{figure}
+\end{landscape}
+
+\newpage
+
+% --- 15 DB Schema (1732x1144 — apaisado → landscape) ---
+\begin{landscape}
+\begin{figure}[H]
+    \centering
+    \includegraphics[height=0.85\textheight]{diagrams/15_backend_db_schema_light}
+    \caption{Esquema entidad-relación de la base de datos PostgreSQL del Backend.}
+    \label{fig:anx_db_schema}
 \end{figure}
 \end{landscape}
 

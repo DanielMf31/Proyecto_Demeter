@@ -1,0 +1,135 @@
+% ============================================================
+% CAPÍTULO 6 — Lecciones Aprendidas
+% ============================================================
+\chapter{Lecciones Aprendidas}
+\label{cap:lecciones}
+
+Este cap\'itulo recoge las lecciones aprendidas durante el ciclo de vida
+del Proyecto Demeter, organizadas en tres dimensiones: t\'ecnicas,
+organizativas y de gesti\'on. Estas lecciones constituyen un activo
+adicional del proyecto, aplicables tanto a futuros proyectos de la
+asociaci\'on como a otras iniciativas docentes similares.
+
+\section{Lecciones t\'ecnicas}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Modelos compartidos como infraestructura central}:
+    el uso de modelos Pydantic compartidos entre todas las capas para
+    serializaci\'on/deserializaci\'on JSON y binaria result\'o
+    especialmente acertado. La misma definici\'on de mensaje sirve
+    para validaci\'on en backend y para empaquetado en firmware sin
+    duplicaci\'on de l\'ogica.
+
+    \item \textbf{Filosof\'ia de fallo silencioso en redes RF}: descartar
+    silenciosamente las tramas corruptas evita tormentas de
+    retroalimentaci\'on en presencia de interferencias. La l\'ogica de
+    aplicaci\'on aporta los \texttt{ACK} necesarios.
+
+    \item \textbf{Cuadros de \textit{Decisi\'on de Dise\~no} en
+    documentaci\'on}: documentar expl\'icitamente las justificaciones de
+    decisiones t\'ecnicas resulta cr\'itico para la mantenibilidad y la
+    incorporaci\'on de nuevos miembros. Las cajas con razonamiento
+    impl\'icito han demostrado ser una de las mejores aportaciones
+    documentales.
+
+    \item \textbf{Containerizaci\'on Docker en Raspberry Pi}: si bien
+    introduce overhead inicial, la consistencia de despliegue y la
+    facilidad de actualizaciones justific\'o ampliamente la decisi\'on.
+
+    \item \textbf{Lecci\'on costosa: ausencia de cifrado en capa de
+    campo}: planificar AES-128 como mejora futura en lugar de
+    implementarlo desde el principio result\'o ser deuda t\'ecnica
+    significativa al considerar despliegues en entornos de
+    investigaci\'on con datos sensibles.
+
+    \item \textbf{Patr\'on que se repetir\'ia: el modelo compartido
+    entre capas}. Definir el protocolo una sola vez con modelos Pydantic
+    en \texttt{Software/Common} y consumirlos desde el backend y desde la
+    Raspberry Pi elimin\'o de ra\'iz toda una clase de errores de
+    desincronizaci\'on entre extremos. Lo mismo aplica al patr\'on
+    \textit{Strategy} sobre la interfaz \texttt{IComms} del firmware, que
+    permiti\'o probar la l\'ogica de protocolo en el PC sin hardware.
+
+    \item \textbf{Decisi\'on que se cambiar\'ia: medir antes de
+    optimizar y antes de cerrar}. El sistema se dio por bueno sin una
+    l\'inea base de latencia, p\'erdida de tramas ni autonom\'ia real de
+    los nodos. Sin esas medidas no hay forma de demostrar que funciona ni
+    de detectar una regresi\'on, y a\~nadirlas al final ya no es posible.
+    La instrumentaci\'on m\'inima --- cobertura de tests y cuatro
+    m\'etricas de campo --- deber\'ia haber existido desde la primera
+    versi\'on.
+
+    \item \textbf{Decisi\'on que se cambiar\'ia: validar el hardware
+    cr\'itico antes de comprarlo}. El \textit{spike} de validaci\'on de
+    bombeo se escribi\'o pero nunca se ejecut\'o, y para cuando se
+    adquiri\'o la instalaci\'on hidr\'aulica (900\,\euro) el plan de
+    pruebas ya se hab\'ia quedado obsoleto: estaba redactado para bombas
+    de 5\,V y el material comprado era de 12\,V. El resultado es material
+    sin desembalar. Un \textit{spike} que no se ejecuta no reduce ning\'un
+    riesgo; solo documenta que se era consciente de \'el.
+
+    \item \textbf{Decisi\'on que se cambiar\'ia: higiene del repositorio
+    desde el primer d\'ia}. Versionar \texttt{node\_modules}, la
+    documentaci\'on generada por Doxygen y ficheros de \textit{log}
+    parece inocuo al principio, pero infla el repositorio en un orden de
+    magnitud y destruye la posibilidad de medir nada autom\'aticamente
+    sobre \'el. Un \texttt{.gitignore} correcto al inicio cuesta cinco
+    minutos; corregirlo despu\'es implica reescribir el hist\'orico.
+\end{itemize}
+
+\section{Lecciones organizativas}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Distribuci\'on del conocimiento desde el inicio}: la
+    concentraci\'on del desarrollo en un \'unico miembro fue la fuente
+    principal de fragilidad del proyecto. Pr\'acticas como pair
+    programming, code reviews sistem\'aticas y rotaci\'on de
+    responsabilidades habr\'ian mitigado este \textit{single point of
+    failure} estructural.
+
+    \item \textbf{Documentaci\'on viva durante el desarrollo, no al
+    final}: la documentaci\'on t\'ecnica generada al final del proyecto
+    es valiosa, pero documentar progresivamente durante el desarrollo
+    habr\'ia facilitado la incorporaci\'on de nuevos miembros y la
+    resoluci\'on m\'as r\'apida de incidencias.
+
+    \item \textbf{Onboarding sistematizado para nuevos miembros}: la
+    asociaci\'on no contaba con un proceso definido de incorporaci\'on
+    al proyecto. Una gu\'ia de \textit{onboarding} habr\'ia reducido la
+    curva de aprendizaje de los miembros que se incorporaron en fases
+    intermedias.
+
+    \item \textbf{Distinci\'on entre documentaci\'on para evaluadores y
+    documentaci\'on para mantenedores}: son audiencias y prop\'ositos
+    distintos. La documentaci\'on para evaluadores enfatiza
+    arquitectura y decisiones; la documentaci\'on para mantenedores
+    enfatiza c\'omo hacer cosas concretas.
+\end{itemize}
+
+\section{Lecciones de gesti\'on}
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Dimensionar las ambiciones al equipo realmente
+    disponible}: el proyecto fue dise\~nado con una arquitectura de
+    cuatro capas que requiere un equipo multidisciplinar consolidado.
+    En retrospectiva, un MVP m\'as acotado, con menos capas pero
+    iterables, habr\'ia sido m\'as compatible con la composici\'on real
+    de la asociaci\'on.
+
+    \item \textbf{MVP iterativo $>$ arquitectura aspiracional}: empezar
+    con una versi\'on m\'inima funcional end-to-end y a\~nadir complejidad
+    \'unicamente cuando se justifica con uso real es preferible a
+    dise\~nar la arquitectura completa por anticipado.
+
+    \item \textbf{Definir criterios de cierre desde el inicio}: cada
+    proyecto deber\'ia tener criterios expl\'icitos de \'exito (cu\'ando
+    se considera completado), pivote (cu\'ando cambiar de direcci\'on)
+    y cierre (cu\'ando concluir formalmente). El Proyecto Demeter no
+    los tuvo formalmente; la decisi\'on de cierre se toma ahora con
+    criterios construidos a posteriori.
+
+    \item \textbf{Reconocer cu\'ando cerrar es competencia profesional}:
+    saber decir ``esto no podemos sostenerlo bajo las condiciones
+    actuales'' es parte del aprendizaje en gesti\'on de proyectos. El
+    presente informe es, en s\'i mismo, ejercicio de esa competencia.
+\end{itemize}

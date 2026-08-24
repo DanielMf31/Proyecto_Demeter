@@ -1,0 +1,144 @@
+% ============================================================
+% SECCIÓN 0: Resumen Ejecutivo
+% ============================================================
+\chapter*{Resumen Ejecutivo}
+\addcontentsline{toc}{chapter}{Resumen Ejecutivo}
+
+\noindent
+\textbf{Proyecto:} Demeter --- Plataforma IoT para Investigación Agrícola \\
+\textbf{Autor:} Daniel Montero Fernández (\texttt{danmonfer@us.es}) \\
+\textbf{Versión documentada:} 1.0 \\
+\textbf{Estado:} Sistema operativo en banco; integración hidráulica y validación
+de campo en curso \\
+\textbf{Documento:} Documentación técnica completa de arquitectura, protocolo,
+firmware, servicios y SDK
+
+\vspace{0.6em}
+\noindent\rule{\textwidth}{0.4pt}
+
+% ─────────────────────────────────────────────────────────────
+\section*{Propósito}
+
+Demeter es una plataforma IoT diseñada para automatizar la recolección de variables
+ambientales y el control de actuadores en entornos de investigación agrícola
+(invernaderos, cámaras de cultivo). Resuelve el problema de la \textit{toma manual
+de datos} y la \textit{intervención humana en el riego}, dos limitaciones que
+condicionan tanto la calidad estadística de los experimentos como la disponibilidad
+del personal investigador. El sistema combina tres elementos en un solo producto:
+\textbf{red de sensores y actuadores} sobre microcontroladores ESP32, \textbf{servicio
+de borde} ejecutado en una Raspberry Pi, \textbf{servidor central} con API REST y
+WebSocket para visualización y control en tiempo real, y un \textbf{SDK científico de
+Python} pensado para que investigadores puedan obtener informes de datos sin asistencia
+del equipo de soporte.
+
+% ─────────────────────────────────────────────────────────────
+\section*{Arquitectura del Sistema}
+
+El sistema se descompone en cuatro capas con responsabilidades estrictamente
+separadas. La frontera entre capas se materializa mediante un \textbf{protocolo
+binario propietario} (Demeter, descrito en el Capítulo~\ref{sec:protocolo}) entre
+los nodos ESP32 y la Raspberry Pi, y mediante una \textbf{API REST + WebSocket}
+entre la Raspberry Pi y el servidor central.
+
+\begin{table}[H]
+    \centering
+    \caption{Capas del sistema Demeter y tecnologías asociadas}
+    \begin{tabularx}{\textwidth}{lXl}
+        \toprule
+        \textbf{Capa}                       & \textbf{Función principal}                                                                       & \textbf{Tecnología} \\
+        \midrule
+        Campo (firmware)                    & Sensado, actuación y enrutamiento entre nodos.                                                     & ESP32 + ESP-NOW (C\texttt{++}) \\
+        Borde (Raspberry Pi)                & Pasarela edge: UART$\leftrightarrow$WebSocket, despacho de comandos.                              & Python 3 + asyncio \\
+        Servidor (backend)                  & API REST/WS, autenticación, persistencia, cola de cálculos pesados.                               & FastAPI + PostgreSQL + Redis \\
+        Cliente (frontend / SDK)            & Dashboard interactivo y SDK de análisis científico para investigadores.                           & React (TS) + Python (\texttt{demeter\_sdk}) \\
+        \bottomrule
+    \end{tabularx}
+    \label{tab:exec_arch}
+\end{table}
+
+\textbf{Decisiones arquitectónicas clave.} El proyecto adopta tres compromisos de
+diseño que recorren toda la documentación: \textit{(i)} un protocolo binario
+propietario en lugar de JSON sobre el enlace UART, motivado por el ancho de banda y la
+latencia en redes ESP-NOW; \textit{(ii)} \textbf{Pydantic} como puente único entre la
+representación binaria del protocolo y los modelos de aplicación, evitando duplicar
+contratos; \textit{(iii)} \textbf{Docker dual} (despliegue en GCP y Raspberry Pi local)
+para que el mismo \textit{stack} se ejecute en producción y en entorno doméstico sin
+divergencia. Las decisiones se documentan en detalle en cada capítulo y se
+formalizarán como ADRs antes del cierre v1.0.
+
+% ─────────────────────────────────────────────────────────────
+\section*{Alcance de la Versión 1.0}
+
+El alcance funcional cubierto por esta versión es deliberadamente acotado para
+garantizar un sistema cerrado y mantenible:
+
+\begin{itemize}[leftmargin=*, label=--]
+    \item Red de hasta 5 nodos ESP32 (sensores y actuadores) sobre ESP-NOW.
+    \item Telemetría continua con periodicidad configurable y \textit{Deep Sleep} para nodos sensores.
+    \item Control remoto de bombas y actuadores discretos a través del dashboard.
+    \item Persistencia relacional (PostgreSQL) con LIMS básico: registro botánico, experimentos y trazabilidad.
+    \item Análisis científico desde el SDK con caché Parquet local, indicadores agronómicos (VPD, GDD, ET$_0$) y exportación a Excel/CSV.
+\end{itemize}
+
+\textbf{Fuera de alcance v1.0} (registrado para evitar \textit{feature creep}): app
+móvil, notificaciones push, capa de inferencia ML/IA, multi-tenancy, integraciones
+con APIs meteorológicas y refactor estructural del código existente.
+
+% ─────────────────────────────────────────────────────────────
+\section*{Estado de Validación}
+
+El proyecto sostiene un banco de \textbf{140 tests automatizados} distribuidos en
+\textbf{18 archivos} sobre las cuatro capas (Capítulo~\ref{sec:testing}):
+
+\begin{table}[H]
+    \centering
+    \caption{Validación automatizada por capa (verificada el 2026-05-07)}
+    \begin{tabular}{lrrr}
+        \toprule
+        \textbf{Capa}      & \textbf{Archivos} & \textbf{Tests} & \textbf{Tipo predominante} \\
+        \midrule
+        Firmware (ESP32)   & 5                 & 32             & Unitario (Unity + mocks) \\
+        Raspberry Pi       & 5                 & 37             & Mixto (asyncio mocks) \\
+        Backend (FastAPI)  & 4                 & 16             & Integración (TestClient + SQLite) \\
+        SDK (Python)       & 4                 & 52             & Unitario (funciones puras) \\
+        \midrule
+        Frontend           & 2                 & 3              & 3 unit. \\
+        \midrule
+        \textbf{Total}     & \textbf{20}       & \textbf{140}   & 117 unit. + 23 integ. \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:exec_tests}
+\end{table}
+
+La validación de hardware (caudal, consumo, ciclos térmicos de las bombas) estaba
+prevista mediante \textbf{spikes} estructurados con hipótesis verificables, y el
+criterio final de \texttt{DONE} para la versión 1.0 iba a ser \textbf{30 días de
+operación continua sin intervención manual}. Conviene decirlo de entrada: \textbf{ni
+el spike ni el periodo de operación llegaron a ejecutarse}. La versión 1.0 se entrega
+verificada en software y validada en banco, pero \textbf{sin caracterizar en campo}
+y sin haber actuado nunca sobre una bomba real. El Capítulo~\ref{sec:testing} detalla
+qué se midió y qué no, y el Capítulo~\ref{sec:conclusiones} explica por qué.
+
+% ─────────────────────────────────────────────────────────────
+\section*{Cómo Leer Este Documento}
+
+El documento está organizado en seis capítulos principales y tres anexos de diagramas:
+
+\begin{itemize}[leftmargin=*, label=--]
+    \item \textbf{Introducción} (visión, objetivos, alcance) y \textbf{Capítulo~\ref{sec:protocolo}}
+          (protocolo binario): orientación general y contrato de comunicación.
+    \item \textbf{Capítulos de arquitectura}: firmware ESP32, servicio Raspberry Pi
+          (Capítulo~\ref{sec:raspberry}), backend (Capítulo~\ref{sec:backend}) y
+          SDK (Capítulo~\ref{sec:sdk}).
+    \item \textbf{Capítulo~\ref{sec:testing}}: estrategia de testing, inventario
+          verificable de tests y métricas medidas.
+    \item \textbf{Anexos}: diagramas de flujo del protocolo, arquitectura
+          desplegada de la Raspberry Pi y arquitectura del backend.
+\end{itemize}
+
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.4em}
+
+\noindent\textit{Este documento se mantiene sincronizado con el repositorio del
+proyecto. La fecha de última verificación de los datos numéricos (tests, métricas,
+inventario de archivos) se indica explícitamente en cada tabla.}

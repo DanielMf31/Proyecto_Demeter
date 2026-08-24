@@ -1,0 +1,184 @@
+% ============================================================
+% CAPÍTULO 3 — Estado Actual del Sistema
+% ============================================================
+\chapter{Estado Actual del Sistema}
+\label{cap:estado}
+
+\section{Componentes funcionales verificados}
+
+A fecha de redacci\'on del presente informe, los siguientes componentes
+del sistema operan de forma verificada en entorno de pruebas:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Telemetr\'ia extremo a extremo.} Un nodo sensor
+    ESP32-S3 despierta de \textit{deep sleep}, lee sus sondas DS18B20 y
+    sus sensores capacitivos de humedad de suelo, emite un
+    \texttt{SENSOR\_CLUSTER\_REPORT} por ESP-NOW al \textit{gateway},
+    \'este lo reenv\'ia por UART a la Raspberry Pi, que lo decodifica y lo
+    publica por WebSocket al backend, donde queda persistido en
+    PostgreSQL y visible en el dashboard.
+    \item \textbf{Comando manual extremo a extremo.} La cadena
+    dashboard $\to$ \texttt{POST /api/command} $\to$ Redis Pub/Sub $\to$
+    \textit{dispatcher} WebSocket $\to$ Raspberry Pi $\to$ UART $\to$
+    \textit{gateway} $\to$ ESP-NOW $\to$ nodo actuador opera de forma
+    completa para el comando \texttt{SET\_GPIO}.
+    \item \textbf{Handshake y enrutado.} Establecimiento de sesi\'on
+    SYN / SYN-ACK / ACK entre nodo y \textit{gateway}, y alta de rutas en
+    caliente mediante \texttt{ROUTE\_ADD}.
+    \item \textbf{Secuencias programadas.} El servicio secuenciador
+    ejecuta secuencias multi-paso definidas desde el planificador del
+    frontend.
+    \item \textbf{Trazabilidad LIMS.} Alta de plantas y experimentos,
+    asignaci\'on N:M entre ambos y consulta de telemetr\'ia filtrada por
+    planta.
+    \item \textbf{Autenticaci\'on.} Registro e inicio de sesi\'on con JWT
+    y \texttt{bcrypt}, con protecci\'on efectiva de las rutas privadas.
+    \item \textbf{SDK cient\'ifico.} Extracci\'on de series a
+    \texttt{DataFrame} con cach\'e Parquet, limpieza y remuestreo,
+    c\'alculos agron\'omicos vectorizados y exportaci\'on a CSV y Excel.
+    \item \textbf{Despliegue reproducible.} Los cinco entornos de
+    \textit{Docker Compose} (desarrollo, \textit{override},
+    \textit{staging}, producci\'on y Raspberry Pi) levantan desde un
+    \'arbol limpio, y la integraci\'on continua construye y publica las
+    im\'agenes de backend y frontend en GitHub Container Registry.
+\end{itemize}
+
+\textbf{Escenario de prueba m\'as representativo}. La validaci\'on
+integrada se realiz\'o sobre banco de laboratorio con \textbf{tres nodos
+ESP32-S3} (uno \textit{gateway} conectado por UART a la Raspberry Pi y
+dos nodos de campo) y hasta dos plantas instrumentadas por nodo, con un
+ciclo de \textit{deep sleep} de 60 segundos. El procedimiento completo,
+incluido el conexionado, est\'a documentado en
+\texttt{docs/deep\_sleep\_test.md} y es reproducible. Es importante
+precisar el alcance de esta validaci\'on: se trata de \textbf{sesiones de
+prueba en laboratorio, no de una campa\~na de operaci\'on continua}. El
+sistema nunca lleg\'o a desplegarse en un invernadero real ni a
+funcionar sin supervisi\'on durante d\'ias.
+
+\section{Componentes parciales o no implementados}
+
+Por honestidad t\'ecnica y para facilitar la replicabilidad o la
+continuaci\'on parcial del proyecto, se documentan los aspectos que se
+encuentran en estado parcial o pendiente:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Cifrado en la capa de campo.} AES-128 sobre el
+    \textit{payload} ESP-NOW estaba planificado para la versi\'on 3.0 y
+    no est\'a implementado. La trama es legible por cualquier ESP32
+    cercano sintonizado al canal.
+    \item \textbf{Discovery din\'amico incompleto.} Existe un
+    \textit{Device Manager} con cach\'e persistente de topolog\'ia y un
+    \textit{router} de descubrimiento en el backend, pero el alta de un
+    nodo nuevo no es aut\'onoma: la direcci\'on MAC del \textit{gateway}
+    est\'a fijada en tiempo de compilaci\'on en el firmware de los nodos y
+    el \texttt{NODE\_ID} se asigna tambi\'en por \textit{build flag}.
+    A\~nadir un nodo exige recompilar y reflashear.
+    \item \textbf{Sin observabilidad.} No hay agregaci\'on de
+    \textit{logs}, m\'etricas, alarmas ni notificaciones. El diagn\'ostico
+    de una incidencia obliga a leer la salida de cada contenedor por
+    separado.
+    \item \textbf{Dashboard no adaptado a m\'ovil.} La interfaz est\'a
+    dise\~nada para pantalla de escritorio.
+    \item \textbf{Riego f\'isico sin validar.} La instalaci\'on
+    hidr\'aulica adquirida (cap\'itulo~\ref{cap:sostenibilidad}) no lleg\'o
+    a montarse. El \textit{spike} de validaci\'on de bombeo
+    (\texttt{docs/spikes/SPIKE-001}) qued\'o escrito y sin ejecutar, y
+    adem\'as est\'a redactado para una bomba de 5\,V mientras que el
+    material comprado es de 12\,V, por lo que su plan de pruebas
+    tampoco ser\'ia aplicable sin reescribirlo.
+\end{itemize}
+
+Conviene se\~nalar que \textbf{el c\'odigo no contiene marcas
+\texttt{TODO} ni \texttt{FIXME} significativas}: no hay funciones a
+medio escribir ni parches provisionales pendientes de resolver. Lo que
+falta no est\'a dentro de lo construido, sino que son capas que nunca se
+empezaron. Es deuda de alcance, no de implementaci\'on.
+
+Se considera que ninguna de estas limitaciones impide la utilidad
+docente ni el aprovechamiento del sistema como caso de estudio: la
+arquitectura est\'a documentada y los puntos parciales est\'an claramente
+identificados.
+
+\section{Tests y validaci\'on realizados}
+
+La validaci\'on del sistema se ha articulado en m\'ultiples niveles.
+
+\subsection{Tests unitarios por capa}
+
+Cada capa cuenta con suite de tests unitarios independiente:
+
+\begin{table}[H]
+    \centering
+    \caption{Tests unitarios por capa.}
+    \label{tab:cobertura_tests}
+    \begin{tabular}{llc}
+        \toprule
+        \textbf{Capa} & \textbf{Framework} & \textbf{N\'umero de tests} \\
+        \midrule
+        Firmware ESP32        & Unity (C++)     & 32 \\
+        Servicio Raspberry Pi & pytest          & 37 \\
+        Backend FastAPI       & pytest          & 16 \\
+        Frontend              & Vitest          & 3 \\
+        SDK cient\'ifico      & pytest          & 52 \\
+        \midrule
+        \textbf{TOTAL}        &                 & \textbf{140} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Sobre la cobertura}. La tabla no incluye porcentaje de cobertura
+porque \textbf{el proyecto nunca instrument\'o su medida}: no hay
+configuraci\'on de \texttt{coverage} ni umbral m\'inimo en integraci\'on
+continua, y ning\'un informe hist\'orico que citar. Se ha preferido
+declararlo abiertamente antes que producir ahora una cifra retrospectiva
+que no represente el estado del proyecto durante su desarrollo. El
+reparto de los tests es, en s\'i mismo, informativo: las capas con
+l\'ogica algor\'itmica pura y f\'acilmente aislable (SDK cient\'ifico,
+protocolo del firmware, cach\'e de telemetr\'ia) concentran la mayor
+parte de las pruebas, mientras que las capas dominadas por integraci\'on
+con servicios externos (backend, frontend) quedan claramente por debajo.
+
+\subsection{Tests de integraci\'on}
+
+Adem\'as de los tests unitarios se mantienen:
+
+\begin{itemize}[leftmargin=*]
+    \item Un entorno de integraci\'on del firmware
+    (\texttt{pio test -e integration}) que ejercita los flujos completos
+    del \texttt{SystemManager} y del \texttt{ProtocolEngine} sobre
+    \textit{mocks} de Arduino, sin hardware.
+    \item Tests de backend sobre cliente HTTP de prueba que recorren
+    autenticaci\'on, emisi\'on de comandos, LIMS y an\'alisis contra una
+    base de datos real levantada en contenedor.
+    \item Validaci\'on manual extremo a extremo sobre el entorno de
+    \textit{staging}, con la Raspberry Pi conectada al backend remoto y
+    los tres nodos operativos.
+\end{itemize}
+
+\subsection{Pruebas de campo}
+
+No se realizaron. El sistema se valid\'o \'unicamente sobre banco de
+laboratorio, en el escenario descrito al principio de este cap\'itulo.
+No hubo instalaci\'on en invernadero, ni operaci\'on desatendida
+prolongada, ni exposici\'on de los nodos a condiciones ambientales
+reales.
+
+\subsection{M\'etricas medidas}
+
+\textbf{El sistema no lleg\'o a caracterizarse cuantitativamente.} No se
+midieron la latencia extremo a extremo, la tasa de p\'erdida de tramas
+ESP-NOW, la vida \'util real de un nodo alimentado por bater\'ia, el
+\textit{throughput} sostenido de telemetr\'ia ni el tiempo medio de
+reconexi\'on del WebSocket. Los \'unicos valores de consumo que aparecen
+en este informe ($\sim$80\,mA en activo, $\sim$0,01\,mA en reposo)
+proceden de la hoja de caracter\'isticas del ESP32-S3, no de una medida
+propia.
+
+Se ha optado por declarar esta ausencia en lugar de rellenar una tabla
+con estimaciones. La falta de caracterizaci\'on no es un descuido
+aislado: es exactamente el tipo de trabajo que un proyecto sostenido por
+una sola persona en horario nocturno termina posponiendo, y como tal
+refuerza el an\'alisis del cap\'itulo~\ref{cap:sostenibilidad} en lugar de
+contradecirlo. Cualquier continuaci\'on del proyecto deber\'ia empezar
+por aqu\'i: sin l\'inea base medida no hay forma de saber si un cambio
+mejora o empeora el sistema.

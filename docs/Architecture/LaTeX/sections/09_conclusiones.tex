@@ -1,0 +1,312 @@
+% ============================================================
+% SECCIÓN 9: Conclusiones y Cierre de la Versión 1.0
+% ============================================================
+% Redactado en agosto de 2026 con los datos reales del cierre.
+% Sustituye al esqueleto anterior, que asumía la ejecución del
+% SPIKE-001 y 30 días de operación continua. Ninguna de las dos
+% cosas llegó a ocurrir; el capítulo se reescribe en pasado.
+% ============================================================
+
+\chapter{Conclusiones y Cierre de la Versión 1.0}
+\label{sec:conclusiones}
+
+% ─────────────────────────────────────────────────────────────
+\section{Estado de la Versión 1.0 Entregada}
+
+Demeter v1.0 se entrega como un sistema \textbf{completo en su arquitectura y
+verificado en banco}, modesto en alcance y nunca puesto en explotación real. Se
+archiva como \textit{release} congelada: un artefacto estable, documentado y
+reproducible, con una cláusula explícita de no continuidad.
+
+\begin{table}[H]
+    \centering
+    \caption{Inventario factual de lo entregado en la versión 1.0.}
+    \label{tab:inventario_v1}
+    \begin{tabular}{lp{8cm}}
+        \toprule
+        \textbf{Artefacto} & \textbf{Estado al cierre} \\
+        \midrule
+        Capas implementadas & 4 de 4: firmware ESP32-S3, servicio de borde
+        en Raspberry Pi, backend en contenedores y SDK científico \\
+        Código propio & 27.025 líneas, excluidas dependencias y ficheros
+        generados \\
+        Protocolo & 14 tipos de mensaje operativos sobre trama binaria
+        propia, con handshake y validación por capas \\
+        Tests automatizados & 145, repartidos en cinco suites (véase el
+        Capítulo~\ref{sec:testing}) \\
+        Documentación técnica & Este documento, 84 páginas, 18 diagramas y
+        9 cuadros de Decisión de Diseño \\
+        Imágenes Docker & Backend y frontend publicadas en GitHub Container
+        Registry \\
+        Entornos de despliegue & 5 configuraciones de Docker Compose,
+        levantables desde un árbol limpio \\
+        Días de operación continua sin intervención & \textbf{0} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Esa última fila es la que da la medida honesta del cierre y merece leerse junto a
+todas las anteriores. El sistema \textbf{funciona}: la cadena completa, desde un
+sensor que despierta de \textit{deep sleep} hasta el dato visible en el dashboard,
+se recorrió de extremo a extremo sobre tres nodos reales. Pero funcionó en un banco
+de laboratorio y bajo supervisión, nunca desatendido durante días ni expuesto a las
+condiciones de un invernadero. Demeter v1.0 es un \textbf{prototipo validado}, no un
+sistema en producción, y el resto de este capítulo se escribe desde esa premisa.
+
+\begin{table}[H]
+    \centering
+    \caption{Alcance entregado frente a alcance excluido deliberadamente.}
+    \label{tab:alcance_v1}
+    \begin{tabular}{p{6.2cm}p{6.2cm}}
+        \toprule
+        \textbf{Entregado en v1.0} & \textbf{Fuera de alcance por decisión} \\
+        \midrule
+        Telemetría ambiental y de suelo por nodo y por planta &
+        Cifrado del enlace de campo (AES-128 sobre ESP-NOW) \\
+        Actuación remota sobre GPIO y secuencias programadas &
+        Actualización de firmware por aire (OTA) \\
+        Trazabilidad LIMS de plantas y experimentos &
+        Multi-invernadero sobre una misma instancia \\
+        SDK con cálculo agronómico y exportación &
+        Observabilidad centralizada y sistema de alarmas \\
+        Despliegue reproducible en cinco entornos &
+        Interfaz adaptada a móvil \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+% ─────────────────────────────────────────────────────────────
+\section{Cumplimiento de Objetivos}
+
+El Capítulo~\ref{sec:introduccion} declaró cuatro objetivos específicos. Su estado
+real al cierre es el siguiente.
+
+\begin{table}[H]
+    \centering
+    \caption{Grado de cumplimiento de los objetivos declarados.}
+    \label{tab:cumplimiento}
+    \begin{tabular}{p{2.8cm}p{2.6cm}p{7cm}}
+        \toprule
+        \textbf{Objetivo} & \textbf{Estado} & \textbf{Evidencia y matices} \\
+        \midrule
+        Automatización IoT & Cumplido parcialmente &
+        Tres nodos ESP32-S3 operativos en banco, con ciclo de \textit{deep sleep}
+        y reporte automático. La recolección «continua y sin intervención humana»
+        que enunciaba el objetivo nunca se sostuvo más allá de una sesión de
+        pruebas. \\
+        \midrule
+        Control Remoto & Cumplido parcialmente &
+        La cadena de mando completa opera para \texttt{SET\_GPIO}, y el
+        secuenciador ejecuta secuencias multi-paso. Pero \textbf{no se actuó nunca
+        sobre una bomba real}: la instalación hidráulica se adquirió y no llegó a
+        montarse, y el \textit{spike} que debía validarla no se ejecutó. Este es
+        el objetivo que queda más lejos de lo prometido. \\
+        \midrule
+        Trazabilidad LIMS & Cumplido &
+        Modelo de 13 tablas con relación N:M entre plantas y experimentos,
+        consulta de telemetría por planta y registro de actividad
+        (Capítulo~\ref{sec:backend}). \\
+        \midrule
+        Análisis Científico & Cumplido &
+        SDK con caché Parquet, pipeline ETL, cálculo agronómico vectorizado y
+        exportación a CSV y Excel (Capítulo~\ref{sec:sdk}), utilizable sin
+        conocimientos de la infraestructura. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+El patrón es nítido y conviene nombrarlo: \textbf{los dos objetivos de software puro
+se cumplieron; los dos que tocaban el mundo físico se quedaron a medias}. No es
+casualidad. El software se puede escribir de noche, en solitario y sin depender de
+nadie; montar una instalación de riego en un invernadero de otra escuela exige
+coordinación, permisos, presencia física y manos ajenas. La barrera no fue técnica.
+
+% ─────────────────────────────────────────────────────────────
+\section{Decisiones Arquitectónicas en Retrospectiva}
+
+\subsection*{Decisiones que se sostienen}
+
+\begin{itemize}[leftmargin=*, label=--]
+    \item \textbf{Protocolo binario propio en lugar de JSON sobre el enlace de
+          campo.} La trama compacta hizo viable el \textit{deep sleep} agresivo y
+          mantuvo la ocupación del canal por nodo por debajo del 0,01\,\%. El coste
+          --- tener que escribir y depurar el empaquetado --- se amortizó con la
+          validación por capas, que atrapa tramas corruptas antes de que lleguen a
+          la lógica de dominio.
+    \item \textbf{Pydantic como puente único entre lo binario y el dominio.}
+          Definir el contrato una sola vez en \texttt{Software/Common} y consumirlo
+          desde el backend y desde la Raspberry Pi eliminó de raíz toda una clase
+          de errores de desincronización entre extremos. Es, con diferencia, la
+          decisión que más problemas evitó.
+    \item \textbf{Patrón \textit{Strategy} sobre la interfaz \texttt{IComms}.}
+          Permitió probar la lógica de protocolo en el PC, sin hardware, y explica
+          que la suite de firmware sea la segunda más poblada del proyecto.
+    \item \textbf{Imagen base común para nube y Raspberry Pi.} La misma
+          definición de servicios sirvió para cinco entornos, con las diferencias
+          confinadas a ficheros de \textit{override}.
+    \item \textbf{Caché Parquet local en el SDK.} Hace que el análisis iterativo
+          no golpee la API en cada ejecución, que es exactamente el patrón de
+          trabajo de quien explora datos.
+\end{itemize}
+
+\subsection*{Decisiones que se tomarían de otra forma}
+
+\begin{itemize}[leftmargin=*, label=--]
+    \item \textbf{Validar el hardware crítico antes de comprarlo.} El
+          \textit{spike} de la bomba se escribió y nunca se ejecutó, y para cuando
+          se adquirió la instalación hidráulica su plan de pruebas ya estaba
+          obsoleto: contemplaba una bomba de 5\,V y el material comprado era de
+          12\,V. Un \textit{spike} que no se ejecuta no reduce ningún riesgo; solo
+          documenta que se era consciente de él.
+    \item \textbf{Medir desde el primer día.} El sistema se dio por bueno sin
+          línea base de latencia, pérdida de tramas ni autonomía real. Sin esas
+          medidas no hay forma de demostrar que funciona ni de detectar una
+          regresión, y añadirlas al final ya no es posible.
+    \item \textbf{Integración continua completa desde el primer
+          \textit{release}.} El \textit{pipeline} construye y publica las imágenes
+          de backend y frontend, pero nunca compiló el firmware ni ejecutó
+          análisis de secretos. La auditoría del cierre encontró una credencial
+          viva versionada en el repositorio, que un análisis automático habría
+          detectado el día que se introdujo.
+    \item \textbf{Higiene del repositorio desde el inicio.} Versionar
+          \texttt{node\_modules}, la documentación generada por Doxygen y ficheros
+          de \textit{log} infla el repositorio en un orden de magnitud y arruina
+          cualquier métrica automática sobre él. Corregirlo después obliga a
+          reescribir el histórico.
+\end{itemize}
+
+\subsection*{Sobre las decisiones de arquitectura y su registro}
+
+El plan original contemplaba formalizar entre cinco y siete \textit{Architecture
+Decision Records} como documentos independientes. \textbf{No se escribió ninguno.}
+En la práctica su función la cumplen los \textbf{nueve cuadros de Decisión de
+Diseño} repartidos por este documento, que recogen el mismo contenido --- decisión,
+alternativas descartadas y justificación --- pero incrustado en el capítulo donde
+la decisión es relevante en lugar de en un registro aparte.
+
+La lección no es que los ADR sobren, sino que \textbf{un formato que nadie mantiene
+es peor que uno más humilde que sí se usa}. Para un proyecto de un solo autor, el
+cuadro dentro del capítulo resultó ser el vehículo que sobrevivió; el registro
+separado se habría quedado, como tantas otras cosas, en la lista de pendientes.
+
+% ─────────────────────────────────────────────────────────────
+\section{Lecciones Aprendidas}
+
+\subsection*{Técnicas}
+
+\begin{itemize}[leftmargin=*, label=--]
+    \item \textbf{El contrato compartido vale más que cualquier optimización.}
+          Un único modelo de datos consumido por todas las capas evitó la clase de
+          fallo más cara de depurar en un sistema distribuido: dos extremos que
+          creen hablar el mismo idioma y no lo hacen.
+    \item \textbf{\texttt{asyncio} recompensa la disciplina y castiga la
+          improvisación.} Cuatro tareas cooperativas sobre un solo hilo bastaron
+          para el servicio de borde, pero cualquier llamada bloqueante que se cuele
+          detiene todo el proceso. El modelo obliga a pensar dónde está cada
+          punto de espera.
+    \item \textbf{ESP-NOW resuelve el enlace de campo mejor de lo esperado, y con
+          un límite claro.} No necesita punto de acceso, el consumo es compatible
+          con el \textit{deep sleep} y el alcance fue suficiente. Su límite es la
+          seguridad: sin cifrado, cualquier receptor cercano lee la trama.
+    \item \textbf{El binario merece la pena solo cuando la energía es el
+          recurso escaso.} En el enlace de campo, sí. Entre la Raspberry Pi y el
+          servidor, donde ya había JSON sobre WebSocket, habría sido una
+          complicación gratuita.
+\end{itemize}
+
+\subsection*{De proceso}
+
+\begin{itemize}[leftmargin=*, label=--]
+    \item \textbf{Documentación como código.} Mantener el LaTeX en el mismo
+          repositorio, versionado junto al código que describe, es lo que ha hecho
+          posible que este documento siga siendo cierto en el momento del cierre.
+          Una documentación fuera del repositorio habría divergido en semanas.
+    \item \textbf{Un \textit{spike} sin ejecutar es una deuda disfrazada de
+          diligencia.} Escribir la exploración y no hacerla da la sensación de
+          haber gestionado el riesgo sin haberlo tocado. Es peor que no escribirla,
+          porque tranquiliza.
+    \item \textbf{Cerrar es una decisión de ingeniería, no una rendición.} La
+          alternativa realista a este cierre no era un proyecto que siguiera
+          creciendo, sino uno que siguiera facturando infraestructura sin que nadie
+          lo tocara. Decidir el final y documentarlo produce un artefacto
+          referenciable; dejarlo morir por inercia no produce nada.
+\end{itemize}
+
+\subsection*{Personales}
+
+El aprendizaje más incómodo del proyecto no es técnico. Demeter demostró que una
+sola persona puede construir un sistema distribuido de cuatro capas, documentarlo
+en ochenta páginas y desplegarlo de forma reproducible. Demostró también que \textbf{esa
+misma persona no puede sostenerlo}, y que la parte que exigía coordinarse con
+otros --- montar la instalación en el invernadero, medir en campo, transferir el
+conocimiento --- fue precisamente la que no se hizo.
+
+La conclusión que el autor se lleva al siguiente proyecto es que la capacidad
+técnica individual no es el cuello de botella, y que optimizarla más no habría
+cambiado el resultado. Lo que faltó fue todo lo demás.
+
+% ─────────────────────────────────────────────────────────────
+\section{Trabajo Futuro y Extensiones Posibles}
+
+Las siguientes extensiones son plausibles sobre la arquitectura entregada. Se
+inventarían aquí para quien retome el trabajo; \textbf{ninguna constituye un
+compromiso} de la versión 1.0 ni del autor.
+
+\begin{itemize}[leftmargin=*, label=--]
+    \item \textbf{Caracterización en campo.} Latencia extremo a extremo, pérdida
+          de tramas, autonomía real y tiempo de reconexión. Es el primer trabajo
+          que debería hacer cualquier continuación: sin línea base no se puede
+          saber si un cambio mejora o empeora el sistema.
+    \item \textbf{Montaje y validación de la instalación de riego.} El material
+          está adquirido y sin usar. Requiere reescribir el \textit{spike} para
+          12\,V y dimensionar la conmutación: la fuente disponible no admite más de
+          una bomba simultánea.
+    \item \textbf{Cifrado del enlace de campo.} AES-128 sobre el \textit{payload}
+          ESP-NOW, imprescindible antes de cualquier despliegue con datos que
+          importen.
+    \item \textbf{Observabilidad centralizada.} Agregación de \textit{logs} y
+          métricas. Hoy diagnosticar una incidencia obliga a leer la salida de
+          cada contenedor por separado.
+    \item \textbf{Alta de nodos sin recompilar.} La dirección del \textit{gateway}
+          y el identificador de nodo se fijan en tiempo de compilación; añadir un
+          nodo exige reflashear.
+    \item \textbf{Actualización de firmware por aire.} Con autenticación y
+          \textit{rollback}. Se descartó en v1.0 por alcance, pero condiciona
+          cualquier despliegue de más de un puñado de nodos.
+    \item \textbf{Riego predictivo.} Integración con datos meteorológicos o una
+          capa de inferencia por especie. Es la extensión más vistosa y la que
+          menos sentido tiene abordar antes que las cinco anteriores.
+\end{itemize}
+
+% ─────────────────────────────────────────────────────────────
+\section{Cierre y Agradecimientos}
+
+Con la publicación de este documento, el Proyecto Demeter queda \textbf{archivado
+en su versión 1.0}. No hay desarrollo planificado. El repositorio se abre con
+licencia MIT para el código y CC-BY-SA 4.0 para la documentación, de modo que
+cualquiera pueda estudiarlo, reutilizarlo o continuarlo por su cuenta, sin que ello
+comprometa al autor ni a la asociación a mantenimiento alguno.
+
+El análisis que sostiene esta decisión --- económico, de recursos humanos y técnico
+--- se recoge en el documento hermano \textit{Informe de Viabilidad y Propuesta de
+Cierre}, en \texttt{docs/Closure/}.
+
+Quedan los agradecimientos. A la \textbf{Asociación Universitaria ESIBot}, por el
+contexto, los recursos y la libertad para llevar el proyecto hasta donde llegó. Al
+\textbf{Departamento de Agronomía de la ETSIA}, por plantear un problema real y
+confiar en que un grupo de estudiantes de otra escuela pudiera abordarlo. Y a
+quienes, en algún momento de estos veinte meses, preguntaron cómo iba: sostener un
+proyecto en solitario se parece bastante a hablar solo, y esas preguntas contaban
+más de lo que probablemente parecía.
+
+\begin{designnote}
+\textbf{Por qué se archiva como \textit{release} y no como abandono.} La diferencia
+es material. Un proyecto abandonado deja de ser operable: nadie sabe si arranca, la
+documentación miente y el conocimiento se disipa. Una versión archivada es un
+artefacto estable, reproducible desde un árbol limpio, documentado hasta sus
+limitaciones y publicado con licencia clara. Demeter cumple los criterios de la
+segunda categoría, incluido el más incómodo: dejar escrito, con nombres y cifras,
+todo aquello que no llegó a funcionar. Un documento que solo contara los aciertos
+sería propaganda; y la propaganda, a diferencia de un artefacto, no le sirve a
+nadie que venga después.
+\end{designnote}

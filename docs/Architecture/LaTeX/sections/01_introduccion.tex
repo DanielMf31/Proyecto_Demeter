@@ -4,53 +4,144 @@
 \chapter*{Introducción y Visión del Proyecto}
 \addcontentsline{toc}{chapter}{Introducción y Visión del Proyecto}
 
-\section{Motivación y Problema a Resolver}
+% ─────────────────────────────────────────────────────────────
+\section{Origen del Proyecto}
 
-La agricultura de precisión y la automatización del cuidado botánico representan uno de los campos
-de mayor proyección en la intersección entre la electrónica, el software y las ciencias naturales.
-En entornos como invernaderos de investigación, la falta de herramientas de monitorización continua
-obliga a los investigadores a realizar lecturas manuales, perder datos valiosos durante la noche y
-tomar decisiones de riego basadas en la intuición.
+El \textbf{Proyecto Demeter} nace en el seno de la asociación universitaria
+\textbf{ESIBot} (Escuela Técnica Superior de Ingeniería, Universidad de Sevilla)
+como un ejercicio de ingeniería full-stack aplicada a un dominio físico real:
+la monitorización y el control automatizado de entornos de cultivo. Su autor,
+Daniel Montero Fernández, conduce el proyecto en solitario a lo largo de
+varias iteraciones, partiendo de una primera prueba de concepto sobre Arduino
+y evolucionando hasta la arquitectura distribuida documentada en este texto:
+una red de microcontroladores ESP32, un servicio de borde sobre Raspberry Pi,
+un servidor central desplegable indistintamente en Google Cloud Platform o en
+hardware doméstico, y un SDK científico de Python para análisis agronómico.
 
-\textbf{El Proyecto Demeter} nace para resolver este problema. Propone un ecosistema tecnológico
-completo que automatiza la recolección de variables ambientales mediante sensores, asegura la
-trazabilidad física de cada sujeto de prueba y facilita el análisis científico avanzado mediante
-herramientas modernas y de bajo coste.
+La presente versión 1.0 marca el cierre del ciclo de desarrollo activo del
+proyecto. Se entrega como \textit{release} estable y \textit{portfolio
+piece}, no como abandono: el sistema queda funcional, documentado y
+reproducible, con una cláusula explícita de no continuidad (\textit{no further
+development planned}) que libera al autor del compromiso de mantenimiento
+indefinido y, simultáneamente, fija el alcance de lo entregado.
 
+% ─────────────────────────────────────────────────────────────
+\section{Motivación}
+
+La monitorización continua de variables ambientales y la trazabilidad de los
+sujetos experimentales son requisitos básicos en cualquier protocolo
+agronómico riguroso, pero su implantación en pequeños invernaderos de
+investigación universitaria choca con dos limitaciones recurrentes: la
+\textbf{necesidad de presencia humana} para tomar lecturas y operar el riego,
+y el \textbf{coste de las plataformas comerciales} de gestión de información
+de laboratorio (LIMS), normalmente diseñadas para entornos clínicos o
+industriales y desproporcionadas para grupos pequeños. Demeter aborda ambos
+frentes con hardware de bajo coste, software libre y un alcance
+deliberadamente acotado.
+
+% ─────────────────────────────────────────────────────────────
 \section{Objetivos del Sistema}
 
 \subsection{Objetivo General}
-Desarrollar una plataforma IoT integral que permita monitorizar, controlar y analizar entornos de
-cultivo, proporcionando trazabilidad científica completa de las plantas y los experimentos asociados.
+Desarrollar una plataforma IoT integral que permita monitorizar, controlar y
+analizar entornos de cultivo, proporcionando trazabilidad científica completa
+de las plantas y los experimentos asociados.
 
 \subsection{Objetivos Específicos}
 
+Estos cuatro objetivos articulan el resto del documento y se retoman en el
+Capítulo~\ref{sec:conclusiones} para evaluar el grado de cumplimiento de
+la versión 1.0:
+
 \begin{itemize}[leftmargin=*, label=--]
-    \item \textbf{Automatización IoT:} Desplegar una red de sensores de bajo coste y alta
-          fiabilidad que recolecte variables ambientales de forma continua y sin intervención humana.
-    \item \textbf{Control Remoto:} Permitir la actuación sobre los elementos físicos del entorno
-          (bombas de riego, electroválvulas, ventanas) desde cualquier punto con acceso a internet.
-    \item \textbf{Trazabilidad LIMS:} Implementar un sistema de gestión de información de
-          laboratorio que mantenga un registro estructurado de cada planta y los experimentos
-          en los que participa.
-    \item \textbf{Análisis Científico:} Dotar a los investigadores de herramientas (SDK, gráficas,
-          informes exportables) para extraer y analizar datos sin depender del equipo de soporte.
+    \item \textbf{Automatización IoT.} Desplegar una red de sensores de bajo
+          coste y alta fiabilidad que recolecte variables ambientales de
+          forma continua y sin intervención humana.
+    \item \textbf{Control Remoto.} Permitir la actuación sobre los elementos
+          físicos del entorno (bombas de riego, electroválvulas, ventanas)
+          desde cualquier punto con acceso a internet.
+    \item \textbf{Trazabilidad LIMS.} Implementar un sistema de gestión de
+          información de laboratorio que mantenga un registro estructurado
+          de cada planta y los experimentos en los que participa.
+    \item \textbf{Análisis Científico.} Dotar a los investigadores de
+          herramientas (SDK, gráficas, informes exportables) para extraer y
+          analizar datos sin depender del equipo de soporte técnico.
 \end{itemize}
 
-\section{Descripción General del Sistema}
+% ─────────────────────────────────────────────────────────────
+\section{Alcance del Documento}
 
-El sistema Demeter se articula en cuatro módulos interconectados que cubren el ciclo completo
-desde la adquisición de datos hasta su interpretación científica:
+Este documento es la \textbf{documentación técnica de arquitectura} del
+sistema Demeter. Su audiencia objetivo son personas con perfil técnico
+(desarrolladores, evaluadores, mantenedores futuros) que necesitan entender
+\textit{cómo está construido} el sistema, \textit{por qué se tomaron las
+decisiones} de diseño que se tomaron, y \textit{cómo desplegarlo} desde un
+entorno limpio.
 
-\begin{enumerate}
-    \item \textbf{Capa de Campo (Firmware ESP32):} Red de microcontroladores ESP32 comunicados
-          mediante ESP-NOW. Tres roles diferenciados: sensores, actuadores y gateway.
-    \item \textbf{Capa de Borde (Servicio Raspberry Pi):} Servicio Python que recibe las tramas
-          del gateway por UART y las reenvía al servidor central.
-    \item \textbf{Capa de Servidor (Backend FastAPI):} API REST y WebSocket asíncrona que gestiona
-          la persistencia en PostgreSQL y la publicación de datos en tiempo real.
-    \item \textbf{Capa de Visualización (Frontend React):} SPA que muestra datos en vivo, permite
-          crear secuencias de riego y gestionar experimentos científicos (LIMS).
-\end{enumerate}
+\textbf{Lo que cubre este documento:}
 
+\begin{itemize}[leftmargin=*, label=--]
+    \item Arquitectura de cada una de las cuatro capas del sistema y de las
+          fronteras entre ellas (Capítulos~\ref{sec:protocolo} a \ref{sec:sdk}).
+    \item Estrategia de validación y banco de tests automatizados verificable
+          (Capítulo~\ref{sec:testing}).
+    \item Procedimiento reproducible de despliegue en los cuatro entornos
+          soportados, incluyendo CI/CD y operaciones
+          (Capítulo~\ref{sec:despliegue}).
+    \item Estado de la versión 1.0 y lecciones aprendidas
+          (Capítulo~\ref{sec:conclusiones}).
+\end{itemize}
 
+\textbf{Lo que NO cubre este documento} (y dónde encontrarlo):
+
+\begin{itemize}[leftmargin=*, label=--]
+    \item \textbf{Manual de usuario final}: cómo usar el dashboard, cómo crear
+          un experimento, cómo interpretar las gráficas. La interfaz se
+          documenta en el propio frontend mediante \textit{tooltips}, ayudas
+          contextuales y un README específico del módulo.
+    \item \textbf{Informe de viabilidad y cierre del proyecto}: análisis de
+          sostenibilidad económica, justificación del cierre como v1.0
+          \textit{release} y plan de entrega académica. Documento separado en
+          \texttt{docs/Closure/LaTeX/main.pdf}.
+    \item \textbf{Guías de desarrollo de plugins o módulos terceros}: la
+          versión 1.0 no contempla extensibilidad mediante plugins. Una
+          eventual versión futura debería añadir esta dimensión a la
+          documentación.
+\end{itemize}
+
+% ─────────────────────────────────────────────────────────────
+\section{Glosario y Siglas}
+
+A lo largo del documento se emplean los siguientes términos y siglas, muchos
+de los cuales son habituales en sus dominios respectivos pero pueden requerir
+contextualización conjunta.
+
+\begin{table}[H]
+    \centering
+    \caption{Glosario de términos y siglas empleados en el documento}
+    \begin{tabularx}{\textwidth}{lX}
+        \toprule
+        \textbf{Sigla / Término}      & \textbf{Significado y contexto en Demeter} \\
+        \midrule
+        ADR                            & \textit{Architecture Decision Record}. Registro corto que documenta una decisión arquitectónica relevante, sus alternativas y su justificación. \\
+        API REST                       & \textit{Application Programming Interface} sobre HTTP siguiendo el estilo arquitectónico REST. \\
+        CRC                            & \textit{Cyclic Redundancy Check}. Suma de verificación que protege la integridad de las tramas del protocolo binario Demeter. \\
+        ESP-NOW                        & Protocolo de comunicación inalámbrica entre dispositivos ESP32 sin necesidad de un punto de acceso WiFi. \\
+        ET\textsubscript{0}            & \textit{Evapotranspiración de referencia}. Indicador agronómico que estima la pérdida de agua del cultivo por unidad de tiempo. \\
+        GDD                            & \textit{Growing Degree Days}. Acumulado térmico que se usa para predecir fases fenológicas del cultivo. \\
+        IoT                            & \textit{Internet of Things}. Paradigma de dispositivos físicos conectados que recolectan y reaccionan a datos del entorno. \\
+        JWT                            & \textit{JSON Web Token}. Formato compacto de token firmado usado para autenticación entre el frontend y el backend. \\
+        LIMS                           & \textit{Laboratory Information Management System}. Sistema que organiza la trazabilidad de muestras y experimentos en un laboratorio. \\
+        OTA                            & \textit{Over-The-Air}. Actualización remota del firmware sin intervención física sobre el dispositivo. NO implementado en v1.0. \\
+        Parquet                        & Formato columnar de almacenamiento de datos usado por el SDK como caché local de telemetría. \\
+        RBAC                           & \textit{Role-Based Access Control}. Modelo de control de acceso basado en roles (admin, viewer) usado por el backend. \\
+        RQ                             & \textit{Redis Queue}. Librería Python que implementa una cola de tareas asíncronas sobre Redis, usada por el \textit{math worker}. \\
+        SDK                            & \textit{Software Development Kit}. En Demeter, el paquete Python \texttt{demeter\_sdk} que provee acceso programático a la plataforma. \\
+        TLS                            & \textit{Transport Layer Security}. Cifrado del transporte HTTPS y WebSocket Seguro (WSS). \\
+        UART                           & \textit{Universal Asynchronous Receiver-Transmitter}. Enlace serie entre el ESP32 \textit{gateway} y la Raspberry Pi. \\
+        VPD                            & \textit{Vapor Pressure Deficit}. Indicador agronómico que cuantifica el estrés hídrico atmosférico sobre la planta. \\
+        WSS                            & \textit{WebSocket Secure}. WebSocket sobre TLS, transporte usado entre la Raspberry Pi y el backend. \\
+        \bottomrule
+    \end{tabularx}
+    \label{tab:glosario}
+\end{table}

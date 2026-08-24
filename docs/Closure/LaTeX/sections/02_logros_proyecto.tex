@@ -1,0 +1,123 @@
+% ============================================================
+% CAPÍTULO 2 — Logros del Proyecto
+% ============================================================
+\chapter{Logros del Proyecto}
+\label{cap:logros}
+
+\section{Hitos t\'ecnicos alcanzados}
+
+El sistema cubre las cuatro capas proyectadas y un SDK cient\'ifico
+independiente. A continuaci\'on se enumeran los hitos verificados por
+capa.
+
+\subsection{Capa de Campo (Firmware ESP32)}
+\begin{itemize}[leftmargin=*]
+    \item Implementaci\'on completa de los tres roles (Sensor, Actuador,
+    Gateway) con c\'odigo compartido y comportamiento configurable en
+    compilaci\'on.
+    \item Protocolo binario Demeter v2 funcional: \textbf{14} tipos de
+    mensaje operativos, handshake TCP-like (SYN / SYN-ACK / ACK),
+    gesti\'on de reintentos.
+    \item Operaci\'on en \textit{Deep Sleep} para nodos sensor
+    ($\sim$80\,mA en activo, $\sim$0.01\,mA en reposo).
+    \item Tabla de rutas din\'amica con comando \texttt{ROUTE\_ADD}.
+    \item Pipeline de validaci\'on por capas: SYNC + LENGTH + CRC + DST\_ID.
+\end{itemize}
+
+\subsection{Capa de Borde (Raspberry Pi)}
+\begin{itemize}[leftmargin=*]
+    \item Servicio Python \texttt{asyncio} con cuatro tareas concurrentes.
+    \item Decodificaci\'on bidireccional Protocolo Demeter $\leftrightarrow$ JSON.
+    \item Cliente WebSocket TLS persistente con reconexi\'on autom\'atica.
+    \item Containerizaci\'on Docker con mapeo directo del UART f\'isico.
+    \item Cach\'e local de topolog\'ia (\textit{Device Manager}) persistente.
+\end{itemize}
+
+\subsection{Capa de Servidor (Google Cloud)}
+\begin{itemize}[leftmargin=*]
+    \item Stack de seis contenedores en red Docker privada
+    (\texttt{demeter-net}).
+    \item Backend FastAPI con \textbf{31} endpoints REST (19 GET, 10 POST,
+    1 PATCH, 1 DELETE) y canal WebSocket.
+    \item Persistencia PostgreSQL sobre \textbf{13} tablas, con migraciones
+    gestionadas v\'ia Alembic.
+    \item Bus Redis Pub/Sub con dos bases de datos l\'ogicas (cach\'e + cola).
+    \item Worker as\'incrono para c\'alculos pesados (RQ).
+    \item Secuenciador para automatizaci\'on temporizada.
+    \item Autenticaci\'on JWT con \texttt{bcrypt}.
+    \item Sistema LIMS con plantas, experimentos y asignaciones N:M.
+\end{itemize}
+
+\subsection{Capa de Visualizaci\'on (React)}
+\begin{itemize}[leftmargin=*]
+    \item \textit{Single Page Application} con dashboard tiempo real.
+    \item Control manual de actuadores.
+    \item Planificador de secuencias multi-paso.
+    \item Gesti\'on LIMS: plantas, experimentos, asignaciones,
+    consulta de telemetr\'ia por planta.
+\end{itemize}
+
+\subsection{SDK Cient\'ifico (Python)}
+\begin{itemize}[leftmargin=*]
+    \item Cliente con cach\'e Parquet autom\'atica
+    (\texttt{\textasciitilde/.demeter\_cache}).
+    \item Pipeline ETL: \texttt{to\_dataframe} $\to$ \texttt{clean}
+    $\to$ \texttt{fill\_gaps} $\to$ \texttt{resample}.
+    \item C\'alculos agron\'omicos vectorizados:
+    \begin{itemize}
+        \item Termodin\'amica del aire h\'umedo: VPD, punto de roc\'io,
+        bulbo h\'umedo (Stull, 2011), humedad absoluta, entalp\'ia (ASHRAE).
+        \item Fenolog\'ia: GDD, \textit{chill hours},
+        ET$_0$ (Hargreaves--Samani), DAP.
+        \item Estad\'istica: Z-score, \'indice de Wallin (1962), media m\'ovil 24\,h.
+    \end{itemize}
+    \item Visualizaci\'on con Matplotlib/Seaborn (4 funciones gr\'aficas).
+    \item Exportaci\'on CSV (UTF-8 BOM) y Excel multi-hoja.
+    \item Suite completa en una sola llamada (\texttt{run\_full\_suite()}).
+\end{itemize}
+
+\section{Documentaci\'on y artefactos generados}
+
+\begin{itemize}[leftmargin=*]
+    \item Documentaci\'on t\'ecnica de arquitectura: \textbf{84~p\'aginas}
+    en LaTeX, m\'as las 14.575 l\'ineas de documentaci\'on en Markdown del
+    \'arbol \texttt{docs/}.
+    \item \textbf{18} diagramas distintos de flujo, secuencia y
+    arquitectura (compilados en variante clara y oscura).
+    \item \textbf{9} cuadros de \textit{Decisi\'on de Dise\~no} con
+    justificaci\'on y alternativas descartadas.
+    \item Repositorio Git con \textbf{227} \textit{commits} y
+    \textbf{27.025} l\'ineas de c\'odigo propio, excluidas dependencias y
+    ficheros generados.
+    \item Suite de \textbf{140 tests} automatizados repartidos en 20 ficheros:
+    \begin{itemize}
+        \item Firmware ESP32 (Unity/C++): 32 tests.
+        \item Servicio Raspberry Pi (pytest): 37 tests.
+        \item Backend FastAPI (pytest): 16 tests.
+        \item Frontend (Vitest): 3 tests.
+        \item SDK cient\'ifico (pytest): 52 tests.
+    \end{itemize}
+    \item Esquema de datos PostgreSQL versionado con Alembic.
+    \item Modelos Pydantic compartidos entre todas las capas.
+\end{itemize}
+
+\section{Aprendizajes adquiridos}
+
+Los miembros participantes han desarrollado competencias en:
+
+\begin{itemize}[leftmargin=*]
+    \item Dise\~no de protocolos de comunicaci\'on binarios.
+    \item Programaci\'on embebida ESP32 + ESP-NOW.
+    \item Programaci\'on as\'incrona en Python (\texttt{asyncio}).
+    \item Backend moderno (FastAPI, asincron\'ia, Pydantic, SQLAlchemy as\'incrona).
+    \item Frontend reactivo (React, WebSockets en cliente).
+    \item DevOps b\'asico (Docker, despliegue cloud, gesti\'on de secretos).
+    \item Documentaci\'on t\'ecnica profesional (LaTeX, diagramas).
+    \item C\'alculos agron\'omicos vectorizados (NumPy/Pandas).
+    \item Especificaci\'on y redacci\'on de decisiones de arquitectura
+    (ADR) y de exploraciones acotadas (\textit{spikes}) como herramientas
+    de trabajo, no como burocracia.
+    \item Evaluaci\'on cr\'itica de la sostenibilidad de un proyecto propio
+    y capacidad de proponer su cierre ordenado, que es en s\'i misma una
+    competencia de ingenier\'ia.
+\end{itemize}

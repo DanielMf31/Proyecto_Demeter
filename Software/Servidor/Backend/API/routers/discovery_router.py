@@ -35,11 +35,7 @@ async def get_devices(current_user: User = Depends(get_current_active_user)):
     if not raw_config:
         # Podríamos retornar una lista vacía, pero un 404 indica que
         # el origen de la verdad (Raspberry) no ha reportado nada aún.
-        return {
-            "status": "pending",
-            "message": "Ninguna Raspberry ha reportado su configuración todavía.",
-            "devices": {}
-        }
+        raise HTTPException(status_code=404, detail="No hay configuración de dispositivos disponible.")
 
     try:
         devices = json.loads(raw_config)

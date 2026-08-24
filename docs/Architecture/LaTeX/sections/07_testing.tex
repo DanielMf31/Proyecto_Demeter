@@ -1,0 +1,280 @@
+% ============================================================
+% SECCIÓN 7: Testing y Validación
+% ============================================================
+\chapter{Testing y Validación}
+\label{sec:testing}
+
+% ─────────────────────────────────────────────────────────────
+\section{Estrategia de Testing por Capa}
+
+El sistema Demeter está formado por cuatro capas con tecnologías y restricciones de
+ejecución radicalmente distintas: firmware C\texttt{++} sobre ESP32, servicio Python
+asíncrono en la Raspberry Pi, backend FastAPI en GCP y SDK científico empaquetado para
+el usuario final. Aplicar una única política de testing a todas ellas no sería
+realista; en su lugar, cada capa adopta el enfoque que mejor se ajusta a sus
+dependencias y a la madurez de los componentes que ejercita.
+
+\begin{table}[H]
+    \centering
+    \caption{Enfoque de testing por capa del sistema}
+    \begin{tabularx}{\textwidth}{lllX}
+        \toprule
+        \textbf{Capa}            & \textbf{Framework}      & \textbf{Énfasis}     & \textbf{Justificación} \\
+        \midrule
+        Firmware (ESP32)         & Unity (PlatformIO)      & Unitario             & Hardware caro de simular: se aíslan controladores y motor de protocolo con mocks Arduino. \\
+        Raspberry Pi             & pytest, asyncio         & Mixto                & Lógica de despacho concurrente: se mockean transporte UART y WebSocket para validar flujos sin red ni puerto serie. \\
+        Backend (FastAPI)        & pytest, TestClient      & Integración           & La autenticación JWT, el RBAC y la cola RQ son emergentes: se ejercitan extremo a extremo contra una base SQLite en memoria. \\
+        SDK Científico           & pytest                  & Unitario              & Funciones agronómicas puras (VPD, entalpía, GDD): se validan con vectores numéricos de referencia, sin red. \\
+        \bottomrule
+    \end{tabularx}
+    \label{tab:test_strategy}
+\end{table}
+
+\begin{designnote}
+\textbf{Pirámide de testing pragmática.} El proyecto privilegia la \textit{base} de la
+pirámide — tests unitarios rápidos, deterministas y locales — y un nivel intermedio de
+integración acotado a fixtures en memoria. No se invierte en E2E automatizados (frontend
+clic-a-clic, hardware físico continuo) porque su mantenimiento no se amortiza en un
+sistema de un solo desarrollador. La validación E2E se delega a \textit{spikes}
+manuales documentados (Sección~\ref{sec:testing_field}) y a la operación real del
+sistema durante los 30 días de estabilización.
+\end{designnote}
+
+% ─────────────────────────────────────────────────────────────
+\section{Tests Unitarios}
+\label{sec:testing_unit}
+
+La capa unitaria cubre los componentes cuyo contrato es internamente verificable: un
+controlador GPIO al que se le piden estados, un parser binario al que se le suministran
+tramas, un cálculo agronómico al que se le pasan vectores. Todos estos tests se
+ejecutan en menos de un segundo y no requieren hardware ni red.
+
+\begin{table}[H]
+    \centering
+    \caption{Inventario de tests unitarios (verificado el 2026-05-07)}
+    \begin{tabularx}{\textwidth}{lXrl}
+        \toprule
+        \textbf{Capa}           & \textbf{Archivo}                      & \textbf{\#Tests} & \textbf{Cubre} \\
+        \midrule
+        Firmware                & \texttt{test\_gpio\_controller.cpp}   & 3   & Lectura/escritura de pines, pull-up, modo \\
+        Firmware                & \texttt{test\_protocol\_engine.cpp}   & 25  & Parseo, CRC, cabecera, callbacks (MockComms) \\
+        Firmware                & \texttt{test\_system\_manager.cpp}    & 4   & Inicialización, transición de estados \\
+        Raspberry Pi            & \texttt{test\_device\_manager.py}     & 4   & Alta, baja y consulta de nodos \\
+        Raspberry Pi            & \texttt{test\_telemetry\_cache.py}    & 23  & Caché en memoria, expiración, agregación \\
+        Raspberry Pi            & \texttt{test\_ws\_client.py}          & 3   & Reconexión, serialización de frames \\
+        SDK                     & \texttt{test\_science.py}             & 23  & VPD, entalpía, presión de vapor, GDD \\
+        SDK                     & \texttt{test\_transform.py}           & 15  & Pipeline ETL, resample, normalización \\
+        SDK                     & \texttt{test\_client\_offline.py}     & 7   & Caché Parquet sin red \\
+        SDK                     & \texttt{test\_export.py}              & 7   & Exportación a CSV y Excel \\
+        \midrule
+        \textbf{Total}          &                                       & \textbf{114} & \\
+        \bottomrule
+    \end{tabularx}
+    \label{tab:tests_unit}
+\end{table}
+
+\textbf{Detalles destacables por capa:}
+
+\begin{itemize}[leftmargin=*, label=--]
+    \item \textbf{Firmware}. El archivo \texttt{test\_protocol\_engine.cpp} concentra
+          25 casos sobre el parseo del protocolo binario Demeter: validación de la
+          cabecera (Sección~\ref{sec:protocolo}), CRC, manejo de tramas truncadas,
+          callbacks y rutas de error. Es el componente con mayor densidad de tests
+          porque es también el más expuesto a entradas externas.
+    \item \textbf{Raspberry Pi}. \texttt{test\_telemetry\_cache.py} (23 tests) ejercita
+          la caché que evita golpear al backend en cada lectura. Cubre expiración por
+          TTL, agregación por nodo y comportamiento bajo carga concurrente con
+          \texttt{asyncio}.
+    \item \textbf{SDK}. Las funciones científicas son las que más tests soportan
+          porque su corrección numérica es auditable: cada función agronómica se
+          contrasta contra al menos un caso de referencia conocido (e.g.\ tabla de
+          presión de vapor de saturación, ejemplos del manual de agroclimatología).
+\end{itemize}
+
+% ─────────────────────────────────────────────────────────────
+\section{Tests de Integración}
+\label{sec:testing_integration}
+
+La capa de integración ejercita la \textit{colaboración} entre componentes: una
+petición HTTP que atraviesa autenticación, base de datos y respuesta; un comando que
+viaja del despachador al transporte UART; una tarea que se encola y se procesa.
+Ningún test de integración requiere infraestructura real: PostgreSQL se sustituye por
+SQLite en memoria, Redis se mockea y el transporte UART se reemplaza por un
+\texttt{AsyncMock}.
+
+\begin{table}[H]
+    \centering
+    \caption{Inventario de tests de integración}
+    \begin{tabularx}{\textwidth}{lXrl}
+        \toprule
+        \textbf{Capa}           & \textbf{Archivo}                       & \textbf{\#Tests} & \textbf{Ejercita} \\
+        \midrule
+        Raspberry Pi            & \texttt{test\_command\_dispatcher.py}  & 3  & Despachador + UART + WebSocket \\
+        Raspberry Pi            & \texttt{test\_uart\_processor.py}      & 4  & Transporte UART + handshake (Ping/Ack) \\
+        Backend                 & \texttt{test\_auth.py}                 & 6  & Login, refresh token, RBAC \\
+        Backend                 & \texttt{test\_command.py}              & 4  & RBAC + JWT + envío de comando \\
+        Backend                 & \texttt{test\_analysis.py}             & 3  & Encolado en RQ, procesamiento \\
+        Backend                 & \texttt{test\_lims.py}                 & 3  & Endpoints LIMS sobre DB en memoria \\
+        Firmware                & \texttt{test\_integration.cpp}         & 0$^{\dagger}$ & Bucle UART por loopback (infraestructura) \\
+        \midrule
+        \textbf{Total}          &                                        & \textbf{23} & \\
+        \bottomrule
+    \end{tabularx}
+    \label{tab:tests_integration}
+\end{table}
+
+\noindent$^{\dagger}$ Infraestructura de loopback presente pero sin casos
+\texttt{TEST\_CASE} activos: queda como base para los tests Hardware-In-the-Loop
+previstos tras el spike de bombas (Sección~\ref{sec:testing_field}).
+
+\textbf{Patrón compartido.} Todos los tests de integración del backend usan un
+fixture \texttt{conftest.py} que arranca una aplicación FastAPI completa contra
+una base SQLite en memoria, crea usuarios con distintos roles y emite tokens JWT
+para ejercitar los endpoints. Los tests de la Raspberry Pi siguen un patrón análogo
+con \texttt{AsyncMock} para los componentes asíncronos (Sección~\ref{sec:raspberry}).
+
+\begin{warningbox}
+\textbf{Limitación conocida.} Ningún test de integración cubre actualmente el flujo
+completo \textit{usuario $\rightarrow$ backend $\rightarrow$ Raspberry Pi $\rightarrow$
+ESP32 $\rightarrow$ actuador físico}. Esa validación se hizo manualmente sobre banco,
+comprobando que el comando llega al nodo y conmuta el pin; nunca llegó a ejercitarse
+contra un actuador hidráulico real. Automatizarla exigiría un \textit{harness} con un
+ESP32 dedicado conectado a la suite de tests, un coste de mantenimiento que el
+proyecto no asumió.
+\end{warningbox}
+
+% ─────────────────────────────────────────────────────────────
+\section{Pruebas de Campo y Validación Hardware}
+\label{sec:testing_field}
+
+Las pruebas de campo cubren lo que el banco de tests automatizados no puede: el
+comportamiento de los componentes electromecánicos reales bajo las condiciones de
+operación. Estas pruebas se documentan como \textit{spikes} con objetivos, hipótesis
+verificables y criterios de aceptación previos a la ejecución.
+
+\textbf{SPIKE-001 — Validación de la bomba de 5\,V: planificado y no ejecutado.} El
+primer y único \textit{spike} del ciclo se escribió para confirmar cinco hipótesis
+sobre una bomba mini sumergible antes de comprometer el resto del sistema de riego:
+
+\begin{itemize}[leftmargin=*, label=--]
+    \item \textbf{H1}: la bomba entrega un caudal $\geq$~50~mL/min a 5\,V.
+    \item \textbf{H2}: el consumo a régimen no excede 350\,mA, dentro del margen del módulo relé.
+    \item \textbf{H3}: el ESP32 actuador puede activar/desactivar la bomba a través del relé sin glitches.
+    \item \textbf{H4}: el tiempo de riego típico para una maceta (~50~mL) es inferior a 90\,s.
+    \item \textbf{H5}: la temperatura del cuerpo de la bomba se mantiene estable tras 6 ciclos consecutivos.
+\end{itemize}
+
+El \textit{spike} quedó estructurado en tres sesiones de tres horas --- montaje,
+caracterización y ciclos repetidos --- con una tabla de resultados que debía decidir
+la continuidad: continuar, pivotar a otra bomba o abortar el rediseño físico. El
+procedimiento y la plantilla residen en
+\texttt{docs/spikes/SPIKE-001-validacion-bomba-5v.md}.
+
+\textbf{Ninguna de esas tres sesiones se llegó a celebrar.} El \textit{spike} está
+completo como documento y vacío como experimento: sus cinco hipótesis siguen sin
+verificar, y la tabla de resultados sin rellenar. Peor aún, quedó desalineado del
+hardware que finalmente se adquirió: está redactado para una bomba de 5\,V y la
+instalación comprada es de 12\,V autocebada, de modo que sus umbrales de caudal y
+consumo ya no son aplicables. Cualquier continuación tendría que reescribirlo antes
+de ejecutarlo.
+
+Se conserva aquí, sin maquillarlo, porque documenta el punto exacto en el que el
+proyecto dejó de avanzar sobre el mundo físico, y porque un \textit{spike} escrito y
+no ejecutado es una lección de proceso más útil que su ausencia.
+
+\textbf{Validación E2E continua: no realizada.} El criterio de \texttt{DONE} previsto
+para la versión 1.0 era un periodo de \textbf{30 días de operación continua sin
+intervención manual}, durante el cual se anotarían caídas del servicio, consumo
+energético, tasa de pérdida de tramas y desviación temporal del secuenciador. Ese
+periodo nunca se inició. \textbf{El sistema acumula cero días de operación
+desatendida}, y en consecuencia ninguna de esas cuatro series existe.
+
+\textbf{Pruebas de campo previas (firmware).} El firmware ya ha sido sometido a
+pruebas de Deep Sleep en banco que validan el ciclo energético documentado en el
+Anexo (Figura~\ref{fig:anx_ciclo_energetico}): fase activa de $\sim$1{,}5\,s y
+ventana de Deep Sleep de $\sim$3596\,s. Los detalles de medición están en
+\texttt{docs/deep\_sleep\_test.md}.
+
+% ─────────────────────────────────────────────────────────────
+\section{Métricas Medidas}
+\label{sec:testing_metrics}
+
+Esta sección recoge únicamente métricas \textbf{efectivamente medidas} sobre el
+sistema. Las métricas para las que aún no existe instrumentación se marcan como
+pendientes para evitar inducir confianza injustificada en los datos.
+
+\begin{table}[H]
+    \centering
+    \caption{Métricas observadas y estado de medición}
+    \begin{tabularx}{\textwidth}{Xlll}
+        \toprule
+        \textbf{Métrica}                                  & \textbf{Valor}            & \textbf{Fuente}                                & \textbf{Estado} \\
+        \midrule
+        Tiempo de fase activa nodo sensor                  & $\sim$1{,}5\,s            & Banco con osciloscopio                          & Medido \\
+        Periodo Deep Sleep nodo sensor                     & $\sim$3596\,s             & Configuración firmware + medida real            & Medido \\
+        Consumo nodo en Deep Sleep                         & $\mu$A (orden de magnitud)& Datasheet ESP32 + observación                  & Medido \\
+        Latencia comando usuario\,$\rightarrow$\,actuador  & ---                       & Sin instrumentación                            & Pendiente (spike) \\
+        Throughput de tramas Gateway\,$\rightarrow$\,RPi   & ---                       & Sin instrumentación                            & Pendiente \\
+        Tasa de pérdida de tramas                           & ---                       & Sin instrumentación                            & Pendiente \\
+        Cobertura de código (todas las capas)              & No formalizada            & \texttt{pytest-cov} declarado en SDK, sin reporte & Pendiente \\
+        \bottomrule
+    \end{tabularx}
+    \label{tab:metrics}
+\end{table}
+
+\textbf{Las métricas pendientes lo siguen estando.} El plan de instrumentación
+previsto --- marcas de tiempo en frontend y ESP32 para la latencia extremo a extremo,
+contadores de tramas recibidas y descartadas en el servicio de borde, y ejecución de
+\texttt{pytest --cov} sobre backend, Raspberry Pi y SDK --- \textbf{no llegó a
+implementarse en ninguno de sus tres puntos}.
+
+La tabla anterior queda, por tanto, como el estado definitivo de la caracterización
+del sistema: tres métricas medidas, todas ellas del ciclo energético del nodo, y
+cuatro sin instrumentar. Es poco, y decirlo importa: sin línea base medida no hay
+forma de demostrar que el sistema cumple sus requisitos ni de detectar una regresión.
+Cualquier continuación de este trabajo debería empezar por aquí, antes de añadir una
+sola función nueva.
+
+% ─────────────────────────────────────────────────────────────
+\section{Resumen del Estado de Validación}
+
+A fecha de redacción de este capítulo, el banco de tests automatizado del proyecto
+suma \textbf{140 tests verificables} distribuidos en \textbf{20 archivos} sobre las
+cuatro capas del sistema y la interfaz web:
+
+\begin{table}[H]
+    \centering
+    \caption{Resumen agregado de tests por capa}
+    \begin{tabular}{lrrrr}
+        \toprule
+        \textbf{Capa}      & \textbf{Archivos} & \textbf{Tests} & \textbf{Unitarios} & \textbf{Integración} \\
+        \midrule
+        Firmware           & 5                 & 32             & 32                 & 0$^{\dagger}$ \\
+        Raspberry Pi       & 5                 & 37             & 30                 & 7 \\
+        Backend            & 4                 & 16             & 0                  & 16 \\
+        SDK                & 4                 & 52             & 52                 & 0 \\
+        Frontend           & 2                 & 3              & 3                  & 0 \\
+        \midrule
+        \textbf{Total}     & \textbf{20}       & \textbf{140}   & \textbf{117}       & \textbf{23} \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:tests_summary}
+\end{table}
+
+\noindent$^{\dagger}$ Infraestructura de loopback presente, sin casos
+\texttt{TEST\_CASE} activos.
+
+\begin{designnote}
+\textbf{Honestidad metodológica.} El propósito de este capítulo no es exhibir un
+banco de pruebas exhaustivo, sino documentar con precisión qué se ha verificado,
+cómo se ha verificado y qué queda fuera. La cifra de 140 tests es modesta a escala
+industrial; en cambio, cubre los componentes de mayor riesgo del sistema --- parser
+binario, despachador asíncrono, autenticación --- que es donde un fallo silencioso
+resulta más caro.
+
+Lo que no puede decirse es que ese banco se complementara, como estaba previsto, con
+validación manual estructurada y operación continua: el \textit{spike} de hardware no
+se ejecutó y los 30 días de operación desatendida nunca empezaron. La versión 1.0
+se entrega, por tanto, \textbf{verificada en software y sin validar en campo}. Es una
+distinción que este documento prefiere dejar escrita antes que difuminar.
+\end{designnote}

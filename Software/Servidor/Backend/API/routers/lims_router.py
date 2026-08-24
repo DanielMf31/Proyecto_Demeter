@@ -9,8 +9,12 @@ from sqlalchemy.orm import selectinload
 from Core.database import get_db
 from Core.redis import redis_manager
 from Core.auth import get_current_active_user
-from BD.models import Experiment, User, Plant, ExperimentoPlantaLink
-from BD.schemas import PlantCreate, PlantUpdate, PlantResponse, ExperimentCreate, ExperimentResponse
+from BD.models import Experiment, User, Plant, ExperimentoPlantaLink, PlantSensorMap
+from BD.schemas import (
+    PlantCreate, PlantUpdate, PlantResponse,
+    ExperimentCreate, ExperimentResponse,
+    PlantSensorMapCreate, PlantSensorMapResponse,
+)
 
 logger = logging.getLogger("lims_router")
 router = APIRouter(prefix="/lims", tags=["LIMS Architecture"])
@@ -150,3 +154,65 @@ async def generar_experimento(exp_in: ExperimentCreate, db: AsyncSession = Depen
     stmt = select(Experiment).options(selectinload(Experiment.plants)).where(Experiment.id == db_exp.id)
     final_result = await db.execute(stmt)
     return final_result.scalar_one()
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SENSOR MAP (node_id, sensor_slot) → plant_id
+# ─────────────────────────────────────────────────────────────────────────────
+
+@router.get("/sensor-map", response_model=List[PlantSensorMapResponse])
+async def get_sensor_mappings(db: AsyncSession = Depends(get_db)):
+    """List all sensor-slot-to-plant mappings."""
+    stmt = (
+        select(PlantSensorMap)
+        .options(selectinload(PlantSensorMap.plant))
+        .order_by(PlantSensorMap.node_id, PlantSensorMap.sensor_slot)
+    )
+    result = await db.execute(stmt)
+    return result.scalars().all()
+
+
+@router.post("/sensor-map", response_model=PlantSensorMapResponse)
+async def upsert_sensor_mapping(
+    mapping_in: PlantSensorMapCreate,
+    db: AsyncSession = Depends(get_db),
+    _user: User = Depends(get_current_active_user),
+):
+    """Create or update a sensor-slot-to-plant mapping (upsert)."""
+    # Verify plant exists
+    plant = await db.execute(select(Plant).where(Plant.id == mapping_in.plant_id))
+    if not plant.scalar_one_or_none():
+        raise HTTPException(status_code=404, detail=f"Plant id={mapping_in.plant_id} not found")
+
+    # Check for existing mapping on this (node_id, sensor_slot)
+    stmt = select(PlantSensorMap).where(
+        PlantSensorMap.node_id == mapping_in.node_id,
+        PlantSensorMap.sensor_slot == mapping_in.sensor_slot,
+    )
+    result = await db.execute(stmt)
+    existing = result.scalar_one_or_none()
+
+    if existing:
+        existing.plant_id = mapping_in.plant_id
+    else:
+        existing = PlantSensorMap(**mapping_in.model_dump())
+        db.add(existing)
+
+    await db.commit()
+    await db.refresh(existing)
+    return existing
+
+
+@router.delete("/sensor-map/{mapping_id}", status_code=204)
+async def delete_sensor_mapping(
+    mapping_id: int,
+    db: AsyncSession = Depends(get_db),
+    _user: User = Depends(get_current_active_user),
+):
+    """Remove a sensor-slot mapping."""
+    result = await db.execute(select(PlantSensorMap).where(PlantSensorMap.id == mapping_id))
+    mapping = result.scalar_one_or_none()
+    if not mapping:
+        raise HTTPException(status_code=404, detail="Mapping not found")
+    await db.delete(mapping)
+    await db.commit()

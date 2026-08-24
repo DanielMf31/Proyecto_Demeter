@@ -1,0 +1,194 @@
+% ============================================================
+% ANEXO B — Plan de Entrega Detallado
+% ============================================================
+\chapter{Plan de Entrega de Artefactos}
+\label{anx:plan_entrega}
+
+Este anexo detalla los artefactos a entregar como parte del cierre
+formal del Proyecto Demeter, organizados por naturaleza (digital,
+f\'isico, conocimiento) y con cronograma asociado.
+
+\section{Artefactos digitales}
+
+\begin{table}[H]
+    \centering
+    \caption{Artefactos digitales a entregar.}
+    \label{tab:digital}
+    \begin{tabular}{p{4.5cm}p{8cm}}
+        \toprule
+        \textbf{Artefacto} & \textbf{Detalle / Ubicaci\'on} \\
+        \midrule
+        Repositorio p\'ublico & \texttt{github.com/DanielMf31/Proyecto\_Demeter} (privado en el momento de redactar; se abre en la semana 1 del cronograma) \\
+        Documentaci\'on T\'ecnica (PDF) & \texttt{docs/Architecture/LaTeX/main.pdf} en el propio repositorio (84 p\'aginas) \\
+        Documentaci\'on T\'ecnica (fuentes LaTeX) & Carpeta \texttt{docs/Architecture/LaTeX/} \\
+        Informe de Viabilidad (este documento) & Carpeta \texttt{docs/Closure/LaTeX/} \\
+        Backups de base de datos & No se entrega \textit{dump}: la base solo contiene datos de prueba y semilla, reproducibles con \texttt{make seed}. El esquema viaja versionado en las migraciones de Alembic \\
+        Im\'agenes Docker & Ya publicadas en GitHub Container Registry (\texttt{ghcr.io/danielmf31/proyecto\_demeter/\{backend,frontend\}}); pasan a p\'ublicas junto con el repositorio \\
+        Diagramas fuente (.mmd, .drawio) & Carpeta \texttt{docs/diagrams/} en repositorio \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Licencias propuestas}:
+\begin{itemize}[leftmargin=*]
+    \item C\'odigo: \textbf{MIT}. Se descarta Apache 2.0 porque su valor
+    diferencial es la cl\'ausula expresa de patentes, irrelevante en un
+    proyecto sin cartera de patentes ni intenci\'on de litigio, mientras
+    que MIT impone menos fricci\'on a quien quiera reutilizar el c\'odigo
+    con fines docentes.
+    \item Documentaci\'on: \textbf{CC-BY-SA 4.0} (atribuci\'on +
+    compartir igual), de modo que las mejoras sobre el material docente
+    reviertan en el mismo r\'egimen abierto.
+\end{itemize}
+
+\section{Artefactos f\'isicos}
+
+\begin{table}[H]
+    \centering
+    \caption{Plan de gesti\'on del hardware f\'isico.}
+    \label{tab:fisico}
+    \begin{tabular}{p{4cm}p{4cm}p{4.5cm}}
+        \toprule
+        \textbf{Tipo de hardware} & \textbf{Ubicaci\'on actual} & \textbf{Destino propuesto} \\
+        \midrule
+        Instalaci\'on hidr\'aulica (4 bombas, 6 electrov\'alvulas, 8 v\'alvulas, 4 barriles de 60\,L, fuente DIN 12\,V) & Almac\'en ESIBot & Puesta a disposici\'on de la ETSIA: financiada con el Proyecto Docente, es patrimonio universitario \\
+        Nodos ESP32-S3 con sensores   & Almac\'en ESIBot & Conservaci\'on en la asociaci\'on \\
+        Raspberry Pi 4B (gateway)     & Almac\'en ESIBot & Conservaci\'on en la asociaci\'on \\
+        Cables, fuentes, accesorios   & Almac\'en ESIBot & Reaprovechamiento en otros proyectos de la asociaci\'on \\
+        Carcasas y protecciones IP65  & Almac\'en ESIBot & Reaprovechamiento \\
+        Bater\'ias LiPo               & Almac\'en ESIBot & Reaprovechamiento, previa comprobaci\'on de estado de carga \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+El detalle por origen de financiaci\'on se recoge en la
+tabla~\ref{tab:plan_hardware} del Anexo~\ref{anx:financiero}.
+
+\section{Artefactos de conocimiento e infraestructura}
+
+\begin{table}[H]
+    \centering
+    \caption{Gesti\'on de cuentas externas e infraestructura.}
+    \label{tab:cuentas}
+    \begin{tabular}{p{3.5cm}p{4cm}p{5cm}}
+        \toprule
+        \textbf{Cuenta / Recurso} & \textbf{Estado actual} & \textbf{Acci\'on propuesta} \\
+        \midrule
+        Cuenta Google Cloud Platform & \textbf{Cerrada}. La VM, el disco persistente y la IP reservada han sido eliminados; la facturaci\'on est\'a detenida & Ninguna. Acci\'on ya ejecutada: era el \'unico gasto recurrente vivo del proyecto \\
+        Dominio \texttt{patata.monters.org} & Subdominio del dominio personal del autor, no del proyecto & Retirar el registro DNS. No procede transferencia: el dominio ra\'iz es ajeno al proyecto \\
+        Cuenta Cloudflare            & Personal del autor; se usa solo como \textit{tunnel} de acceso al entorno de \textit{staging} & Eliminar el t\'unel de Demeter. La cuenta permanece con el autor \\
+        Documentaci\'on interna      & Reside en el propio repositorio (\texttt{docs/}, 14.575 l\'ineas de Markdown), no en una wiki externa & Se entrega con el repositorio; no hay plataforma de terceros que dar de baja \\
+        Repositorios privados        & GitHub privado          & Convertir a p\'ublico al cierre \\
+        Credenciales y secretos      & Vault privado del autor & Rotar / invalidar antes del cierre p\'ublico \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{warningbox}
+Antes de la apertura p\'ublica del repositorio es \textbf{obligatorio}
+revisar el hist\'orico Git para asegurar que no contiene credenciales,
+claves API, contrase\~nas ni informaci\'on personal sensible.
+\end{warningbox}
+
+\subsection*{Resultado de la auditor\'ia de secretos}
+
+La auditor\'ia se ha realizado sobre los 227 \textit{commits} del
+repositorio, revisando tanto el \'arbol actual como el hist\'orico
+completo. Se resume a continuaci\'on.
+
+\begin{table}[H]
+    \centering
+    \caption{Hallazgos de la auditor\'ia de secretos del repositorio.}
+    \label{tab:auditoria}
+    \begin{tabular}{p{1.8cm}p{4.6cm}p{6.2cm}}
+        \toprule
+        \textbf{Gravedad} & \textbf{Hallazgo} & \textbf{Acci\'on requerida} \\
+        \midrule
+        \textbf{Cr\'itica} &
+        \textit{Token} de t\'unel de Cloudflare v\'alido en
+        \texttt{.env.staging}, versionado desde su commit inicial y
+        presente tambi\'en en el \'arbol actual. &
+        \textbf{Revocar el t\'unel en Cloudflare antes de abrir el
+        repositorio.} Una vez revocado, el valor filtrado queda inservible
+        y no es necesario reescribir el hist\'orico. \\
+        \midrule
+        Media &
+        Ficheros \texttt{.env} de los cuatro entornos versionados, con
+        contrase\~nas de PostgreSQL en claro. &
+        Los valores son de desarrollo o marcadores expl\'icitos
+        (\texttt{change\_me}), y la base de datos no es accesible desde
+        el exterior. Basta con dejar de versionarlos y conservar
+        \'unicamente \texttt{.env.example}. \\
+        \midrule
+        Baja &
+        \texttt{Core/auth.py} usa una clave de firma JWT por defecto
+        codificada en el fuente si la variable de entorno no est\'a
+        definida. &
+        No afecta al cierre, pero debe se\~nalarse a quien reutilice el
+        c\'odigo: un despliegue que olvide definir la variable firmar\'ia
+        sus \textit{tokens} con una clave p\'ublica y conocida. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{No se han encontrado} claves de cuenta de servicio de Google
+Cloud, claves privadas SSH o TLS, ni datos personales de terceros en
+ning\'un punto del hist\'orico.
+
+Con la revocaci\'on del \textit{token} de Cloudflare --- \'unica acci\'on
+bloqueante --- el repositorio puede abrirse sin reescribir el hist\'orico,
+lo que evita invalidar los identificadores de \textit{commit} citados a
+lo largo de esta documentaci\'on.
+
+\section{Cronograma detallado}
+
+\begin{table}[H]
+    \centering
+    \caption{Cronograma de entrega tras la aceptaci\'on del cierre.}
+    \label{tab:cronograma_detalle}
+    \begin{tabular}{p{2cm}p{11cm}}
+        \toprule
+        \textbf{Semana} & \textbf{Acciones} \\
+        \midrule
+        1 & Auditor\'ia de seguridad del repositorio (eliminaci\'on de
+            secretos del hist\'orico). Selecci\'on de licencias.
+            Apertura del repositorio en GitHub p\'ublico. Anuncio
+            interno en la asociaci\'on. \\
+        \midrule
+        2 & Entrega formal de la documentaci\'on a la Universidad
+            (PDFs + fuentes). Env\'io del informe de cierre completo.
+            Reuni\'on de cierre con el Departamento de Agronom\'ia de la
+            ETSIA, promotor del Proyecto Docente, y con la junta directiva
+            de ESIBot. \\
+        \midrule
+        3 & Inventario f\'isico definitivo del hardware. Devoluci\'on /
+            cesi\'on seg\'un origen de financiaci\'on. Firma del acta
+            de entrega de hardware. \\
+        \midrule
+        4 & Baja del registro DNS y del t\'unel de Cloudflare. Acta de
+            cierre t\'ecnico. El cierre de la infraestructura cloud
+            (eliminaci\'on de la VM, el disco y la IP reservada) ya est\'a
+            ejecutado, por lo que esta semana solo recoge la
+            formalizaci\'on documental. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\section{Documento de cierre formal}
+
+Como conclusi\'on del proceso, se solicita la firma de un \textbf{acta
+de cierre} entre la Universidad de Sevilla y la Asociaci\'on
+Universitaria ESIBot, que recoja al menos:
+
+\begin{itemize}[leftmargin=*]
+    \item Reconocimiento de la conclusi\'on del Proyecto Docente Demeter.
+    \item Listado de artefactos entregados.
+    \item Disposici\'on del hardware adquirido con fondos institucionales.
+    \item Reconocimiento del valor docente generado.
+    \item Disponibilidad futura de los autores para consultas puntuales.
+    \item Apertura a futuras colaboraciones bajo nuevos formatos.
+\end{itemize}
+
+Este acta constituye el cierre formal del proyecto y referencia
+institucional de la colaboraci\'on, facilitando que ambas partes
+mantengan relaci\'on operativa para futuras iniciativas.

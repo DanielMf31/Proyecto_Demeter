@@ -1,0 +1,389 @@
+% ============================================================
+% CAPÍTULO 4 — Análisis de Sostenibilidad (sección clave)
+% ============================================================
+\chapter{An\'alisis de Sostenibilidad}
+\label{cap:sostenibilidad}
+
+Este cap\'itulo analiza la viabilidad de mantener el Proyecto Demeter
+operativo en su forma actual a lo largo del tiempo, examinando las tres
+dimensiones cr\'iticas: econ\'omica, de recursos humanos y t\'ecnica.
+
+\section{An\'alisis econ\'omico}
+\label{sec:economico}
+
+\subsection{Inversi\'on realizada hasta la fecha}
+
+El proyecto ha consumido recursos econ\'omicos en hardware embebido,
+infraestructura cloud y horas de desarrollo personal. Las siguientes
+tablas detallan estos costes.
+
+\begin{table}[H]
+    \centering
+    \caption{Inversi\'on en electr\'onica de control y sensores.}
+    \label{tab:hardware}
+    \begin{tabular}{lrrr}
+        \toprule
+        \textbf{Componente} & \textbf{Uds.} & \textbf{\textbf{\euro}/ud.} & \textbf{Total} \\
+        \midrule
+        ESP32-S3-DevKitC-1                      & 3   & $\sim$15\,\euro  & 45\,\euro \\
+        Raspberry Pi 4B (4\,GB)                 & 1   & $\sim$75\,\euro  & 75\,\euro \\
+        MicroSD 32\,GB clase 10                 & 1   & $\sim$9\,\euro   & 9\,\euro \\
+        Sensor DS18B20 (sonda impermeable)      & 10  & $\sim$4\,\euro   & 40\,\euro \\
+        Sensor capacitivo de humedad de suelo   & 10  & $\sim$3\,\euro   & 30\,\euro \\
+        Sensor DHT22                            & 10  & $\sim$5\,\euro   & 50\,\euro \\
+        M\'odulo rel\'e 4 canales               & 3   & $\sim$6\,\euro   & 18\,\euro \\
+        Convertidores TTL/USB                   & 2   & $\sim$5\,\euro   & 10\,\euro \\
+        Fuentes de alimentaci\'on 5\,V          & 3   & $\sim$5\,\euro   & 15\,\euro \\
+        Bater\'ias LiPo 3000\,mAh               & 2   & $\sim$12\,\euro  & 24\,\euro \\
+        Carcasas/protecciones IP65              & 2   & $\sim$10\,\euro  & 20\,\euro \\
+        Cables, jumpers, \textit{breadboard}    & --- & ---              & 30\,\euro \\
+        \midrule
+        \textbf{SUBTOTAL ELECTR\'ONICA}         & --- & ---              & \textbf{366\,\euro} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+La electr\'onica se adquiri\'o de forma incremental en distribuci\'on
+\textit{online} a lo largo del desarrollo, en pedidos peque\~nos y sin
+un expediente de compra unificado; los importes de la
+tabla~\ref{tab:hardware} son por tanto precios de referencia de mercado
+por unidad, no importes facturados uno a uno. La instalaci\'on
+hidr\'aulica, por el contrario, s\'i procede de un \'unico expediente
+con trazabilidad completa.
+
+\begin{table}[H]
+    \centering
+    \caption{Inversi\'on en instalaci\'on hidr\'aulica y de potencia
+             (presupuesto n\textsuperscript{o}~26317, MR MICRO Sevilla).}
+    \label{tab:hardware_hidraulico}
+    \begin{tabular}{lrrr}
+        \toprule
+        \textbf{Componente} & \textbf{Uds.} & \textbf{\textbf{\euro}/ud.} & \textbf{Total} \\
+        \midrule
+        Bomba el\'ectrica autocebada 12\,V (Coolty) & 4 & 29,99\,\euro & 119,96\,\euro \\
+        Electrov\'alvula DC 12\,V 1\,\textquotedbl  & 6 & 36,74\,\euro & 220,44\,\euro \\
+        V\'alvula reguladora de presi\'on 1\,\textquotedbl & 4 & 31,91\,\euro & 127,64\,\euro \\
+        V\'alvula antirretorno 1\,\textquotedbl     & 4 & 18,11\,\euro & 72,44\,\euro \\
+        Barril 60\,L boca ancha HDPE sin BPA        & 4 & 28,45\,\euro & 113,80\,\euro \\
+        Kit de grifos para tanque                   & 2 & 16,80\,\euro & 33,60\,\euro \\
+        Fuente de alimentaci\'on carril DIN 12\,V 120\,W & 1 & 29,93\,\euro & 29,93\,\euro \\
+        Cable plano gemelo 2 n\'ucleos 10\,m        & 1 & 25,99\,\euro & 25,99\,\euro \\
+        \midrule
+        Base imponible                              & --- & --- & 743,80\,\euro \\
+        IVA (21\,\%)                                & --- & --- & 156,20\,\euro \\
+        \midrule
+        \textbf{SUBTOTAL HIDR\'AULICA}              & --- & --- & \textbf{900,00\,\euro} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \caption{Inversi\'on total en hardware.}
+    \label{tab:hardware_total}
+    \begin{tabular}{lr}
+        \toprule
+        \textbf{Bloque} & \textbf{Importe} \\
+        \midrule
+        Electr\'onica de control y sensores (tabla~\ref{tab:hardware})     & 366\,\euro \\
+        Instalaci\'on hidr\'aulica y de potencia (tabla~\ref{tab:hardware_hidraulico}) & 900\,\euro \\
+        \midrule
+        \textbf{TOTAL HARDWARE}                                            & \textbf{1.266\,\euro} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \caption{Infraestructura cloud (Google Cloud Platform).}
+    \label{tab:cloud}
+    \begin{tabular}{lrr}
+        \toprule
+        \textbf{Servicio} & \textbf{\textbf{\euro}/mes} & \textbf{Acumulado} \\
+        \midrule
+        VM e2-small (always-on)         & $\sim$14\,\euro  & $\sim$112\,\euro \\
+        Disco persistente 30\,GB        & $\sim$1,5\,\euro & $\sim$12\,\euro \\
+        IP est\'atica reservada         & $\sim$3\,\euro   & $\sim$24\,\euro \\
+        Tr\'afico de salida (estimado)  & $\sim$0\,\euro   & 0\,\euro \\
+        Dominio (.com, prorrateado)     & $\sim$1\,\euro   & $\sim$8\,\euro \\
+        Certificado SSL (Let's Encrypt) & 0\,\euro         & 0\,\euro \\
+        Otros servicios y variaci\'on de uso & $\sim$5,5\,\euro & $\sim$44\,\euro \\
+        \midrule
+        \textbf{TOTAL CLOUD FACTURADO}  & \textbf{25\,\euro} & \textbf{200\,\euro} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+El importe facturado real por Google Cloud Platform fue de
+\textbf{25\,\euro/mes} a lo largo de los \textbf{ocho meses} de operaci\'on
+continua del entorno (enero--agosto de 2026), con un total definitivo de
+\textbf{200\,\euro}. La cuenta ya ha sido cerrada, de modo que esa cifra
+no crecer\'a. Los \textbf{300\,\euro/a\~no} que se manejan m\'as adelante
+en este cap\'itulo no son, por tanto, un gasto en curso, sino el coste
+que habr\'ia que \emph{volver a asumir} para mantener el sistema
+operativo. El desglose por servicio de la
+tabla~\ref{tab:cloud} es orientativo y se ofrece para explicar la
+composici\'on del gasto; el detalle mes a mes se recoge en el
+Anexo~\ref{anx:financiero}.
+
+\begin{table}[H]
+    \centering
+    \caption{Estimaci\'on del coste en horas-persona del desarrollo.}
+    \label{tab:horas}
+    \begin{tabular}{lr}
+        \toprule
+        \textbf{Fase} & \textbf{Horas estimadas} \\
+        \midrule
+        Investigaci\'on previa y dise\~no   & 15 \\
+        Firmware ESP32                       & 28 \\
+        Servicio Raspberry Pi                & 10 \\
+        Backend FastAPI                      & 28 \\
+        Frontend                             & 15 \\
+        SDK cient\'ifico Python              & 10 \\
+        Documentaci\'on t\'ecnica            & 22 \\
+        Testing y depuraci\'on               & 12 \\
+        Despliegue e integraci\'on           & 15 \\
+        \midrule
+        \textbf{TOTAL HORAS DE DESARROLLO}   & \textbf{$\sim$155 h} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\textbf{Procedencia de la cifra.} El proyecto no dispuso de un sistema
+formal de registro de horas, por lo que la estimaci\'on se construye en
+dos pasos. Primero se calcula un \textbf{suelo objetivo} a partir de los
+sellos de tiempo de los 227 \textit{commits} del repositorio, agrupados
+en sesiones de trabajo (una sesi\'on termina tras dos horas sin
+\textit{commits}, y se a\~naden 45 minutos por sesi\'on para el trabajo
+previo al primer \textit{commit}): 38 sesiones y $\sim$87 horas. Ese
+suelo solo captura el tiempo pr\'oximo a un \textit{commit} y deja fuera
+el montaje y cableado del hardware, la lectura de hojas de
+caracter\'isticas, la depuraci\'on sin \textit{commit} y buena parte de
+la redacci\'on de las 84 p\'aginas del manual t\'ecnico. Corrigiendo por
+esas partidas, la horquilla honesta se sit\'ua entre 120 y 180 horas, y
+la tabla~\ref{tab:horas} adopta el punto medio de 155 horas.
+
+A modo orientativo, valorando estas horas a precio de mercado de
+desarrollador junior (20--30\,\euro/h), el coste equivalente de
+externalizaci\'on de un proyecto de esta envergadura ser\'ia del orden de
+3.875\,\euro.
+
+\subsection{Coste de mantenimiento y operaci\'on}
+
+Para sostener el sistema operativo de forma continua, los costes
+recurrentes m\'inimos son los siguientes:
+
+\begin{table}[H]
+    \centering
+    \caption{Costes operativos recurrentes m\'inimos anuales.}
+    \label{tab:operativo}
+    \begin{tabular}{lr}
+        \toprule
+        \textbf{Concepto} & \textbf{\textbf{\euro}/a\~no} \\
+        \midrule
+        Infraestructura cloud GCP             & $\sim$300\,\euro \\
+        Dominio y certificados                & $\sim$12\,\euro \\
+        Reemplazo hardware (5\,\% anual)      & $\sim$63\,\euro \\
+        Bater\'ias nodos sensores             & $\sim$24\,\euro \\
+        Margen de imprevistos (15\,\%)        & $\sim$60\,\euro \\
+        \midrule
+        \textbf{TOTAL ANUAL ESTIMADO}         & \textbf{$\sim$459\,\euro} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Frente a este coste, la financiaci\'on disponible de manera recurrente
+es la siguiente:
+
+\begin{table}[H]
+    \centering
+    \caption{Financiaci\'on recurrente disponible.}
+    \label{tab:financiacion}
+    \begin{tabular}{lr}
+        \toprule
+        \textbf{Fuente} & \textbf{\textbf{\euro}/a\~no} \\
+        \midrule
+        Asignaci\'on universitaria (Proyecto Docente) & 0\,\euro \\
+        Cuotas de la asociaci\'on                     & 0\,\euro \\
+        Patrocinios externos                          & 0\,\euro \\
+        \midrule
+        \textbf{TOTAL DISPONIBLE}                     & \textbf{0\,\euro} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+La \'unica financiaci\'on institucional recibida por el proyecto fue la
+asignaci\'on del Proyecto Docente de la ETSIA que cubri\'o el expediente
+de 900\,\euro\ de la tabla~\ref{tab:hardware_hidraulico}. Se trata de una
+\textbf{dotaci\'on puntual de inversi\'on, no de una partida recurrente}:
+no financia gasto corriente ni est\'a comprometida para ejercicios
+siguientes. La asociaci\'on no destina cuota alguna al mantenimiento del
+proyecto y no se han obtenido patrocinios externos. La financiaci\'on
+recurrente comprometida es, por tanto, nula.
+
+\begin{conclusionbox}
+El \textit{gap} entre el coste operativo m\'inimo
+($\sim$459\,\euro/a\~no) y la financiaci\'on recurrente disponible
+(0\,\euro/a\~no) es de 459\,\euro/a\~no, es decir, la totalidad del
+coste. Sin nuevas fuentes de financiaci\'on recurrente comprometidas, la
+operaci\'on continua del sistema desplegado no es viable.
+\end{conclusionbox}
+
+\section{An\'alisis de recursos humanos}
+\label{sec:humanos}
+
+\subsection{Composici\'on actual de la asociaci\'on}
+
+ESIBot, como toda asociaci\'on universitaria, opera con un modelo de
+\textbf{rotaci\'on natural}: los miembros entran al inicio de sus
+estudios y salen al graduarse, con permanencia media estimada de
+2--4 a\~nos.
+
+\begin{itemize}[leftmargin=*]
+    \item Composici\'on de la asociaci\'on: $\sim$100 miembros, repartidos
+    entre rob\'otica, electr\'onica, telem\'atica y dise\~no 3D.
+    \item Miembros actualmente vinculados al Proyecto Demeter: \textbf{5}.
+    \item Miembros con conocimiento profundo de Demeter: \textbf{1}.
+    \item Miembros con capacidad de mantenimiento aut\'onomo del sistema
+    completo: \textbf{1}.
+\end{itemize}
+
+\subsection{Requisitos de equipo para mantenimiento sostenido}
+
+El proyecto requiere conocimientos en al menos las siguientes \'areas
+t\'ecnicas:
+
+\begin{itemize}[leftmargin=*]
+    \item Embedded C/C++ (ESP32, ESP-NOW, sensores, FreeRTOS).
+    \item Python avanzado (\texttt{asyncio}, FastAPI, Pydantic).
+    \item DevOps: Docker, despliegue cloud, monitorizaci\'on.
+    \item Frontend: React, WebSockets, gesti\'on de estado.
+    \item Bases de datos: PostgreSQL, Redis, migraciones.
+    \item \textit{Networking}: TLS, WebSocket, protocolos binarios.
+    \item C\'alculo agron\'omico (para mantener el SDK).
+\end{itemize}
+
+Estimaci\'on realista del equipo m\'inimo viable para mantener el sistema
+operativo sin desarrollo nuevo:
+
+\begin{itemize}[leftmargin=*]
+    \item 1 responsable de firmware (15--20\,\% de dedicaci\'on).
+    \item 1 responsable de backend/DevOps (20--30\,\%).
+    \item 1 responsable de frontend (10--15\,\%).
+    \item 1 coordinador con visi\'on transversal (10--15\,\%).
+\end{itemize}
+
+Esta carga representa aproximadamente el \textbf{60--80\,\% de un FTE}
+distribuido entre cuatro personas con dedicaci\'on parcial. Esta
+intensidad es \textbf{incompatible} con la disponibilidad real de los
+miembros actuales de la asociaci\'on, que combinan su actividad con
+estudios de grado/m\'aster.
+
+El contraste con las cifras de la secci\'on anterior es directo: el
+mantenimiento exige \textbf{cuatro perfiles} distintos, y la asociaci\'on
+dispone hoy de \textbf{uno}. Conviene precisar d\'onde est\'a exactamente
+el problema, porque no es donde parece. ESIBot tiene cien miembros: no
+falta gente, ni falta talento. Lo que falta es \textbf{conocimiento
+transferido}. De las cinco personas vinculadas al proyecto, una sola
+puede mantenerlo, y esa concentraci\'on no se corrige contratando ni
+reclutando, sino con meses de acompa\~namiento que nadie est\'a en
+disposici\'on de dar ni de recibir. Un sistema que solo una persona entre
+cien puede sostener no es un sistema de la asociaci\'on: es un sistema de
+esa persona alojado en la asociaci\'on.
+
+\subsection{Single Point of Failure}
+
+Hasta la fecha, el desarrollo se ha concentrado mayoritariamente en un
+\'unico miembro (el autor de este informe). Esta concentraci\'on:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Facilit\'o} la coherencia arquitect\'onica del sistema y
+    una velocidad de desarrollo elevada.
+    \item Pero \textbf{configur\'o} un riesgo estructural significativo:
+    al desvincularse este miembro, ning\'un otro tiene la capacidad
+    actual para mantener el conjunto del sistema.
+\end{itemize}
+
+Este patr\'on (\textit{bus factor} = 1) es com\'un en proyectos
+estudiantiles ambiciosos y constituye una de las principales causas de
+fragilidad identificadas en la literatura sobre asociaciones
+universitarias.
+
+\section{An\'alisis t\'ecnico de mantenimiento}
+\label{sec:tecnico}
+
+\subsection{Complejidad del stack}
+
+\begin{table}[H]
+    \centering
+    \caption{Complejidad del stack tecnol\'ogico por capa.}
+    \label{tab:complejidad}
+    \begin{tabular}{lp{6.5cm}c}
+        \toprule
+        \textbf{Capa} & \textbf{Tecnolog\'ias principales} & \textbf{Complejidad} \\
+        \midrule
+        Firmware         & C++, ESP-IDF, ESP-NOW, FreeRTOS              & Alta  \\
+        Edge (RPi)       & Python, asyncio, Docker, UART async          & Media \\
+        Backend          & FastAPI, SQLAlchemy as\'incrona, Redis, PostgreSQL & Alta  \\
+        Frontend         & React, WebSocket, gesti\'on de estado        & Media \\
+        DevOps           & GCP, Docker, TLS, gesti\'on de secretos      & Media \\
+        Ciencia de datos & NumPy, Pandas, agronom\'ia                   & Media \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Carga de mantenimiento estimada}
+
+Operaci\'on en r\'egimen normal, sin desarrollo nuevo:
+
+\begin{itemize}[leftmargin=*]
+    \item Monitorizaci\'on del sistema: $\sim$2--3\,h/semana.
+    \item Resoluci\'on de incidencias: $\sim$3--5\,h/semana.
+    \item Actualizaciones de seguridad y dependencias: $\sim$5--10\,h/mes.
+    \item Reemplazo y calibraci\'on de hardware: $\sim$10--20\,h/trimestre.
+\end{itemize}
+
+\textbf{Total estimado}: $\sim$40--60 horas/mes $\approx$ \textbf{0,3 FTE}.
+Esta cifra coincide con la estimaci\'on de equipo m\'inimo de la
+secci\'on~\ref{sec:humanos}.
+
+\subsection{Deuda t\'ecnica acumulada}
+
+A continuaci\'on se identifican aspectos que requerir\'ian refactor o
+trabajo adicional para garantizar la sostenibilidad a medio plazo:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Cifrado ESP-NOW pendiente.} El \textit{payload} viaja en
+    claro; el cifrado AES-128 estaba planificado para la versi\'on 3.0 y no
+    llega a implementarse. Cualquier ESP32 sintonizado al canal puede leer
+    las tramas.
+    \item \textbf{Sin observabilidad centralizada.} No hay agregaci\'on de
+    \textit{logs} ni m\'etricas: el diagn\'ostico de una incidencia obliga a
+    entrar por SSH en la m\'aquina y leer la salida de cada contenedor por
+    separado.
+    \item \textbf{CI/CD parcial.} El \textit{pipeline} construye y publica
+    im\'agenes de \textit{backend} y \textit{frontend}, pero no compila el
+    firmware ni ejecuta an\'alisis de secretos, y el despliegue sobre la
+    m\'aquina de producci\'on sigue siendo manual.
+    \item \textbf{Dependencias versionadas en el repositorio.} El \'arbol
+    contiene \texttt{node\_modules} y documentaci\'on HTML generada por
+    Doxygen bajo control de versiones, adem\'as de ficheros de \textit{log}
+    subidos por error. No compromete el funcionamiento, pero infla el
+    repositorio y distorsiona cualquier m\'etrica autom\'atica sobre \'el.
+    \item \textbf{Cobertura de tests no instrumentada.} Existen 140 tests
+    (v\'ease la tabla~\ref{tab:cobertura_tests}), pero no hay configuraci\'on
+    de medida de cobertura ni umbral m\'inimo en integraci\'on continua.
+    \item \textbf{Validaci\'on hidr\'aulica pendiente.} El spike de
+    validaci\'on de bombeo (\texttt{docs/spikes/SPIKE-001}) qued\'o escrito
+    pero sin ejecutar, y adem\'as est\'a redactado para una bomba de 5\,V,
+    mientras que la instalaci\'on efectivamente adquirida es de 12\,V. La
+    cadena de riego no llega a validarse extremo a extremo sobre el hardware
+    real.
+\end{itemize}
+
+Merece una menci\'on aparte que \textbf{el c\'odigo no contiene marcas
+\texttt{TODO} ni \texttt{FIXME} significativas}: la deuda t\'ecnica de
+Demeter no est\'a en funciones a medio escribir, sino en las capas que
+nunca se llegaron a construir (observabilidad, seguridad de campo,
+automatizaci\'on del despliegue). Es una deuda de alcance, no de
+implementaci\'on.

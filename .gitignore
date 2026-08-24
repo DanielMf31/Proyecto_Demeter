@@ -7,7 +7,12 @@ __pycache__/
 *.db
 
 # Environment variables
-/.env
+# Ningún fichero de entorno se versiona salvo la plantilla .env.example.
+# Motivo: la auditoría de cierre encontró un token de Cloudflare vivo en
+# .env.staging (ver docs/Closure, Anexo B).
+.env
+.env.*
+!.env.example
 .venv
 env/
 venv/
@@ -35,3 +40,13 @@ SDK/dist/
 SDK/*.egg-info/
 token.md
 *.pypirc
+
+# Artefactos de compilación LaTeX (solo se versionan las fuentes y el PDF)
+*.aux
+*.toc
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.lof
+*.lot

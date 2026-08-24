@@ -140,5 +140,20 @@ class ExperimentResponse(ExperimentBase):
     user_id: Optional[UUID] = None
     api_key: str
     plants: List[PlantResponse] = []
-    
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# --- Plant Sensor Map Schemas ---
+class PlantSensorMapBase(BaseModel):
+    node_id: int
+    sensor_slot: int
+    plant_id: int
+
+class PlantSensorMapCreate(PlantSensorMapBase):
+    pass
+
+class PlantSensorMapResponse(PlantSensorMapBase):
+    id: int
+    plant: Optional[PlantResponse] = None
     model_config = ConfigDict(from_attributes=True)

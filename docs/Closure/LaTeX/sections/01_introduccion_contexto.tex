@@ -1,0 +1,93 @@
+% ============================================================
+% CAPÍTULO 1 — Introducción y Contexto
+% ============================================================
+\chapter{Introducci\'on y Contexto}
+\label{cap:introduccion}
+
+\section{Proyecto Demeter --- s\'intesis}
+
+Demeter nace en \textbf{diciembre de 2024} como iniciativa de la
+Asociaci\'on Universitaria ESIBot para abordar la necesidad de
+herramientas asequibles de monitorizaci\'on ambiental e investigaci\'on
+agr\'icola de precisi\'on. El sistema, definido por su arquitectura de
+cuatro capas, integra hardware embebido (ESP32), computaci\'on en el
+borde (Raspberry Pi), infraestructura cloud (Google Cloud Platform) y
+una interfaz web reactiva, articulados por un protocolo binario
+propietario optimizado para nodos de bajo consumo.
+
+El prop\'osito original no era construir una plataforma IoT gen\'erica,
+sino resolver un problema concreto y bien acotado: en el
+\textbf{Grado en Ingenier\'ia Agr\'icola} hay pr\'acticas docentes cuyas
+plantas deben regarse y vigilarse a diario, y ese riego lo ven\'ian
+haciendo a mano los t\'ecnicos del Departamento de Agronom\'ia. Demeter
+deb\'ia \textbf{automatizar ese riego} y liberar as\'i horas de trabajo
+manual repetitivo, aportando de paso la trazabilidad de cada planta y
+cada experimento que un protocolo agron\'omico riguroso exige y que una
+libreta de campo no da.
+
+Conviene retener el dato temporal, porque enmarca todo el an\'alisis de
+este informe: entre esa fecha de nacimiento y la redacci\'on del presente
+documento median \textbf{veinte meses}, de los cuales el desarrollo
+efectivo del sistema ocupa \textbf{cuarenta y cuatro d\'ias naturales}
+(227 \textit{commits} entre enero y marzo de 2026). El resto del tiempo
+el proyecto estuvo detenido, no por falta de voluntad, sino por la
+ausencia de personas disponibles para empujarlo. Esa proporci\'on entre
+tiempo transcurrido y tiempo trabajado es, en s\'i misma, la primera
+evidencia del problema de sostenibilidad que el
+cap\'itulo~\ref{cap:sostenibilidad} analiza en detalle.
+
+La descripci\'on t\'ecnica completa del sistema se recoge en la
+\textit{Documentaci\'on T\'ecnica del Sistema} (documento hermano de
+84~p\'aginas). El presente informe se centra en el an\'alisis de
+viabilidad y la propuesta de cierre del proyecto.
+
+\section{Marco institucional}
+
+ESIBot es una asociaci\'on universitaria con sede en la
+\textbf{Escuela T\'ecnica Superior de Ingenier\'ia (ETSI)} de la
+Universidad de Sevilla. Re\'une aproximadamente a \textbf{cien miembros}
+y trabaja en cuatro l\'ineas: \textbf{rob\'otica}, \textbf{electr\'onica},
+\textbf{telem\'atica} y \textbf{dise\~no 3D}. Su actividad se organiza en
+proyectos internos de duraci\'on variable, en los que los miembros
+participan de forma voluntaria y en paralelo a sus estudios.
+
+El Proyecto Demeter se enmarc\'o como Proyecto Docente bajo el acuerdo
+de colaboraci\'on con el \textbf{Departamento de Agronom\'ia de la
+Escuela T\'ecnica Superior de Ingenier\'ia Agron\'omica (ETSIA)}. El
+objetivo pactado era proveer un \textbf{sistema de riego automatizado}
+que sustituyera el trabajo manual de los t\'ecnicos encargados de las
+plantas asignadas a una pr\'actica docente del Grado en Ingenier\'ia
+Agr\'icola, a\~nadiendo el registro y la trazabilidad de las variables
+ambientales de cada planta.
+
+Merece la pena subrayar la naturaleza \textbf{interescuela} de la
+colaboraci\'on: los desarrolladores pertenec\'ian a la ETSI y el problema
+y sus beneficiarios estaban en la ETSIA. Esa distancia, que enriquec\'ia
+el proyecto en lo formativo, tuvo tambi\'en un coste: ninguna de las dos
+escuelas ten\'ia el proyecto plenamente como propio, y la instalaci\'on
+f\'isica --- que deb\'ia montarse en dependencias de la ETSIA con material
+adquirido por la ETSIA, pero por personas de la ETSI --- nunca lleg\'o a
+ejecutarse.
+
+\section{Prop\'osito de este informe}
+
+El presente documento tiene tres objetivos:
+
+\begin{enumerate}[leftmargin=*]
+    \item Reportar el estado actual del proyecto y los logros alcanzados,
+    con la honestidad t\'ecnica que la colaboraci\'on institucional exige.
+
+    \item Analizar la sostenibilidad del proyecto en su forma actual,
+    identificando las limitaciones estructurales encontradas y aportando
+    datos econ\'omicos, organizativos y t\'ecnicos concretos.
+
+    \item Proponer una estrategia de cierre que preserve el valor generado,
+    cumpla los objetivos docentes pactados, y mantenga abiertas las
+    opciones de continuidad bajo nuevos formatos.
+\end{enumerate}
+
+El informe se ha estructurado de modo que sea \'util tanto para una
+lectura completa por parte del responsable t\'ecnico como para una
+consulta r\'apida por parte de un evaluador acad\'emico: el resumen
+ejecutivo y la secci\'on de propuesta de cierre (cap\'itulo~\ref{cap:propuesta})
+contienen toda la informaci\'on de decisi\'on necesaria.

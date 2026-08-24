@@ -1,0 +1,100 @@
+% ============================================================
+% CAPÍTULO 5 — Razones de No Sostenibilidad
+% ============================================================
+\chapter{Razones de No Sostenibilidad}
+\label{cap:razones}
+
+\section{Resumen estructural}
+
+A partir del an\'alisis del cap\'itulo~\ref{cap:sostenibilidad}, se
+identifican cuatro razones estructurales que motivan la no
+sostenibilidad del proyecto en su forma actual. Estas razones son
+\textbf{estructurales, no personales}, y comunes en proyectos
+estudiantiles que escalan en complejidad t\'ecnica.
+
+\subsection*{R1. Escala humana}
+
+La complejidad multistack del sistema requiere un equipo
+multidisciplinar de aproximadamente cuatro personas con dedicaci\'on
+parcial (60--80\,\% FTE total distribuido). La rotaci\'on natural de
+miembros en una asociaci\'on estudiantil --- con permanencia media de
+2--4 a\~nos --- no permite mantener ese nivel de capacidad t\'ecnica
+acumulada de forma sostenida sin un programa expl\'icito de transferencia
+de conocimiento que la asociaci\'on no tiene actualmente capacidad de
+implementar.
+
+\subsection*{R2. Escala econ\'omica}
+
+El coste operativo recurrente m\'inimo
+($\sim$459\,\euro/a\~no) excede por completo la financiaci\'on
+recurrente disponible (0\,\euro/a\~no). No se trata de un desfase
+parcial: \textbf{no existe ninguna partida comprometida} para el gasto
+corriente del proyecto. La \'unica financiaci\'on institucional recibida
+--- los 900\,\euro\ del Proyecto Docente de la ETSIA --- fue una
+dotaci\'on puntual de inversi\'on en material, no una asignaci\'on
+recurrente. El \textit{gap} requiere, por tanto, crear desde cero una
+fuente de ingresos sostenida que la asociaci\'on no puede asegurar bajo
+el formato actual.
+
+Un dato ilustra el problema mejor que cualquier proyecci\'on: el
+\'ultimo \textit{commit} del repositorio es de marzo de 2026, pero la
+factura de Google Cloud sigui\'o llegando cada mes durante cinco meses
+m\'as, hasta que la cuenta se cerr\'o de forma expresa. \textbf{El coste
+de un sistema desplegado no se detiene cuando se detiene el desarrollo};
+solo se detiene cuando alguien lo apaga. Esa asimetr\'ia es precisamente
+lo que convierte una infraestructura sin equipo en un pasivo, y explica
+por qu\'e el cierre ordenado que propone este informe no es una
+formalidad administrativa sino una medida con efecto econ\'omico
+inmediato.
+
+\subsection*{R3. Escala de complejidad}
+
+El proyecto integra tecnolog\'ias de seis dominios distintos
+(\textit{embedded}, \textit{networking}, backend, frontend, DevOps,
+agronom\'ia). Cada dominio aisladamente es manejable, pero la
+integraci\'on y mantenimiento simult\'aneo demandan especializaci\'on
+multidisciplinar dif\'icil de mantener en el tiempo en un contexto
+estudiantil donde los miembros priorizan, l\'ogicamente, sus estudios.
+
+\subsection*{R4. Single Point of Failure}
+
+El desarrollo se ha concentrado en un \'unico miembro, creando una
+dependencia estructural incompatible con la rotaci\'on natural de la
+asociaci\'on. La distribuci\'on real del conocimiento del sistema
+implica que, sin este miembro, el resto de la asociaci\'on no tiene
+capacidad operativa sobre el conjunto del sistema.
+
+\section{\textquestiondown Por qu\'e cerrar ahora y no antes?}
+
+Estas limitaciones eran parcialmente conocidas desde el inicio del
+proyecto. La decisi\'on de cierre formal \textbf{ahora}, frente a una
+continuaci\'on indefinida, responde a las siguientes consideraciones:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{El sistema ha alcanzado un hito relevante}: la
+    funcionalidad completa est\'a documentada y validada por capa.
+    El cierre se realiza \textbf{con valor demostrable}, no en estado
+    intermedio.
+
+    \item \textbf{La identificaci\'on clara de las limitaciones permite
+    cierre razonado}: no es abandono por agotamiento, sino conclusi\'on
+    fundamentada en datos t\'ecnicos y econ\'omicos espec\'ificos.
+
+    \item \textbf{Mantener el proyecto activo bajo condiciones no
+    sostenibles generar\'ia coste creciente sin valor proporcional},
+    y eventualmente da\~no reputacional al no poder cumplir
+    expectativas operativas.
+
+    \item \textbf{El cierre maduro preserva la relaci\'on institucional}
+    y deja abiertas opciones de continuidad bajo nuevos formatos
+    (caso de estudio docente, base para TFG/TFM, transferencia
+    eventual a un grupo de investigaci\'on).
+\end{itemize}
+
+\begin{warningbox}
+Reconocer cu\'ando un proyecto debe cerrar es una competencia
+profesional reconocida en la literatura de gesti\'on de proyectos
+(Edmondson, 2023). En el contexto de proyectos docentes, esta
+capacidad de evaluaci\'on cr\'itica es uno de los aprendizajes m\'as
+valiosos que la experiencia ha aportado a los miembros participantes.
+\end{warningbox}

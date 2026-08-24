@@ -1,0 +1,240 @@
+% ===============================
+% PROYECTO DEMETER — Informe de Viabilidad y Cierre
+% Plantilla: ESIBot · Universidad de Sevilla (adaptada de Architecture/LaTeX)
+% Compilar con pdfLaTeX (2 pasadas para TOC)
+% ===============================
+\documentclass[11pt,a4paper,openany]{report}
+
+\usepackage[spanish, provide=*]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{pdflscape}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins, breakable}
+\usepackage{longtable}
+\usepackage{colortbl}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{xurl}
+\usepackage{ragged2e}
+\usepackage{eurosym}
+% El paquete eurosym ya define \euro como símbolo €
+
+% ── Geometría ────────────────────────────────────────────────
+\usepackage[
+    a4paper,
+    top=2.5cm,
+    bottom=2.5cm,
+    left=2cm,
+    right=2cm,
+    headheight=45pt,
+    headsep=15pt,
+    footskip=35pt
+]{geometry}
+
+% ── Directorio de imágenes ───────────────────────────────────
+\graphicspath{{diagrams/}}
+
+% ── Comando placeholder ──────────────────────────────────────
+% Renderiza en rojo bold para localizar fácilmente al rellenar.
+% Buscar globalmente con: grep -rn '\\todo' sections/
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{[#1]}}}
+
+% ── Cajas de diseño sin colores ──────────────────────────────
+\newenvironment{designnote}
+  {\begin{tcolorbox}[colback=white, colframe=black,
+     title=Decisión de Diseño, fonttitle=\bfseries, breakable]}
+  {\end{tcolorbox}}
+
+\newenvironment{warningbox}
+  {\begin{tcolorbox}[colback=white, colframe=black,
+     title=Consideración Importante, fonttitle=\bfseries, breakable]}
+  {\end{tcolorbox}}
+
+\newenvironment{conclusionbox}
+  {\begin{tcolorbox}[colback=white, colframe=black,
+     title=Conclusión, fonttitle=\bfseries, breakable]}
+  {\end{tcolorbox}}
+
+% ── Encabezado páginas normales ──────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{%
+  \IfFileExists{diagrams/logo_esibot.png}{%
+    \includegraphics[width=1.5cm]{logo_esibot.png}%
+  }{\small\textbf{ESIBot}}%
+}
+\fancyhead[C]{
+    \footnotesize\textbf{Proyecto Demeter} \\
+    \scriptsize Informe de Viabilidad y Cierre
+}
+\fancyhead[R]{
+    \footnotesize Daniel Montero Fernández \\
+    \scriptsize danmonfer@us.es
+}
+\fancyfoot[L]{\small Informe de Viabilidad}
+\fancyfoot[C]{\small Página \thepage\ de \pageref{LastPage}}
+\fancyfoot[R]{\small Agosto 2026}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% ── Estilo primera página ────────────────────────────────────
+\fancypagestyle{firstpage}{
+    \fancyhf{}
+    \renewcommand{\headrulewidth}{0.4pt}
+    \renewcommand{\footrulewidth}{0.4pt}
+    \fancyhead[L]{\includegraphics[width=2cm]{logo_esibot.png}}
+    \fancyhead[C]{
+        \normalsize\textbf{Creado por la Asociación Universitaria ESIBot} \\
+        \small Correo: esibot@us.es
+    }
+    \fancyhead[R]{
+        \small Autor: Daniel Montero Fernández \\
+        \small Correo: danmonfer@us.es \\
+        \small Fecha: Agosto 2026
+    }
+    \fancyfoot[L]{\small Informe de Viabilidad y Cierre - Proyecto Demeter}
+    \fancyfoot[C]{\small Página \thepage\ de \pageref{LastPage}}
+    \fancyfoot[R]{\small 24 de agosto de 2026}
+}
+
+% ── Listings ─────────────────────────────────────────────────
+\lstdefinestyle{trama}{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    breaklines=true,
+    columns=fullflexible,
+    literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+             {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+             {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {¿}{{\textquestiondown}}1 {¡}{{\textexclamdown}}1
+             {├──}{|-- }4 {└──}{+-- }4 {│}{|}1 {─}{-}1
+}
+
+% ── Formato de secciones ─────────────────────────────────────
+\titleformat{\chapter}[display]{\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titleformat{\section}{\normalfont\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\normalfont\normalsize\bfseries}{\thesubsubsection}{1em}{}
+
+% ── Hipervínculos ────────────────────────────────────────────
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    urlcolor=blue,
+    citecolor=green!50!black,
+    pdftitle={Proyecto Demeter --- Informe de Viabilidad y Cierre},
+    pdfauthor={Daniel Montero Fernández}
+}
+
+% ============================================================
+\begin{document}
+
+% ── Portada ──────────────────────────────────────────────────
+\thispagestyle{firstpage}
+\begin{center}
+    \vspace*{1cm}
+
+    % Logo
+    \includegraphics[width=0.35\textwidth]{logo_esibot.png}
+
+    \vspace{1cm}
+
+    % Título principal
+    {\Huge \textbf{Proyecto DEMETER}}
+
+    \vspace{0.5cm}
+
+    % Subtítulo
+    {\Large Plataforma Integral de Monitorización y Gestión\\
+    para Investigación Agrícola}
+
+    \vspace{0.4cm}
+    {\large \textit{IoT $\cdot$ Firmware ESP32 $\cdot$ Backend FastAPI $\cdot$ LIMS}}
+
+    \vspace{1.2cm}
+    \rule{\textwidth}{1pt}
+    \vspace{0.4cm}
+
+    {\LARGE \textbf{Informe de Viabilidad y Cierre}}
+
+    \vspace{0.3cm}
+    {\large An\'alisis de Sostenibilidad y Propuesta de Cierre Formal}
+
+    \vspace{0.4cm}
+    \rule{\textwidth}{1pt}
+
+    \vfill
+
+    \begin{tabular}{rl}
+        \textbf{Autor:}        & Daniel Montero Fern\'andez \\[0.3cm]
+        \textbf{Contacto:}      & danmonfer@us.es \\[0.3cm]
+        \textbf{Asociaci\'on:}  & ESIBot \\[0.3cm]
+        \textbf{Instituci\'on:} & Universidad de Sevilla \\[0.3cm]
+        \textbf{Versi\'on:}     & 1.0 \\[0.3cm]
+        \textbf{Fecha:}         & Agosto de 2026 \\[0.3cm]
+        \textbf{Estado:}        & Cierre formal propuesto \\
+    \end{tabular}
+
+    \vspace{1cm}
+    {\small Documento complementario a la \textit{Documentaci\'on T\'ecnica del Sistema}.}
+
+    \vspace{0.3cm}
+    {\small Este documento es de uso interno del proyecto y de la colaboraci\'on institucional.}
+\end{center}
+
+\newpage
+
+% ── Índice ───────────────────────────────────────────────────
+\pagestyle{fancy}
+\tableofcontents
+\newpage
+
+% ============================================================
+% RESUMEN EJECUTIVO (sin numeración de capítulo)
+% ============================================================
+\input{sections/00_resumen_ejecutivo}
+\newpage
+
+% ============================================================
+% CAPÍTULOS PRINCIPALES
+% ============================================================
+\input{sections/01_introduccion_contexto}
+\newpage
+\input{sections/02_logros_proyecto}
+\newpage
+\input{sections/03_estado_actual}
+\newpage
+\input{sections/04_analisis_sostenibilidad}
+\newpage
+\input{sections/05_razones_no_sostenibilidad}
+\newpage
+\input{sections/06_lecciones_aprendidas}
+\newpage
+\input{sections/07_propuesta_cierre}
+\newpage
+\input{sections/08_recomendaciones_futuras}
+
+% ============================================================
+% ANEXOS
+% ============================================================
+\newpage
+\appendix
+\input{sections/A_anexo_financiero}
+\newpage
+\input{sections/B_anexo_plan_entrega}
+
+\end{document}

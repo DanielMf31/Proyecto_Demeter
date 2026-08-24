@@ -26,8 +26,9 @@ Flujo completo:
 
 import asyncio
 import json
-from datetime import datetime, timezone
+from datetime import datetime
 from pydantic import TypeAdapter, ValidationError
+from sqlalchemy.future import select
 from Core.logger import setup_logger
 from Core.redis import redis_manager
 from Core.database import AsyncSessionLocal
@@ -36,7 +37,8 @@ from BD.models import (
     TelemetrySoil,
     PinHistory,
     SystemHistory,
-    ActivityLog
+    ActivityLog,
+    PlantSensorMap,
 )
 from .manager import registry
 from schemas import (
@@ -132,12 +134,26 @@ async def handle_gateway_message(data: dict) -> None:
                 f"Cluster report — nodo {report.node_id}: "
                 f"{len(report.entries)} entries"
             )
-            # 1. DB Persistence — one row per plant entry
+            # 1. DB Persistence — resolve (node_id, slot) → plant_id via mapping table
             async with AsyncSessionLocal() as session:
+                stmt = select(PlantSensorMap).where(
+                    PlantSensorMap.node_id == report.node_id
+                )
+                result = await session.execute(stmt)
+                mappings = {m.sensor_slot: m.plant_id for m in result.scalars().all()}
+
                 now = datetime.utcnow()
-                for entry in report.entries:
+                for idx, entry in enumerate(report.entries):
+                    plant_id = mappings.get(idx)
+                    if plant_id is None:
+                        logger.warning(
+                            f"No mapping for node_id={report.node_id} slot={idx} "
+                            f"(firmware plantId={entry.plant_id}). Skipping."
+                        )
+                        continue
+
                     db_row = TelemetrySoil(
-                        plant_id=entry.plant_id,
+                        plant_id=plant_id,
                         soil_temperature=entry.temperature,
                         soil_moisture=entry.soil_moisture,
                         timestamp=now,
